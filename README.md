@@ -49,24 +49,6 @@ source .venv/bin/activate
 python gm_main.py molecule.xyz
 ```
 
-## Setup Gaussian Integration
-
-1. **Make helper script executable**:
-```bash
-chmod +x gm_helper.py
-```
-
-2. **Copy to your bin directory**:
-```bash
-cp gm_helper.py /home/bin/
-```
-
-3. **Use in Gaussian input files**:
-```
-# freq (anharm)
-# external="/home/bin/gm_helper.py"
-```
-
 ## Workflow
 
 1. **Check environment**:
@@ -89,7 +71,7 @@ This will:
 Edit `gm_main.py` to change settings:
 
 ```python
-DIPOLE_METHOD = 'auto'  # Options: 'auto', 'mace_ml', 'espaloma', 'xtb', 'geometry'
+DIPOLE_METHOD = 'mace_ml'  # Options: 'auto', 'mace_ml', 'espaloma', 'xtb', 'geometry'
 CALCULATE_DIPOLE_DERIVATIVES = True
 ```
 
@@ -136,16 +118,3 @@ ls -la /home/bin/gm_helper.py
 Core packages installed automatically:
 - numpy, ase, torch, mace-torch, pyzmq
 - espaloma_charge, rdkit (for dipole calculations)
-
-## Quick Reference
-
-```bash
-# Install
-curl -LsSf https://astral.sh/uv/install.sh | sh
-git clone <repo-url> && cd mace-gaussian-interface
-uv sync
-
-# Use
-uv run python gm_main.py --diagnose  # Test
-uv run python gm_main.py mol.xyz     # Calculate
-```
