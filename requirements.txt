@@ -31,8 +31,8 @@ jupyter_client @ file:///home/conda/feedstock_root/build_artifacts/jupyter_clien
 jupyter_core @ file:///home/conda/feedstock_root/build_artifacts/jupyter_core_1748333051527/work
 kiwisolver==1.4.9
 lightning-utilities==0.15.2
--e git+https://github.com/nitbha007/ML_course_spectral_learning.git@0e922c64b19459ba9423fbc9269bb64c3153237e#egg=mace_dipole_core&subdirectory=mace_dipole_pkg
--e git+https://github.com/nitbha007/ML_course_spectral_learning.git@0e922c64b19459ba9423fbc9269bb64c3153237e#egg=mace_torch&subdirectory=mace_ML_pkg
+git+https://github.com/nitbha007/ML_course_spectral_learning.git@0e922c64b19459ba9423fbc9269bb64c3153237e#egg=mace_dipole_core&subdirectory=mace_dipole_pkg
+git+https://github.com/nitbha007/ML_course_spectral_learning.git@0e922c64b19459ba9423fbc9269bb64c3153237e#egg=mace_torch&subdirectory=mace_ML_pkg
 MarkupSafe==2.1.5
 matplotlib==3.10.6
 matplotlib-inline @ file:///home/conda/feedstock_root/build_artifacts/matplotlib-inline_1733416936468/work
