@@ -1,0 +1,8 @@
+README.md
+setup.py
+mace_gaussian_interface.egg-info/PKG-INFO
+mace_gaussian_interface.egg-info/SOURCES.txt
+mace_gaussian_interface.egg-info/dependency_links.txt
+mace_gaussian_interface.egg-info/entry_points.txt
+mace_gaussian_interface.egg-info/requires.txt
+mace_gaussian_interface.egg-info/top_level.txt
