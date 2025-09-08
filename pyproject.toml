@@ -7,9 +7,8 @@ name = "mace-gaussian-interface"
 version = "0.1.0"
 description = "Interface between MACE ML potentials and Gaussian for molecular calculations"
 readme = "README.md"
-license = {file = "LICENSE"}
 authors = [
-    {name = "Your Name", email = "your.email@domain.com"}
+    {name = "Manuel Ott", email = "your.email@domain.com"}
 ]
 keywords = ["quantum-chemistry", "machine-learning", "molecular-simulation", "gaussian", "mace"]
 classifiers = [
@@ -30,13 +29,12 @@ dependencies = [
     "ase>=3.22.0",
     "torch>=1.12.0",
     "mace-torch>=0.3.0",
-    "espaloma_charge>=0.1.0",
     "rdkit>=2022.03.0",
     "matplotlib>=3.5.0",
 ]
 
-[project.optional-dependencies]
-xtb = ["xtb-python>=22.1.0"]
+#[project.optional-dependencies]
+#xtb = ["xtb-python>=22.1.0"]
 dev = [
     "pytest>=7.0.0",
     "black>=22.0.0", 
@@ -44,7 +42,7 @@ dev = [
     "flake8>=4.0.0",
     "mypy>=0.950",
 ]
-all = ["mace-gaussian-interface[xtb,dev]"]
+#all = ["mace-gaussian-interface[xtb,dev]"]
 
 [project.scripts]
 gm-main = "gm_main:main"

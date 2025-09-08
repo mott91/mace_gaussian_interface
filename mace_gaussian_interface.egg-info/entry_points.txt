@@ -1,0 +1,2 @@
+[console_scripts]
+gm-main = gm_main:main
