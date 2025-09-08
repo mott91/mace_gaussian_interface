@@ -26,7 +26,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 2. **Clone and install**:
 ```bash
-git clone https://github.com/yourusername/mace-gaussian-interface.git
+git clone https://github.com/mott91/mace-gaussian-interface.git
 cd mace-gaussian-interface
 uv sync
 ```
