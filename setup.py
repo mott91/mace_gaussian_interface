@@ -4,7 +4,15 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 with open("requirements.txt", "r", encoding="utf-8") as fh:
-    requirements = [line.strip() for line in fh if line.strip() and not line.startswith("#")]
+    requirements = []
+    for line in fh:
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        # Skip editable or git dependencies
+        if line.startswith("-e") or re.match(r"git\+https?://", line):
+            continue
+        requirements.append(line)
 
 setup(
     name="mace-gaussian-interface",
