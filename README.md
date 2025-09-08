@@ -13,15 +13,13 @@ Interface between MACE machine learning potentials and Gaussian quantum chemistr
 ## Installation
 
 ### Prerequisites
-
-- Python 3.8+
+- Python 3.9+
 - Gaussian 16 (for quantum chemistry calculations)
 - CUDA-capable GPU (recommended for MACE calculations)
 
-### Option 1: Conda (Recommended)
+### Quick Install (Recommended)
 
+1. **Install uv** (if not already installed):
 ```bash
-git clone https://github.com/yourusername/your-repo-name.git
-cd your-repo-name
-conda env create -f environment.yml
-conda activate mace-gaussian-interface
+curl -LsSf https://astral.sh/uv/install.sh | sh
+# or: pip install uv
