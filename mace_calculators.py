@@ -2,6 +2,7 @@ import types
 import importlib
 import sys
 import numpy as np
+import torch
 from ase.calculators.calculator import Calculator
 import logging
 
@@ -62,8 +63,39 @@ class MACEDipoleCalculator:
         atoms_copy = atoms.copy()
         atoms_copy.calc = self.calc
         
-        # Get dipole moment (already in correct units from MACE)
-        dipole_moment = atoms_copy.get_dipole_moment()
-        
-        logger.debug(f"MACE dipole: {dipole_moment}")
-        return dipole_moment, None  # No partial charges for now
+        try:
+            # Get dipole moment - this may return various formats
+            dipole_moment = atoms_copy.get_dipole_moment()
+            
+            logger.debug(f"DEBUG: dipole_moment type: {type(dipole_moment)}")
+            logger.debug(f"DEBUG: dipole_moment value: {dipole_moment}")
+            
+            # Handle different return formats
+            if isinstance(dipole_moment, tuple):
+                # If it's a tuple, take the first element
+                logger.debug("Dipole returned as tuple, extracting first element")
+                dipole_moment = dipole_moment[0]
+            
+            # Convert torch tensor to numpy if needed
+            if isinstance(dipole_moment, torch.Tensor):
+                dipole_moment = dipole_moment.detach().cpu().numpy()
+            
+            # Ensure it's a 1D numpy array
+            dipole_moment = np.atleast_1d(np.array(dipole_moment))
+            
+            # If it's the wrong shape, try to fix it
+            if dipole_moment.shape == (1, 3):
+                dipole_moment = dipole_moment.flatten()
+            elif dipole_moment.shape != (3,):
+                logger.warning(f"Unexpected dipole shape: {dipole_moment.shape}, attempting to reshape")
+                dipole_moment = dipole_moment.reshape(-1)[:3]  # Take first 3 elements
+            
+            logger.debug(f"MACE dipole (final): {dipole_moment}, shape: {dipole_moment.shape}")
+            
+            # Dipole should already be in correct units (e*Bohr) from MACE
+            return dipole_moment, None  # No partial charges for now
+            
+        except Exception as e:
+            logger.error(f"Error in MACE dipole calculation: {e}")
+            logger.error(f"Full traceback:", exc_info=True)
+            raise

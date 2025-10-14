@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # For the helperscript copy to /home/bin/ and set shebang!!!
 # module load mace-torch-dftd/14Jul2025
 # module load gv
@@ -237,67 +238,41 @@ class EspalomaDipoleCalculator(DipoleCalculatorBase):
             logger.info("\u2713 Espaloma-charge dipole calculator available and tested")
         except ImportError as e:
             self.available = False
-            logger.warning(f"\u2717 Espaloma-charge import failed: {e}")
-            logger.warning("  Try: pip install espaloma_charge rdkit")
-        except Exception as e:
-            self.available = False
-            logger.warning(f"\u2717 Espaloma-charge functionality test failed: {e}")
+            logger.warning(f"\u2717 Espaloma-charge dipole calculator failed: {e}")
     
-    def _ase_to_rdkit(self, atoms):
-        """Convert ASE Atoms to RDKit molecule"""
+    def calculate_dipole(self, atoms, **kwargs):
+        """Calculate dipole using espaloma partial charges"""
         from rdkit import Chem
-        from rdkit.Chem import AllChem
+        from rdkit.Chem import rdDetermineBonds
+        import espaloma_charge
         
-        # Create molecule from XYZ string (simple approach)
-        xyz_string = f"{len(atoms)}\n\n"
-        for i, (symbol, pos) in enumerate(zip(atoms.get_chemical_symbols(), atoms.get_positions())):
-            xyz_string += f"{symbol} {pos[0]:.6f} {pos[1]:.6f} {pos[2]:.6f}\n"
+        # Create RDKit molecule from ASE atoms
+        mol = Chem.RWMol()
+        for symbol in atoms.get_chemical_symbols():
+            atom = Chem.Atom(symbol)
+            mol.AddAtom(atom)
         
-        # Try to create molecule - this is simplified and might need refinement
-        mol = Chem.MolFromXYZBlock(xyz_string)
+        # Set coordinates
+        conf = Chem.Conformer(len(atoms))
+        for i, pos in enumerate(atoms.get_positions()):
+            conf.SetAtomPosition(i, pos)
+        mol.AddConformer(conf)
         
-        if mol is None:
-            # Fallback: create molecule without connectivity
-            mol = Chem.RWMol()
-            for symbol in atoms.get_chemical_symbols():
-                atom = Chem.Atom(symbol)
-                mol.AddAtom(atom)
-            
-            # Add coordinates
-            conf = Chem.Conformer(len(atoms))
-            for i, pos in enumerate(atoms.get_positions()):
-                conf.SetAtomPosition(i, tuple(pos))
-            mol.AddConformer(conf)
-            mol = mol.GetMol()
+        # Determine bonds
+        rdDetermineBonds.DetermineBonds(mol, charge=0)
         
-        return mol
-    
-    def calculate_dipole(self, atoms, **kwargs) -> Tuple[np.ndarray, Optional[np.ndarray]]:
-        if not self.available:
-            raise RuntimeError("Espaloma-charge not available")
+        # Get partial charges from espaloma
+        charges = espaloma_charge.charge(mol)
         
-        try:
-            from espaloma_charge import charge
-            
-            # Convert to RDKit
-            rdkit_mol = self._ase_to_rdkit(atoms)
-            
-            if rdkit_mol is None:
-                raise RuntimeError("Failed to convert ASE atoms to RDKit molecule")
-            
-            # Calculate charges
-            partial_charges = charge(rdkit_mol)
-            
-            # Calculate dipole moment
-            positions = atoms.get_positions()  # Angstrom
-            dipole = np.dot(partial_charges, positions) / 0.5291772105638411  # Convert to e*bohr
-            
-            logger.debug(f"Espaloma dipole: {dipole}")
-            return dipole, partial_charges
-            
-        except Exception as e:
-            logger.error(f"Espaloma dipole calculation failed: {e}")
-            raise
+        # Calculate dipole moment: \u03bc = \u03a3 q_i * r_i
+        positions = atoms.get_positions()
+        dipole = np.dot(charges, positions)
+        
+        # Convert from e*Angstrom to e*Bohr (Gaussian units)
+        dipole = dipole / 0.529177210903
+        
+        logger.debug(f"Espaloma dipole: {dipole}, charges sum: {np.sum(charges):.6f}")
+        return dipole, charges
 
 
 class XTBDipoleCalculator(DipoleCalculatorBase):
@@ -305,7 +280,7 @@ class XTBDipoleCalculator(DipoleCalculatorBase):
     
     def __init__(self):
         super().__init__("xtb")
-    
+        
     def _check_availability(self):
         try:
             from xtb.ase.calculator import XTB
@@ -313,63 +288,32 @@ class XTBDipoleCalculator(DipoleCalculatorBase):
             logger.info("\u2713 xTB dipole calculator available")
         except ImportError as e:
             self.available = False
-            logger.warning(f"\u2717 xTB not available: {e}")
+            logger.warning(f"\u2717 xTB dipole calculator failed: {e}")
     
-    def calculate_dipole(self, atoms, method="GFN2-xTB", **kwargs) -> Tuple[np.ndarray, Optional[np.ndarray]]:
-        if not self.available:
-            raise RuntimeError("xTB not available")
+    def calculate_dipole(self, atoms, **kwargs):
+        """Calculate dipole using xTB"""
+        from xtb.ase.calculator import XTB
         
-        try:
-            from xtb.ase.calculator import XTB
-            
-            # Create xTB calculator
-            xtb_calc = XTB(method=method)
-            
-            # Copy atoms to avoid modifying original
-            atoms_copy = atoms.copy()
-            atoms_copy.calc = xtb_calc
-            
-            # Get energy to ensure calculation is done
-            atoms_copy.get_potential_energy()
-            
-            # Try to get dipole moment directly
-            try:
-                dipole_moment = atoms_copy.get_dipole_moment()
-                dipole = dipole_moment / 0.5291772105638411  # Convert to e*bohr
-            except:
-                # Fallback: calculate from charges if available
-                charges = atoms_copy.get_charges() if hasattr(atoms_copy, 'get_charges') else None
-                if charges is not None:
-                    positions = atoms.get_positions()
-                    dipole = np.dot(charges, positions) / 0.5291772105638411
-                else:
-                    raise RuntimeError("Could not extract dipole or charges from xTB")
-            
-            # Try to get partial charges
-            try:
-                partial_charges = atoms_copy.get_charges()
-            except:
-                partial_charges = None
-                logger.warning("Could not extract partial charges from xTB")
-            
-            logger.debug(f"xTB dipole: {dipole}")
-            return dipole, partial_charges
-            
-        except Exception as e:
-            logger.error(f"xTB dipole calculation failed: {e}")
-            raise
-	    
-	   
+        atoms_copy = atoms.copy()
+        atoms_copy.calc = XTB(method="GFN2-xTB")
+        
+        # Get dipole moment (in e*Bohr from xTB)
+        dipole_moment = atoms_copy.get_dipole_moment()
+        
+        # Get partial charges
+        partial_charges = atoms_copy.calc.get_charges(atoms_copy)
+        
+        logger.debug(f"xTB dipole: {dipole_moment}")
+        return dipole_moment, partial_charges
+
+
 class MACEMLDipoleCalculator(DipoleCalculatorBase):
     """MACE ML-based dipole calculator"""
     
     def __init__(self, model_path="/home/mot/mace_gaussian/dipole_model/model_1.model"):
         self.model_path = model_path       
         self.mace_calc = None
-	        
         super().__init__("mace_ml")
-
-
     
     def _check_availability(self):
         try:
@@ -384,7 +328,6 @@ class MACEMLDipoleCalculator(DipoleCalculatorBase):
         if not self.available:
             raise RuntimeError("MACE ML dipole calculator not available")
         return self.mace_calc.calculate_dipole(atoms, **kwargs)
-
 
 
 class GeometryDipoleCalculator(DipoleCalculatorBase):
@@ -447,7 +390,7 @@ class DipoleCalculatorFactory:
         calculators = [
             EspalomaDipoleCalculator(),
             XTBDipoleCalculator(),
-	    MACEMLDipoleCalculator(),
+            MACEMLDipoleCalculator(),
             GeometryDipoleCalculator()
         ]
         
@@ -507,7 +450,6 @@ def zmq_server(file):
 
 def is_calc_finished(proc, socket):
     """Waits until there is either a new msg (= script 2 was executed), or the g16 process finished"""
-    # TODO maybe add a maximum time to wait and throw an exception if exceeded
     while True:
         # poll the socket for messages with timeout 10 ms, returns 0 in case of timeout (= no messages)
         if socket.poll(timeout=10) != 0:
@@ -527,11 +469,6 @@ def run_next_calculation(mol, msg, calculator, dipole_method='auto', calculate_d
     # Read data from gaussian sys-call
     infile, outfile = msg.split('|')
 
-    # --------------------------------------------------------------------------------
-    # read other data from file manually if needed and convert to units used by ase
-    # below is the version from qmcfc script, file-format is turbomole,
-    # TODO adapt to used file format and units used by gaussian
-
     # Read lines from infile    
     infile_ptr = open(infile, "r")    
     lines = infile_ptr.readlines()
@@ -549,10 +486,7 @@ def run_next_calculation(mol, msg, calculator, dipole_method='auto', calculate_d
     coord = np.zeros((natoms,3))
     atomnames = []   
 
-    # --------------------------------------------------------------------------------
-    # TODO improve loop (get rid of the loop and use numpy only approach if possible)
-    #
-    # loop over all atoms     
+    # Loop over all atoms     
     for i, line in enumerate(lines[1:natoms+1]):
         line_element = line.split()
 
@@ -567,26 +501,16 @@ def run_next_calculation(mol, msg, calculator, dipole_method='auto', calculate_d
         coord[i,1] = xyz[1]
         coord[i,2] = xyz[2]
 
-    # update the coordinates for iterative (anharmonic) scheme
+    # Update the coordinates for iterative (anharmonic) scheme
     mol.set_positions(coord)
-
-    # --------------------------------------------------------------------------------
-    # TODO use with pbc
     
-    # read first three fields (unit cell) into LX, LY, LZ (convert to float and * Bohr)
-    # LX, LY, LZ = list(map(lambda x: float(x) * Bohr, line3.split()[0:3]))
-    # mol.set_cell([LX, LY, LZ])
+    # *** NEW: Set charge and spin in atoms.info for MACE-OMOL ***
+    mol.info["charge"] = float(charge)
+    mol.info["spin"] = float(spin)
 
-    # define mapping for dim => pbc-tuple, and set pbc
-    # dim_mapping = {3: (True, True, True), 2: (True, True, False)}
-    # mol.set_pbc(dim_mapping[dim])
-    # --------------------------------------------------------------------------------
-
-    # --------------------------------------------------------------------------------
-    # calculate required properties (energy, forces, etc)
+    # Calculate required properties (energy, forces, etc)
     E = mol.get_potential_energy()
     grad = -mol.get_forces()
-    # --------------------------------------------------------------------------------
 
     # ==========================================
     # ENHANCED DIPOLE CALCULATION SYSTEM
@@ -598,7 +522,7 @@ def run_next_calculation(mol, msg, calculator, dipole_method='auto', calculate_d
         
         # Calculate dipole moment
         dipole, partial_charges = dipole_calc.calculate_dipole(mol)
-        
+     
         # Store charges in ASE atoms object if available
         if partial_charges is not None:
             mol.set_initial_charges(partial_charges)
@@ -620,8 +544,6 @@ def run_next_calculation(mol, msg, calculator, dipole_method='auto', calculate_d
         # Fallback to original behavior
         dipole = np.zeros(3)
         dip_deriv = np.zeros((3*natoms, 3))
-        
-    # ==========================================
 
     # Set other output to zero (as in original)
     polar = np.zeros(6)
@@ -667,7 +589,6 @@ def run_next_calculation(mol, msg, calculator, dipole_method='auto', calculate_d
         outfile_ptr.write("\n")
     
     outfile_ptr.close()
-    # --------------------------------------------------------------------------------
 
     return
 
@@ -721,6 +642,17 @@ def calculator(nnp):
                     dispersion = False
                     ) 
         return calc
+    
+    # *** NEW: MACE-OMOL-0 support with charge and spin embeddings ***
+    if nnp == 'mace_omol':
+        from mace.calculators import mace_omol
+        calc = mace_omol(
+            model="extra_large",
+            device="cuda",
+            default_dtype='float64',
+            dispersion=False
+        )
+        return calc
 
 
 ####################################################################
@@ -736,12 +668,19 @@ if __name__ == '__main__':
         diagnose_python_environment()
         test_espaloma_functionality()
         print("\nTo run the actual calculation, use:")
-        print("python enhanced_mace_gaussian_helper.py molecule.xyz")
+        print("python gm_main.py molecule.xyz")
         sys.exit(0)
     
     # Configuration options
-    DIPOLE_METHOD = 'mace_ml'  # Options: 'auto', 'mace_dipole', 'espaloma', 'xtb', 'geometry'
+    DIPOLE_METHOD = 'mace_ml'  # Options: 'auto', 'mace_ml', 'espaloma', 'xtb', 'geometry'
     CALCULATE_DIPOLE_DERIVATIVES = True
+    
+    # Note: espaloma is recommended for organic molecules
+    # 'auto' will select the best available calculator in this order:
+    # 1. mace_ml (if mace_dipole_core is available - currently has a bug)
+    # 2. espaloma (if espaloma_charge + rdkit are installed) \u2713 RECOMMENDED
+    # 3. xtb (if xtb-python is installed)
+    # 4. geometry (fallback - crude electronegativity-based estimation)
     
     # Print available dipole calculators
     logger.info("Available dipole calculators:")
@@ -764,19 +703,14 @@ if __name__ == '__main__':
         logger.warning("  # OR")
         logger.warning("  mamba install -c conda-forge xtb-python")
         logger.warning("")
-        logger.warning("Run diagnostics with: python script.py --diagnose")
+        logger.warning("Run diagnostics with: python gm_main.py --diagnose")
         logger.warning("=" * 60)
         logger.warning("")
     
     # Check for input file
     if len(sys.argv) < 2 or sys.argv[1].startswith('--'):
-        print("Usage: python enhanced_mace_gaussian_helper.py molecule.xyz")
-        print("       python enhanced_mace_gaussian_helper.py --diagnose")
-        sys.exit(1)
-    # Check for input file
-    if len(sys.argv) < 2 or sys.argv[1].startswith('--'):
-        print("Usage: python enhanced_mace_gaussian_helper.py molecule.xyz")
-        print("       python enhanced_mace_gaussian_helper.py --diagnose")
+        print("Usage: python gm_main.py molecule.xyz")
+        print("       python gm_main.py --diagnose")
         sys.exit(1)
     
     # ========================================================================
@@ -786,38 +720,57 @@ if __name__ == '__main__':
     # pass initial file as argument when running script in .xyz or .cif format
     initial_coords = sys.argv[1]
 
-    # possibly change file-format
+    # Read molecule
     mol = read(initial_coords)
+    
+    # *** NEW: Set default charge and spin for MACE-OMOL ***
+    # These are defaults for neutral, closed-shell (singlet) molecules
+    # Gaussian will override these with actual values when it calls back
+    mol.info["charge"] = 0.0   # Neutral molecule
+    mol.info["spin"] = 1.0     # Singlet state (all electrons paired, 2S+1 = 1)
+    
+    print("\n" + "="*60)
+    print("INITIAL MOLECULE SETUP")
+    print("="*60)
+    print(f"Loaded: {initial_coords}")
+    print(f"Atoms: {len(mol)}")
+    print(f"Initial charge: {mol.info['charge']}")
+    print(f"Initial spin multiplicity: {mol.info['spin']}")
+    print("="*60 + "\n")
 
-    # --------------------------------------------------------------------------------
-    # TODO Set up cell and pbc
-    # --------------------------------------------------------------------------------
-
-    # initialize  calculator and do a geometry optimization
-    # --------------------------------------------------------------------------------
-    # TODO make it optional with a --flag 
-    # --------------------------------------------------------------------------------
-    calc = calculator('mace_mp')
+    # Initialize calculator and do geometry optimization
+    # *** CHANGED: Using mace_omol instead of mace_mp ***
+    calc = calculator('mace_omol')  # Options: 'mace_mp', 'mace_off', 'mace_omol'
     mol.calc = calc
 
+    print("="*60)
+    print("GEOMETRY OPTIMIZATION")
+    print("="*60)
     mol = geometry_optimisation(mol)
+    print("="*60 + "\n")
 
-    # --------------------------------------------------------------------------------
-    # change filename to initial name + _freq_anharm.gjf
-    # --------------------------------------------------------------------------------
-    # TODO make it optional with a --flag (--opt, --freq, --anharm) this flag should also change the outputfile name.
-    # --------------------------------------------------------------------------------
-    flaglist = ['freq', 'anharm', 'opt'] # as example
-
+    # Generate Gaussian input file
     gjf_filename = initial_coords[:-4]+'_freq_anharm.gjf'
-    ase_to_gjf(mol, gjf_filename)
-    # write(gjf_filename, mol)
-    # --------------------------------------------------------------------------------
     
-    # --------------------------------------------------------------------------------
-    # start gaussian as subprocess, TODO change gaussian input file and add more args if needed
+    # *** NEW: Get charge and spin from atoms.info for Gaussian input ***
+    charge = int(mol.info.get("charge", 0))
+    multiplicity = int(mol.info.get("spin", 1))
+    
+    ase_to_gjf(mol, gjf_filename, charge=charge, multiplicity=multiplicity)
+    
+    print("="*60)
+    print("GAUSSIAN INPUT FILE GENERATED")
+    print("="*60)
+    print(f"File: {gjf_filename}")
+    print(f"Charge: {charge}")
+    print(f"Spin Multiplicity: {multiplicity}")
+    print("="*60 + "\n")
+
+    # Start gaussian as subprocess
+    print("="*60)
+    print("LAUNCHING GAUSSIAN")
+    print("="*60)
     proc = subprocess.Popen(["g16", './'+gjf_filename])
-    # --------------------------------------------------------------------------------
 
     # From here the 'server' starts and waits for the request of the client.
     counter = 0
@@ -840,3 +793,6 @@ if __name__ == '__main__':
                 socket.send_string("error")
     
     logger.info("Calculation completed successfully!")
+    print("\n" + "="*60)
+    print("CALCULATION COMPLETED SUCCESSFULLY!")
+    print("="*60)

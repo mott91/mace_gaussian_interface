@@ -4,13 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mace-gaussian-interface"
-version = "0.1.0"
-description = "Interface between MACE ML potentials and Gaussian for molecular calculations"
+version = "0.2.0"
+description = "Interface between MACE ML potentials and Gaussian for molecular calculations with MACE-OMOL-0 support"
 readme = "README.md"
 authors = [
     {name = "Manuel Ott", email = "your.email@domain.com"}
 ]
-keywords = ["quantum-chemistry", "machine-learning", "molecular-simulation", "gaussian", "mace"]
+keywords = ["quantum-chemistry", "machine-learning", "molecular-simulation", "gaussian", "mace", "mace-omol"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research", 
@@ -28,7 +28,7 @@ dependencies = [
     "pyzmq>=22.0.0", 
     "ase>=3.22.0",
     "torch>=1.12.0",
-    "mace-torch>=0.3.0",
+    "mace-torch>=0.3.14",  # Updated: MACE-OMOL-0 requires >= 0.3.14
     "rdkit>=2022.03.0",
     "matplotlib>=3.5.0",
 ]
