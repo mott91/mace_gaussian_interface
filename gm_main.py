@@ -245,7 +245,8 @@ class EspalomaDipoleCalculator(DipoleCalculatorBase):
         from rdkit import Chem
         from rdkit.Chem import rdDetermineBonds
         import espaloma_charge
-        
+        import torch
+    
         # Create RDKit molecule from ASE atoms
         mol = Chem.RWMol()
         for symbol in atoms.get_chemical_symbols():
@@ -254,18 +255,27 @@ class EspalomaDipoleCalculator(DipoleCalculatorBase):
         
         # Set coordinates
         conf = Chem.Conformer(len(atoms))
-        for i, pos in enumerate(atoms.get_positions()):
-            conf.SetAtomPosition(i, pos)
+        positions = atoms.get_positions()
+        for i, pos in enumerate(positions):
+            conf.SetAtomPosition(i, (float(pos[0]), float(pos[1]), float(pos[2])))
         mol.AddConformer(conf)
         
         # Determine bonds
         rdDetermineBonds.DetermineBonds(mol, charge=0)
         
-        # Get partial charges from espaloma
-        charges = espaloma_charge.charge(mol)
+        # Patch espaloma to use float32
+        # Temporarily set torch default dtype to float32
+        original_dtype = torch.get_default_dtype()
+        torch.set_default_dtype(torch.float32)
         
-        # Calculate dipole moment: \u03bc = \u03a3 q_i * r_i
-        positions = atoms.get_positions()
+        try:
+            # Get partial charges from espaloma
+            charges = espaloma_charge.charge(mol)
+        finally:
+            # Restore original dtype
+            torch.set_default_dtype(original_dtype)
+        
+        # Calculate dipole moment: μ = Σ q_i * r_i
         dipole = np.dot(charges, positions)
         
         # Convert from e*Angstrom to e*Bohr (Gaussian units)
