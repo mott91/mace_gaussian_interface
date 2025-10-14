@@ -827,7 +827,7 @@ wheels = [
 
 [[package]]
 name = "mace-gaussian-interface"
-version = "0.1.0"
+version = "0.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "ase" },
@@ -845,7 +845,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "ase", specifier = ">=3.22.0" },
-    { name = "mace-torch", specifier = ">=0.3.0" },
+    { name = "mace-torch", specifier = ">=0.3.14" },
     { name = "matplotlib", specifier = ">=3.5.0" },
     { name = "numpy", specifier = ">=1.20.0" },
     { name = "pyzmq", specifier = ">=22.0.0" },
