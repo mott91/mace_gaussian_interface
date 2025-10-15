@@ -524,149 +524,300 @@ def is_calc_finished(proc, socket):
             time.sleep(1)
 
 
-def run_next_calculation(
-    mol, msg, calculator, dipole_method="auto", calculate_derivatives=True
-):
-    """updates coords, runs actual calculations, writes results to file"""
-    # Read data from gaussian sys-call
-    infile, outfile = msg.split("|")
+# ============================================================================
+# GAUSSIAN INPUT/OUTPUT HANDLING (Refactored from run_next_calculation)
+# ============================================================================
 
-    # Read lines from infile
-    infile_ptr = open(infile, "r")
-    lines = infile_ptr.readlines()
-    infile_ptr.close()
-
-    # Extract system info from head line
-    line_element = lines[0].split()
-
-    natoms = int(line_element[0])
-    deriv = int(line_element[1])
-    charge = int(line_element[2])
-    spin = int(line_element[3])
-
+def parse_gaussian_input(infile: str) -> Tuple[int, int, int, int, np.ndarray, list]:
+    """
+    Parse Gaussian external calculation input file.
+    
+    Args:
+        infile: Path to Gaussian input file
+        
+    Returns:
+        Tuple of (natoms, deriv, charge, spin, coordinates, atomnames)
+        - natoms: Number of atoms
+        - deriv: Derivative level (0=energy, 1=gradient, 2=hessian)
+        - charge: Molecular charge
+        - spin: Spin multiplicity
+        - coordinates: Numpy array of shape (natoms, 3) in Angstroms
+        - atomnames: List of element symbols
+    """
+    with open(infile, 'r') as f:
+        lines = f.readlines()
+    
+    # Extract system info from header line
+    header = lines[0].split()
+    natoms = int(header[0])
+    deriv = int(header[1])
+    charge = int(header[2])
+    spin = int(header[3])
+    
     # Initialize arrays
-    coord = np.zeros((natoms, 3))
+    coordinates = np.zeros((natoms, 3))
     atomnames = []
+    
+    # Parse atomic data (atomic number + coordinates in Bohr)
+    BOHR_TO_ANGSTROM = 0.52917721092
+    
+    for i, line in enumerate(lines[1:natoms+1]):
+        elements = line.split()
+        
+        # Convert atomic number to element symbol
+        atomic_num = int(elements[0])
+        atomnames.append(chemical_symbols[atomic_num])
+        
+        # Convert coordinates from Bohr to Angstrom
+        coordinates[i] = BOHR_TO_ANGSTROM * np.array([
+            float(elements[1]),
+            float(elements[2]),
+            float(elements[3])
+        ])
+    
+    return natoms, deriv, charge, spin, coordinates, atomnames
 
-    # Loop over all atoms
-    for i, line in enumerate(lines[1 : natoms + 1]):
-        line_element = line.split()
 
-        # convert atomic number to element name
-        atom = chemical_symbols[int(line_element[0])]
-        atomnames.append(atom)
+def update_molecule_geometry(atoms, coordinates: np.ndarray, charge: int, spin: int):
+    """
+    Update ASE Atoms object with new geometry and electronic state.
+    
+    Args:
+        atoms: ASE Atoms object to update (modified in-place)
+        coordinates: New atomic coordinates in Angstroms, shape (natoms, 3)
+        charge: Molecular charge
+        spin: Spin multiplicity
+    """
+    atoms.set_positions(coordinates)
+    atoms.info['charge'] = float(charge)
+    atoms.info['spin'] = float(spin)
 
-        # convert bohr to Angstroem and store coordinates
-        xyz = 0.52917721092 * np.array(
-            [float(line_element[1]), float(line_element[2]), float(line_element[3])]
-        )
 
-        coord[i, 0] = xyz[0]
-        coord[i, 1] = xyz[1]
-        coord[i, 2] = xyz[2]
+def calculate_energy_and_forces(atoms, calculator) -> Tuple[float, np.ndarray]:
+    """
+    Calculate energy and forces using the attached calculator.
+    
+    Args:
+        atoms: ASE Atoms object with calculator attached
+        calculator: ASE calculator (not used directly, atoms.calc is used)
+        
+    Returns:
+        Tuple of (energy, gradient)
+        - energy: Potential energy in eV
+        - gradient: Negative forces (gradient) in eV/Angstrom, shape (natoms, 3)
+    """
+    energy = atoms.get_potential_energy()
+    gradient = -atoms.get_forces()  # Gradient = -Force
+    return energy, gradient
 
-    # Update the coordinates for iterative (anharmonic) scheme
-    mol.set_positions(coord)
 
-    # *** NEW: Set charge and spin in atoms.info for MACE-OMOL ***
-    mol.info["charge"] = float(charge)
-    mol.info["spin"] = float(spin)
-
-    # Calculate required properties (energy, forces, etc)
-    E = mol.get_potential_energy()
-    grad = -mol.get_forces()
-
-    # ==========================================
-    # ENHANCED DIPOLE CALCULATION SYSTEM
-    # ==========================================
+def calculate_hessian(atoms, calculator, natoms: int) -> Optional[np.ndarray]:
+    """
+    Calculate Hessian matrix (second derivatives).
+    
+    Args:
+        atoms: ASE Atoms object
+        calculator: ASE calculator
+        natoms: Number of atoms
+        
+    Returns:
+        Hessian matrix in Hartree/Bohr^2, shape (3*natoms, 3*natoms)
+        Returns None if calculator doesn't support Hessian
+    """
     try:
-        # Get dipole calculator
-        dipole_calc = dipole_factory.get_calculator(dipole_method)
-        logger.info(f"Using dipole calculator: {dipole_calc.name}")
+        # Get Hessian in eV/Angstrom^2
+        hessian = calculator.get_hessian(atoms=atoms)
+        
+        # Convert to Hartree/Bohr^2 for Gaussian
+        # 1 eV/Ang^2 = 0.52917721092^2 / 27.211386246 Hartree/Bohr^2
+        ANGSTROM_TO_BOHR = 0.52917721092
+        EV_TO_HARTREE = 27.211386246
+        hessian = hessian * (ANGSTROM_TO_BOHR ** 2) / EV_TO_HARTREE
+        
+        # Reshape to matrix form
+        hessian = hessian.reshape(3*natoms, 3*natoms)
+        return hessian
+        
+    except Exception as e:
+        logger.warning(f"Hessian calculation failed: {e}")
+        return None
 
+
+def calculate_dipole_properties(
+    atoms,
+    dipole_calc,
+    deriv: int,
+    calculate_derivatives: bool
+) -> Tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]:
+    """
+    Calculate dipole moment and optionally its derivatives.
+    
+    Args:
+        atoms: ASE Atoms object
+        dipole_calc: DipoleCalculatorBase instance
+        deriv: Derivative level from Gaussian
+        calculate_derivatives: Whether to calculate dipole derivatives
+        
+    Returns:
+        Tuple of (dipole, dipole_derivatives, partial_charges)
+        - dipole: Dipole moment in e*Bohr, shape (3,)
+        - dipole_derivatives: Dipole derivatives in e, shape (3*natoms, 3)
+        - partial_charges: Partial atomic charges (or None), shape (natoms,)
+    """
+    natoms = len(atoms)
+    
+    try:
         # Calculate dipole moment
-        dipole, partial_charges = dipole_calc.calculate_dipole(mol)
-
-        # Store charges in ASE atoms object if available
+        logger.info(f"Using dipole calculator: {dipole_calc.name}")
+        dipole, partial_charges = dipole_calc.calculate_dipole(atoms)
+        
+        # Store charges in atoms object if available
         if partial_charges is not None:
-            mol.set_initial_charges(partial_charges)
-            logger.debug(f"Stored partial charges: {np.sum(partial_charges):.6f} total")
-
-        # Calculate dipole derivatives if requested and derivatives are needed
+            atoms.set_initial_charges(partial_charges)
+            logger.debug(f"Partial charges sum: {np.sum(partial_charges):.6f}")
+        
+        # Calculate dipole derivatives for IR intensities
         if calculate_derivatives and deriv >= 1:
             logger.info("Calculating dipole derivatives for IR intensities...")
-            dip_deriv = dipole_calc.calculate_dipole_derivatives(
-                mol, displacement=0.005
+            dipole_derivatives = dipole_calc.calculate_dipole_derivatives(
+                atoms, displacement=0.005
             )
         else:
-            dip_deriv = np.zeros((3 * natoms, 3))
-
-        logger.info(f"\u2713 Dipole calculated: {dipole} e*bohr")
-
+            dipole_derivatives = np.zeros((3*natoms, 3))
+        
+        logger.info(f"✓ Dipole calculated: {dipole} e*Bohr")
+        return dipole, dipole_derivatives, partial_charges
+        
     except Exception as e:
         logger.error(f"Dipole calculation failed: {e}")
         logger.warning("Falling back to zero dipole (IR intensities will be zero)")
-
-        # Fallback to original behavior
+        
+        # Fallback to zeros
         dipole = np.zeros(3)
-        dip_deriv = np.zeros((3 * natoms, 3))
+        dipole_derivatives = np.zeros((3*natoms, 3))
+        return dipole, dipole_derivatives, None
 
-    # Set other output to zero (as in original)
-    polar = np.zeros(6)
 
-    outfile_ptr = open(outfile, "w")
-    # write energy and dipole moment components - replace E with D for fortran
+def write_gaussian_output(
+    outfile: str,
+    natoms: int,
+    energy: float,
+    gradient: np.ndarray,
+    dipole: np.ndarray,
+    dipole_derivatives: np.ndarray,
+    hessian: Optional[np.ndarray],
+    deriv: int
+):
+    """
+    Write results to Gaussian external calculation output file.
+    
+    Args:
+        outfile: Path to output file
+        natoms: Number of atoms
+        energy: Energy in eV
+        gradient: Gradient in eV/Angstrom, shape (natoms, 3)
+        dipole: Dipole moment in e*Bohr, shape (3,)
+        dipole_derivatives: Dipole derivatives in e, shape (3*natoms, 3)
+        hessian: Hessian in Hartree/Bohr^2, shape (3*natoms, 3*natoms), or None
+        deriv: Derivative level (0, 1, or 2)
+    """
+    # Convert energy from eV to Hartree
+    EV_TO_HARTREE = 27.211386246
+    energy_hartree = energy / EV_TO_HARTREE
+    
+    # Convert gradient from eV/Angstrom to Hartree/Bohr
+    ANGSTROM_TO_BOHR = 0.52917721092
+    gradient_hartree_bohr = gradient * ANGSTROM_TO_BOHR / EV_TO_HARTREE
+    
+    # Polarizability (not implemented, set to zero)
+    polarizability = np.zeros(6)
+    
+    with open(outfile, 'w') as f:
+        # Write energy and dipole (Fortran format with 'D' exponent)
+        line = f"{energy_hartree:20.12E}{dipole[0]:20.12E}{dipole[1]:20.12E}{dipole[2]:20.12E}"
+        f.write(line.replace('E', 'D') + '\n')
+        
+        # Write gradient (forces)
+        for i in range(natoms):
+            line = f"{gradient_hartree_bohr[i,0]:20.12E}{gradient_hartree_bohr[i,1]:20.12E}{gradient_hartree_bohr[i,2]:20.12E}"
+            f.write(line.replace('E', 'D') + '\n')
+        
+        # Write polarizability (2 lines, 3 components each)
+        line = f"{polarizability[0]:20.12E}{polarizability[1]:20.12E}{polarizability[2]:20.12E}"
+        f.write(line.replace('E', 'D') + '\n')
+        line = f"{polarizability[3]:20.12E}{polarizability[4]:20.12E}{polarizability[5]:20.12E}"
+        f.write(line.replace('E', 'D') + '\n')
+        
+        # Write dipole derivatives (3*natoms lines, 3 components each)
+        for i in range(3*natoms):
+            line = f"{dipole_derivatives[i,0]:20.12E}{dipole_derivatives[i,1]:20.12E}{dipole_derivatives[i,2]:20.12E}"
+            f.write(line.replace('E', 'D') + '\n')
+        
+        # Write Hessian if second derivatives requested
+        if deriv >= 2 and hessian is not None:
+            count = 0
+            for i in range(3*natoms):
+                for j in range(i + 1):  # Lower triangle including diagonal
+                    line = f"{hessian[i,j]:20.12E}"
+                    f.write(line.replace('E', 'D'))
+                    count += 1
+                    
+                    if count % 3 == 0:  # Three entries per line
+                        f.write('\n')
+            
+            # Ensure file ends with newline
+            if count % 3 != 0:
+                f.write('\n')
 
-    string = (
-        f"{E:20.12E}{dipole[0]:20.12E}{dipole[1]:20.12E}{dipole[2]:20.12E}".replace(
-            "E", "D"
-        )
+
+def run_next_calculation(
+    mol,
+    msg: str,
+    calculator,
+    dipole_method: str = 'auto',
+    calculate_derivatives: bool = True
+):
+    """
+    Coordinate a single calculation cycle for Gaussian external interface.
+    
+    This is the main function called by Gaussian for each calculation step.
+    It orchestrates parsing input, running calculations, and writing output.
+    
+    Args:
+        mol: ASE Atoms object
+        msg: Message from Gaussian containing "infile|outfile" paths
+        calculator: ASE calculator for energy/forces
+        dipole_method: Method for dipole calculation ('auto', 'mace_ml', 'espaloma', etc.)
+        calculate_derivatives: Whether to calculate dipole derivatives
+    """
+    # Parse message to get file paths
+    infile, outfile = msg.split('|')
+    
+    # Step 1: Parse Gaussian input file
+    natoms, deriv, charge, spin, coordinates, atomnames = parse_gaussian_input(infile)
+    
+    # Step 2: Update molecule geometry and electronic state
+    update_molecule_geometry(mol, coordinates, charge, spin)
+    
+    # Step 3: Calculate energy and forces
+    energy, gradient = calculate_energy_and_forces(mol, calculator)
+    
+    # Step 4: Calculate Hessian if needed
+    hessian = None
+    if deriv >= 2:
+        hessian = calculate_hessian(mol, calculator, natoms)
+    
+    # Step 5: Calculate dipole properties
+    dipole_calc = dipole_factory.get_calculator(dipole_method)
+    dipole, dipole_derivatives, partial_charges = calculate_dipole_properties(
+        mol, dipole_calc, deriv, calculate_derivatives
     )
-    outfile_ptr.write(string + "\n")
-
-    # write gradient
-    for i in range(natoms):
-        string = f"{grad[i][0]:20.12E}{grad[i][1]:20.12E}{grad[i][2]:20.12E}".replace(
-            "E", "D"
-        )
-        outfile_ptr.write(string + "\n")
-
-    # write polarizability
-    string = f"{polar[0]:20.12E}{polar[1]:20.12E}{polar[2]:20.12E}".replace("E", "D")
-    outfile_ptr.write(string + "\n")
-
-    string = f"{polar[3]:20.12E}{polar[4]:20.12E}{polar[5]:20.12E}".replace("E", "D")
-    outfile_ptr.write(string + "\n")
-
-    # write dipole derivatives
-    for i in range(3 * natoms):
-        string = f"{dip_deriv[i][0]:20.12E}{dip_deriv[i][1]:20.12E}{dip_deriv[i][2]:20.12E}".replace(
-            "E", "D"
-        )
-        outfile_ptr.write(string + "\n")
-
-    hessian = (
-        calculator.get_hessian(atoms=mol) * 0.52917721092 * 0.52917721092 / 27.211386246
-    )  # convert to E_h/bohr2
-    hessian = hessian.reshape(3 * natoms, 3 * natoms)
-
-    count = 0
-    for i in range(3 * natoms):  # iterate over all entries
-        for j in range(i + 1):  # Iterate over lower triangle including diagonal
-            string = f"{hessian[i, j]:20.12E}".replace("E", "D")
-            outfile_ptr.write(string)  # Format to 6 decimal places
-            count += 1
-
-            if count % 3 == 0:  # Write three entries per line
-                outfile_ptr.write("\n")
-
-    # Ensure the file ends with a newline if the last line isn't full
-    if count % 3 != 0:
-        outfile_ptr.write("\n")
-
-    outfile_ptr.close()
-
-    return
+    
+    # Step 6: Write results to Gaussian output file
+    write_gaussian_output(
+        outfile, natoms, energy, gradient, dipole,
+        dipole_derivatives, hessian, deriv
+    )
 
 
 def ase_to_gjf(atoms, filename='molecule.gjf',
