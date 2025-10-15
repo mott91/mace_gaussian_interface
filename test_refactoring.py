@@ -6,7 +6,6 @@ from ase import Atoms
 from gm_main import (
     parse_gaussian_input,
     update_molecule_geometry,
-    calculate_energy_and_forces,
     write_gaussian_output
 )
 

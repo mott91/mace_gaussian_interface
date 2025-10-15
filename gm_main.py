@@ -3,25 +3,28 @@
 # module load mace-torch-dftd/14Jul2025
 # module load gv
 
+import warnings
+warnings.filterwarnings("ignore")
 import numpy as np
 import zmq
 import os
 import time
-import warnings
 from contextlib import contextmanager
 import sys
 import subprocess
+from pathlib import Path
 from mace_calculators import MACEDipoleCalculator
 from ase.io import read
 from ase.optimize import LBFGS
-from ase.data import atomic_numbers, chemical_symbols
+from ase.data import chemical_symbols
 from abc import ABC, abstractmethod
 from typing import Tuple, Optional, Dict
 import logging
 
 # Set up logging
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+    level=logging.WARNING,  # Changed from INFO
+    format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -35,18 +38,15 @@ os.environ["PYTHONWARNINGS"] = "ignore::FutureWarning"
 # CONFIGURATION
 # ============================================================================
 
-# Get configuration from environment variables with sensible defaults
-from pathlib import Path
-
 # Default paths - can be overridden by environment variables
 DEFAULT_MACE_DIPOLE_MODEL = os.getenv(
-    'MACE_DIPOLE_MODEL_PATH',
-    str(Path.home() / 'mace_gaussian' / 'dipole_model' / 'model_1.model')
+    "MACE_DIPOLE_MODEL_PATH",
+    str(Path.home() / "mace_gaussian" / "dipole_model" / "model_1.model"),
 )
 
 DEFAULT_HELPER_SCRIPT = os.getenv(
-    'MACE_HELPER_SCRIPT_PATH',
-    str(Path(__file__).parent / 'gm_helper.py')  # Use relative path by default
+    "MACE_HELPER_SCRIPT_PATH",
+    str(Path(__file__).parent / "gm_helper.py"),  # Use relative path by default
 )
 
 # Validate paths on startup
@@ -55,127 +55,6 @@ if not Path(DEFAULT_HELPER_SCRIPT).exists():
     logger.warning("Set MACE_HELPER_SCRIPT_PATH environment variable if needed")
 
 # Note: MACE dipole model is checked when MACEMLDipoleCalculator is instantiated
-
-# ============================================================================
-# DIAGNOSTIC UTILITIES
-# ============================================================================
-
-
-def diagnose_python_environment():
-    """Diagnose Python environment and package availability"""
-    import sys
-    import site
-
-    print("=" * 60)
-    print("PYTHON ENVIRONMENT DIAGNOSTICS")
-    print("=" * 60)
-
-    print(f"Python executable: {sys.executable}")
-    print(f"Python version: {sys.version}")
-    print(f"Python path: {sys.path[:3]}...")  # First few entries
-
-    print("\nSite packages:")
-    for path in site.getsitepackages():
-        print(f"  {path}")
-
-    print(f"\nUser site packages: {site.getusersitepackages()}")
-
-    print("\nTesting imports:")
-
-    # Test individual imports
-    test_imports = [
-        ("numpy", "np"),
-        ("ase", None),
-        ("rdkit", None),
-        ("rdkit.Chem", "Chem"),
-        ("espaloma_charge", None),
-    ]
-
-    for module_name, alias in test_imports:
-        try:
-            if alias:
-                exec(f"import {module_name} as {alias}")
-            else:
-                exec(f"import {module_name}")
-            print(f"  \u2713 {module_name}")
-
-            # Get version if available
-            try:
-                if module_name == "rdkit":
-                    from rdkit import rdBase
-
-                    print(f"    Version: {rdBase.rdkitVersion}")
-                elif module_name == "espaloma_charge":
-                    import espaloma_charge
-
-                    if hasattr(espaloma_charge, "__version__"):
-                        print(f"    Version: {espaloma_charge.__version__}")
-                    else:
-                        print(f"    Location: {espaloma_charge.__file__}")
-            except:
-                pass
-
-        except ImportError as e:
-            print(f"  \u2717 {module_name}: {e}")
-        except Exception as e:
-            print(f"  ? {module_name}: {e}")
-
-    print("=" * 60)
-    print()
-
-
-def test_espaloma_functionality():
-    """Test espaloma_charge functionality step by step"""
-    print("TESTING ESPALOMA_CHARGE FUNCTIONALITY")
-    print("=" * 60)
-
-    try:
-        print("1. Testing espaloma_charge import...")
-        import espaloma_charge
-
-        print("   \u2713 espaloma_charge imported successfully")
-
-        print("2. Testing charge function import...")
-        from espaloma_charge import charge
-
-        print("   \u2713 charge function imported successfully")
-
-        print("3. Testing RDKit import...")
-        from rdkit import Chem
-
-        print("   \u2713 RDKit imported successfully")
-
-        print("4. Testing simple molecule creation...")
-        mol = Chem.MolFromSmiles("N#N")
-        if mol is not None:
-            print("   \u2713 RDKit molecule created successfully")
-        else:
-            print("   \u2717 RDKit molecule creation failed")
-            return False
-
-        print("5. Testing espaloma charge calculation...")
-        charges = charge(mol)
-        print(f"   \u2713 Charges calculated: {charges}")
-        print(f"   Shape: {charges.shape}, Type: {type(charges)}")
-
-        print("6. Testing with a larger molecule...")
-        mol2 = Chem.MolFromSmiles("CCO")  # Ethanol
-        charges2 = charge(mol2)
-        print(f"   \u2713 Ethanol charges: {charges2}")
-
-        return True
-
-    except ImportError as e:
-        print(f"   \u2717 Import error: {e}")
-        return False
-    except Exception as e:
-        print(f"   \u2717 Runtime error: {e}")
-        return False
-
-    finally:
-        print("=" * 60)
-        print()
-
 
 # ============================================================================
 # MODULAR DIPOLE CALCULATION SYSTEM
@@ -343,23 +222,29 @@ class XTBDipoleCalculator(DipoleCalculatorBase):
 
 class MACEMLDipoleCalculator(DipoleCalculatorBase):
     """MACE ML-based dipole calculator"""
-    
+
     def __init__(self, model_path=None):
         # Use provided path, or fall back to configured default
-        self.model_path = model_path if model_path is not None else DEFAULT_MACE_DIPOLE_MODEL
+        self.model_path = (
+            model_path if model_path is not None else DEFAULT_MACE_DIPOLE_MODEL
+        )
         self.mace_calc = None
-        
+
         super().__init__("mace_ml")
 
     def _check_availability(self):
         try:
             # Check if model file exists
             if not Path(self.model_path).exists():
-                raise FileNotFoundError(f"MACE dipole model not found at: {self.model_path}")
-            
+                raise FileNotFoundError(
+                    f"MACE dipole model not found at: {self.model_path}"
+                )
+
             self.mace_calc = MACEDipoleCalculator(self.model_path)
             self.available = True
-            logger.info(f"\u2713 MACE ML dipole calculator available (model: {self.model_path})")
+            logger.info(
+                f"\u2713 MACE ML dipole calculator available (model: {self.model_path})"
+            )
         except (ImportError, FileNotFoundError) as e:
             self.available = False
             logger.warning(f"\u2717 MACE ML dipole calculator failed: {e}")
@@ -501,7 +386,7 @@ def zmq_server(file):
         with zmq.Context() as ctx:
             with ctx.socket(zmq.REP) as socket:
                 addr = os.path.abspath(file)
-                with open(addr, "x") as f:
+                with open(addr, "x"):
                     socket.bind("ipc://%s" % addr)
                     yield socket
     finally:
@@ -516,7 +401,7 @@ def is_calc_finished(proc, socket):
             # new msg, not finished
             return False
         # poll the running g16 process, if process has exited poll returns return code (int), otherwise None
-        elif proc.poll() != None:
+        elif proc.poll() is not None:
             # g16 process exited, finished
             return True
         else:
@@ -528,13 +413,14 @@ def is_calc_finished(proc, socket):
 # GAUSSIAN INPUT/OUTPUT HANDLING (Refactored from run_next_calculation)
 # ============================================================================
 
+
 def parse_gaussian_input(infile: str) -> Tuple[int, int, int, int, np.ndarray, list]:
     """
     Parse Gaussian external calculation input file.
-    
+
     Args:
         infile: Path to Gaussian input file
-        
+
     Returns:
         Tuple of (natoms, deriv, charge, spin, coordinates, atomnames)
         - natoms: Number of atoms
@@ -544,44 +430,42 @@ def parse_gaussian_input(infile: str) -> Tuple[int, int, int, int, np.ndarray, l
         - coordinates: Numpy array of shape (natoms, 3) in Angstroms
         - atomnames: List of element symbols
     """
-    with open(infile, 'r') as f:
+    with open(infile, "r") as f:
         lines = f.readlines()
-    
+
     # Extract system info from header line
     header = lines[0].split()
     natoms = int(header[0])
     deriv = int(header[1])
     charge = int(header[2])
     spin = int(header[3])
-    
+
     # Initialize arrays
     coordinates = np.zeros((natoms, 3))
     atomnames = []
-    
+
     # Parse atomic data (atomic number + coordinates in Bohr)
     BOHR_TO_ANGSTROM = 0.52917721092
-    
-    for i, line in enumerate(lines[1:natoms+1]):
+
+    for i, line in enumerate(lines[1 : natoms + 1]):
         elements = line.split()
-        
+
         # Convert atomic number to element symbol
         atomic_num = int(elements[0])
         atomnames.append(chemical_symbols[atomic_num])
-        
+
         # Convert coordinates from Bohr to Angstrom
-        coordinates[i] = BOHR_TO_ANGSTROM * np.array([
-            float(elements[1]),
-            float(elements[2]),
-            float(elements[3])
-        ])
-    
+        coordinates[i] = BOHR_TO_ANGSTROM * np.array(
+            [float(elements[1]), float(elements[2]), float(elements[3])]
+        )
+
     return natoms, deriv, charge, spin, coordinates, atomnames
 
 
 def update_molecule_geometry(atoms, coordinates: np.ndarray, charge: int, spin: int):
     """
     Update ASE Atoms object with new geometry and electronic state.
-    
+
     Args:
         atoms: ASE Atoms object to update (modified in-place)
         coordinates: New atomic coordinates in Angstroms, shape (natoms, 3)
@@ -589,18 +473,18 @@ def update_molecule_geometry(atoms, coordinates: np.ndarray, charge: int, spin: 
         spin: Spin multiplicity
     """
     atoms.set_positions(coordinates)
-    atoms.info['charge'] = float(charge)
-    atoms.info['spin'] = float(spin)
+    atoms.info["charge"] = float(charge)
+    atoms.info["spin"] = float(spin)
 
 
 def calculate_energy_and_forces(atoms, calculator) -> Tuple[float, np.ndarray]:
     """
     Calculate energy and forces using the attached calculator.
-    
+
     Args:
         atoms: ASE Atoms object with calculator attached
         calculator: ASE calculator (not used directly, atoms.calc is used)
-        
+
     Returns:
         Tuple of (energy, gradient)
         - energy: Potential energy in eV
@@ -614,12 +498,12 @@ def calculate_energy_and_forces(atoms, calculator) -> Tuple[float, np.ndarray]:
 def calculate_hessian(atoms, calculator, natoms: int) -> Optional[np.ndarray]:
     """
     Calculate Hessian matrix (second derivatives).
-    
+
     Args:
         atoms: ASE Atoms object
         calculator: ASE calculator
         natoms: Number of atoms
-        
+
     Returns:
         Hessian matrix in Hartree/Bohr^2, shape (3*natoms, 3*natoms)
         Returns None if calculator doesn't support Hessian
@@ -627,37 +511,34 @@ def calculate_hessian(atoms, calculator, natoms: int) -> Optional[np.ndarray]:
     try:
         # Get Hessian in eV/Angstrom^2
         hessian = calculator.get_hessian(atoms=atoms)
-        
+
         # Convert to Hartree/Bohr^2 for Gaussian
         # 1 eV/Ang^2 = 0.52917721092^2 / 27.211386246 Hartree/Bohr^2
         ANGSTROM_TO_BOHR = 0.52917721092
         EV_TO_HARTREE = 27.211386246
-        hessian = hessian * (ANGSTROM_TO_BOHR ** 2) / EV_TO_HARTREE
-        
+        hessian = hessian * (ANGSTROM_TO_BOHR**2) / EV_TO_HARTREE
+
         # Reshape to matrix form
-        hessian = hessian.reshape(3*natoms, 3*natoms)
+        hessian = hessian.reshape(3 * natoms, 3 * natoms)
         return hessian
-        
+
     except Exception as e:
         logger.warning(f"Hessian calculation failed: {e}")
         return None
 
 
 def calculate_dipole_properties(
-    atoms,
-    dipole_calc,
-    deriv: int,
-    calculate_derivatives: bool
+    atoms, dipole_calc, deriv: int, calculate_derivatives: bool
 ) -> Tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]:
     """
     Calculate dipole moment and optionally its derivatives.
-    
+
     Args:
         atoms: ASE Atoms object
         dipole_calc: DipoleCalculatorBase instance
         deriv: Derivative level from Gaussian
         calculate_derivatives: Whether to calculate dipole derivatives
-        
+
     Returns:
         Tuple of (dipole, dipole_derivatives, partial_charges)
         - dipole: Dipole moment in e*Bohr, shape (3,)
@@ -665,17 +546,17 @@ def calculate_dipole_properties(
         - partial_charges: Partial atomic charges (or None), shape (natoms,)
     """
     natoms = len(atoms)
-    
+
     try:
         # Calculate dipole moment
         logger.info(f"Using dipole calculator: {dipole_calc.name}")
         dipole, partial_charges = dipole_calc.calculate_dipole(atoms)
-        
+
         # Store charges in atoms object if available
         if partial_charges is not None:
             atoms.set_initial_charges(partial_charges)
             logger.debug(f"Partial charges sum: {np.sum(partial_charges):.6f}")
-        
+
         # Calculate dipole derivatives for IR intensities
         if calculate_derivatives and deriv >= 1:
             logger.info("Calculating dipole derivatives for IR intensities...")
@@ -683,18 +564,18 @@ def calculate_dipole_properties(
                 atoms, displacement=0.005
             )
         else:
-            dipole_derivatives = np.zeros((3*natoms, 3))
-        
+            dipole_derivatives = np.zeros((3 * natoms, 3))
+
         logger.info(f"✓ Dipole calculated: {dipole} e*Bohr")
         return dipole, dipole_derivatives, partial_charges
-        
+
     except Exception as e:
         logger.error(f"Dipole calculation failed: {e}")
         logger.warning("Falling back to zero dipole (IR intensities will be zero)")
-        
+
         # Fallback to zeros
         dipole = np.zeros(3)
-        dipole_derivatives = np.zeros((3*natoms, 3))
+        dipole_derivatives = np.zeros((3 * natoms, 3))
         return dipole, dipole_derivatives, None
 
 
@@ -706,11 +587,11 @@ def write_gaussian_output(
     dipole: np.ndarray,
     dipole_derivatives: np.ndarray,
     hessian: Optional[np.ndarray],
-    deriv: int
+    deriv: int,
 ):
     """
     Write results to Gaussian external calculation output file.
-    
+
     Args:
         outfile: Path to output file
         natoms: Number of atoms
@@ -724,65 +605,65 @@ def write_gaussian_output(
     # Convert energy from eV to Hartree
     EV_TO_HARTREE = 27.211386246
     energy_hartree = energy / EV_TO_HARTREE
-    
+
     # Convert gradient from eV/Angstrom to Hartree/Bohr
     ANGSTROM_TO_BOHR = 0.52917721092
     gradient_hartree_bohr = gradient * ANGSTROM_TO_BOHR / EV_TO_HARTREE
-    
+
     # Polarizability (not implemented, set to zero)
     polarizability = np.zeros(6)
-    
-    with open(outfile, 'w') as f:
+
+    with open(outfile, "w") as f:
         # Write energy and dipole (Fortran format with 'D' exponent)
         line = f"{energy_hartree:20.12E}{dipole[0]:20.12E}{dipole[1]:20.12E}{dipole[2]:20.12E}"
-        f.write(line.replace('E', 'D') + '\n')
-        
+        f.write(line.replace("E", "D") + "\n")
+
         # Write gradient (forces)
         for i in range(natoms):
-            line = f"{gradient_hartree_bohr[i,0]:20.12E}{gradient_hartree_bohr[i,1]:20.12E}{gradient_hartree_bohr[i,2]:20.12E}"
-            f.write(line.replace('E', 'D') + '\n')
-        
+            line = f"{gradient_hartree_bohr[i, 0]:20.12E}{gradient_hartree_bohr[i, 1]:20.12E}{gradient_hartree_bohr[i, 2]:20.12E}"
+            f.write(line.replace("E", "D") + "\n")
+
         # Write polarizability (2 lines, 3 components each)
         line = f"{polarizability[0]:20.12E}{polarizability[1]:20.12E}{polarizability[2]:20.12E}"
-        f.write(line.replace('E', 'D') + '\n')
+        f.write(line.replace("E", "D") + "\n")
         line = f"{polarizability[3]:20.12E}{polarizability[4]:20.12E}{polarizability[5]:20.12E}"
-        f.write(line.replace('E', 'D') + '\n')
-        
+        f.write(line.replace("E", "D") + "\n")
+
         # Write dipole derivatives (3*natoms lines, 3 components each)
-        for i in range(3*natoms):
-            line = f"{dipole_derivatives[i,0]:20.12E}{dipole_derivatives[i,1]:20.12E}{dipole_derivatives[i,2]:20.12E}"
-            f.write(line.replace('E', 'D') + '\n')
-        
+        for i in range(3 * natoms):
+            line = f"{dipole_derivatives[i, 0]:20.12E}{dipole_derivatives[i, 1]:20.12E}{dipole_derivatives[i, 2]:20.12E}"
+            f.write(line.replace("E", "D") + "\n")
+
         # Write Hessian if second derivatives requested
         if deriv >= 2 and hessian is not None:
             count = 0
-            for i in range(3*natoms):
+            for i in range(3 * natoms):
                 for j in range(i + 1):  # Lower triangle including diagonal
-                    line = f"{hessian[i,j]:20.12E}"
-                    f.write(line.replace('E', 'D'))
+                    line = f"{hessian[i, j]:20.12E}"
+                    f.write(line.replace("E", "D"))
                     count += 1
-                    
+
                     if count % 3 == 0:  # Three entries per line
-                        f.write('\n')
-            
+                        f.write("\n")
+
             # Ensure file ends with newline
             if count % 3 != 0:
-                f.write('\n')
+                f.write("\n")
 
 
 def run_next_calculation(
     mol,
     msg: str,
     calculator,
-    dipole_method: str = 'auto',
-    calculate_derivatives: bool = True
+    dipole_method: str = "auto",
+    calculate_derivatives: bool = True,
 ):
     """
     Coordinate a single calculation cycle for Gaussian external interface.
-    
+
     This is the main function called by Gaussian for each calculation step.
     It orchestrates parsing input, running calculations, and writing output.
-    
+
     Args:
         mol: ASE Atoms object
         msg: Message from Gaussian containing "infile|outfile" paths
@@ -791,44 +672,46 @@ def run_next_calculation(
         calculate_derivatives: Whether to calculate dipole derivatives
     """
     # Parse message to get file paths
-    infile, outfile = msg.split('|')
-    
+    infile, outfile = msg.split("|")
+
     # Step 1: Parse Gaussian input file
-    natoms, deriv, charge, spin, coordinates, atomnames = parse_gaussian_input(infile)
-    
+    natoms, deriv, charge, spin, coordinates, _atomnames = parse_gaussian_input(infile)
+
     # Step 2: Update molecule geometry and electronic state
     update_molecule_geometry(mol, coordinates, charge, spin)
-    
+
     # Step 3: Calculate energy and forces
     energy, gradient = calculate_energy_and_forces(mol, calculator)
-    
+
     # Step 4: Calculate Hessian if needed
     hessian = None
     if deriv >= 2:
         hessian = calculate_hessian(mol, calculator, natoms)
-    
+
     # Step 5: Calculate dipole properties
     dipole_calc = dipole_factory.get_calculator(dipole_method)
-    dipole, dipole_derivatives, partial_charges = calculate_dipole_properties(
+    dipole, dipole_derivatives, _partial_charges = calculate_dipole_properties(
         mol, dipole_calc, deriv, calculate_derivatives
     )
-    
+
     # Step 6: Write results to Gaussian output file
     write_gaussian_output(
-        outfile, natoms, energy, gradient, dipole,
-        dipole_derivatives, hessian, deriv
+        outfile, natoms, energy, gradient, dipole, dipole_derivatives, hessian, deriv
     )
 
 
-def ase_to_gjf(atoms, filename='molecule.gjf',
-               route=None,
-               title='Gaussian input generated from ASE',
-               charge=0, multiplicity=1):
-    
+def ase_to_gjf(
+    atoms,
+    filename="molecule.gjf",
+    route=None,
+    title="Gaussian input generated from ASE",
+    charge=0,
+    multiplicity=1,
+):
     # Use default route with configured helper script path if none provided
     if route is None:
         route = f'# freq (anharm)\n# external="{DEFAULT_HELPER_SCRIPT}"'
-        
+
     symbols = atoms.get_chemical_symbols()
     positions = atoms.get_positions()  # Angstrom by ASE convention
     link0 = f"%chk={filename[:-3]}chk\n%mem=2GB\n%NProcShared=2"
