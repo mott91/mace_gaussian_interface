@@ -2,8 +2,8 @@
  Input=./acoh_freq_anharm.gjf
  Output=./acoh_freq_anharm.log
  Initial command:
- /usr/local/g16-c.02/g16/l1.exe "/scratch/mot/Gau-398475.inp" -scrdir="/scratch/mot/"
- Entering Link 1 = /usr/local/g16-c.02/g16/l1.exe PID=    398479.
+ /usr/local/g16-c.02/g16/l1.exe "/scratch/mot/Gau-406587.inp" -scrdir="/scratch/mot/"
+ Entering Link 1 = /usr/local/g16-c.02/g16/l1.exe PID=    406591.
   
  Copyright (c) 1988-2021, Gaussian, Inc.  All Rights Reserved.
   
@@ -188,11 +188,11 @@
  Two-electron integral symmetry is turned on.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.31013528     dipole=      0.235703977756     -0.173193309977      0.000002908132
  Energy=    -6234.31014     NIter=   0.
  Dipole moment=       0.235704      -0.173193       0.000003
@@ -399,11 +399,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.31013431     dipole=      0.235701599442     -0.173192626718     -0.000320053523
  Energy=    -6234.31013     NIter=   0.
  Dipole moment=       0.235702      -0.173193      -0.000320
@@ -433,11 +433,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.31013427     dipole=      0.235701610195     -0.173192567601      0.000325869319
  Energy=    -6234.31013     NIter=   0.
  Dipole moment=       0.235702      -0.173193       0.000326
@@ -467,11 +467,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.31010252     dipole=      0.236111449710     -0.172441955022      0.000002878725
  Energy=    -6234.31010     NIter=   0.
  Dipole moment=       0.236111      -0.172442       0.000003
@@ -501,11 +501,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.31010249     dipole=      0.235292403211     -0.173943390857      0.000002937413
  Energy=    -6234.31010     NIter=   0.
  Dipole moment=       0.235292      -0.173943       0.000003
@@ -535,11 +535,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.31008090     dipole=      0.235705428311     -0.173193592345     -0.001917739548
  Energy=    -6234.31008     NIter=   0.
  Dipole moment=       0.235705      -0.173194      -0.001918
@@ -569,11 +569,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.31008090     dipole=      0.235705367728     -0.173193625117      0.001923555820
  Energy=    -6234.31008     NIter=   0.
  Dipole moment=       0.235705      -0.173194       0.001924
@@ -603,11 +603,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.31007168     dipole=      0.234079565433     -0.173873310489      0.000002837859
  Energy=    -6234.31007     NIter=   0.
  Dipole moment=       0.234080      -0.173873       0.000003
@@ -637,11 +637,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.31007158     dipole=      0.237333185656     -0.172515871075      0.000002978177
  Energy=    -6234.31007     NIter=   0.
  Dipole moment=       0.237333      -0.172516       0.000003
@@ -671,11 +671,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.31005444     dipole=      0.235707444777     -0.173193725407     -0.002919081251
  Energy=    -6234.31005     NIter=   0.
  Dipole moment=       0.235707      -0.173194      -0.002919
@@ -705,11 +705,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.31005444     dipole=      0.235707435628     -0.173193727224      0.002924897545
  Energy=    -6234.31005     NIter=   0.
  Dipole moment=       0.235707      -0.173194       0.002925
@@ -739,11 +739,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.30999483     dipole=      0.235011392171     -0.173176026713      0.000002879936
  Energy=    -6234.30999     NIter=   0.
  Dipole moment=       0.235011      -0.173176       0.000003
@@ -773,11 +773,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.30999392     dipole=      0.236401812795     -0.173204388321      0.000002936264
  Energy=    -6234.30999     NIter=   0.
  Dipole moment=       0.236402      -0.173204       0.000003
@@ -807,11 +807,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.30995129     dipole=      0.234646609682     -0.174478158552      0.000002909250
  Energy=    -6234.30995     NIter=   0.
  Dipole moment=       0.234647      -0.174478       0.000003
@@ -841,11 +841,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.30995149     dipole=      0.236757245566     -0.171904092999      0.000002906393
  Energy=    -6234.30995     NIter=   0.
  Dipole moment=       0.236757      -0.171904       0.000003
@@ -875,11 +875,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.30992709     dipole=      0.235703334184     -0.173196832304      0.000834624016
  Energy=    -6234.30993     NIter=   0.
  Dipole moment=       0.235703      -0.173197       0.000835
@@ -909,11 +909,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.30992708     dipole=      0.235703262233     -0.173196796753     -0.000828807473
  Energy=    -6234.30993     NIter=   0.
  Dipole moment=       0.235703      -0.173197      -0.000829
@@ -943,11 +943,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.30986338     dipole=      0.232790467930     -0.175508626032      0.000002921347
  Energy=    -6234.30986     NIter=   0.
  Dipole moment=       0.232790      -0.175509       0.000003
@@ -977,11 +977,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.30986341     dipole=      0.238630378794     -0.170872623622      0.000002894627
  Energy=    -6234.30986     NIter=   0.
  Dipole moment=       0.238630      -0.170873       0.000003
@@ -1011,11 +1011,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.30980584     dipole=      0.235502913305     -0.172224222533      0.000002900261
  Energy=    -6234.30981     NIter=   0.
  Dipole moment=       0.235503      -0.172224       0.000003
@@ -1045,11 +1045,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.30980470     dipole=      0.235916843776     -0.174158945084      0.000002915681
  Energy=    -6234.30980     NIter=   0.
  Dipole moment=       0.235917      -0.174159       0.000003
@@ -1079,11 +1079,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.30976893     dipole=      0.233308772685     -0.173832898782      0.000002870239
  Energy=    -6234.30977     NIter=   0.
  Dipole moment=       0.233309      -0.173833       0.000003
@@ -1113,11 +1113,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.30976814     dipole=      0.238074689292     -0.172547046842      0.000002945963
  Energy=    -6234.30977     NIter=   0.
  Dipole moment=       0.238075      -0.172547       0.000003
@@ -1147,11 +1147,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.30974339     dipole=      0.235095611899     -0.171815534050      0.000002900195
  Energy=    -6234.30974     NIter=   0.
  Dipole moment=       0.235096      -0.171816       0.000003
@@ -1181,11 +1181,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.30974270     dipole=      0.236307911513     -0.174568596434      0.000002915767
  Energy=    -6234.30974     NIter=   0.
  Dipole moment=       0.236308      -0.174569       0.000003
@@ -1215,11 +1215,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.30973990     dipole=      0.235704895338     -0.173196761917     -0.001330701530
  Energy=    -6234.30974     NIter=   0.
  Dipole moment=       0.235705      -0.173197      -0.001331
@@ -1249,11 +1249,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.30973990     dipole=      0.235704818439     -0.173196796556      0.001336517070
  Energy=    -6234.30974     NIter=   0.
  Dipole moment=       0.235705      -0.173197       0.001337
@@ -1283,11 +1283,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.30950594     dipole=      0.233903521209     -0.168677626598      0.000002893449
  Energy=    -6234.30951     NIter=   0.
  Dipole moment=       0.233904      -0.168678       0.000003
@@ -1317,11 +1317,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.30951458     dipole=      0.237516513323     -0.177692225957      0.000002923190
  Energy=    -6234.30951     NIter=   0.
  Dipole moment=       0.237517      -0.177692       0.000003
@@ -1351,11 +1351,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.30837092     dipole=      0.236064492045     -0.172901631651      0.000002901704
  Energy=    -6234.30837     NIter=   0.
  Dipole moment=       0.236064      -0.172902       0.000003
@@ -1385,11 +1385,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.30841002     dipole=      0.235309530277     -0.173475448578      0.000002913162
  Energy=    -6234.30841     NIter=   0.
  Dipole moment=       0.235310      -0.173475       0.000003
@@ -1419,11 +1419,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.30831574     dipole=      0.235710362050     -0.173182351432     -0.000022211313
  Energy=    -6234.30832     NIter=   0.
  Dipole moment=       0.235710      -0.173182      -0.000022
@@ -1453,11 +1453,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.30831574     dipole=      0.235710525738     -0.173182330648      0.000028026371
  Energy=    -6234.30832     NIter=   0.
  Dipole moment=       0.235711      -0.173182       0.000028
@@ -1487,11 +1487,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.30823915     dipole=      0.236636298340     -0.172693792083      0.000002898772
  Energy=    -6234.30824     NIter=   0.
  Dipole moment=       0.236636      -0.172694       0.000003
@@ -1521,11 +1521,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.30828889     dipole=      0.234745589848     -0.173719879966      0.000002918604
  Energy=    -6234.30829     NIter=   0.
  Dipole moment=       0.234746      -0.173720       0.000003
@@ -1555,11 +1555,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.30759105     dipole=      0.233212922551     -0.171742219343      0.000002933874
  Energy=    -6234.30759     NIter=   0.
  Dipole moment=       0.233213      -0.171742       0.000003
@@ -1589,11 +1589,11 @@
  Two-electron integral symmetry is turned off.
  External calculation of energy, first and second derivatives.
  Running external command "/home/mot/mace_gaussian/gm_helper.py R"
-         input file       "/scratch/mot/Gau-398479.EIn"
-         output file      "/scratch/mot/Gau-398479.EOu"
-         message file     "/scratch/mot/Gau-398479.EMs"
-         fchk file        "/scratch/mot/Gau-398479.EFC"
-         mat. el file     "/scratch/mot/Gau-398479.EUF"
+         input file       "/scratch/mot/Gau-406591.EIn"
+         output file      "/scratch/mot/Gau-406591.EOu"
+         message file     "/scratch/mot/Gau-406591.EMs"
+         fchk file        "/scratch/mot/Gau-406591.EFC"
+         mat. el file     "/scratch/mot/Gau-406591.EUF"
  Recovered energy= -6234.30746684     dipole=      0.238288265985     -0.174543485153      0.000002882784
  Energy=    -6234.30747     NIter=   0.
  Dipole moment=       0.238288      -0.174543       0.000003
@@ -7195,7 +7195,7 @@ SCF-CI
    Mode(n)                            X               Y               Z
       1(1)                      -0.229326D-01    0.174431D-01   -0.633732D-04
       2(1)                       0.166605D-01    0.392060D-02   -0.542230D-06
-      3(1)                       0.462473D-06   -0.348539D-04    0.198913D-02
+      3(1)                       0.462460D-06   -0.348539D-04    0.198913D-02
       4(1)                      -0.185996D-01    0.461004D-02   -0.691970D-05
       5(1)                      -0.449724D-01    0.719114D-01    0.188680D-03
       6(1)                      -0.400348D-04   -0.800129D-04   -0.221067D-01
@@ -7208,7 +7208,7 @@ SCF-CI
      13(1)                      -0.154069D-01   -0.149415D-01   -0.295341D-03
      14(1)                      -0.201181D-03    0.361239D-03   -0.821406D-01
      15(1)                      -0.491074D-01   -0.316660D-01   -0.251558D-04
-     16(1)                       0.230833D-04   -0.574402D-04   -0.737249D-01
+     16(1)                       0.230833D-04   -0.574401D-04   -0.737249D-01
      17(1)                       0.542835D-02    0.317565D-01    0.692703D-04
      18(1)                      -0.126745D-03   -0.163963D-03   -0.139241D-01
 
@@ -7242,22 +7242,22 @@ SCF-CI
       3(1)        2(1)          -0.430804D-08    0.180970D-06    0.778081D-03
       4(1)        1(1)           0.249201D-03    0.474499D-03   -0.105603D-07
       4(1)        2(1)           0.138981D-02   -0.790978D-03    0.654695D-07
-      4(1)        3(1)          -0.276547D-07    0.518655D-07   -0.363598D-03
+      4(1)        3(1)          -0.276546D-07    0.518655D-07   -0.363598D-03
       5(1)        1(1)          -0.485595D-04   -0.682824D-03   -0.324934D-07
-      5(1)        2(1)           0.425739D-03   -0.484699D-03   -0.631356D-08
+      5(1)        2(1)           0.425739D-03   -0.484699D-03   -0.631355D-08
       5(1)        3(1)          -0.334645D-07   -0.394365D-07   -0.672666D-03
       5(1)        4(1)           0.961091D-04    0.507328D-03   -0.114807D-07
-      6(1)        1(1)           0.647811D-07   -0.129815D-06   -0.400581D-03
+      6(1)        1(1)           0.647811D-07   -0.129814D-06   -0.400581D-03
       6(1)        2(1)           0.606689D-07    0.301917D-06    0.111406D-02
       6(1)        3(1)          -0.548654D-04    0.264795D-02   -0.594210D-07
       6(1)        4(1)           0.106361D-06    0.427381D-07   -0.193624D-02
       6(1)        5(1)          -0.163083D-07    0.103415D-06    0.301903D-03
       7(1)        1(1)           0.214075D-04   -0.884749D-05    0.457655D-08
       7(1)        2(1)          -0.732537D-03    0.218271D-02   -0.212495D-06
-      7(1)        3(1)          -0.214569D-07   -0.272186D-06   -0.189679D-02
+      7(1)        3(1)          -0.214568D-07   -0.272186D-06   -0.189679D-02
       7(1)        4(1)           0.255920D-02    0.497241D-04    0.921629D-07
-      7(1)        5(1)           0.446628D-03    0.885529D-03    0.198946D-07
-      7(1)        6(1)           0.180865D-06    0.150662D-06   -0.908301D-03
+      7(1)        5(1)           0.446628D-03    0.885529D-03    0.198947D-07
+      7(1)        6(1)           0.180865D-06    0.150663D-06   -0.908301D-03
       8(1)        1(1)          -0.108146D-03    0.180415D-02    0.212418D-07
       8(1)        2(1)          -0.235107D-02   -0.295655D-02    0.655675D-07
       8(1)        3(1)           0.902666D-07    0.116174D-06   -0.241517D-02
@@ -7282,8 +7282,8 @@ SCF-CI
      10(1)        7(1)          -0.128645D-02   -0.325011D-03    0.111993D-06
      10(1)        8(1)          -0.511890D-02   -0.957834D-03   -0.524927D-07
      10(1)        9(1)           0.105149D-01    0.956960D-03    0.780363D-07
-     11(1)        1(1)           0.384459D-07   -0.506597D-07   -0.751607D-03
-     11(1)        2(1)           0.498910D-08   -0.674475D-07    0.212372D-03
+     11(1)        1(1)           0.384460D-07   -0.506597D-07   -0.751607D-03
+     11(1)        2(1)           0.498912D-08   -0.674475D-07    0.212372D-03
      11(1)        3(1)           0.827511D-03    0.660681D-03   -0.170229D-06
      11(1)        4(1)          -0.689240D-07    0.104725D-06    0.127011D-02
      11(1)        5(1)          -0.147319D-06   -0.151575D-07   -0.128597D-02
@@ -7291,7 +7291,7 @@ SCF-CI
      11(1)        7(1)           0.612553D-08   -0.190096D-06   -0.129132D-02
      11(1)        8(1)           0.398390D-07    0.917622D-07   -0.189950D-02
      11(1)        9(1)           0.152627D-06   -0.923237D-07   -0.310996D-02
-     11(1)       10(1)          -0.296848D-07    0.141349D-06    0.709725D-03
+     11(1)       10(1)          -0.296849D-07    0.141349D-06    0.709725D-03
      12(1)        1(1)           0.188460D-02    0.548520D-03   -0.642719D-07
      12(1)        2(1)           0.166639D-02    0.191969D-02   -0.629682D-07
      12(1)        3(1)           0.391349D-07   -0.674451D-07    0.429812D-03
@@ -7311,20 +7311,20 @@ SCF-CI
      13(1)        6(1)           0.626406D-07    0.659757D-07    0.771112D-05
      13(1)        7(1)          -0.180685D-04    0.970162D-03   -0.415890D-07
      13(1)        8(1)           0.105756D-02   -0.841967D-03    0.407479D-07
-     13(1)        9(1)           0.321096D-02   -0.322262D-03    0.109792D-08
-     13(1)       10(1)           0.920390D-02   -0.432698D-04    0.763185D-08
+     13(1)        9(1)           0.321096D-02   -0.322262D-03    0.109791D-08
+     13(1)       10(1)           0.920390D-02   -0.432698D-04    0.763184D-08
      13(1)       11(1)          -0.266838D-07    0.334194D-07    0.845822D-03
-     13(1)       12(1)           0.240279D-02   -0.293149D-03    0.121645D-07
+     13(1)       12(1)           0.240279D-02   -0.293149D-03    0.121644D-07
      14(1)        1(1)           0.403254D-07   -0.141942D-07   -0.263516D-02
      14(1)        2(1)           0.178265D-07    0.207545D-07    0.413890D-03
      14(1)        3(1)          -0.166568D-03    0.868143D-03   -0.895783D-07
      14(1)        4(1)          -0.710995D-07    0.829367D-07    0.406420D-03
-     14(1)        5(1)          -0.402126D-07   -0.888449D-08    0.125960D-02
+     14(1)        5(1)          -0.402126D-07   -0.888450D-08    0.125960D-02
      14(1)        6(1)          -0.802201D-04    0.836352D-03   -0.948698D-07
-     14(1)        7(1)          -0.468621D-08   -0.144655D-06   -0.272606D-03
+     14(1)        7(1)          -0.468622D-08   -0.144655D-06   -0.272606D-03
      14(1)        8(1)           0.168012D-07    0.775373D-07   -0.924538D-03
-     14(1)        9(1)           0.424430D-08   -0.688789D-08   -0.161591D-02
-     14(1)       10(1)          -0.624827D-07    0.627277D-07   -0.173466D-02
+     14(1)        9(1)           0.424431D-08   -0.688789D-08   -0.161591D-02
+     14(1)       10(1)          -0.624828D-07    0.627277D-07   -0.173466D-02
      14(1)       11(1)          -0.148380D-02   -0.147034D-02    0.199450D-07
      14(1)       12(1)          -0.294798D-07   -0.125221D-06   -0.210150D-03
      14(1)       13(1)           0.185323D-07   -0.342781D-07    0.134485D-02
@@ -7335,31 +7335,31 @@ SCF-CI
      15(1)        5(1)           0.787812D-03    0.217354D-02    0.451060D-07
      15(1)        6(1)           0.115579D-07    0.869911D-07    0.358353D-03
      15(1)        7(1)          -0.398784D-03   -0.496017D-03   -0.141629D-08
-     15(1)        8(1)          -0.308774D-02   -0.187495D-02    0.662866D-07
+     15(1)        8(1)          -0.308774D-02   -0.187495D-02    0.662865D-07
      15(1)        9(1)           0.170150D-03    0.883115D-02   -0.711156D-07
      15(1)       10(1)           0.902294D-02   -0.509639D-02   -0.695633D-07
-     15(1)       11(1)          -0.243084D-07    0.615959D-07   -0.199804D-03
+     15(1)       11(1)          -0.243084D-07    0.615960D-07   -0.199804D-03
      15(1)       12(1)           0.228419D-02   -0.115911D-02   -0.182433D-07
-     15(1)       13(1)          -0.198951D-01    0.104146D-01   -0.274138D-06
-     15(1)       14(1)           0.382579D-07    0.990762D-07    0.724120D-03
-     16(1)        1(1)           0.153949D-07    0.686434D-07   -0.114976D-02
-     16(1)        2(1)          -0.796769D-07   -0.170504D-07   -0.338965D-03
+     15(1)       13(1)          -0.198951D-01    0.104146D-01   -0.274139D-06
+     15(1)       14(1)           0.382579D-07    0.990761D-07    0.724120D-03
+     16(1)        1(1)           0.153950D-07    0.686434D-07   -0.114976D-02
+     16(1)        2(1)          -0.796769D-07   -0.170505D-07   -0.338965D-03
      16(1)        3(1)          -0.224876D-03   -0.940555D-03    0.137234D-06
      16(1)        4(1)           0.975785D-07   -0.110947D-06   -0.586681D-03
      16(1)        5(1)          -0.396931D-07    0.628192D-08    0.117650D-02
      16(1)        6(1)           0.297385D-03   -0.125338D-02    0.802706D-07
      16(1)        7(1)           0.165706D-07    0.688356D-07    0.142107D-03
      16(1)        8(1)           0.330893D-07   -0.709042D-07    0.258141D-02
-     16(1)        9(1)          -0.496889D-07   -0.780987D-08    0.301846D-03
+     16(1)        9(1)          -0.496888D-07   -0.780987D-08    0.301846D-03
      16(1)       10(1)          -0.507109D-07   -0.202152D-07   -0.135212D-02
      16(1)       11(1)          -0.136847D-02    0.256269D-02    0.273040D-07
      16(1)       12(1)           0.698921D-07    0.223791D-06   -0.549894D-02
      16(1)       13(1)          -0.108447D-06    0.236368D-07    0.138922D-02
      16(1)       14(1)           0.133917D-01   -0.784694D-03    0.146201D-06
-     16(1)       15(1)           0.562139D-07    0.130984D-08    0.387363D-03
+     16(1)       15(1)           0.562139D-07    0.130987D-08    0.387363D-03
      17(1)        1(1)          -0.584323D-03   -0.717037D-03   -0.494456D-07
      17(1)        2(1)          -0.448106D-03   -0.434719D-03    0.674483D-07
-     17(1)        3(1)           0.111542D-06    0.761218D-08    0.299800D-03
+     17(1)        3(1)           0.111542D-06    0.761216D-08    0.299800D-03
      17(1)        4(1)          -0.154553D-03   -0.243965D-03    0.659801D-07
      17(1)        5(1)           0.303893D-02   -0.190934D-02    0.219812D-07
      17(1)        6(1)           0.148411D-06    0.566709D-07    0.961439D-03
@@ -7370,13 +7370,13 @@ SCF-CI
      17(1)       11(1)           0.890003D-07   -0.865515D-07    0.846585D-03
      17(1)       12(1)          -0.166672D-01    0.547682D-02   -0.262396D-06
      17(1)       13(1)          -0.247326D-02    0.122671D-02   -0.463323D-07
-     17(1)       14(1)           0.182280D-06   -0.848246D-09    0.157868D-03
+     17(1)       14(1)           0.182280D-06   -0.848261D-09    0.157868D-03
      17(1)       15(1)          -0.162903D-02    0.171040D-02   -0.387893D-07
      17(1)       16(1)          -0.137043D-06    0.198926D-07    0.538415D-04
-     18(1)        1(1)          -0.342134D-07   -0.191704D-06   -0.228039D-02
+     18(1)        1(1)          -0.342133D-07   -0.191704D-06   -0.228039D-02
      18(1)        2(1)           0.842664D-06    0.185365D-06    0.932398D-03
      18(1)        3(1)           0.763653D-03   -0.296874D-02   -0.349450D-07
-     18(1)        4(1)          -0.506232D-07   -0.749828D-07    0.640136D-04
+     18(1)        4(1)          -0.506232D-07   -0.749827D-07    0.640136D-04
      18(1)        5(1)           0.423005D-07   -0.178940D-07    0.230576D-03
      18(1)        6(1)          -0.205666D-02    0.620385D-02   -0.447960D-06
      18(1)        7(1)          -0.388486D-06    0.602003D-07    0.793016D-02
@@ -7384,7 +7384,7 @@ SCF-CI
      18(1)        9(1)          -0.153892D-06    0.357196D-06   -0.352014D-03
      18(1)       10(1)          -0.882042D-07   -0.236423D-06   -0.881975D-03
      18(1)       11(1)          -0.237018D-02    0.626116D-02   -0.437525D-06
-     18(1)       12(1)          -0.308007D-06    0.456389D-09    0.276711D-02
+     18(1)       12(1)          -0.308007D-06    0.456367D-09    0.276711D-02
      18(1)       13(1)           0.474324D-06    0.298598D-06    0.468610D-02
      18(1)       14(1)          -0.169030D-03   -0.224811D-02   -0.146868D-06
      18(1)       15(1)          -0.887973D-07   -0.459789D-07    0.250590D-02
@@ -7398,7 +7398,7 @@ SCF-CI
    Mode(n)                            X               Y               Z
       1(1)                      -0.229326D-01    0.174431D-01   -0.633732D-04
       2(1)                       0.166605D-01    0.392060D-02   -0.542230D-06
-      3(1)                       0.459282D-06   -0.335788D-04    0.190047D-02
+      3(1)                       0.459268D-06   -0.335788D-04    0.190047D-02
       4(1)                      -0.185996D-01    0.461004D-02   -0.691970D-05
       5(1)                      -0.449724D-01    0.719114D-01    0.188680D-03
       6(1)                      -0.367502D-04   -0.735169D-04   -0.198907D-01
@@ -7411,7 +7411,7 @@ SCF-CI
      13(1)                      -0.154069D-01   -0.149415D-01   -0.295341D-03
      14(1)                      -0.191885D-03    0.344608D-03   -0.791078D-01
      15(1)                      -0.491074D-01   -0.316660D-01   -0.251558D-04
-     16(1)                       0.230833D-04   -0.574402D-04   -0.737249D-01
+     16(1)                       0.230833D-04   -0.574401D-04   -0.737249D-01
      17(1)                       0.542835D-02    0.317565D-01    0.692703D-04
      18(1)                      -0.126745D-03   -0.163963D-03   -0.139241D-01
 
@@ -7445,22 +7445,22 @@ SCF-CI
       3(1)        2(1)          -0.430804D-08    0.180970D-06    0.778081D-03
       4(1)        1(1)           0.249201D-03    0.474499D-03   -0.105603D-07
       4(1)        2(1)           0.138981D-02   -0.790978D-03    0.654695D-07
-      4(1)        3(1)          -0.276547D-07    0.518655D-07   -0.363598D-03
+      4(1)        3(1)          -0.276546D-07    0.518655D-07   -0.363598D-03
       5(1)        1(1)          -0.485595D-04   -0.682824D-03   -0.324934D-07
-      5(1)        2(1)           0.425739D-03   -0.484699D-03   -0.631356D-08
+      5(1)        2(1)           0.425739D-03   -0.484699D-03   -0.631355D-08
       5(1)        3(1)          -0.334645D-07   -0.394365D-07   -0.672666D-03
       5(1)        4(1)           0.961091D-04    0.507328D-03   -0.114807D-07
-      6(1)        1(1)           0.647811D-07   -0.129815D-06   -0.400581D-03
+      6(1)        1(1)           0.647811D-07   -0.129814D-06   -0.400581D-03
       6(1)        2(1)           0.606689D-07    0.301917D-06    0.111406D-02
       6(1)        3(1)          -0.548654D-04    0.264795D-02   -0.594210D-07
       6(1)        4(1)           0.106361D-06    0.427381D-07   -0.193624D-02
       6(1)        5(1)          -0.163083D-07    0.103415D-06    0.301903D-03
       7(1)        1(1)           0.214075D-04   -0.884749D-05    0.457655D-08
       7(1)        2(1)          -0.732537D-03    0.218271D-02   -0.212495D-06
-      7(1)        3(1)          -0.214569D-07   -0.272186D-06   -0.189679D-02
+      7(1)        3(1)          -0.214568D-07   -0.272186D-06   -0.189679D-02
       7(1)        4(1)           0.255920D-02    0.497241D-04    0.921629D-07
-      7(1)        5(1)           0.446628D-03    0.885529D-03    0.198946D-07
-      7(1)        6(1)           0.180865D-06    0.150662D-06   -0.908301D-03
+      7(1)        5(1)           0.446628D-03    0.885529D-03    0.198947D-07
+      7(1)        6(1)           0.180865D-06    0.150663D-06   -0.908301D-03
       8(1)        1(1)          -0.108146D-03    0.180415D-02    0.212418D-07
       8(1)        2(1)          -0.235107D-02   -0.295655D-02    0.655675D-07
       8(1)        3(1)           0.902666D-07    0.116174D-06   -0.241517D-02
@@ -7485,8 +7485,8 @@ SCF-CI
      10(1)        7(1)          -0.128645D-02   -0.325011D-03    0.111993D-06
      10(1)        8(1)          -0.511890D-02   -0.957834D-03   -0.524927D-07
      10(1)        9(1)           0.105149D-01    0.956960D-03    0.780363D-07
-     11(1)        1(1)           0.384459D-07   -0.506597D-07   -0.751607D-03
-     11(1)        2(1)           0.498910D-08   -0.674475D-07    0.212372D-03
+     11(1)        1(1)           0.384460D-07   -0.506597D-07   -0.751607D-03
+     11(1)        2(1)           0.498912D-08   -0.674475D-07    0.212372D-03
      11(1)        3(1)           0.827511D-03    0.660681D-03   -0.170229D-06
      11(1)        4(1)          -0.689240D-07    0.104725D-06    0.127011D-02
      11(1)        5(1)          -0.147319D-06   -0.151575D-07   -0.128597D-02
@@ -7494,7 +7494,7 @@ SCF-CI
      11(1)        7(1)           0.612553D-08   -0.190096D-06   -0.129132D-02
      11(1)        8(1)           0.398390D-07    0.917622D-07   -0.189950D-02
      11(1)        9(1)           0.152627D-06   -0.923237D-07   -0.310996D-02
-     11(1)       10(1)          -0.296848D-07    0.141349D-06    0.709725D-03
+     11(1)       10(1)          -0.296849D-07    0.141349D-06    0.709725D-03
      12(1)        1(1)           0.188460D-02    0.548520D-03   -0.642719D-07
      12(1)        2(1)           0.166639D-02    0.191969D-02   -0.629682D-07
      12(1)        3(1)           0.391349D-07   -0.674451D-07    0.429812D-03
@@ -7514,20 +7514,20 @@ SCF-CI
      13(1)        6(1)           0.626406D-07    0.659757D-07    0.771112D-05
      13(1)        7(1)          -0.180685D-04    0.970162D-03   -0.415890D-07
      13(1)        8(1)           0.105756D-02   -0.841967D-03    0.407479D-07
-     13(1)        9(1)           0.321096D-02   -0.322262D-03    0.109792D-08
-     13(1)       10(1)           0.920390D-02   -0.432698D-04    0.763185D-08
+     13(1)        9(1)           0.321096D-02   -0.322262D-03    0.109791D-08
+     13(1)       10(1)           0.920390D-02   -0.432698D-04    0.763184D-08
      13(1)       11(1)          -0.266838D-07    0.334194D-07    0.845822D-03
-     13(1)       12(1)           0.240279D-02   -0.293149D-03    0.121645D-07
+     13(1)       12(1)           0.240279D-02   -0.293149D-03    0.121644D-07
      14(1)        1(1)           0.403254D-07   -0.141942D-07   -0.263516D-02
      14(1)        2(1)           0.178265D-07    0.207545D-07    0.413890D-03
      14(1)        3(1)          -0.166568D-03    0.868143D-03   -0.895783D-07
      14(1)        4(1)          -0.710995D-07    0.829367D-07    0.406420D-03
-     14(1)        5(1)          -0.402126D-07   -0.888449D-08    0.125960D-02
+     14(1)        5(1)          -0.402126D-07   -0.888450D-08    0.125960D-02
      14(1)        6(1)          -0.802201D-04    0.836352D-03   -0.948698D-07
-     14(1)        7(1)          -0.468621D-08   -0.144655D-06   -0.272606D-03
+     14(1)        7(1)          -0.468622D-08   -0.144655D-06   -0.272606D-03
      14(1)        8(1)           0.168012D-07    0.775373D-07   -0.924538D-03
-     14(1)        9(1)           0.424430D-08   -0.688789D-08   -0.161591D-02
-     14(1)       10(1)          -0.624827D-07    0.627277D-07   -0.173466D-02
+     14(1)        9(1)           0.424431D-08   -0.688789D-08   -0.161591D-02
+     14(1)       10(1)          -0.624828D-07    0.627277D-07   -0.173466D-02
      14(1)       11(1)          -0.148380D-02   -0.147034D-02    0.199450D-07
      14(1)       12(1)          -0.294798D-07   -0.125221D-06   -0.210150D-03
      14(1)       13(1)           0.185323D-07   -0.342781D-07    0.134485D-02
@@ -7538,31 +7538,31 @@ SCF-CI
      15(1)        5(1)           0.787812D-03    0.217354D-02    0.451060D-07
      15(1)        6(1)           0.115579D-07    0.869911D-07    0.358353D-03
      15(1)        7(1)          -0.398784D-03   -0.496017D-03   -0.141629D-08
-     15(1)        8(1)          -0.308774D-02   -0.187495D-02    0.662866D-07
+     15(1)        8(1)          -0.308774D-02   -0.187495D-02    0.662865D-07
      15(1)        9(1)           0.170150D-03    0.883115D-02   -0.711156D-07
      15(1)       10(1)           0.902294D-02   -0.509639D-02   -0.695633D-07
-     15(1)       11(1)          -0.243084D-07    0.615959D-07   -0.199804D-03
+     15(1)       11(1)          -0.243084D-07    0.615960D-07   -0.199804D-03
      15(1)       12(1)           0.228419D-02   -0.115911D-02   -0.182433D-07
-     15(1)       13(1)          -0.198951D-01    0.104146D-01   -0.274138D-06
-     15(1)       14(1)           0.382579D-07    0.990762D-07    0.724120D-03
-     16(1)        1(1)           0.153949D-07    0.686434D-07   -0.114976D-02
-     16(1)        2(1)          -0.796769D-07   -0.170504D-07   -0.338965D-03
+     15(1)       13(1)          -0.198951D-01    0.104146D-01   -0.274139D-06
+     15(1)       14(1)           0.382579D-07    0.990761D-07    0.724120D-03
+     16(1)        1(1)           0.153950D-07    0.686434D-07   -0.114976D-02
+     16(1)        2(1)          -0.796769D-07   -0.170505D-07   -0.338965D-03
      16(1)        3(1)          -0.224876D-03   -0.940555D-03    0.137234D-06
      16(1)        4(1)           0.975785D-07   -0.110947D-06   -0.586681D-03
      16(1)        5(1)          -0.396931D-07    0.628192D-08    0.117650D-02
      16(1)        6(1)           0.297385D-03   -0.125338D-02    0.802706D-07
      16(1)        7(1)           0.165706D-07    0.688356D-07    0.142107D-03
      16(1)        8(1)           0.330893D-07   -0.709042D-07    0.258141D-02
-     16(1)        9(1)          -0.496889D-07   -0.780987D-08    0.301846D-03
+     16(1)        9(1)          -0.496888D-07   -0.780987D-08    0.301846D-03
      16(1)       10(1)          -0.507109D-07   -0.202152D-07   -0.135212D-02
      16(1)       11(1)          -0.136847D-02    0.256269D-02    0.273040D-07
      16(1)       12(1)           0.698921D-07    0.223791D-06   -0.549894D-02
      16(1)       13(1)          -0.108447D-06    0.236368D-07    0.138922D-02
      16(1)       14(1)          -0.411697D-02   -0.137532D-01   -0.687356D-05
-     16(1)       15(1)           0.562139D-07    0.130984D-08    0.387363D-03
+     16(1)       15(1)           0.562139D-07    0.130987D-08    0.387363D-03
      17(1)        1(1)          -0.584323D-03   -0.717037D-03   -0.494456D-07
      17(1)        2(1)          -0.448106D-03   -0.434719D-03    0.674483D-07
-     17(1)        3(1)           0.111542D-06    0.761218D-08    0.299800D-03
+     17(1)        3(1)           0.111542D-06    0.761216D-08    0.299800D-03
      17(1)        4(1)          -0.154553D-03   -0.243965D-03    0.659801D-07
      17(1)        5(1)           0.303893D-02   -0.190934D-02    0.219812D-07
      17(1)        6(1)           0.148411D-06    0.566709D-07    0.961439D-03
@@ -7573,13 +7573,13 @@ SCF-CI
      17(1)       11(1)           0.118997D-04    0.235298D-04    0.744289D-02
      17(1)       12(1)          -0.166672D-01    0.547682D-02   -0.262396D-06
      17(1)       13(1)          -0.247326D-02    0.122671D-02   -0.463323D-07
-     17(1)       14(1)           0.182280D-06   -0.848246D-09    0.157868D-03
+     17(1)       14(1)           0.182280D-06   -0.848261D-09    0.157868D-03
      17(1)       15(1)          -0.162903D-02    0.171040D-02   -0.387893D-07
      17(1)       16(1)          -0.137043D-06    0.198926D-07    0.538415D-04
-     18(1)        1(1)          -0.342134D-07   -0.191704D-06   -0.228039D-02
+     18(1)        1(1)          -0.342133D-07   -0.191704D-06   -0.228039D-02
      18(1)        2(1)           0.842664D-06    0.185365D-06    0.932398D-03
      18(1)        3(1)           0.763653D-03   -0.296874D-02   -0.349450D-07
-     18(1)        4(1)           0.741929D-07   -0.934156D-05    0.590709D-03
+     18(1)        4(1)           0.741893D-07   -0.934156D-05    0.590709D-03
      18(1)        5(1)           0.423005D-07   -0.178940D-07    0.230576D-03
      18(1)        6(1)          -0.205666D-02    0.620385D-02   -0.447960D-06
      18(1)        7(1)          -0.388486D-06    0.602003D-07    0.793016D-02
@@ -7605,22 +7605,22 @@ SCF-CI
  -----------------
    Mode(n)                  E(harm)   E(anharm)        I(harm)       I(anharm)
       1(1)                  3764.146   3579.741     81.97167238     48.12564081
-      2(1)                  3189.795   3071.032     11.27750181     14.56888122
+      2(1)                  3189.795   3071.032     11.27750181     14.56888131
       3(1)                  3145.640   2964.701      0.00609439      0.17345819
-      4(1)                  3080.437   2927.700      2.20847832     17.40945182
-      5(1)                  1843.664   1815.936    229.74263361    211.55140338
-      6(1)                  1466.397   1422.102     17.33822175      9.11160668
-      7(1)                  1460.546   1428.400     22.07090053     19.00625696
-      8(1)                  1412.290   1379.817     59.32327704     17.38922277
-      9(1)                  1339.694   1322.474      9.52485718      4.18857189
-     10(1)                  1215.980   1176.302    135.36100331     49.43282493
+      4(1)                  3080.437   2927.700      2.20847832     17.40945176
+      5(1)                  1843.664   1815.936    229.74263361    211.55140337
+      6(1)                  1466.397   1422.102     17.33822175      9.11160667
+      7(1)                  1460.546   1428.400     22.07090053     19.00625698
+      8(1)                  1412.290   1379.817     59.32327704     17.38922279
+      9(1)                  1339.694   1322.474      9.52485718      4.18857190
+     10(1)                  1215.980   1176.302    135.36100331     49.43282492
      11(1)                  1064.083   1043.384      6.74361159      6.66297180
-     12(1)                  1000.040    985.333     26.96221563     11.32515065
-     13(1)                   875.385    859.502      4.71759665      6.41252791
-     14(1)                   662.949    641.435     83.23795567     65.00680818
+     12(1)                  1000.040    985.333     26.96221563     11.32515066
+     13(1)                   875.385    859.502      4.71759665      6.41252792
+     14(1)                   662.949    641.435     83.23795567     65.00680819
      15(1)                   588.340    580.268     30.31782062     32.08370454
      16(1)                   543.772    531.076     35.96212799     46.74584199
-     17(1)                   422.186    423.401      7.14013735      7.11680835
+     17(1)                   422.186    423.401      7.14013735      7.11680836
      18(1)                    72.882     76.210      1.01657474      0.23933076
 
  Overtones
@@ -7639,7 +7639,7 @@ SCF-CI
      11(2)                  2128.166   2088.346                      0.15287260
      12(2)                  2000.080   1968.900                      0.20206323
      13(2)                  1750.770   1713.135                      5.25753900
-     14(2)                  1325.899   1259.546                     19.66054110
+     14(2)                  1325.899   1259.546                     19.66054108
      15(2)                  1176.680   1160.853                      0.04146406
      16(2)                  1087.543   1060.269                      0.49091273
      17(2)                   844.372    847.864                      0.19478377
@@ -7766,7 +7766,7 @@ SCF-CI
      16(1)       11(1)      1607.855   1577.264                      0.21558062
      16(1)       12(1)      1543.811   1520.020                      0.74432675
      16(1)       13(1)      1419.157   1388.995                      0.04341076
-     16(1)       14(1)      1206.721   1161.580                      3.87689925
+     16(1)       14(1)      1206.721   1161.580                      3.87689924
      16(1)       15(1)      1132.112   1109.858                      0.00269687
      17(1)        1(1)      4186.332   4002.424                      0.05545464
      17(1)        2(1)      3611.981   3494.639                      0.02205860
@@ -7809,23 +7809,23 @@ SCF-CI
  -----------------
    Mode(n)                  E(harm)   E(anharm)       DS(harm)      DS(anharm)
       1(1)                  3764.146   3579.741     86.87699292     53.63302203
-      2(1)                  3189.795   3071.032     14.10449597     18.92558503
+      2(1)                  3189.795   3071.032     14.10449597     18.92558516
       3(1)                  3145.640   2964.701      0.00772910      0.23341099
-      4(1)                  3080.437   2927.700      2.86014579     23.72280038
-      5(1)                  1843.664   1815.936    497.12685967    464.75360052
-      6(1)                  1466.397   1422.102     47.16940721     25.56064190
-      7(1)                  1460.546   1428.400     60.28541355     53.08284486
-      8(1)                  1412.290   1379.817    167.57482300     50.27662932
-      9(1)                  1339.694   1322.474     28.36351847     12.63532078
-     10(1)                  1215.980   1176.302    444.09377486    167.65015472
+      4(1)                  3080.437   2927.700      2.86014579     23.72280029
+      5(1)                  1843.664   1815.936    497.12685967    464.75360050
+      6(1)                  1466.397   1422.102     47.16940721     25.56064189
+      7(1)                  1460.546   1428.400     60.28541355     53.08284491
+      8(1)                  1412.290   1379.817    167.57482300     50.27662940
+      9(1)                  1339.694   1322.474     28.36351847     12.63532081
+     10(1)                  1215.980   1176.302    444.09377486    167.65015469
      11(1)                  1064.083   1043.384     25.28275263     25.47599929
-     12(1)                  1000.040    985.333    107.55872568     45.85308711
-     13(1)                   875.385    859.502     21.49953372     29.76390490
-     14(1)                   662.949    641.435    500.89696215    404.30891873
-     15(1)                   588.340    580.268    205.57813289    220.57845815
-     16(1)                   543.772    531.076    263.83735194    351.15052713
-     17(1)                   422.186    423.401     67.46990150     67.05650328
-     18(1)                    72.882     76.210     55.64506864     12.52838179
+     12(1)                  1000.040    985.333    107.55872568     45.85308715
+     13(1)                   875.385    859.502     21.49953372     29.76390491
+     14(1)                   662.949    641.435    500.89696215    404.30891877
+     15(1)                   588.340    580.268    205.57813289    220.57845818
+     16(1)                   543.772    531.076    263.83735194    351.15052712
+     17(1)                   422.186    423.401     67.46990150     67.05650331
+     18(1)                    72.882     76.210     55.64506864     12.52838174
 
  Overtones
  ---------
@@ -7843,7 +7843,7 @@ SCF-CI
      11(2)                  2128.166   2088.346                      0.29203485
      12(2)                  2000.080   1968.900                      0.40942189
      13(2)                  1750.770   1713.135                     12.24329653
-     14(2)                  1325.899   1259.546                     62.27144804
+     14(2)                  1325.899   1259.546                     62.27144798
      15(2)                  1176.680   1160.853                      0.14249573
      16(2)                  1087.543   1060.269                      1.84712164
      17(2)                   844.372    847.864                      0.91650275
@@ -7970,7 +7970,7 @@ SCF-CI
      16(1)       11(1)      1607.855   1577.264                      0.54527127
      16(1)       12(1)      1543.811   1520.020                      1.95353803
      16(1)       13(1)      1419.157   1388.995                      0.12468207
-     16(1)       14(1)      1206.721   1161.580                     13.31504852
+     16(1)       14(1)      1206.721   1161.580                     13.31504851
      16(1)       15(1)      1132.112   1109.858                      0.00969393
      17(1)        1(1)      4186.332   4002.424                      0.05527416
      17(1)        2(1)      3611.981   3494.639                      0.02518158
@@ -8002,7 +8002,7 @@ SCF-CI
      18(1)       12(1)      1072.922   1069.643                      4.03529693
      18(1)       13(1)       948.267    935.383                      1.41869205
      18(1)       14(1)       735.831    729.583                      0.32835882
-     18(1)       15(1)       661.222    654.618                     32.00138663
+     18(1)       15(1)       661.222    654.618                     32.00138662
      18(1)       16(1)       616.654    605.703                     24.26950415
      18(1)       17(1)       495.068    502.887                      5.21710236
 
@@ -9911,10 +9911,10 @@ SCF-CI
  The archive entry for this job was punched.
 
 
- WHAT, THEN, IS TIME?  IF NO ONE ASKS ME, I KNOW WHAT IT IS.
- IF I WISH TO EXPLAIN WHAT IT IS TO HIM WHO ASKS ME, I DO NOT KNOW.
-                                   -- ST. AUGUSTINE (FIFTH CENTURY)
- Job cpu time:       0 days  0 hours  0 minutes 17.4 seconds.
- Elapsed time:       0 days  0 hours  3 minutes 28.2 seconds.
+ HE THAT IS UNAWARE OF HIS IGNORANCE WILL BE MISLED BY HIS KNOWLEDGE.
+
+                                        -- WHATLEY
+ Job cpu time:       0 days  0 hours  0 minutes 17.2 seconds.
+ Elapsed time:       0 days  0 hours  3 minutes 19.2 seconds.
  File lengths (MBytes):  RWF=     44 Int=      0 D2E=      0 Chk=     39 Scr=      1
- Normal termination of Gaussian 16 at Wed Oct 15 10:11:16 2025.
+ Normal termination of Gaussian 16 at Wed Oct 15 10:22:53 2025.
