@@ -4,7 +4,6 @@
 # This program is distributed under the MIT License (see MIT.md)
 ###########################################################################################
 
-from functools import partial
 import logging
 from contextlib import contextmanager
 from typing import Dict

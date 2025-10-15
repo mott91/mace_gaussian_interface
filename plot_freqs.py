@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
-import os
 
 def read_freq_file(filename):
     frequencies = []

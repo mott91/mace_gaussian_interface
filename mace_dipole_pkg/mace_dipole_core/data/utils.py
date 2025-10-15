@@ -256,7 +256,7 @@ def load_from_xyz(
         for atoms in atoms_list:
             try:
                 atoms.info["REF_stress"] = atoms.get_stress()
-            except Exception as e:  # pylint: disable=W0703
+            except Exception:  # pylint: disable=W0703
                 atoms.info["REF_stress"] = None
     if not isinstance(atoms_list, list):
         atoms_list = [atoms_list]

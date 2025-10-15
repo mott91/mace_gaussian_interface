@@ -4,7 +4,7 @@
 # This program is distributed under the MIT License (see MIT.md)
 ###########################################################################################
 
-import argparse, ast
+import argparse
 
 import ase.data
 import ase.io

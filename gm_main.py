@@ -12,11 +12,10 @@ from contextlib import contextmanager
 import sys
 import subprocess
 from mace_calculators import MACEDipoleCalculator
-from ase.io import read, write
-from ase.units import Bohr
-from ase.optimize import BFGS, LBFGS
+from ase.io import read
+from ase.optimize import LBFGS
 from abc import ABC, abstractmethod
-from typing import Tuple, Optional, Dict, Any
+from typing import Tuple, Optional, Dict
 import logging
 
 # Set up logging
@@ -682,7 +681,7 @@ if __name__ == '__main__':
         sys.exit(0)
     
     # Configuration options
-    DIPOLE_METHOD = 'mace_ml'  # Options: 'auto', 'mace_ml', 'espaloma', 'xtb', 'geometry'
+    DIPOLE_METHOD = 'auto'  # Options: 'auto', 'mace_ml', 'espaloma', 'xtb', 'geometry'
     CALCULATE_DIPOLE_DERIVATIVES = True
     
     # Note: espaloma is recommended for organic molecules

@@ -23,7 +23,6 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.optim.swa_utils import SWALR, AveragedModel
 from torch_ema import ExponentialMovingAverage
 
-import mace_dipole_core
 from mace_dipole_core import data, modules, tools
 from mace_dipole_core.calculators.foundations_models import mace_mp, mace_off
 from mace_dipole_core.tools import torch_geometric
@@ -783,7 +782,7 @@ def run(args: argparse.Namespace) -> None:
             )
         try:
             drop_last = test_set.drop_last
-        except AttributeError as e:  # pylint: disable=W0612
+        except AttributeError:  # pylint: disable=W0612
             drop_last = False
         test_loader = torch_geometric.dataloader.DataLoader(
             test_set,
@@ -850,7 +849,7 @@ def run(args: argparse.Namespace) -> None:
                         path_complied,
                         _extra_files=extra_files,
                     )
-                except Exception as e:  # pylint: disable=W0703
+                except Exception:  # pylint: disable=W0703
                     pass
             else:
                 torch.save(model, Path(args.model_dir) / (args.name + ".model"))
@@ -865,7 +864,7 @@ def run(args: argparse.Namespace) -> None:
                         path_complied,
                         _extra_files=extra_files,
                     )
-                except Exception as e:  # pylint: disable=W0703
+                except Exception:  # pylint: disable=W0703
                     pass
 
         if args.distributed:

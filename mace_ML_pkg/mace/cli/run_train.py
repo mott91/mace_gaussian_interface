@@ -710,7 +710,7 @@ def run(args: argparse.Namespace) -> None:
                 )
             try:
                 drop_last = test_set.drop_last
-            except AttributeError as e:  # pylint: disable=W0612
+            except AttributeError:  # pylint: disable=W0612
                 drop_last = False
             test_loader = torch_geometric.dataloader.DataLoader(
                 test_set,
@@ -802,7 +802,7 @@ def run(args: argparse.Namespace) -> None:
                         path_complied,
                         _extra_files=extra_files,
                     )
-                except Exception as e:  # pylint: disable=W0703
+                except Exception:  # pylint: disable=W0703
                     pass
             else:
                 torch.save(model_to_save, Path(args.model_dir) / (args.name + ".model"))
@@ -817,7 +817,7 @@ def run(args: argparse.Namespace) -> None:
                         path_complied,
                         _extra_files=extra_files,
                     )
-                except Exception as e:  # pylint: disable=W0703
+                except Exception:  # pylint: disable=W0703
                     pass
 
         if args.distributed:

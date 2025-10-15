@@ -1,0 +1,830 @@
+=== RUFF ===
+F401 [*] `ase.io.write` imported but unused
+  --> gm_main.py:15:26
+   |
+13 | import subprocess
+14 | from mace_calculators import MACEDipoleCalculator
+15 | from ase.io import read, write
+   |                          ^^^^^
+16 | from ase.units import Bohr
+17 | from ase.optimize import BFGS, LBFGS
+   |
+help: Remove unused import: `ase.io.write`
+
+F401 [*] `ase.units.Bohr` imported but unused
+  --> gm_main.py:16:23
+   |
+14 | from mace_calculators import MACEDipoleCalculator
+15 | from ase.io import read, write
+16 | from ase.units import Bohr
+   |                       ^^^^
+17 | from ase.optimize import BFGS, LBFGS
+18 | from abc import ABC, abstractmethod
+   |
+help: Remove unused import: `ase.units.Bohr`
+
+F401 [*] `ase.optimize.BFGS` imported but unused
+  --> gm_main.py:17:26
+   |
+15 | from ase.io import read, write
+16 | from ase.units import Bohr
+17 | from ase.optimize import BFGS, LBFGS
+   |                          ^^^^
+18 | from abc import ABC, abstractmethod
+19 | from typing import Tuple, Optional, Dict, Any
+   |
+help: Remove unused import: `ase.optimize.BFGS`
+
+F401 [*] `typing.Any` imported but unused
+  --> gm_main.py:19:43
+   |
+17 | from ase.optimize import BFGS, LBFGS
+18 | from abc import ABC, abstractmethod
+19 | from typing import Tuple, Optional, Dict, Any
+   |                                           ^^^
+20 | import logging
+   |
+help: Remove unused import: `typing.Any`
+
+E722 Do not use bare `except`
+  --> gm_main.py:83:13
+   |
+81 |                     else:
+82 |                         print(f"    Location: {espaloma_charge.__file__}")
+83 |             except:
+   |             ^^^^^^
+84 |                 pass
+   |
+
+F401 `espaloma_charge` imported but unused; consider using `importlib.util.find_spec` to test for availability
+   --> gm_main.py:101:16
+    |
+ 99 |     try:
+100 |         print("1. Testing espaloma_charge import...")
+101 |         import espaloma_charge
+    |                ^^^^^^^^^^^^^^^
+102 |         print("   \u2713 espaloma_charge imported successfully")
+    |
+help: Remove unused import: `espaloma_charge`
+
+F841 Local variable `test_charges` is assigned to but never used
+   --> gm_main.py:235:13
+    |
+233 |             # Test basic functionality
+234 |             test_mol = Chem.MolFromSmiles("N")
+235 |             test_charges = espaloma_charge.charge(test_mol)
+    |             ^^^^^^^^^^^^
+236 |             
+237 |             self.available = True
+    |
+help: Remove assignment to unused variable `test_charges`
+
+F401 `xtb.ase.calculator.XTB` imported but unused; consider using `importlib.util.find_spec` to test for availability
+   --> gm_main.py:296:44
+    |
+294 |     def _check_availability(self):
+295 |         try:
+296 |             from xtb.ase.calculator import XTB
+    |                                            ^^^
+297 |             self.available = True
+298 |             logger.info("\u2713 xTB dipole calculator available")
+    |
+help: Remove unused import: `xtb.ase.calculator.XTB`
+
+F841 Local variable `f` is assigned to but never used
+   --> gm_main.py:454:41
+    |
+452 |             with ctx.socket(zmq.REP) as socket:
+453 |                 addr = os.path.abspath(file)
+454 |                 with open(addr, "x") as f:
+    |                                         ^
+455 |                     socket.bind("ipc://%s" % addr)
+456 |                     yield socket
+    |
+help: Remove assignment to unused variable `f`
+
+E711 Comparison to `None` should be `cond is not None`
+   --> gm_main.py:469:29
+    |
+467 |             return False
+468 |         # poll the running g16 process, if process has exited poll returns return code (int), otherwise None
+469 |         elif proc.poll() != None:
+    |                             ^^^^
+470 |             # g16 process exited, finished
+471 |             return True
+    |
+help: Replace with `cond is not None`
+
+E713 [*] Test for membership should be `not in`
+   --> log_analyzer.py:225:69
+    |
+223 |         for line in lines:
+224 |             parts = line.split()
+225 |             if len(parts) >= 4 and not line.startswith('-') and not 'Mode' in line:
+    |                                                                     ^^^^^^^^^^^^^^
+226 |                 try:
+227 |                     freq = float(parts[2].replace('i', ''))
+    |
+help: Convert to `not in`
+
+F401 `.__version__.__version__` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+ --> mace_ML_pkg/mace/__init__.py:1:26
+  |
+1 | from .__version__ import __version__
+  |                          ^^^^^^^^^^^
+  |
+help: Use an explicit re-export: `__version__ as __version__`
+
+F841 [*] Local variable `e` is assigned to but never used
+   --> mace_ML_pkg/mace/cli/run_train.py:713:38
+    |
+711 |             try:
+712 |                 drop_last = test_set.drop_last
+713 |             except AttributeError as e:  # pylint: disable=W0612
+    |                                      ^
+714 |                 drop_last = False
+715 |             test_loader = torch_geometric.dataloader.DataLoader(
+    |
+help: Remove assignment to unused variable `e`
+
+F841 [*] Local variable `e` is assigned to but never used
+   --> mace_ML_pkg/mace/cli/run_train.py:805:37
+    |
+803 |                         _extra_files=extra_files,
+804 |                     )
+805 |                 except Exception as e:  # pylint: disable=W0703
+    |                                     ^
+806 |                     pass
+807 |             else:
+    |
+help: Remove assignment to unused variable `e`
+
+F841 [*] Local variable `e` is assigned to but never used
+   --> mace_ML_pkg/mace/cli/run_train.py:820:37
+    |
+818 |                         _extra_files=extra_files,
+819 |                     )
+820 |                 except Exception as e:  # pylint: disable=W0703
+    |                                     ^
+821 |                     pass
+    |
+help: Remove assignment to unused variable `e`
+
+F841 [*] Local variable `e` is assigned to but never used
+   --> mace_ML_pkg/mace/data/utils.py:258:33
+    |
+256 |             try:
+257 |                 atoms.info["REF_stress"] = atoms.get_stress()
+258 |             except Exception as e:  # pylint: disable=W0703
+    |                                 ^
+259 |                 atoms.info["REF_stress"] = None
+260 |     if not isinstance(atoms_list, list):
+    |
+help: Remove assignment to unused variable `e`
+
+E741 Ambiguous variable name: `l`
+  --> mace_ML_pkg/mace/modules/wrapper_ops.py:52:17
+   |
+50 |         @classmethod
+51 |         def iterator(cls) -> Iterator["O3_e3nn"]:
+52 |             for l in itertools.count(0):
+   |                 ^
+53 |                 yield O3_e3nn(l=l, p=1 * (-1) ** l)
+54 |                 yield O3_e3nn(l=l, p=-1 * (-1) ** l)
+   |
+
+F401 [*] `typing.Union` imported but unused
+ --> mace_ML_pkg/mace/tools/torch_geometric/dataloader.py:2:36
+  |
+1 | from collections.abc import Mapping, Sequence
+2 | from typing import List, Optional, Union
+  |                                    ^^^^^
+3 |
+4 | import torch.utils.data
+  |
+help: Remove unused import: `typing.Union`
+
+F401 `cuequivariance` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> mace_ML_pkg/tests/test_calculator.py:20:30
+   |
+19 | try:
+20 |     import cuequivariance as cue  # pylint: disable=unused-import
+   |                              ^^^
+21 |
+22 |     CUET_AVAILABLE = True
+   |
+help: Remove unused import: `cuequivariance`
+
+F401 `cuequivariance` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> mace_ML_pkg/tests/test_cueq.py:15:30
+   |
+14 | try:
+15 |     import cuequivariance as cue  # pylint: disable=unused-import
+   |                              ^^^
+16 |
+17 |     CUET_AVAILABLE = True
+   |
+help: Remove unused import: `cuequivariance`
+
+F401 `cuequivariance` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> mace_ML_pkg/tests/test_run_train.py:16:30
+   |
+15 | try:
+16 |     import cuequivariance as cue  # pylint: disable=unused-import
+   |                              ^^^
+17 |
+18 |     CUET_AVAILABLE = True
+   |
+help: Remove unused import: `cuequivariance`
+
+F401 [*] `ase.calculators.calculator.Calculator` imported but unused
+ --> mace_calculators.py:6:40
+  |
+4 | import numpy as np
+5 | import torch
+6 | from ase.calculators.calculator import Calculator
+  |                                        ^^^^^^^^^^
+7 | import logging
+  |
+help: Remove unused import: `ase.calculators.calculator.Calculator`
+
+F541 [*] f-string without any placeholders
+   --> mace_calculators.py:100:26
+    |
+ 98 |         except Exception as e:
+ 99 |             logger.error(f"Error in MACE dipole calculation: {e}")
+100 |             logger.error(f"Full traceback:", exc_info=True)
+    |                          ^^^^^^^^^^^^^^^^^^
+101 |             raise
+    |
+help: Remove extraneous `f` prefix
+
+F401 `.__version__.__version__` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+ --> mace_dipole_pkg/mace_dipole_core/__init__.py:1:26
+  |
+1 | from .__version__ import __version__
+  |                          ^^^^^^^^^^^
+  |
+help: Use an explicit re-export: `__version__ as __version__`
+
+E401 [*] Multiple imports on one line
+ --> mace_dipole_pkg/mace_dipole_core/cli/eval_mu_alpha.py:7:1
+  |
+5 | ###########################################################################################
+6 |
+7 | import argparse, ast
+  | ^^^^^^^^^^^^^^^^^^^^
+8 |
+9 | import ase.data
+  |
+help: Split imports
+
+F401 [*] `ast` imported but unused
+ --> mace_dipole_pkg/mace_dipole_core/cli/eval_mu_alpha.py:7:18
+  |
+5 | ###########################################################################################
+6 |
+7 | import argparse, ast
+  |                  ^^^
+8 |
+9 | import ase.data
+  |
+help: Remove unused import: `ast`
+
+F841 Local variable `mus_list` is assigned to but never used
+   --> mace_dipole_pkg/mace_dipole_core/cli/eval_mu_alpha.py:139:5
+    |
+138 |     # Collect data
+139 |     mus_list = []
+    |     ^^^^^^^^
+140 |     # contributions_list = []
+141 |     alphas_list = []
+    |
+help: Remove assignment to unused variable `mus_list`
+
+F841 Local variable `alphas_list` is assigned to but never used
+   --> mace_dipole_pkg/mace_dipole_core/cli/eval_mu_alpha.py:141:5
+    |
+139 |     mus_list = []
+140 |     # contributions_list = []
+141 |     alphas_list = []
+    |     ^^^^^^^^^^^
+142 |     alphas_sh_list = []
+143 |     dmu_dr_collection = []
+    |
+help: Remove assignment to unused variable `alphas_list`
+
+F841 Local variable `alphas_sh_list` is assigned to but never used
+   --> mace_dipole_pkg/mace_dipole_core/cli/eval_mu_alpha.py:142:5
+    |
+140 |     # contributions_list = []
+141 |     alphas_list = []
+142 |     alphas_sh_list = []
+    |     ^^^^^^^^^^^^^^
+143 |     dmu_dr_collection = []
+144 |     dalpha_dr_collection = []
+    |
+help: Remove assignment to unused variable `alphas_sh_list`
+
+F401 [*] `mace_dipole_core` imported but unused
+  --> mace_dipole_pkg/mace_dipole_core/cli/run_train.py:26:8
+   |
+24 | from torch_ema import ExponentialMovingAverage
+25 |
+26 | import mace_dipole_core
+   |        ^^^^^^^^^^^^^^^^
+27 | from mace_dipole_core import data, modules, tools
+28 | from mace_dipole_core.calculators.foundations_models import mace_mp, mace_off
+   |
+help: Remove unused import: `mace_dipole_core`
+
+F821 Undefined name `mace`
+  --> mace_dipole_pkg/mace_dipole_core/cli/run_train.py:84:39
+   |
+83 |     try:
+84 |         logging.info(f"MACE version: {mace.__version__}")
+   |                                       ^^^^
+85 |     except AttributeError:
+86 |         logging.info("Cannot find MACE version, please install MACE via pip")
+   |
+
+F841 [*] Local variable `e` is assigned to but never used
+   --> mace_dipole_pkg/mace_dipole_core/cli/run_train.py:786:34
+    |
+784 |         try:
+785 |             drop_last = test_set.drop_last
+786 |         except AttributeError as e:  # pylint: disable=W0612
+    |                                  ^
+787 |             drop_last = False
+788 |         test_loader = torch_geometric.dataloader.DataLoader(
+    |
+help: Remove assignment to unused variable `e`
+
+F841 [*] Local variable `e` is assigned to but never used
+   --> mace_dipole_pkg/mace_dipole_core/cli/run_train.py:853:37
+    |
+851 |                         _extra_files=extra_files,
+852 |                     )
+853 |                 except Exception as e:  # pylint: disable=W0703
+    |                                     ^
+854 |                     pass
+855 |             else:
+    |
+help: Remove assignment to unused variable `e`
+
+F841 [*] Local variable `e` is assigned to but never used
+   --> mace_dipole_pkg/mace_dipole_core/cli/run_train.py:868:37
+    |
+866 |                         _extra_files=extra_files,
+867 |                     )
+868 |                 except Exception as e:  # pylint: disable=W0703
+    |                                     ^
+869 |                     pass
+    |
+help: Remove assignment to unused variable `e`
+
+F841 Local variable `dipoles_weight` is assigned to but never used
+   --> mace_dipole_pkg/mace_dipole_core/data/utils.py:169:9
+    |
+167 |     if dipole is None:
+168 |         dipole = np.zeros(3)
+169 |         dipoles_weight = 0.0
+    |         ^^^^^^^^^^^^^^
+170 |     if polarizability is None:
+171 |         polarizability = np.zeros(9)
+    |
+help: Remove assignment to unused variable `dipoles_weight`
+
+F841 [*] Local variable `e` is assigned to but never used
+   --> mace_dipole_pkg/mace_dipole_core/data/utils.py:259:33
+    |
+257 |             try:
+258 |                 atoms.info["REF_stress"] = atoms.get_stress()
+259 |             except Exception as e:  # pylint: disable=W0703
+    |                                 ^
+260 |                 atoms.info["REF_stress"] = None
+261 |     if not isinstance(atoms_list, list):
+    |
+help: Remove assignment to unused variable `e`
+
+F401 [*] `scipy.constants.c` imported but unused
+  --> mace_dipole_pkg/mace_dipole_core/modules/utils.py:14:29
+   |
+12 | import torch.nn
+13 | import torch.utils.data
+14 | from scipy.constants import c, e
+   |                             ^
+15 |
+16 | from mace_dipole_core.tools import to_numpy
+   |
+help: Remove unused import
+
+F401 [*] `scipy.constants.e` imported but unused
+  --> mace_dipole_pkg/mace_dipole_core/modules/utils.py:14:32
+   |
+12 | import torch.nn
+13 | import torch.utils.data
+14 | from scipy.constants import c, e
+   |                                ^
+15 |
+16 | from mace_dipole_core.tools import to_numpy
+   |
+help: Remove unused import
+
+F401 [*] `mace_dipole_core.tools.compile.simplify_if_compile` imported but unused
+  --> mace_dipole_pkg/mace_dipole_core/modules/utils.py:17:44
+   |
+16 | from mace_dipole_core.tools import to_numpy
+17 | from mace_dipole_core.tools.compile import simplify_if_compile
+   |                                            ^^^^^^^^^^^^^^^^^^^
+18 | from mace_dipole_core.tools.scatter import scatter_sum
+19 | from mace_dipole_core.tools.torch_geometric.batch import Batch
+   |
+help: Remove unused import: `mace_dipole_core.tools.compile.simplify_if_compile`
+
+F401 [*] `typing.Union` imported but unused
+ --> mace_dipole_pkg/mace_dipole_core/tools/torch_geometric/dataloader.py:2:36
+  |
+1 | from collections.abc import Mapping, Sequence
+2 | from typing import List, Optional, Union
+  |                                    ^^^^^
+3 |
+4 | import torch.utils.data
+  |
+help: Remove unused import: `typing.Union`
+
+F401 [*] `functools.partial` imported but unused
+ --> mace_dipole_pkg/mace_dipole_core/tools/torch_tools.py:7:23
+  |
+5 | ###########################################################################################
+6 |
+7 | from functools import partial
+  |                       ^^^^^^^
+8 | import logging
+9 | from contextlib import contextmanager
+  |
+help: Remove unused import: `functools.partial`
+
+F821 Undefined name `change_of_basis`
+  --> mace_dipole_pkg/mace_dipole_core/tools/torch_tools.py:96:37
+   |
+94 |     Convert cartesian notation to spherical notation
+95 |     """
+96 |     change_of_basis: torch.Tensor = change_of_basis.to(t.device)
+   |                                     ^^^^^^^^^^^^^^^
+97 |     return torch.einsum("ijk,...jk->...i", change_of_basis, t)
+   |
+
+F401 [*] `os` imported but unused
+ --> plot_freqs.py:4:8
+  |
+2 | import matplotlib.pyplot as plt
+3 | import sys
+4 | import os
+  |        ^^
+5 |
+6 | def read_freq_file(filename):
+  |
+help: Remove unused import: `os`
+
+E722 Do not use bare `except`
+  --> plot_freqs.py:19:17
+   |
+17 |                         frequencies.append(freq)
+18 |                         intensities.append(intensity)
+19 |                 except:
+   |                 ^^^^^^
+20 |                     continue
+21 |     return frequencies, intensities
+   |
+
+E741 Ambiguous variable name: `I`
+  --> plot_freqs.py:25:12
+   |
+23 | def make_spectrum(frequencies, intensities, freq_range, sigma=40):
+24 |     spectrum = np.zeros_like(freq_range)
+25 |     for f, I in zip(frequencies, intensities):
+   |            ^
+26 |         spectrum += I * np.exp(-((freq_range - f) ** 2) / (2 * sigma ** 2))
+27 |     if spectrum.max() > spectrum.min():
+   |
+
+Found 45 errors.
+[*] 25 fixable with the `--fix` option (7 hidden fixes can be enabled with the `--unsafe-fixes` option).
+
+
+=== VULTURE ===
+gm_main.py:16: unused import 'Bohr' (90% confidence)
+gm_main.py:17: unused import 'BFGS' (90% confidence)
+gm_main.py:19: unused import 'Any' (90% confidence)
+gm_main.py:235: unused variable 'test_charges' (60% confidence)
+
+
+=== RADON COMPLEXITY ===
+gm_main.py
+    F 477:0 run_next_calculation - C
+    F 34:0 diagnose_python_environment - B
+    M 410:4 DipoleCalculatorFactory.get_calculator - B
+    F 94:0 test_espaloma_functionality - A
+    F 461:0 is_calc_finished - A
+    F 637:0 calculator - A
+    M 187:4 DipoleCalculatorBase.calculate_dipole_derivatives - A
+    C 390:0 DipoleCalculatorFactory - A
+    C 166:0 DipoleCalculatorBase - A
+    C 222:0 EspalomaDipoleCalculator - A
+    M 243:4 EspalomaDipoleCalculator.calculate_dipole - A
+    C 320:0 MACEMLDipoleCalculator - A
+    C 343:0 GeometryDipoleCalculator - A
+    M 353:4 GeometryDipoleCalculator.calculate_dipole - A
+    F 606:0 ase_to_gjf - A
+    M 228:4 EspalomaDipoleCalculator._check_availability - A
+    C 288:0 XTBDipoleCalculator - A
+    M 294:4 XTBDipoleCalculator._check_availability - A
+    M 328:4 MACEMLDipoleCalculator._check_availability - A
+    M 337:4 MACEMLDipoleCalculator.calculate_dipole - A
+    M 398:4 DipoleCalculatorFactory._register_calculators - A
+    M 432:4 DipoleCalculatorFactory.list_available - A
+    F 446:0 zmq_server - A
+    F 624:0 geometry_optimisation - A
+    M 169:4 DipoleCalculatorBase.__init__ - A
+    M 175:4 DipoleCalculatorBase._check_availability - A
+    M 180:4 DipoleCalculatorBase.calculate_dipole - A
+    M 225:4 EspalomaDipoleCalculator.__init__ - A
+    M 291:4 XTBDipoleCalculator.__init__ - A
+    M 303:4 XTBDipoleCalculator.calculate_dipole - A
+    M 323:4 MACEMLDipoleCalculator.__init__ - A
+    M 346:4 GeometryDipoleCalculator.__init__ - A
+    M 349:4 GeometryDipoleCalculator._check_availability - A
+    M 393:4 DipoleCalculatorFactory.__init__ - A
+
+34 blocks (classes, functions, methods) analyzed.
+Average complexity: A (2.7941176470588234)
+
+
+=== RADON MAINTAINABILITY ===
+gm_main.py - A
+
+
+=== PYLINT ===
+************* Module gm_main
+gm_main.py:38:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:42:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:46:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:50:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:52:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:54:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:63:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:71:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:85:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:90:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:98:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:103:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:107:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:111:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:119:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:124:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:129:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:131:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:138:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:145:88: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:146:88: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:147:88: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:148:88: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:149:88: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:150:88: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:151:88: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:152:88: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:153:88: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:154:88: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:155:88: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:156:88: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:157:88: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:158:88: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:168:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:173:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:178:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:186:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:192:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:202:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:207:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:211:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:214:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:218:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:224:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:227:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:232:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:236:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:242:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:249:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:255:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:262:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:265:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:270:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:277:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:280:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:283:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:290:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:293:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:302:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:306:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:309:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:312:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:315:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:322:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:324:36: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:327:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:336:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:345:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:348:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:352:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:355:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:363:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:366:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:370:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:376:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:378:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:382:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:385:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:392:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:397:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:406:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:409:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:412:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:420:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:422:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:426:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:429:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:431:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:447:0: C0301: Line too long (129/100) (line-too-long)
+gm_main.py:462:0: C0301: Line too long (102/100) (line-too-long)
+gm_main.py:464:0: C0301: Line too long (103/100) (line-too-long)
+gm_main.py:468:0: C0301: Line too long (108/100) (line-too-long)
+gm_main.py:482:28: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:483:34: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:486:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:488:35: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:489:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:494:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:497:18: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:499:25: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:506:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:508:0: C0301: Line too long (112/100) (line-too-long)
+gm_main.py:516:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:532:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:535:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:540:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:547:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:549:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:553:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:560:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:561:36: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:563:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:571:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:575:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:578:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:581:0: C0301: Line too long (110/100) (line-too-long)
+gm_main.py:583:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:584:0: C0301: Line too long (117/100) (line-too-long)
+gm_main.py:586:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:593:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:600:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:610:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:646:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:653:21: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:655:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:676:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:683:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:687:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:694:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:700:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:719:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:725:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:729:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:735:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:741:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:764:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:768:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:770:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:793:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:795:52: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:800:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:804:0: C0303: Trailing whitespace (trailing-whitespace)
+gm_main.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+gm_main.py:36:4: W0621: Redefining name 'sys' from outer scope (line 12) (redefined-outer-name)
+gm_main.py:36:4: W0404: Reimport 'sys' (imported line 12) (reimported)
+gm_main.py:36:4: C0415: Import outside toplevel (sys) (import-outside-toplevel)
+gm_main.py:37:4: C0415: Import outside toplevel (site) (import-outside-toplevel)
+gm_main.py:88:15: W0718: Catching too general exception Exception (broad-exception-caught)
+gm_main.py:67:16: W0122: Use of exec (exec-used)
+gm_main.py:69:16: W0122: Use of exec (exec-used)
+gm_main.py:83:12: W0702: No exception type(s) specified (bare-except)
+gm_main.py:75:20: C0415: Import outside toplevel (rdkit.rdBase) (import-outside-toplevel)
+gm_main.py:76:42: I1101: Module 'rdkit.rdBase' has no 'rdkitVersion' member, but source is unavailable. Consider adding this module to extension-pkg-allow-list if you want to perform analysis based on run-time introspection of living objects. (c-extension-no-member)
+gm_main.py:78:20: C0415: Import outside toplevel (espaloma_charge) (import-outside-toplevel)
+gm_main.py:113:8: W0621: Redefining name 'mol' from outer scope (line 734) (redefined-outer-name)
+gm_main.py:105:8: W0621: Redefining name 'charge' from outer scope (line 766) (redefined-outer-name)
+gm_main.py:135:11: W0718: Catching too general exception Exception (broad-exception-caught)
+gm_main.py:101:8: C0415: Import outside toplevel (espaloma_charge) (import-outside-toplevel)
+gm_main.py:105:8: C0415: Import outside toplevel (espaloma_charge.charge) (import-outside-toplevel)
+gm_main.py:109:8: C0415: Import outside toplevel (rdkit.Chem) (import-outside-toplevel)
+gm_main.py:113:14: E1101: Module 'rdkit.Chem' has no 'MolFromSmiles' member (no-member)
+gm_main.py:126:15: E1101: Module 'rdkit.Chem' has no 'MolFromSmiles' member (no-member)
+gm_main.py:101:8: W0611: Unused import espaloma_charge (unused-import)
+gm_main.py:144:0: C0103: Constant name "AtomicNumber" doesn't conform to UPPER_CASE naming style (invalid-name)
+gm_main.py:169:23: W0621: Redefining name 'name' from outer scope (line 697) (redefined-outer-name)
+gm_main.py:177:8: W0107: Unnecessary pass statement (unnecessary-pass)
+gm_main.py:185:8: W0107: Unnecessary pass statement (unnecessary-pass)
+gm_main.py:212:15: W0718: Catching too general exception Exception (broad-exception-caught)
+gm_main.py:213:12: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:230:12: C0415: Import outside toplevel (espaloma_charge) (import-outside-toplevel)
+gm_main.py:231:12: C0415: Import outside toplevel (rdkit.Chem) (import-outside-toplevel)
+gm_main.py:234:23: E1101: Module 'rdkit.Chem' has no 'MolFromSmiles' member (no-member)
+gm_main.py:241:12: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:235:12: W0612: Unused variable 'test_charges' (unused-variable)
+gm_main.py:243:4: R0914: Too many local variables (17/15) (too-many-locals)
+gm_main.py:251:8: W0621: Redefining name 'mol' from outer scope (line 734) (redefined-outer-name)
+gm_main.py:245:8: C0415: Import outside toplevel (rdkit.Chem) (import-outside-toplevel)
+gm_main.py:246:8: C0415: Import outside toplevel (rdkit.Chem.rdDetermineBonds) (import-outside-toplevel)
+gm_main.py:247:8: C0415: Import outside toplevel (espaloma_charge) (import-outside-toplevel)
+gm_main.py:248:8: C0415: Import outside toplevel (torch) (import-outside-toplevel)
+gm_main.py:251:14: E1101: Module 'rdkit.Chem' has no 'RWMol' member (no-member)
+gm_main.py:253:19: E1101: Module 'rdkit.Chem' has no 'Atom' member (no-member)
+gm_main.py:257:15: E1101: Module 'rdkit.Chem' has no 'Conformer' member (no-member)
+gm_main.py:264:8: I1101: Module 'rdkit.Chem.rdDetermineBonds' has no 'DetermineBonds' member, but source is unavailable. Consider adding this module to extension-pkg-allow-list if you want to perform analysis based on run-time introspection of living objects. (c-extension-no-member)
+gm_main.py:284:8: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:296:12: C0415: Import outside toplevel (xtb.ase.calculator.XTB) (import-outside-toplevel)
+gm_main.py:301:12: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:296:12: W0611: Unused XTB imported from xtb.ase.calculator (unused-import)
+gm_main.py:305:8: E0401: Unable to import 'xtb.ase.calculator' (import-error)
+gm_main.py:305:8: C0415: Import outside toplevel (xtb.ase.calculator.XTB) (import-outside-toplevel)
+gm_main.py:316:8: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:335:12: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:374:12: W0621: Redefining name 'charge' from outer scope (line 766) (redefined-outer-name)
+gm_main.py:386:8: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:407:12: W0621: Redefining name 'calc' from outer scope (line 753) (redefined-outer-name)
+gm_main.py:416:16: W0621: Redefining name 'calc' from outer scope (line 753) (redefined-outer-name)
+gm_main.py:418:20: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:452:40: W0621: Redefining name 'socket' from outer scope (line 787) (redefined-outer-name)
+gm_main.py:454:21: W1514: Using open without explicitly specifying an encoding (unspecified-encoding)
+gm_main.py:455:32: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+gm_main.py:454:40: W0612: Unused variable 'f' (unused-variable)
+gm_main.py:461:21: W0621: Redefining name 'proc' from outer scope (line 783) (redefined-outer-name)
+gm_main.py:461:27: W0621: Redefining name 'socket' from outer scope (line 787) (redefined-outer-name)
+gm_main.py:465:8: R1705: Unnecessary "elif" after "return", remove the leading "el" from "elif" (no-else-return)
+gm_main.py:469:13: C0121: Comparison 'proc.poll() != None' should be 'proc.poll() is not None' (singleton-comparison)
+gm_main.py:477:0: R0914: Too many local variables (33/15) (too-many-locals)
+gm_main.py:477:25: W0621: Redefining name 'mol' from outer scope (line 734) (redefined-outer-name)
+gm_main.py:477:30: W0621: Redefining name 'msg' from outer scope (line 792) (redefined-outer-name)
+gm_main.py:477:35: W0621: Redefining name 'calculator' from outer scope (line 637) (redefined-outer-name)
+gm_main.py:492:4: W0621: Redefining name 'charge' from outer scope (line 766) (redefined-outer-name)
+gm_main.py:483:17: W1514: Using open without explicitly specifying an encoding (unspecified-encoding)
+gm_main.py:522:4: C0103: Variable name "E" doesn't conform to snake_case naming style (invalid-name)
+gm_main.py:550:11: W0718: Catching too general exception Exception (broad-exception-caught)
+gm_main.py:531:8: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:539:12: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:548:8: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:551:8: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:561:18: W1514: Using open without explicitly specifying an encoding (unspecified-encoding)
+gm_main.py:477:0: R0915: Too many statements (65/50) (too-many-statements)
+gm_main.py:477:0: R1711: Useless return at end of function or method (useless-return)
+gm_main.py:483:17: R1732: Consider using 'with' for resource-allocating operations (consider-using-with)
+gm_main.py:561:18: R1732: Consider using 'with' for resource-allocating operations (consider-using-with)
+gm_main.py:606:0: C0116: Missing function or method docstring (missing-function-docstring)
+gm_main.py:606:0: R0913: Too many arguments (6/5) (too-many-arguments)
+gm_main.py:606:0: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+gm_main.py:609:15: W0621: Redefining name 'charge' from outer scope (line 766) (redefined-outer-name)
+gm_main.py:609:25: W0621: Redefining name 'multiplicity' from outer scope (line 767) (redefined-outer-name)
+gm_main.py:614:9: W1514: Using open without explicitly specifying an encoding (unspecified-encoding)
+gm_main.py:624:0: C0116: Missing function or method docstring (missing-function-docstring)
+gm_main.py:624:26: W0621: Redefining name 'mol' from outer scope (line 734) (redefined-outer-name)
+gm_main.py:637:0: C0116: Missing function or method docstring (missing-function-docstring)
+gm_main.py:640:8: W0621: Redefining name 'calc' from outer scope (line 753) (redefined-outer-name)
+gm_main.py:639:8: C0415: Import outside toplevel (mace.calculators.mace_mp) (import-outside-toplevel)
+gm_main.py:648:8: C0415: Import outside toplevel (mace.calculators.mace_off) (import-outside-toplevel)
+gm_main.py:658:8: C0415: Import outside toplevel (mace.calculators.mace_omol) (import-outside-toplevel)
+gm_main.py:637:0: R1710: Either all return statements in a function should return an expression, or none of them should. (inconsistent-return-statements)
+gm_main.py:699:8: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:789:12: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:801:19: W0718: Catching too general exception Exception (broad-exception-caught)
+gm_main.py:802:16: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:8:0: C0411: standard import "os" should be placed before third party imports "numpy", "zmq" (wrong-import-order)
+gm_main.py:9:0: C0411: standard import "time" should be placed before third party imports "numpy", "zmq" (wrong-import-order)
+gm_main.py:10:0: C0411: standard import "warnings" should be placed before third party imports "numpy", "zmq" (wrong-import-order)
+gm_main.py:11:0: C0411: standard import "contextlib.contextmanager" should be placed before third party imports "numpy", "zmq" (wrong-import-order)
+gm_main.py:12:0: C0411: standard import "sys" should be placed before third party imports "numpy", "zmq" (wrong-import-order)
+gm_main.py:13:0: C0411: standard import "subprocess" should be placed before third party imports "numpy", "zmq" (wrong-import-order)
+gm_main.py:15:0: C0411: third party import "ase.io.read" should be placed before first party import "mace_calculators.MACEDipoleCalculator"  (wrong-import-order)
+gm_main.py:16:0: C0411: third party import "ase.units.Bohr" should be placed before first party import "mace_calculators.MACEDipoleCalculator"  (wrong-import-order)
+gm_main.py:17:0: C0411: third party import "ase.optimize.BFGS" should be placed before first party import "mace_calculators.MACEDipoleCalculator"  (wrong-import-order)
+gm_main.py:18:0: C0411: standard import "abc.ABC" should be placed before third party imports "numpy", "zmq", "ase.io.read", "ase.units.Bohr", "ase.optimize.BFGS" and first party import "mace_calculators.MACEDipoleCalculator"  (wrong-import-order)
+gm_main.py:19:0: C0411: standard import "typing.Tuple" should be placed before third party imports "numpy", "zmq", "ase.io.read", "ase.units.Bohr", "ase.optimize.BFGS" and first party import "mace_calculators.MACEDipoleCalculator"  (wrong-import-order)
+gm_main.py:20:0: C0411: standard import "logging" should be placed before third party imports "numpy", "zmq", "ase.io.read", "ase.units.Bohr", "ase.optimize.BFGS" and first party import "mace_calculators.MACEDipoleCalculator"  (wrong-import-order)
+gm_main.py:783:11: R1732: Consider using 'with' for resource-allocating operations (consider-using-with)
+gm_main.py:15:0: W0611: Unused write imported from ase.io (unused-import)
+gm_main.py:16:0: W0611: Unused Bohr imported from ase.units (unused-import)
+gm_main.py:17:0: W0611: Unused BFGS imported from ase.optimize (unused-import)
+gm_main.py:19:0: W0611: Unused Any imported from typing (unused-import)
+
+------------------------------------------------------------------
+Your code has been rated at 3.70/10 (previous run: 3.70/10, +0.00)
+

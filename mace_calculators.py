@@ -3,7 +3,6 @@ import importlib
 import sys
 import numpy as np
 import torch
-from ase.calculators.calculator import Calculator
 import logging
 
 logger = logging.getLogger(__name__)
@@ -97,5 +96,5 @@ class MACEDipoleCalculator:
             
         except Exception as e:
             logger.error(f"Error in MACE dipole calculation: {e}")
-            logger.error(f"Full traceback:", exc_info=True)
+            logger.error("Full traceback:", exc_info=True)
             raise

@@ -222,7 +222,7 @@ def compare_frequencies(gaussian_file, ml_file="Vib_freq.txt", tolerance=50):
             
         for line in lines:
             parts = line.split()
-            if len(parts) >= 4 and not line.startswith('-') and not 'Mode' in line:
+            if len(parts) >= 4 and not line.startswith('-') and 'Mode' not in line:
                 try:
                     freq = float(parts[2].replace('i', ''))
                     inten = float(parts[3])

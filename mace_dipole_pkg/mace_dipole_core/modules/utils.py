@@ -11,10 +11,8 @@ import numpy as np
 import torch
 import torch.nn
 import torch.utils.data
-from scipy.constants import c, e
 
 from mace_dipole_core.tools import to_numpy
-from mace_dipole_core.tools.compile import simplify_if_compile
 from mace_dipole_core.tools.scatter import scatter_sum
 from mace_dipole_core.tools.torch_geometric.batch import Batch
 
