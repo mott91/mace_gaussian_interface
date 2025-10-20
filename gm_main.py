@@ -5,6 +5,11 @@
 
 import warnings
 warnings.filterwarnings("ignore")
+try:
+    from rdkit import RDLogger
+    RDLogger.DisableLog('rdApp.*')
+except ImportError:
+    pass
 import numpy as np
 import zmq
 import os
@@ -20,10 +25,14 @@ from ase.data import chemical_symbols
 from abc import ABC, abstractmethod
 from typing import Tuple, Optional, Dict
 import logging
+from diagnostics import diagnose_python_environment, test_espaloma_functionality
+from charge_analysis import ChargeAnalyzer
+
+
 
 # Set up logging
 logging.basicConfig(
-    level=logging.WARNING,  # Changed from INFO
+    level=logging.INFO,  # Changed from INFO
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
@@ -33,6 +42,13 @@ warnings.filterwarnings(
     "ignore", message=".*weights_only=False.*", category=FutureWarning
 )
 os.environ["PYTHONWARNINGS"] = "ignore::FutureWarning"
+
+try:
+    from charge_analysis import ChargeAnalyzer
+    CHARGE_ANALYSIS_AVAILABLE = True
+except ImportError:
+    logger.warning("Charge analysis module not available")
+    CHARGE_ANALYSIS_AVAILABLE = False
 
 # ============================================================================
 # CONFIGURATION
@@ -379,18 +395,33 @@ dipole_factory = DipoleCalculatorFactory()
 
 @contextmanager
 def zmq_server(file):
-    """Creates a context manager with ZMQ client socket as resource using the IPC transport protocol, used via python with block.
-    There must not be a file with the filename passed as argument in the current dir.
     """
+    Creates a context manager with a ZMQ server socket using the IPC transport protocol.
+
+    This version safely removes an existing IPC file before creating a new one,
+    preventing FileExistsError if a previous run left the file behind.
+    """
+    addr = os.path.abspath(file)
+
+    # If an old socket file exists, remove it first
+    if os.path.exists(addr):
+        try:
+            os.remove(addr)
+        except Exception as e:
+            print(f"Warning: could not remove old IPC file {addr}: {e}")
+
     try:
         with zmq.Context() as ctx:
             with ctx.socket(zmq.REP) as socket:
-                addr = os.path.abspath(file)
+                # Create a placeholder file to reserve the address
                 with open(addr, "x"):
-                    socket.bind("ipc://%s" % addr)
-                    yield socket
+                    pass
+                socket.bind(f"ipc://{addr}")
+                yield socket
     finally:
-        os.remove(addr)
+        # Clean up socket file when done
+        if os.path.exists(addr):
+            os.remove(addr)
 
 
 def is_calc_finished(proc, socket):
@@ -671,6 +702,9 @@ def run_next_calculation(
         dipole_method: Method for dipole calculation ('auto', 'mace_ml', 'espaloma', etc.)
         calculate_derivatives: Whether to calculate dipole derivatives
     """
+    # Visible progress indicator
+    print(f"  → Processing Gaussian request...")
+
     # Parse message to get file paths
     infile, outfile = msg.split("|")
 
@@ -766,7 +800,73 @@ def calculator(nnp):
             dispersion=False,
         )
         return calc
+    
+# Charge Analyzer
 
+def analyze_molecular_charges(atoms, output_dir='charge_analysis'):
+    """
+    Perform comprehensive charge analysis and visualization.
+    
+    Parameters
+    ----------
+    atoms : ase.Atoms
+        Molecular structure with charges stored
+    output_dir : str
+        Directory for saving analysis outputs
+    """
+    if not CHARGE_ANALYSIS_AVAILABLE:
+        logger.warning("Charge analysis not available - skipping")
+        return None
+    
+    # Check if charges are available
+    charges = atoms.get_initial_charges()
+    if charges is None or len(charges) == 0:
+        logger.warning("No charges available for analysis")
+        return None
+    
+    try:
+        logger.info("")
+        logger.info("="*70)
+        logger.info("DETAILED CHARGE ANALYSIS")
+        logger.info("="*70)
+        
+        # Create analyzer and run all analyses
+        analyzer = ChargeAnalyzer(atoms, charges)
+        analyzer.analyze_all(groups=None, save_plots=True, output_dir=output_dir)
+        
+        logger.info("="*70)
+        logger.info("")
+        return analyzer
+    except Exception as e:
+        logger.error(f"Charge analysis failed: {e}")
+        return None
+    
+def setup_output_directory(base_name: str) -> str:
+    """
+    Create organized output directory structure.
+    
+    Parameters
+    ----------
+    base_name : str
+        Base name for the calculation (e.g., 'acoh')
+    
+    Returns
+    -------
+    str
+        Path to output directory
+    """
+    import os
+    from datetime import datetime
+    
+    # Create main output directory
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    output_dir = f"{base_name}_analysis_{timestamp}"
+    
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+        print(f"  ✓ Created output directory: {output_dir}")
+    
+    return output_dir
 
 ####################################################################
 ##                   SCRIPT EXECUTION STARTS HERE                 ##
@@ -778,7 +878,7 @@ if __name__ == "__main__":
     # ========================================================================
 
     # Configuration options
-    DIPOLE_METHOD = "auto"  # Options: 'auto', 'mace_ml', 'espaloma', 'xtb', 'geometry'
+    DIPOLE_METHOD = "espaloma"  # Options: 'auto', 'mace_ml', 'espaloma', 'xtb', 'geometry'
     CALCULATE_DIPOLE_DERIVATIVES = True
 
     # Note: espaloma is recommended for organic molecules
@@ -857,6 +957,59 @@ if __name__ == "__main__":
     mol = geometry_optimisation(mol)
     print("=" * 60 + "\n")
 
+    # *** NEW CODE - Complete charge analysis to file ***
+    print("=" * 60)
+    print("MOLECULAR PROPERTY ANALYSIS")
+    print("=" * 60)
+    
+    try:
+        print("  → Calculating partial charges with Espaloma...")
+        dipole_calc = dipole_factory.get_calculator(DIPOLE_METHOD)
+        dipole, charges = dipole_calc.calculate_dipole(mol)
+        
+        if charges is not None and CHARGE_ANALYSIS_AVAILABLE:
+            mol.set_initial_charges(charges)
+            print(f"  ✓ Charges calculated for {len(charges)} atoms")
+            
+            # Create organized output directory
+            base_name = initial_coords.replace('.xyz', '').replace('.cif', '')
+            output_dir = setup_output_directory(base_name)
+            
+            # Create analyzer and run analysis
+            print("  → Running comprehensive charge analysis...")
+            analyzer = ChargeAnalyzer(mol, charges)
+            
+            # Auto-detect groups (same as before)
+            groups = None
+            symbols = mol.get_chemical_symbols()
+            if symbols.count('C') == 2 and symbols.count('O') == 2:
+                c_indices = [i for i, s in enumerate(symbols) if s == 'C']
+                if len(c_indices) == 2:
+                    h_indices = [i for i, s in enumerate(symbols) if s == 'H']
+                    o_indices = [i for i, s in enumerate(symbols) if s == 'O']
+                    groups = {
+                        'methyl': [c_indices[0]] + h_indices[:3],
+                        'carboxyl': [c_indices[1]] + o_indices + h_indices[3:]
+                    }
+                    print(f"  ✓ Auto-detected groups: {list(groups.keys())}")
+            
+            # Run complete analysis
+            analyzer.analyze_all_to_file(
+                filename='charge_analysis_report.txt',
+                groups=groups,
+                save_plots=True,
+                output_dir=output_dir
+            )
+            
+            print(f"  ✓ All results in: {output_dir}/")
+            print("=" * 60 + "\n")
+            
+    except Exception as e:
+        logger.warning(f"Charge analysis failed: {e}")
+        import traceback
+        logger.debug(traceback.format_exc())
+        print("=" * 60 + "\n")
+
     # Generate Gaussian input file
     gjf_filename = initial_coords[:-4] + "_freq_anharm.gjf"
 
@@ -905,6 +1058,7 @@ if __name__ == "__main__":
                 socket.send_string("error")
 
     logger.info("Calculation completed successfully!")
+
     print("\n" + "=" * 60)
     print("CALCULATION COMPLETED SUCCESSFULLY!")
     print("=" * 60)
