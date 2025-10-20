@@ -878,7 +878,7 @@ if __name__ == "__main__":
     # ========================================================================
 
     # Configuration options
-    DIPOLE_METHOD = "espaloma"  # Options: 'auto', 'mace_ml', 'espaloma', 'xtb', 'geometry'
+    DIPOLE_METHOD = "mace_ml"  # Options: 'auto', 'mace_ml', 'espaloma', 'xtb', 'geometry'
     CALCULATE_DIPOLE_DERIVATIVES = True
 
     # Note: espaloma is recommended for organic molecules
