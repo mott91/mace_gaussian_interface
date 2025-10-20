@@ -271,78 +271,12 @@ class MACEMLDipoleCalculator(DipoleCalculatorBase):
         return self.mace_calc.calculate_dipole(atoms, **kwargs)
 
 
-class GeometryDipoleCalculator(DipoleCalculatorBase):
-    """Simple geometry-based dipole estimate (fallback)"""
-
-    def __init__(self):
-        super().__init__("geometry")
-
-    def _check_availability(self):
-        self.available = True  # Always available
-        logger.info("\u2713 Geometry-based dipole calculator available (fallback)")
-
-    def calculate_dipole(
-        self, atoms, **kwargs
-    ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
-        """Crude electronegativity-based dipole estimation"""
-
-        # Pauling electronegativities (simplified set)
-        electronegativity = {
-            "H": 2.20,
-            "C": 2.55,
-            "N": 3.04,
-            "O": 3.44,
-            "F": 3.98,
-            "Si": 1.90,
-            "P": 2.19,
-            "S": 2.58,
-            "Cl": 3.16,
-            "Br": 2.96,
-            "I": 2.66,
-            "Li": 0.98,
-            "Na": 0.93,
-            "K": 0.82,
-            "Mg": 1.31,
-            "Ca": 1.00,
-            "Al": 1.61,
-            "B": 2.04,
-            "Be": 1.57,
-        }
-
-        symbols = atoms.get_chemical_symbols()
-        positions = atoms.get_positions()
-
-        # Estimate partial charges based on electronegativity
-        charges = []
-        avg_electronegativity = np.mean(
-            [electronegativity.get(s, 2.5) for s in symbols]
-        )
-
-        for symbol in symbols:
-            en = electronegativity.get(symbol, 2.5)
-            # Simple charge estimation (very crude)
-            charge = (en - avg_electronegativity) * 0.1
-            charges.append(charge)
-
-        charges = np.array(charges)
-
-        # Ensure charge neutrality
-        total_charge = np.sum(charges)
-        charges -= total_charge / len(charges)
-
-        # Calculate dipole
-        dipole = np.dot(charges, positions) / 0.5291772105638411
-
-        logger.debug(f"Geometry-based dipole: {dipole}")
-        return dipole, charges
-
-
 class DipoleCalculatorFactory:
     """Factory for managing different dipole calculators"""
 
     def __init__(self):
         self.calculators = {}
-        self.preferred_order = ["mace_ml", "espaloma", "xtb", "geometry"]
+        self.preferred_order = ["mace_ml", "espaloma", "xtb"]
         self._register_calculators()
 
     def _register_calculators(self):
@@ -351,7 +285,6 @@ class DipoleCalculatorFactory:
             EspalomaDipoleCalculator(),
             XTBDipoleCalculator(),
             MACEMLDipoleCalculator(),
-            GeometryDipoleCalculator(),
         ]
 
         for calc in calculators:
@@ -878,7 +811,7 @@ if __name__ == "__main__":
     # ========================================================================
 
     # Configuration options
-    DIPOLE_METHOD = "mace_ml"  # Options: 'auto', 'mace_ml', 'espaloma', 'xtb', 'geometry'
+    DIPOLE_METHOD = "mace_ml"  # Options: 'auto', 'mace_ml', 'espaloma', 'xtb'
     CALCULATE_DIPOLE_DERIVATIVES = True
 
     # Note: espaloma is recommended for organic molecules
@@ -893,27 +826,6 @@ if __name__ == "__main__":
     for name, available in dipole_factory.list_available().items():
         status = "\u2713" if available else "\u2717"
         logger.info(f"  {status} {name}")
-
-    # If no dipole calculators available except geometry, show help
-    available_calcs = [
-        name for name, avail in dipole_factory.list_available().items() if avail
-    ]
-    if available_calcs == ["geometry"]:
-        logger.warning("")
-        logger.warning("=" * 60)
-        logger.warning("ONLY FALLBACK DIPOLE CALCULATOR AVAILABLE")
-        logger.warning("=" * 60)
-        logger.warning("Only geometry-based dipole estimation is available.")
-        logger.warning("This will give very crude dipole moments and IR intensities.")
-        logger.warning("")
-        logger.warning("To improve accuracy, install additional packages:")
-        logger.warning("  pip install espaloma_charge rdkit  # Recommended")
-        logger.warning("  # OR")
-        logger.warning("  mamba install -c conda-forge xtb-python")
-        logger.warning("")
-        logger.warning("Run diagnostics with: python gm_main.py --diagnose")
-        logger.warning("=" * 60)
-        logger.warning("")
 
     # Check for input file
     if len(sys.argv) < 2 or sys.argv[1].startswith("--"):
