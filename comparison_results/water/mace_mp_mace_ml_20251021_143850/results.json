@@ -3,7 +3,7 @@
   "energy_calculator": "mace_mp",
   "dipole_calculator": "mace_ml",
   "calculator_type": "ml",
-  "timestamp": "20251021_130138",
+  "timestamp": "20251021_143850",
   "frequencies": {
     "harmonic": [
       {
@@ -47,7 +47,7 @@
     "z": -1.034295509499536,
     "magnitude": 1.034295509499536
   },
-  "runtime_s": 14.333102226257324,
+  "runtime_s": 20.6492657661438,
   "files": {
     "gaussian_log": "gaussian_freq.log",
     "gaussian_input": "gaussian_freq.gjf"

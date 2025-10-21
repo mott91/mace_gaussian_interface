@@ -31,6 +31,7 @@ from results_manager import ResultsManager
 from gaussian_parser import parse_gaussian_log
 import time
 import shutil
+import traceback
 
 
 
@@ -448,50 +449,36 @@ def update_molecule_geometry(atoms, coordinates: np.ndarray, charge: int, spin: 
 def calculate_energy_and_forces(atoms, calculator) -> Tuple[float, np.ndarray]:
     """
     Calculate energy and forces using the attached calculator.
-
-    Args:
-        atoms: ASE Atoms object with calculator attached
-        calculator: ASE calculator (not used directly, atoms.calc is used)
-
-    Returns:
-        Tuple of (energy, gradient)
-        - energy: Potential energy in eV
-        - gradient: Negative forces (gradient) in eV/Angstrom, shape (natoms, 3)
     """
-    energy = atoms.get_potential_energy()
-    gradient = -atoms.get_forces()  # Gradient = -Force
-    return energy, gradient
+    try:
+        energy = atoms.get_potential_energy()
+        gradient = -atoms.get_forces()
+        return energy, gradient
+    except Exception as e:
+        logger.error(f"Energy/forces calculation failed: {e}")
+        import traceback
+        logger.error(f"Full traceback:\n{traceback.format_exc()}")
+        raise
 
 
 def calculate_hessian(atoms, calculator, natoms: int) -> Optional[np.ndarray]:
     """
     Calculate Hessian matrix (second derivatives).
-
-    Args:
-        atoms: ASE Atoms object
-        calculator: ASE calculator
-        natoms: Number of atoms
-
-    Returns:
-        Hessian matrix in Hartree/Bohr^2, shape (3*natoms, 3*natoms)
-        Returns None if calculator doesn't support Hessian
     """
     try:
-        # Get Hessian in eV/Angstrom^2
         hessian = calculator.get_hessian(atoms=atoms)
-
+        
         # Convert to Hartree/Bohr^2 for Gaussian
-        # 1 eV/Ang^2 = 0.52917721092^2 / 27.211386246 Hartree/Bohr^2
         ANGSTROM_TO_BOHR = 0.52917721092
         EV_TO_HARTREE = 27.211386246
         hessian = hessian * (ANGSTROM_TO_BOHR**2) / EV_TO_HARTREE
-
-        # Reshape to matrix form
         hessian = hessian.reshape(3 * natoms, 3 * natoms)
+        
         return hessian
-
     except Exception as e:
-        logger.warning(f"Hessian calculation failed: {e}")
+        logger.error(f"Hessian calculation failed: {e}")
+        import traceback
+        logger.error(f"Full traceback:\n{traceback.format_exc()}")
         return None
 
 
@@ -1064,8 +1051,8 @@ if __name__ == "__main__":
     OPTIMIZATION_CALCULATOR = "mace_omol"
     
     # For now, hardcode one combination - we'll add CLI later
-    ENERGY_CALCULATORS = ["mace_mp", "mace_off", "mace_omol"]
-    DIPOLE_CALCULATORS = ["espaloma", "xtb", "mace_ml"]
+    ENERGY_CALCULATORS = ["mace_mp", "mace_omol"]
+    DIPOLE_CALCULATORS = ["mace_ml"]
     
     # ========================================================================
     # MAIN WORKFLOW

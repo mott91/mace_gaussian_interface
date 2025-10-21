@@ -15,16 +15,16 @@ GEOMETRY OPTIMIZATION
 Calculator: mace_omol
 Initial Energy:  -2079.8644740509762 eV
        Step     Time          Energy          fmax
-LBFGS:    0 13:06:24    -2079.864474        0.304735
-LBFGS:    1 13:06:25    -2079.865905        0.135138
-LBFGS:    2 13:06:29    -2079.866088        0.035316
-LBFGS:    3 13:06:29    -2079.866147        0.030449
-LBFGS:    4 13:06:29    -2079.866192        0.013453
-LBFGS:    5 13:06:29    -2079.866196        0.003792
-LBFGS:    6 13:06:29    -2079.866196        0.000294
-LBFGS:    7 13:06:29    -2079.866196        0.000007
+LBFGS:    0 13:14:50    -2079.864474        0.304735
+LBFGS:    1 13:14:51    -2079.865905        0.135138
+LBFGS:    2 13:14:55    -2079.866088        0.035316
+LBFGS:    3 13:14:55    -2079.866147        0.030449
+LBFGS:    4 13:14:55    -2079.866192        0.013453
+LBFGS:    5 13:14:55    -2079.866196        0.003792
+LBFGS:    6 13:14:55    -2079.866196        0.000294
+LBFGS:    7 13:14:55    -2079.866196        0.000007
 Final Energy:  -2079.8661957042827 eV
-Runtime: 4.8 seconds
+Runtime: 5.4 seconds
 ============================================================
 
 ============================================================
@@ -40,7 +40,7 @@ FREQUENCY CALCULATION: mace_mp + espaloma
 Using Materials Project MACE for MACECalculator with /home/mot/.cache/mace/MACE_MPtrj_20229model
 Using float64 for MACECalculator, which is slower but more accurate. Recommended for geometry optimization.
 Using head Default out of ['Default']
-  → Gaussian input: temp_mace_mp_espaloma_20251021_130629.gjf
+  → Gaussian input: temp_mace_mp_espaloma_20251021_131455.gjf
   → Launching Gaussian...
   → Processing Gaussian request...
   → Processing Gaussian request...
@@ -49,7 +49,7 @@ Using head Default out of ['Default']
   → Processing Gaussian request...
   → Processing Gaussian request...
   → Processing Gaussian request...
-  ✓ Completed in 17.9 seconds
+  ✓ Completed in 18.6 seconds
 ============================================================
 
 ============================================================
@@ -58,7 +58,7 @@ FREQUENCY CALCULATION: mace_mp + xtb
 Using Materials Project MACE for MACECalculator with /home/mot/.cache/mace/MACE_MPtrj_20229model
 Using float64 for MACECalculator, which is slower but more accurate. Recommended for geometry optimization.
 Using head Default out of ['Default']
-  → Gaussian input: temp_mace_mp_xtb_20251021_130647.gjf
+  → Gaussian input: temp_mace_mp_xtb_20251021_131514.gjf
   → Launching Gaussian...
   → Processing Gaussian request...
 ============================================================
@@ -67,7 +67,7 @@ FREQUENCY CALCULATION: mace_mp + mace_ml
 Using Materials Project MACE for MACECalculator with /home/mot/.cache/mace/MACE_MPtrj_20229model
 Using float64 for MACECalculator, which is slower but more accurate. Recommended for geometry optimization.
 Using head Default out of ['Default']
-  → Gaussian input: temp_mace_mp_mace_ml_20251021_130649.gjf
+  → Gaussian input: temp_mace_mp_mace_ml_20251021_131516.gjf
   → Launching Gaussian...
   → Processing Gaussian request...
 Default dtype float64 does not match model dtype float32, converting models to float64.
@@ -77,7 +77,7 @@ Default dtype float64 does not match model dtype float32, converting models to f
   → Processing Gaussian request...
   → Processing Gaussian request...
   → Processing Gaussian request...
-  ✓ Completed in 15.0 seconds
+  ✓ Completed in 14.9 seconds
 ============================================================
 
 ============================================================
@@ -86,7 +86,7 @@ FREQUENCY CALCULATION: mace_off + espaloma
 Using MACE-OFF23 MODEL for MACECalculator with /home/mot/.cache/mace/MACE-OFF23_large.model
 Using float64 for MACECalculator, which is slower but more accurate. Recommended for geometry optimization.
 Using head Default out of ['Default']
-  → Gaussian input: temp_mace_off_espaloma_20251021_130704.gjf
+  → Gaussian input: temp_mace_off_espaloma_20251021_131531.gjf
   → Launching Gaussian...
   → Processing Gaussian request...
 ============================================================
@@ -95,7 +95,7 @@ FREQUENCY CALCULATION: mace_off + xtb
 Using MACE-OFF23 MODEL for MACECalculator with /home/mot/.cache/mace/MACE-OFF23_large.model
 Using float64 for MACECalculator, which is slower but more accurate. Recommended for geometry optimization.
 Using head Default out of ['Default']
-  → Gaussian input: temp_mace_off_xtb_20251021_130705.gjf
+  → Gaussian input: temp_mace_off_xtb_20251021_131532.gjf
   → Launching Gaussian...
   → Processing Gaussian request...
 ============================================================
@@ -104,7 +104,7 @@ FREQUENCY CALCULATION: mace_off + mace_ml
 Using MACE-OFF23 MODEL for MACECalculator with /home/mot/.cache/mace/MACE-OFF23_large.model
 Using float64 for MACECalculator, which is slower but more accurate. Recommended for geometry optimization.
 Using head Default out of ['Default']
-  → Gaussian input: temp_mace_off_mace_ml_20251021_130707.gjf
+  → Gaussian input: temp_mace_off_mace_ml_20251021_131533.gjf
   → Launching Gaussian...
   → Processing Gaussian request...
 ============================================================
@@ -112,7 +112,7 @@ FREQUENCY CALCULATION: mace_omol + espaloma
 ============================================================
 Using float64 for MACECalculator, recommended for geometry optimization.
 Using head omol out of ['omol']
-  → Gaussian input: temp_mace_omol_espaloma_20251021_130708.gjf
+  → Gaussian input: temp_mace_omol_espaloma_20251021_131535.gjf
   → Launching Gaussian...
   → Processing Gaussian request...
 ============================================================
@@ -120,7 +120,7 @@ FREQUENCY CALCULATION: mace_omol + xtb
 ============================================================
 Using float64 for MACECalculator, recommended for geometry optimization.
 Using head omol out of ['omol']
-  → Gaussian input: temp_mace_omol_xtb_20251021_130710.gjf
+  → Gaussian input: temp_mace_omol_xtb_20251021_131536.gjf
   → Launching Gaussian...
   → Processing Gaussian request...
 ============================================================
@@ -128,7 +128,7 @@ FREQUENCY CALCULATION: mace_omol + mace_ml
 ============================================================
 Using float64 for MACECalculator, recommended for geometry optimization.
 Using head omol out of ['omol']
-  → Gaussian input: temp_mace_omol_mace_ml_20251021_130711.gjf
+  → Gaussian input: temp_mace_omol_mace_ml_20251021_131537.gjf
   → Launching Gaussian...
   → Processing Gaussian request...
 
