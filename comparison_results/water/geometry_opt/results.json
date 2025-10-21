@@ -1,0 +1,13 @@
+{
+  "molecule": "water",
+  "calculator": "mace_omol",
+  "initial_energy_eV": -2079.8644740509762,
+  "final_energy_eV": -2079.8661957042827,
+  "converged": true,
+  "num_steps": 0,
+  "runtime_s": 4.755797624588013,
+  "files": {
+    "initial_geometry": "initial.xyz",
+    "optimized_geometry": "optimized.xyz"
+  }
+}

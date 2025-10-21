@@ -27,6 +27,10 @@ from typing import Tuple, Optional, Dict
 import logging
 from diagnostics import diagnose_python_environment, test_espaloma_functionality
 from charge_analysis import ChargeAnalyzer
+from results_manager import ResultsManager
+from gaussian_parser import parse_gaussian_log
+import time
+import shutil
 
 
 
@@ -801,176 +805,360 @@ def setup_output_directory(base_name: str) -> str:
     
     return output_dir
 
+def run_geometry_optimization(
+    atoms,
+    molecule_name: str,
+    results_mgr: ResultsManager,
+    calculator_name: str = "mace_omol"
+):
+    """
+    Run geometry optimization and save results.
+    
+    Parameters
+    ----------
+    atoms : ase.Atoms
+        Initial molecular structure
+    molecule_name : str
+        Name of the molecule
+    results_mgr : ResultsManager
+        Results manager instance
+    calculator_name : str
+        Name of calculator to use for optimization
+        
+    Returns
+    -------
+    ase.Atoms
+        Optimized molecular structure
+    """
+    print("=" * 60)
+    print("GEOMETRY OPTIMIZATION")
+    print("=" * 60)
+    print(f"Calculator: {calculator_name}")
+    
+    # Store initial structure
+    initial_atoms = atoms.copy()
+    initial_energy = atoms.get_potential_energy()
+    
+    # Track optimization
+    start_time = time.time()
+    
+    # Run optimization
+    optimized_atoms = geometry_optimisation(atoms)
+    
+    # Get final energy
+    final_energy = optimized_atoms.get_potential_energy()
+    runtime = time.time() - start_time
+    
+    # Save results
+    results_mgr.save_optimization_results(
+        molecule_name=molecule_name,
+        initial_atoms=initial_atoms,
+        final_atoms=optimized_atoms,
+        calculator_name=calculator_name,
+        initial_energy=initial_energy,
+        final_energy=final_energy,
+        converged=True,  # geometry_optimisation returns when converged
+        num_steps=0,  # TODO: track this if needed
+        runtime=runtime
+    )
+    
+    print(f"Runtime: {runtime:.1f} seconds")
+    print("=" * 60 + "\n")
+    
+    return optimized_atoms
+
+
+def run_frequency_calculation(
+    atoms,
+    molecule_name: str,
+    energy_calculator_name: str,
+    dipole_calculator_name: str,
+    results_mgr: ResultsManager,
+    charge: int = 0,
+    multiplicity: int = 1
+):
+    """
+    Run frequency calculation with specified calculators.
+    
+    Parameters
+    ----------
+    atoms : ase.Atoms
+        Optimized molecular structure
+    molecule_name : str
+        Name of the molecule
+    energy_calculator_name : str
+        Name of energy calculator (e.g., 'mace_mp', 'mace_off')
+    dipole_calculator_name : str
+        Name of dipole calculator (e.g., 'espaloma', 'xtb')
+    results_mgr : ResultsManager
+        Results manager instance
+    charge : int
+        Molecular charge
+    multiplicity : int
+        Spin multiplicity
+        
+    Returns
+    -------
+    bool
+        True if successful, False otherwise
+    """
+    print("=" * 60)
+    print(f"FREQUENCY CALCULATION: {energy_calculator_name} + {dipole_calculator_name}")
+    print("=" * 60)
+    
+    timestamp = time.strftime("%Y%m%d_%H%M%S")
+    start_time = time.time()
+    
+    try:
+        # Setup calculator for energy
+        calc = calculator(energy_calculator_name)
+        mol = atoms.copy()
+        mol.calc = calc
+        
+        # Set charge and spin
+        mol.info["charge"] = float(charge)
+        mol.info["spin"] = float(multiplicity)
+        
+        # Create frequency directory
+        freq_dir = results_mgr.create_frequency_directory(
+            molecule_name, energy_calculator_name, dipole_calculator_name, timestamp
+        )
+        
+        # Generate Gaussian input file in the working directory first
+        # Use a temporary name to avoid conflicts
+        temp_basename = f"temp_{energy_calculator_name}_{dipole_calculator_name}_{timestamp}"
+        gjf_temp = f"{temp_basename}.gjf"
+        
+        # Create Gaussian input
+        ase_to_gjf(mol, gjf_temp, charge=charge, multiplicity=multiplicity)
+        
+        print(f"  → Gaussian input: {gjf_temp}")
+        
+        # Run Gaussian calculation
+        print("  → Launching Gaussian...")
+        proc = subprocess.Popen(["g16", gjf_temp])
+        
+        # ZMQ server for external interface
+        counter = 0
+        with zmq_server(".ipc_file") as socket:
+            while not is_calc_finished(proc, socket):
+                logger.info(f"Calculation step {counter}")
+                counter += 1
+                msg = socket.recv_string()
+                
+                try:
+                    run_next_calculation(
+                        mol,
+                        msg,
+                        calc,
+                        dipole_method=dipole_calculator_name,
+                        calculate_derivatives=True
+                    )
+                    socket.send_string("ready")
+                    
+                except Exception as e:
+                    logger.error(f"Calculation step failed: {e}")
+                    socket.send_string("error")
+                    return False
+        
+        runtime = time.time() - start_time
+        
+        # Now move the files to the frequency directory
+        log_temp = gjf_temp.replace('.gjf', '.log')
+        chk_temp = gjf_temp.replace('.gjf', '.chk')
+        
+        gjf_final = str(freq_dir / "gaussian_freq.gjf")
+        log_final = str(freq_dir / "gaussian_freq.log")
+        
+        # Move files (not copy, since they're in different locations)
+        if os.path.exists(gjf_temp):
+            shutil.move(gjf_temp, gjf_final)
+        if os.path.exists(log_temp):
+            shutil.move(log_temp, log_final)
+        # Clean up checkpoint file
+        if os.path.exists(chk_temp):
+            os.remove(chk_temp)
+        
+                # Parse Gaussian log file to extract frequencies
+        parsed_data = {}
+        if os.path.exists(log_final):
+            try:
+                logger.info("Parsing Gaussian log file...")
+                parsed_data = parse_gaussian_log(log_final)
+                
+                # Convert energy from Hartree to eV if available
+                if parsed_data.get('final_energy_hartree'):
+                    EV_TO_HARTREE = 27.211386246
+                    final_energy = parsed_data['final_energy_hartree'] * EV_TO_HARTREE
+                else:
+                    final_energy = mol.get_potential_energy()
+                    
+            except Exception as e:
+                logger.error(f"Failed to parse Gaussian log: {e}")
+                parsed_data = {'harmonic': [], 'anharmonic': []}
+                final_energy = mol.get_potential_energy()
+        else:
+            parsed_data = {'harmonic': [], 'anharmonic': []}
+            final_energy = mol.get_potential_energy()
+        
+        results_mgr.save_frequency_results(
+            molecule_name=molecule_name,
+            energy_calculator=energy_calculator_name,
+            dipole_calculator=dipole_calculator_name,
+            calculator_type="ml",
+            frequencies_data={
+                'harmonic': parsed_data.get('harmonic', []),
+                'anharmonic': parsed_data.get('anharmonic', [])
+            },
+            energy=final_energy,
+            dipole=parsed_data.get('dipole_moment'),
+            runtime=runtime,
+            gaussian_log=log_final if os.path.exists(log_final) else None,
+            gaussian_gjf=gjf_final if os.path.exists(gjf_final) else None,
+            timestamp=timestamp
+        )
+        
+        print(f"  ✓ Completed in {runtime:.1f} seconds")
+        print("=" * 60 + "\n")
+        
+        return True
+        
+    except Exception as e:
+        logger.error(f"Frequency calculation failed: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        print("  ✗ FAILED")
+        print("=" * 60 + "\n")
+        return False
+
 ####################################################################
 ##                   SCRIPT EXECUTION STARTS HERE                 ##
 ####################################################################
 
 if __name__ == "__main__":
     # ========================================================================
-    # DIAGNOSTIC MODE - Run diagnostics if requested
+    # DIAGNOSTIC MODE
     # ========================================================================
-
-    # Configuration options
-    DIPOLE_METHOD = "mace_ml"  # Options: 'auto', 'mace_ml', 'espaloma', 'xtb'
-    CALCULATE_DIPOLE_DERIVATIVES = True
-
-    # Note: espaloma is recommended for organic molecules
-    # 'auto' will select the best available calculator in this order:
-    # 1. mace_ml (if mace_dipole_core is available - currently has a bug)
-    # 2. espaloma (if espaloma_charge + rdkit are installed) \u2713 RECOMMENDED
-    # 3. xtb (if xtb-python is installed)
-    # 4. geometry (fallback - crude electronegativity-based estimation)
-
-    # Print available dipole calculators
-    logger.info("Available dipole calculators:")
-    for name, available in dipole_factory.list_available().items():
-        status = "\u2713" if available else "\u2717"
-        logger.info(f"  {status} {name}")
-
-    # Check for input file
-    if len(sys.argv) < 2 or sys.argv[1].startswith("--"):
+    if len(sys.argv) > 1 and sys.argv[1] == "--diagnose":
+        print("=" * 60)
+        print("DIAGNOSTIC MODE")
+        print("=" * 60)
+        print("\nAvailable dipole calculators:")
+        for name, available in dipole_factory.list_available().items():
+            status = "✓" if available else "✗"
+            print(f"  {status} {name}")
+        print("\n" + "=" * 60)
+        sys.exit(0)
+    
+    # ========================================================================
+    # CHECK FOR INPUT FILE
+    # ========================================================================
+    if len(sys.argv) < 2:
         print("Usage: python gm_main.py molecule.xyz")
         print("       python gm_main.py --diagnose")
         sys.exit(1)
-
+    
     # ========================================================================
-    # MAIN EXECUTION
+    # CONFIGURATION
     # ========================================================================
-
-    # pass initial file as argument when running script in .xyz or .cif format
+    OPTIMIZATION_CALCULATOR = "mace_omol"
+    
+    # For now, hardcode one combination - we'll add CLI later
+    ENERGY_CALCULATORS = ["mace_mp", "mace_off", "mace_omol"]
+    DIPOLE_CALCULATORS = ["espaloma", "xtb", "mace_ml"]
+    
+    # ========================================================================
+    # MAIN WORKFLOW
+    # ========================================================================
+    
+    # Read initial structure
     initial_coords = sys.argv[1]
-
+    molecule_name = Path(initial_coords).stem  # e.g., 'acoh' from 'acoh.xyz'
+    
+    print("\n" + "=" * 60)
+    print("MACE-GAUSSIAN COMPARISON FRAMEWORK")
+    print("=" * 60)
+    print(f"Molecule: {molecule_name}")
+    print(f"Input: {initial_coords}")
+    print("=" * 60 + "\n")
+    
+    # Initialize results manager
+    results_mgr = ResultsManager(base_output_dir="comparison_results")
+    
     # Read molecule
     mol = read(initial_coords)
-
-    # *** NEW: Set default charge and spin for MACE-OMOL ***
-    # These are defaults for neutral, closed-shell (singlet) molecules
-    # Gaussian will override these with actual values when it calls back
-    mol.info["charge"] = 0.0  # Neutral molecule
-    mol.info["spin"] = 1.0  # Singlet state (all electrons paired, 2S+1 = 1)
-
-    print("\n" + "=" * 60)
-    print("INITIAL MOLECULE SETUP")
-    print("=" * 60)
-    print(f"Loaded: {initial_coords}")
-    print(f"Atoms: {len(mol)}")
-    print(f"Initial charge: {mol.info['charge']}")
-    print(f"Initial spin multiplicity: {mol.info['spin']}")
-    print("=" * 60 + "\n")
-
-    # Initialize calculator and do geometry optimization
-    # *** CHANGED: Using mace_omol instead of mace_mp ***
-    calc = calculator("mace_omol")  # Options: 'mace_mp', 'mace_off', 'mace_omol'
+    mol.info["charge"] = 0.0
+    mol.info["spin"] = 1.0
+    
+    # Setup calculator for optimization
+    calc = calculator(OPTIMIZATION_CALCULATOR)
     mol.calc = calc
-
+    
+    # ========================================================================
+    # PHASE 1: GEOMETRY OPTIMIZATION
+    # ========================================================================
+    try:
+        optimized_mol = run_geometry_optimization(
+            mol, 
+            molecule_name, 
+            results_mgr,
+            OPTIMIZATION_CALCULATOR
+        )
+    except Exception as e:
+        logger.error(f"Geometry optimization failed: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        sys.exit(1)
+    
+    # ========================================================================
+    # PHASE 2: FREQUENCY CALCULATIONS WITH DIFFERENT METHODS
+    # ========================================================================
+    
+    # Get charge and spin for frequency calculations
+    charge = int(optimized_mol.info.get("charge", 0))
+    multiplicity = int(optimized_mol.info.get("spin", 1))
+    
     print("=" * 60)
-    print("GEOMETRY OPTIMIZATION")
+    print("FREQUENCY CALCULATIONS")
     print("=" * 60)
-    mol = geometry_optimisation(mol)
+    print(f"Energy calculators: {ENERGY_CALCULATORS}")
+    print(f"Dipole calculators: {DIPOLE_CALCULATORS}")
     print("=" * 60 + "\n")
-
-    # *** NEW CODE - Complete charge analysis to file ***
-    print("=" * 60)
-    print("MOLECULAR PROPERTY ANALYSIS")
+    
+    # Run all combinations
+    results = []
+    for energy_calc in ENERGY_CALCULATORS:
+        for dipole_calc in DIPOLE_CALCULATORS:
+            success = run_frequency_calculation(
+                optimized_mol,
+                molecule_name,
+                energy_calc,
+                dipole_calc,
+                results_mgr,
+                charge,
+                multiplicity
+            )
+            results.append({
+                'energy': energy_calc,
+                'dipole': dipole_calc,
+                'success': success
+            })
+    
+    # ========================================================================
+    # SUMMARY
+    # ========================================================================
+    print("\n" + "=" * 60)
+    print("CALCULATION SUMMARY")
     print("=" * 60)
     
-    try:
-        print("  → Calculating partial charges with Espaloma...")
-        dipole_calc = dipole_factory.get_calculator(DIPOLE_METHOD)
-        dipole, charges = dipole_calc.calculate_dipole(mol)
-        
-        if charges is not None and CHARGE_ANALYSIS_AVAILABLE:
-            mol.set_initial_charges(charges)
-            print(f"  ✓ Charges calculated for {len(charges)} atoms")
-            
-            # Create organized output directory
-            base_name = initial_coords.replace('.xyz', '').replace('.cif', '')
-            output_dir = setup_output_directory(base_name)
-            
-            # Create analyzer and run analysis
-            print("  → Running comprehensive charge analysis...")
-            analyzer = ChargeAnalyzer(mol, charges)
-            
-            # Auto-detect groups (same as before)
-            groups = None
-            symbols = mol.get_chemical_symbols()
-            if symbols.count('C') == 2 and symbols.count('O') == 2:
-                c_indices = [i for i, s in enumerate(symbols) if s == 'C']
-                if len(c_indices) == 2:
-                    h_indices = [i for i, s in enumerate(symbols) if s == 'H']
-                    o_indices = [i for i, s in enumerate(symbols) if s == 'O']
-                    groups = {
-                        'methyl': [c_indices[0]] + h_indices[:3],
-                        'carboxyl': [c_indices[1]] + o_indices + h_indices[3:]
-                    }
-                    print(f"  ✓ Auto-detected groups: {list(groups.keys())}")
-            
-            # Run complete analysis
-            analyzer.analyze_all_to_file(
-                filename='charge_analysis_report.txt',
-                groups=groups,
-                save_plots=True,
-                output_dir=output_dir
-            )
-            
-            print(f"  ✓ All results in: {output_dir}/")
-            print("=" * 60 + "\n")
-            
-    except Exception as e:
-        logger.warning(f"Charge analysis failed: {e}")
-        import traceback
-        logger.debug(traceback.format_exc())
-        print("=" * 60 + "\n")
-
-    # Generate Gaussian input file
-    gjf_filename = initial_coords[:-4] + "_freq_anharm.gjf"
-
-    # *** NEW: Get charge and spin from atoms.info for Gaussian input ***
-    charge = int(mol.info.get("charge", 0))
-    multiplicity = int(mol.info.get("spin", 1))
-
-    ase_to_gjf(mol, gjf_filename, charge=charge, multiplicity=multiplicity)
-
-    print("=" * 60)
-    print("GAUSSIAN INPUT FILE GENERATED")
-    print("=" * 60)
-    print(f"File: {gjf_filename}")
-    print(f"Charge: {charge}")
-    print(f"Spin Multiplicity: {multiplicity}")
-    print("=" * 60 + "\n")
-
-    # Start gaussian as subprocess
-    print("=" * 60)
-    print("LAUNCHING GAUSSIAN")
-    print("=" * 60)
-    proc = subprocess.Popen(["g16", "./" + gjf_filename])
-
-    # From here the 'server' starts and waits for the request of the client.
-    counter = 0
-    with zmq_server(".ipc_file") as socket:
-        while not is_calc_finished(proc, socket):
-            logger.info(f"NNP calculation run {counter}")
-            counter += 1
-            # add possibility to send 2 different strings, where one signals error
-            msg = socket.recv_string()
-
-            try:
-                run_next_calculation(
-                    mol,
-                    msg,
-                    calc,
-                    dipole_method=DIPOLE_METHOD,
-                    calculate_derivatives=CALCULATE_DIPOLE_DERIVATIVES,
-                )
-                # currently the content doesn't matter, maybe add possibility to signal error
-                socket.send_string("ready")
-
-            except Exception as e:
-                logger.error(f"Calculation failed: {e}")
-                socket.send_string("error")
-
-    logger.info("Calculation completed successfully!")
-
-    print("\n" + "=" * 60)
-    print("CALCULATION COMPLETED SUCCESSFULLY!")
+    successful = sum(1 for r in results if r['success'])
+    total = len(results)
+    
+    print(f"Completed: {successful}/{total} calculations")
+    print("\nResults saved to: comparison_results/{}/".format(molecule_name))
+    
+    for r in results:
+        status = "✓" if r['success'] else "✗"
+        print(f"  {status} {r['energy']} + {r['dipole']}")
+    
     print("=" * 60)
