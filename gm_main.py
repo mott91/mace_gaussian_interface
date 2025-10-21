@@ -1050,9 +1050,8 @@ if __name__ == "__main__":
     # ========================================================================
     OPTIMIZATION_CALCULATOR = "mace_omol"
     
-    # For now, hardcode one combination - we'll add CLI later
     ENERGY_CALCULATORS = ["mace_mp", "mace_omol"]
-    DIPOLE_CALCULATORS = ["mace_ml"]
+    DIPOLE_CALCULATORS = ["espaloma", "mace_ml"]
     
     # ========================================================================
     # MAIN WORKFLOW

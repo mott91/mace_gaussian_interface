@@ -170,7 +170,7 @@ class ResultsManager:
         with open(json_path, 'w') as f:
             json.dump(metadata, f, indent=2)
             
-        logger.info(f"✓ Saved optimization results to {opt_dir}")
+        logger.info(f"\u2713 Saved optimization results to {opt_dir}")
         
     def save_frequency_results(
         self,
@@ -208,9 +208,9 @@ class ResultsManager:
         runtime : float
             Runtime in seconds
         gaussian_log : str, optional
-            Path to Gaussian log file (should already be in freq_dir)
+            Path to Gaussian log file to copy
         gaussian_gjf : str, optional
-            Path to Gaussian input file (should already be in freq_dir)
+            Path to Gaussian input file to copy
         timestamp : str, optional
             Timestamp for directory name
         """
@@ -218,19 +218,15 @@ class ResultsManager:
             molecule_name, energy_calculator, dipole_calculator, timestamp
         )
         
-        # Just record the filenames - files should already be in place
+        # Copy Gaussian files if provided
         files = {}
-        if gaussian_log:
-            # Check if file exists and record relative name
-            log_path = Path(gaussian_log)
-            if log_path.exists():
-                files["gaussian_log"] = log_path.name
-                
-        if gaussian_gjf:
-            # Check if file exists and record relative name
-            gjf_path = Path(gaussian_gjf)
-            if gjf_path.exists():
-                files["gaussian_input"] = gjf_path.name
+        if gaussian_log and os.path.exists(gaussian_log):
+            shutil.copy2(gaussian_log, freq_dir / "gaussian_freq.log")
+            files["gaussian_log"] = "gaussian_freq.log"
+            
+        if gaussian_gjf and os.path.exists(gaussian_gjf):
+            shutil.copy2(gaussian_gjf, freq_dir / "gaussian_freq.gjf")
+            files["gaussian_input"] = "gaussian_freq.gjf"
         
         # Create metadata
         metadata = {
@@ -251,7 +247,7 @@ class ResultsManager:
         with open(json_path, 'w') as f:
             json.dump(metadata, f, indent=2)
             
-        logger.info(f"✓ Saved frequency results to {freq_dir}")
+        logger.info(f"\u2713 Saved frequency results to {freq_dir}")
         
     def load_optimization_results(self, molecule_name: str) -> Dict[str, Any]:
         """
