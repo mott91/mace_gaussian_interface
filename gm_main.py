@@ -1022,99 +1022,180 @@ def run_frequency_calculation(
 ##                   SCRIPT EXECUTION STARTS HERE                 ##
 ####################################################################
 
-if __name__ == "__main__":
-    # ========================================================================
-    # DIAGNOSTIC MODE
-    # ========================================================================
-    if len(sys.argv) > 1 and sys.argv[1] == "--diagnose":
-        print("=" * 60)
-        print("DIAGNOSTIC MODE")
-        print("=" * 60)
-        print("\nAvailable dipole calculators:")
-        for name, available in dipole_factory.list_available().items():
-            status = "✓" if available else "✗"
-            print(f"  {status} {name}")
-        print("\n" + "=" * 60)
-        sys.exit(0)
+# INSTRUCTIONS: Add these sections to gm_main.py
+# Replace the entire "if __name__ == '__main__':" section with these functions
+
+####################################################################
+##                   DIAGNOSTIC FUNCTION                          ##
+####################################################################
+
+def print_diagnostics():
+    """Print diagnostic information about available calculators."""
+    print("=" * 60)
+    print("DIAGNOSTIC MODE")
+    print("=" * 60)
+    print("\nAvailable dipole calculators:")
+    for name, available in dipole_factory.list_available().items():
+        status = "✓" if available else "✗"
+        print(f"  {status} {name}")
+    print("\n" + "=" * 60)
+
+
+####################################################################
+##                   MAIN WORKFLOW FUNCTION                       ##
+####################################################################
+
+def run_workflow(
+    input_file: str,
+    optimization_calculator: str = "mace_omol",
+    energy_calculators: list = None,
+    dipole_calculators: list = None,
+    force_optimization: bool = False,
+    include_dft_baselines: bool = True,
+    base_output_dir: str = "comparison_results"
+):
+    """
+    Run the complete MACE-Gaussian comparison workflow.
     
-    # ========================================================================
-    # CHECK FOR INPUT FILE
-    # ========================================================================
-    if len(sys.argv) < 2:
-        print("Usage: python gm_main.py molecule.xyz")
-        print("       python gm_main.py --diagnose")
-        sys.exit(1)
+    Parameters
+    ----------
+    input_file : str
+        Path to input XYZ file
+    optimization_calculator : str
+        Calculator to use for geometry optimization (default: 'mace_omol')
+    energy_calculators : list, optional
+        List of energy calculators to use (default: ['mace_mp', 'mace_omol'])
+    dipole_calculators : list, optional
+        List of dipole calculators to use (default: ['espaloma', 'mace_ml'])
+    force_optimization : bool
+        If True, force re-optimization even if optimized geometry exists (default: False)
+    include_dft_baselines : bool
+        If True, run DFT baseline calculations (default: True)
+    base_output_dir : str
+        Base directory for results (default: 'comparison_results')
+        
+    Returns
+    -------
+    dict
+        Summary of results with success status for each calculation
+    """
+    from dft_baseline import run_all_dft_baselines
     
-    # ========================================================================
-    # CONFIGURATION
-    # ========================================================================
-    OPTIMIZATION_CALCULATOR = "mace_omol"
+    # Set defaults
+    if energy_calculators is None:
+        energy_calculators = ["mace_mp", "mace_omol"]
+    if dipole_calculators is None:
+        dipole_calculators = ["espaloma", "mace_ml"]
     
-    ENERGY_CALCULATORS = ["mace_mp", "mace_omol"]
-    DIPOLE_CALCULATORS = ["espaloma", "mace_ml"]
-    
-    # ========================================================================
-    # MAIN WORKFLOW
-    # ========================================================================
-    
-    # Read initial structure
-    initial_coords = sys.argv[1]
-    molecule_name = Path(initial_coords).stem  # e.g., 'acoh' from 'acoh.xyz'
+    # Extract molecule name
+    molecule_name = Path(input_file).stem
     
     print("\n" + "=" * 60)
     print("MACE-GAUSSIAN COMPARISON FRAMEWORK")
     print("=" * 60)
     print(f"Molecule: {molecule_name}")
-    print(f"Input: {initial_coords}")
+    print(f"Input: {input_file}")
     print("=" * 60 + "\n")
     
     # Initialize results manager
-    results_mgr = ResultsManager(base_output_dir="comparison_results")
-    
-    # Read molecule
-    mol = read(initial_coords)
-    mol.info["charge"] = 0.0
-    mol.info["spin"] = 1.0
-    
-    # Setup calculator for optimization
-    calc = calculator(OPTIMIZATION_CALCULATOR)
-    mol.calc = calc
+    results_mgr = ResultsManager(base_output_dir=base_output_dir)
     
     # ========================================================================
     # PHASE 1: GEOMETRY OPTIMIZATION
     # ========================================================================
-    try:
-        optimized_mol = run_geometry_optimization(
-            mol, 
-            molecule_name, 
-            results_mgr,
-            OPTIMIZATION_CALCULATOR
-        )
-    except Exception as e:
-        logger.error(f"Geometry optimization failed: {e}")
-        import traceback
-        logger.error(traceback.format_exc())
-        sys.exit(1)
     
-    # ========================================================================
-    # PHASE 2: FREQUENCY CALCULATIONS WITH DIFFERENT METHODS
-    # ========================================================================
+    # Check if optimized geometry already exists
+    opt_dir = results_mgr.create_optimization_directory(molecule_name)
+    opt_file = opt_dir / "optimized.xyz"
     
-    # Get charge and spin for frequency calculations
+    if opt_file.exists() and not force_optimization:
+        print("=" * 60)
+        print("GEOMETRY OPTIMIZATION")
+        print("=" * 60)
+        print("✓ Found existing optimized geometry")
+        print(f"  Loading from: {opt_file}")
+        print("  (use --force-optimization to re-run)")
+        
+        optimized_mol = read(str(opt_file))
+        
+        # Load metadata to get charge and spin
+        json_file = opt_dir / "results.json"
+        if json_file.exists():
+            import json
+            with open(json_file, 'r') as f:
+                opt_metadata = json.load(f)
+            # Note: charge/spin might not be in old metadata, use defaults
+            optimized_mol.info["charge"] = 0.0
+            optimized_mol.info["spin"] = 1.0
+        else:
+            optimized_mol.info["charge"] = 0.0
+            optimized_mol.info["spin"] = 1.0
+        
+        print("=" * 60 + "\n")
+    else:
+        if force_optimization and opt_file.exists():
+            print("=" * 60)
+            print("GEOMETRY OPTIMIZATION")
+            print("=" * 60)
+            print("⚠ Forcing re-optimization (existing geometry will be overwritten)")
+            print("=" * 60 + "\n")
+        
+        # Read initial structure
+        mol = read(input_file)
+        mol.info["charge"] = 0.0
+        mol.info["spin"] = 1.0
+        
+        # Setup calculator for optimization
+        calc = calculator(optimization_calculator)
+        mol.calc = calc
+        
+        try:
+            optimized_mol = run_geometry_optimization(
+                mol, 
+                molecule_name, 
+                results_mgr,
+                optimization_calculator
+            )
+        except Exception as e:
+            logger.error(f"Geometry optimization failed: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
+            raise
+    
+    # Get charge and spin for subsequent calculations
     charge = int(optimized_mol.info.get("charge", 0))
     multiplicity = int(optimized_mol.info.get("spin", 1))
     
+    # ========================================================================
+    # PHASE 2: DFT BASELINE CALCULATIONS
+    # ========================================================================
+    
+    dft_results = {}
+    if include_dft_baselines:
+        dft_results = run_all_dft_baselines(
+            optimized_mol,
+            molecule_name,
+            results_mgr,
+            charge,
+            multiplicity,
+            skip_if_exists=True
+        )
+    
+    # ========================================================================
+    # PHASE 3: ML FREQUENCY CALCULATIONS WITH DIFFERENT METHODS
+    # ========================================================================
+    
     print("=" * 60)
-    print("FREQUENCY CALCULATIONS")
+    print("ML FREQUENCY CALCULATIONS")
     print("=" * 60)
-    print(f"Energy calculators: {ENERGY_CALCULATORS}")
-    print(f"Dipole calculators: {DIPOLE_CALCULATORS}")
+    print(f"Energy calculators: {energy_calculators}")
+    print(f"Dipole calculators: {dipole_calculators}")
     print("=" * 60 + "\n")
     
     # Run all combinations
-    results = []
-    for energy_calc in ENERGY_CALCULATORS:
-        for dipole_calc in DIPOLE_CALCULATORS:
+    ml_results = []
+    for energy_calc in energy_calculators:
+        for dipole_calc in dipole_calculators:
             success = run_frequency_calculation(
                 optimized_mol,
                 molecule_name,
@@ -1124,7 +1205,7 @@ if __name__ == "__main__":
                 charge,
                 multiplicity
             )
-            results.append({
+            ml_results.append({
                 'energy': energy_calc,
                 'dipole': dipole_calc,
                 'success': success
@@ -1137,14 +1218,59 @@ if __name__ == "__main__":
     print("CALCULATION SUMMARY")
     print("=" * 60)
     
-    successful = sum(1 for r in results if r['success'])
-    total = len(results)
+    # DFT baselines summary
+    if dft_results:
+        print("\nDFT Baselines:")
+        for baseline, success in dft_results.items():
+            status = "✓" if success else "✗"
+            print(f"  {status} {baseline}")
     
-    print(f"Completed: {successful}/{total} calculations")
-    print("\nResults saved to: comparison_results/{}/".format(molecule_name))
+    # ML calculations summary
+    print("\nML Calculations:")
+    successful_ml = sum(1 for r in ml_results if r['success'])
+    total_ml = len(ml_results)
     
-    for r in results:
+    print(f"Completed: {successful_ml}/{total_ml}")
+    
+    for r in ml_results:
         status = "✓" if r['success'] else "✗"
         print(f"  {status} {r['energy']} + {r['dipole']}")
     
+    print(f"\nResults saved to: {base_output_dir}/{molecule_name}/")
     print("=" * 60)
+    
+    return {
+        'dft_baselines': dft_results,
+        'ml_calculations': ml_results,
+        'molecule_name': molecule_name
+    }
+
+
+####################################################################
+##                   SCRIPT EXECUTION (LEGACY)                    ##
+####################################################################
+
+if __name__ == "__main__":
+    # ========================================================================
+    # DIAGNOSTIC MODE
+    # ========================================================================
+    if len(sys.argv) > 1 and sys.argv[1] == "--diagnose":
+        print_diagnostics()
+        sys.exit(0)
+    
+    # ========================================================================
+    # CHECK FOR INPUT FILE
+    # ========================================================================
+    if len(sys.argv) < 2:
+        print("Usage: python gm_main.py molecule.xyz")
+        print("       python gm_main.py --diagnose")
+        print("\nNote: Consider using the new CLI interface:")
+        print("       python cli.py run molecule.xyz [options]")
+        sys.exit(1)
+    
+    # Run workflow with defaults (legacy mode)
+    try:
+        run_workflow(sys.argv[1])
+    except Exception as e:
+        logger.error(f"Workflow failed: {e}")
+        sys.exit(1)

@@ -1,0 +1,55 @@
+{
+  "molecule": "water",
+  "energy_calculator": "wb97xd_def2tzvp",
+  "dipole_calculator": "wb97xd_def2tzvp",
+  "calculator_type": "dft",
+  "timestamp": null,
+  "frequencies": {
+    "harmonic": [
+      {
+        "freq_cm": 1639.6392,
+        "ir_intensity": 81.0217
+      },
+      {
+        "freq_cm": 3824.5176,
+        "ir_intensity": 6.0071
+      },
+      {
+        "freq_cm": 3930.6945,
+        "ir_intensity": 46.2877
+      }
+    ],
+    "anharmonic": [
+      {
+        "mode": 1,
+        "freq_cm": 3633.409,
+        "ir_intensity": 4.31819547,
+        "freq_harmonic": 3824.518
+      },
+      {
+        "mode": 2,
+        "freq_cm": 1580.6,
+        "ir_intensity": 80.41108586,
+        "freq_harmonic": 1639.639
+      },
+      {
+        "mode": 3,
+        "freq_cm": 3724.678,
+        "ir_intensity": 43.01332408,
+        "freq_harmonic": 3930.694
+      }
+    ]
+  },
+  "energy_eV": 0.102342023671206,
+  "dipole": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": -2.0842319086,
+    "magnitude": 2.0842319086
+  },
+  "runtime_s": 42.93314814567566,
+  "files": {
+    "gaussian_log": "gaussian_freq.log",
+    "gaussian_input": "gaussian_freq.gjf"
+  }
+}
