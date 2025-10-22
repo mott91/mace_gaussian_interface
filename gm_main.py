@@ -780,15 +780,15 @@ def setup_output_directory(base_name: str) -> str:
         Path to output directory
     """
     import os
-    from datetime import datetime
     
-    # Create main output directory
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_dir = f"{base_name}_analysis_{timestamp}"
+    # Create main output directory (no timestamp, will overwrite)
+    output_dir = f"{base_name}_analysis"
     
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
         print(f"  ✓ Created output directory: {output_dir}")
+    else:
+        print(f"  ✓ Using output directory: {output_dir} (will overwrite files)")
     
     return output_dir
 

@@ -1,0 +1,55 @@
+{
+  "molecule": "water",
+  "energy_calculator": "mace_omol",
+  "dipole_calculator": "espaloma",
+  "calculator_type": "ml",
+  "timestamp": null,
+  "frequencies": {
+    "harmonic": [
+      {
+        "freq_cm": 1621.8515,
+        "ir_intensity": 706.0973
+      },
+      {
+        "freq_cm": 3818.0578,
+        "ir_intensity": 358.6082
+      },
+      {
+        "freq_cm": 3918.3625,
+        "ir_intensity": 698.7514
+      }
+    ],
+    "anharmonic": [
+      {
+        "mode": 1,
+        "freq_cm": 3643.79,
+        "ir_intensity": 338.50503807,
+        "freq_harmonic": 3818.058
+      },
+      {
+        "mode": 2,
+        "freq_cm": 1570.25,
+        "ir_intensity": 715.43685635,
+        "freq_harmonic": 1621.851
+      },
+      {
+        "mode": 3,
+        "freq_cm": 3739.402,
+        "ir_intensity": 683.55260654,
+        "freq_harmonic": 3918.363
+      }
+    ]
+  },
+  "energy_eV": 0.10008347861278799,
+  "dipole": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": -2.081479705782156,
+    "magnitude": 2.081479705782156
+  },
+  "runtime_s": 20.243698835372925,
+  "files": {
+    "gaussian_log": "gaussian_freq.log",
+    "gaussian_input": "gaussian_freq.gjf"
+  }
+}

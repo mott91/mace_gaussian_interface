@@ -73,37 +73,19 @@ class ResultsManager:
         molecule_name: str,
         energy_calculator: str,
         dipole_calculator: str,
-        timestamp: Optional[str] = None
+        timestamp: Optional[str] = None  # Keep parameter for compatibility but ignore it
     ) -> Path:
         """
         Create directory for frequency calculation results.
-        
-        Parameters
-        ----------
-        molecule_name : str
-            Name of the molecule
-        energy_calculator : str
-            Energy calculator name (e.g., 'mace_mp', 'dft_wB97MV')
-        dipole_calculator : str
-            Dipole calculator name (e.g., 'espaloma', 'xtb')
-        timestamp : str, optional
-            Timestamp string, generated if not provided
-            
-        Returns
-        -------
-        Path
-            Path to frequency calculation directory
+        ...
         """
-        if timestamp is None:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            
         mol_dir = self.create_molecule_directory(molecule_name)
-        
-        # Create directory name
-        dir_name = f"{energy_calculator}_{dipole_calculator}_{timestamp}"
+
+        # Create directory name (no timestamp, will overwrite)
+        dir_name = f"{energy_calculator}_{dipole_calculator}"
         freq_dir = mol_dir / dir_name
         freq_dir.mkdir(exist_ok=True)
-        
+
         return freq_dir
         
     def save_optimization_results(
@@ -218,14 +200,20 @@ class ResultsManager:
             molecule_name, energy_calculator, dipole_calculator, timestamp
         )
         
-        # Copy Gaussian files if provided
+        # Copy Gaussian files if provided (skip if source and destination are the same)
         files = {}
         if gaussian_log and os.path.exists(gaussian_log):
-            shutil.copy2(gaussian_log, freq_dir / "gaussian_freq.log")
+            dest_log = freq_dir / "gaussian_freq.log"
+            # Only copy if source and destination are different files
+            if os.path.abspath(gaussian_log) != os.path.abspath(dest_log):
+                shutil.copy2(gaussian_log, dest_log)
             files["gaussian_log"] = "gaussian_freq.log"
             
         if gaussian_gjf and os.path.exists(gaussian_gjf):
-            shutil.copy2(gaussian_gjf, freq_dir / "gaussian_freq.gjf")
+            dest_gjf = freq_dir / "gaussian_freq.gjf"
+            # Only copy if source and destination are different files
+            if os.path.abspath(gaussian_gjf) != os.path.abspath(dest_gjf):
+                shutil.copy2(gaussian_gjf, dest_gjf)
             files["gaussian_input"] = "gaussian_freq.gjf"
         
         # Create metadata
@@ -234,7 +222,7 @@ class ResultsManager:
             "energy_calculator": energy_calculator,
             "dipole_calculator": dipole_calculator,
             "calculator_type": calculator_type,
-            "timestamp": timestamp or datetime.now().strftime("%Y%m%d_%H%M%S"),
+            "timestamp": None,
             "frequencies": frequencies_data,
             "energy_eV": float(energy),
             "dipole": dipole,
