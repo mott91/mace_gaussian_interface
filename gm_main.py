@@ -995,8 +995,11 @@ def run_frequency_calculation(
             calculator_type="ml",
             frequencies_data={
                 'harmonic': parsed_data.get('harmonic', []),
-                'anharmonic': parsed_data.get('anharmonic', [])
+                'anharmonic': parsed_data.get('anharmonic', []),
+                'overtones': parsed_data.get('overtones', []),
+                'combination_bands': parsed_data.get('combination_bands', [])
             },
+
             energy=final_energy,
             dipole=parsed_data.get('dipole_moment'),
             runtime=runtime,

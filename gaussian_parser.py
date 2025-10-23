@@ -85,12 +85,12 @@ class GaussianLogParser:
     
     def parse_anharmonic_frequencies(self) -> List[Dict[str, float]]:
         """
-        Parse anharmonic frequencies and IR intensities.
-
+        Parse anharmonic frequencies and IR intensities (Fundamental Bands only).
+        
         Returns
         -------
         list of dict
-            List of dictionaries with 'freq_cm' and 'ir_intensity' keys
+            List of dictionaries with 'mode', 'freq_cm', 'ir_intensity', and 'freq_harmonic' keys
         """
         frequencies = []
         
@@ -141,6 +141,117 @@ class GaussianLogParser:
         
         logger.info(f"Parsed {len(frequencies)} anharmonic frequencies")
         return frequencies
+    
+    def parse_overtones(self) -> List[Dict[str, float]]:
+        """
+        Parse overtones frequencies and IR intensities.
+        
+        Returns
+        -------
+        list of dict
+            List of dictionaries with 'mode', 'overtone_level', 'freq_harmonic', 
+            'freq_anharmonic', and 'ir_intensity' keys
+        """
+        overtones = []
+        
+        lines = self.content.split('\n')
+        in_overtones_section = False
+        
+        for i, line in enumerate(lines):
+            # Check if we're entering the Overtones section
+            if 'Overtones' in line and '---' in lines[i+1]:
+                # Look ahead to see if this section has intensities
+                for j in range(i, min(i+10, len(lines))):
+                    if 'I(anharm)' in lines[j] or 'DS(anharm)' in lines[j]:
+                        in_overtones_section = True
+                        break
+                continue
+            
+            # Check if we're leaving the overtones section
+            if in_overtones_section and 'Combination Bands' in line:
+                break
+            
+            if in_overtones_section:
+                # Match lines like:
+                #    1(2)                  7528.291   6994.185                     11.18668104
+                # Pattern: mode(overtone_level), harmonic freq, anharmonic freq, intensity
+                match = re.match(r'^\s*(\d+)\((\d+)\)\s+([\d\.]+)\s+([\d\.]+)\s+([\d\.]+)\s*$', line)
+                
+                if match:
+                    mode = int(match.group(1))
+                    overtone_level = int(match.group(2))
+                    freq_harm = float(match.group(3))
+                    freq_anharm = float(match.group(4))
+                    ir_intensity = float(match.group(5))
+                    
+                    overtones.append({
+                        'mode': mode,
+                        'overtone_level': overtone_level,
+                        'freq_harmonic': freq_harm,
+                        'freq_anharmonic': freq_anharm,
+                        'ir_intensity': ir_intensity
+                    })
+        
+        logger.info(f"Parsed {len(overtones)} overtones")
+        return overtones
+    
+    def parse_combination_bands(self) -> List[Dict[str, float]]:
+        """
+        Parse combination bands frequencies and IR intensities.
+        
+        Returns
+        -------
+        list of dict
+            List of dictionaries with 'mode1', 'mode2', 'freq_harmonic', 
+            'freq_anharmonic', and 'ir_intensity' keys
+        """
+        combination_bands = []
+        
+        lines = self.content.split('\n')
+        in_combination_section = False
+        
+        for i, line in enumerate(lines):
+            # Check if we're entering the Combination Bands section
+            if 'Combination Bands' in line and '---' in lines[i+1]:
+                # Look ahead to see if this section has intensities
+                for j in range(i, min(i+10, len(lines))):
+                    if 'I(anharm)' in lines[j] or 'DS(anharm)' in lines[j]:
+                        in_combination_section = True
+                        break
+                continue
+            
+            # Check if we're leaving the combination bands section
+            # (usually ends with another major section or analysis)
+            if in_combination_section and (
+                'Electric dipole :' in line or 
+                'Rotational Constants' in line or
+                line.strip().startswith('==')
+            ):
+                break
+            
+            if in_combination_section:
+                # Match lines like:
+                #    2(1)        1(1)      6953.940   6650.547                      0.03741575
+                # Pattern: mode1(1), mode2(1), harmonic freq, anharmonic freq, intensity
+                match = re.match(r'^\s*(\d+)\(1\)\s+(\d+)\(1\)\s+([\d\.]+)\s+([\d\.]+)\s+([\d\.]+)\s*$', line)
+                
+                if match:
+                    mode1 = int(match.group(1))
+                    mode2 = int(match.group(2))
+                    freq_harm = float(match.group(3))
+                    freq_anharm = float(match.group(4))
+                    ir_intensity = float(match.group(5))
+                    
+                    combination_bands.append({
+                        'mode1': mode1,
+                        'mode2': mode2,
+                        'freq_harmonic': freq_harm,
+                        'freq_anharmonic': freq_anharm,
+                        'ir_intensity': ir_intensity
+                    })
+        
+        logger.info(f"Parsed {len(combination_bands)} combination bands")
+        return combination_bands
     
     def parse_final_energy(self) -> Optional[float]:
         """
@@ -206,11 +317,13 @@ class GaussianLogParser:
         Returns
         -------
         dict
-            Dictionary with all parsed data
+            Dictionary with all parsed data including overtones and combination bands
         """
         return {
             'harmonic': self.parse_harmonic_frequencies(),
             'anharmonic': self.parse_anharmonic_frequencies(),
+            'overtones': self.parse_overtones(),
+            'combination_bands': self.parse_combination_bands(),
             'final_energy_hartree': self.parse_final_energy(),
             'dipole_moment': self.parse_dipole_moment()
         }

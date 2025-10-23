@@ -2,7 +2,7 @@
 Results Manager for organizing and saving calculation outputs.
 
 Handles directory structure, file naming, and JSON metadata writing
-for comparison framework.
+for comparison framework. Now includes overtones and combination bands.
 """
 
 import os
@@ -77,7 +77,6 @@ class ResultsManager:
     ) -> Path:
         """
         Create directory for frequency calculation results.
-        ...
         """
         mol_dir = self.create_molecule_directory(molecule_name)
 
@@ -169,7 +168,7 @@ class ResultsManager:
         timestamp: Optional[str] = None
     ):
         """
-        Save frequency calculation results.
+        Save frequency calculation results with overtones and combination bands.
         
         Parameters
         ----------
@@ -182,7 +181,7 @@ class ResultsManager:
         calculator_type : str
             Type of calculator ('ml' or 'dft')
         frequencies_data : dict
-            Dictionary with 'harmonic' and 'anharmonic' frequency data
+            Dictionary with 'harmonic', 'anharmonic', 'overtones', and 'combination_bands'
         energy : float
             Final energy in eV
         dipole : dict, optional

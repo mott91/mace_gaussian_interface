@@ -360,7 +360,9 @@ def run_dft_baseline_calculation(
             calculator_type="dft",
             frequencies_data={
                 'harmonic': parsed_data.get('harmonic', []),
-                'anharmonic': parsed_data.get('anharmonic', [])
+                'anharmonic': parsed_data.get('anharmonic', []),
+                'overtones': parsed_data.get('overtones', []),
+                'combination_bands': parsed_data.get('combination_bands', [])
             },
             energy=energy_ev,
             dipole=parsed_data.get('dipole_moment'),

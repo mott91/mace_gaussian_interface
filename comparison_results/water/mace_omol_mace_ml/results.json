@@ -38,6 +38,73 @@
         "ir_intensity": 49.18284415,
         "freq_harmonic": 3918.363
       }
+    ],
+    "overtones": [
+      {
+        "mode": 1,
+        "overtone_level": 2,
+        "freq_harmonic": 7636.116,
+        "freq_anharmonic": 7202.135,
+        "ir_intensity": 0.27509261
+      },
+      {
+        "mode": 2,
+        "overtone_level": 2,
+        "freq_harmonic": 3243.703,
+        "freq_anharmonic": 3104.707,
+        "ir_intensity": 0.81419603
+      },
+      {
+        "mode": 3,
+        "overtone_level": 2,
+        "freq_harmonic": 7836.725,
+        "freq_anharmonic": 7390.956,
+        "ir_intensity": 0.01850698
+      }
+    ],
+    "combination_bands": [
+      {
+        "mode1": 2,
+        "mode2": 1,
+        "freq_harmonic": 5439.909,
+        "freq_anharmonic": 5200.525,
+        "ir_intensity": 0.26218271
+      },
+      {
+        "mode1": 3,
+        "mode2": 1,
+        "freq_harmonic": 7736.42,
+        "freq_anharmonic": 7219.063,
+        "ir_intensity": 2.15822998
+      },
+      {
+        "mode1": 3,
+        "mode2": 2,
+        "freq_harmonic": 5540.214,
+        "freq_anharmonic": 5291.554,
+        "ir_intensity": 4.0370716
+      },
+      {
+        "mode1": 2,
+        "mode2": 1,
+        "freq_harmonic": 5439.909,
+        "freq_anharmonic": 5200.525,
+        "ir_intensity": 0.20112419
+      },
+      {
+        "mode1": 3,
+        "mode2": 1,
+        "freq_harmonic": 7736.42,
+        "freq_anharmonic": 7219.063,
+        "ir_intensity": 1.19268101
+      },
+      {
+        "mode1": 3,
+        "mode2": 2,
+        "freq_harmonic": 5540.214,
+        "freq_anharmonic": 5291.554,
+        "ir_intensity": 3.0436214
+      }
     ]
   },
   "energy_eV": 0.10008347861278799,
@@ -47,7 +114,7 @@
     "z": -1.034295509499536,
     "magnitude": 1.034295509499536
   },
-  "runtime_s": 22.55431866645813,
+  "runtime_s": 22.647413969039917,
   "files": {
     "gaussian_log": "gaussian_freq.log",
     "gaussian_input": "gaussian_freq.gjf"
