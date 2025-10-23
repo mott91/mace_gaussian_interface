@@ -8,6 +8,7 @@ for comparison with ML-enhanced calculations.
 import subprocess
 import time
 import logging
+import shutil
 from pathlib import Path
 from typing import Dict, Any, Optional
 from ase import Atoms
@@ -335,7 +336,23 @@ def run_dft_baseline_calculation(
             logger.error("Could not extract energy from log file")
             return False
         
-        # Save results
+        # Move Gaussian files to output directory
+        chk_file = gjf_file.replace('.gjf', '.chk')
+        
+        # Final paths in output directory
+        final_gjf = freq_dir / f"gaussian_dft.gjf"
+        final_log = freq_dir / f"gaussian_dft.log"
+        final_chk = freq_dir / f"gaussian_dft.chk"
+        
+        # Move/copy files
+        if Path(gjf_file).exists():
+            shutil.move(gjf_file, final_gjf)
+        if Path(log_file).exists():
+            shutil.move(log_file, final_log)
+        if Path(chk_file).exists():
+            shutil.move(chk_file, final_chk)
+        
+        # Save results (point to the final file locations)
         results_mgr.save_frequency_results(
             molecule_name=molecule_name,
             energy_calculator=calculator_name,
@@ -348,8 +365,8 @@ def run_dft_baseline_calculation(
             energy=energy_ev,
             dipole=parsed_data.get('dipole_moment'),
             runtime=runtime,
-            gaussian_log=log_file,
-            gaussian_gjf=gjf_file,
+            gaussian_log=str(final_log),
+            gaussian_gjf=str(final_gjf),
             timestamp=timestamp
         )
         
