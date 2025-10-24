@@ -5,7 +5,7 @@
   "final_energy_eV": -6234.310135282208,
   "converged": true,
   "num_steps": 0,
-  "runtime_s": 6.653573036193848,
+  "runtime_s": 7.515936613082886,
   "files": {
     "initial_geometry": "initial.xyz",
     "optimized_geometry": "optimized.xyz"

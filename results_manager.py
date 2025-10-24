@@ -73,18 +73,22 @@ class ResultsManager:
         molecule_name: str,
         energy_calculator: str,
         dipole_calculator: str,
-        timestamp: Optional[str] = None  # Keep parameter for compatibility but ignore it
+        timestamp: Optional[str] = None
     ) -> Path:
-        """
-        Create directory for frequency calculation results.
-        """
+        """Create directory for frequency calculation results."""
         mol_dir = self.create_molecule_directory(molecule_name)
-
-        # Create directory name (no timestamp, will overwrite)
-        dir_name = f"{energy_calculator}_{dipole_calculator}"
+    
+        # Create directory name - avoid duplication for DFT
+        if energy_calculator == dipole_calculator:
+            # For DFT where both calculators are the same
+            dir_name = energy_calculator
+        else:
+            # For ML where they're different
+            dir_name = f"{energy_calculator}_{dipole_calculator}"
+        
         freq_dir = mol_dir / dir_name
         freq_dir.mkdir(exist_ok=True)
-
+    
         return freq_dir
         
     def save_optimization_results(

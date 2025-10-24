@@ -59,16 +59,24 @@ class ComparisonWorkflow:
         
         logger.info(f"Initialized workflow for {molecule_name}")
     
-    def find_dft_baseline(self):
-        """Find DFT baseline by looking for calculator_type: 'dft'"""
-        for item in self.molecule_dir.iterdir():
-            if item.is_dir():
-                json_path = item / "results.json"
-                if json_path.exists():
-                    with open(json_path, 'r') as f:
-                        data = json.load(f)
-                        if data.get('calculator_type') == 'dft':
-                            return json_path
+    def find_dft_baseline(self) -> Optional[Path]:
+        """
+        Find DFT anharmonic baseline results
+        
+        Returns
+        -------
+        Path or None
+            Path to DFT baseline results.json
+        """
+        # Look for freq_anharm directory
+        dft_dir = self.molecule_dir / "freq_anharm"
+        if dft_dir.exists():
+            json_path = dft_dir / "results.json"
+            if json_path.exists():
+                logger.info(f"Found DFT baseline: {json_path}")
+                return json_path
+        
+        logger.warning("No DFT anharmonic baseline found!")
         return None
     
     def find_ml_results(self) -> List[Tuple[str, Path]]:
@@ -183,11 +191,15 @@ class ComparisonWorkflow:
         regression_plot_path = self.plots_dir / f"regression_{ml_name}.pdf"
         
         self.analyzer.plot_spectra_comparison(
-            ml_spectrum, dft_spectrum, ml_name, str(spectrum_plot_path)
+            ml_spectrum, dft_spectrum, ml_name, 
+            molecule_name=self.molecule_name,
+            save_path=str(spectrum_plot_path)
         )
         
         self.analyzer.plot_regression(
-            ml_spectrum, dft_spectrum, metrics, ml_name, str(regression_plot_path)
+            ml_spectrum, dft_spectrum, metrics, ml_name,
+            molecule_name=self.molecule_name,
+            save_path=str(regression_plot_path)
         )
         
         # Create comparison table
@@ -233,17 +245,40 @@ class ComparisonWorkflow:
         # Find DFT baseline
         dft_path = self.find_dft_baseline()
         if dft_path is None:
-            raise FileNotFoundError(
-                f"No DFT baseline found for {self.molecule_name}"
-            )
+            logger.error("=" * 60)
+            logger.error(f"NO DFT BASELINE FOUND FOR {self.molecule_name.upper()}")
+            logger.error("=" * 60)
+            logger.error(f"Searched in: {self.molecule_dir}")
+            logger.error("Could not find any directory with calculator_type='dft' in results.json")
+            logger.error("Analysis cannot proceed without DFT baseline for comparison.")
+            logger.error("=" * 60)
+            
+            # Return empty result instead of raising exception
+            return {
+                'molecule': self.molecule_name,
+                'comparisons': [],
+                'output_dir': self.output_dir,
+                'error': 'No DFT baseline found'
+            }
         
         # Find all ML results
         ml_results = self.find_ml_results()
         if not ml_results:
-            raise FileNotFoundError(
-                f"No ML results found for {self.molecule_name}"
-            )
+            logger.warning("=" * 60)
+            logger.warning(f"NO ML RESULTS FOUND FOR {self.molecule_name.upper()}")
+            logger.warning("=" * 60)
+            logger.warning(f"Searched in: {self.molecule_dir}")
+            logger.warning("No directories with calculator_type='ml' found.")
+            logger.warning("=" * 60)
+            
+            return {
+                'molecule': self.molecule_name,
+                'comparisons': [],
+                'output_dir': self.output_dir,
+                'error': 'No ML results found'
+            }
         
+        logger.info(f"Found DFT baseline: {dft_path.parent.name}")
         logger.info(f"Found {len(ml_results)} ML calculations to compare")
         
         # Run comparisons
@@ -257,26 +292,28 @@ class ComparisonWorkflow:
             except Exception as e:
                 logger.error(f"  [FAIL] {ml_name} failed: {e}")
         
-        # Save summary metrics
-        metrics_summary = {
-            'molecule': self.molecule_name,
-            'analysis_date': datetime.now().isoformat(),
-            'num_ml_calculators': len(comparisons),
-            'comparisons': [
-                {
-                    'name': c['name'],
-                    'mae_freq': c['metrics'].mae_freq,
-                    'rmse_freq': c['metrics'].rmse_freq,
-                    'r2_freq': c['metrics'].r2_freq,
-                    'r2_intensity': c['metrics'].r2_intensity,
-                    'speedup': c['speedup']
-                }
-                for c in comparisons
-            ]
-        }
-        
-        with open(self.data_dir / "metrics_summary.json", 'w') as f:
-            json.dump(metrics_summary, f, indent=2)
+        # Only save summary if we have comparisons
+        if comparisons:
+            # Save summary metrics
+            metrics_summary = {
+                'molecule': self.molecule_name,
+                'analysis_date': datetime.now().isoformat(),
+                'num_ml_calculators': len(comparisons),
+                'comparisons': [
+                    {
+                        'name': c['name'],
+                        'mae_freq': c['metrics'].mae_freq,
+                        'rmse_freq': c['metrics'].rmse_freq,
+                        'r2_freq': c['metrics'].r2_freq,
+                        'r2_intensity': c['metrics'].r2_intensity,
+                        'speedup': c['speedup']
+                    }
+                    for c in comparisons
+                ]
+            }
+            
+            with open(self.data_dir / "metrics_summary.json", 'w') as f:
+                json.dump(metrics_summary, f, indent=2)
         
         logger.info("=" * 60)
         logger.info("ANALYSIS COMPLETE")
@@ -307,7 +344,11 @@ class ComparisonWorkflow:
         
         generator.generate_report(analysis_results)
         
-        logger.info(f"HTML report generated: {self.output_dir}/report.html")
+        # Only show success message if we have comparisons
+        if analysis_results.get('comparisons'):
+            logger.info(f"HTML report generated: {self.output_dir}/report.html")
+        else:
+            logger.warning(f"Error report generated: {self.output_dir}/report.html")
 
 
 def analyze_molecule(molecule_name: str,

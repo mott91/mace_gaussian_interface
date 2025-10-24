@@ -282,9 +282,10 @@ class SpectrumAnalyzer:
                                ml_spectrum: SpectrumData,
                                dft_spectrum: SpectrumData,
                                ml_name: str,
+                               molecule_name: str = None,
                                save_path: Optional[str] = None) -> plt.Figure:
         """
-        Create comparison plot of broadened spectra
+        Create comparison plot of broadened spectra with modern design
         
         Parameters
         ----------
@@ -292,6 +293,8 @@ class SpectrumAnalyzer:
             Spectra to plot
         ml_name : str
             Name of ML calculator for title
+        molecule_name : str, optional
+            Name of molecule for title
         save_path : str, optional
             Path to save figure
             
@@ -300,54 +303,88 @@ class SpectrumAnalyzer:
         matplotlib.figure.Figure
             The created figure
         """
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), 
-                                       gridspec_kw={'height_ratios': [2, 1]})
+        # Modern color palette
+        DFT_COLOR = '#2E3440'      # Dark charcoal
+        ML_COLOR = '#88C0D0'       # Teal
+        STICK_DFT_COLOR = '#4C566A'  # Gray
+        STICK_ML_COLOR = '#81A1C1'   # Light blue
+        
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8), 
+                                       gridspec_kw={'height_ratios': [2.5, 1]})
         
         # Broaden spectra
         ml_broadened = self.broaden_spectrum(ml_spectrum)
         dft_broadened = self.broaden_spectrum(dft_spectrum)
         
-        # Panel A: Broadened spectra (transmittance style - inverted)
-        ax1.plot(self.freq_grid, -dft_broadened, 'k-', linewidth=1.5, 
-                label='DFT (anharmonic)', alpha=0.7)
-        ax1.plot(self.freq_grid, -ml_broadened, '-', linewidth=1.5, 
-                color='#E24A33', label=f'ML ({ml_name})')
+        # Panel A: Stacked absorbance spectra (peaks UP)
+        # Normalize spectra for better visualization
+        dft_norm = dft_broadened / np.max(dft_broadened) if np.max(dft_broadened) > 0 else dft_broadened
+        ml_norm = ml_broadened / np.max(ml_broadened) if np.max(ml_broadened) > 0 else ml_broadened
         
-        ax1.set_ylabel('Intensity (a.u.)', fontsize=11)
+        # Stack with offset - DFT on bottom, ML on top
+        offset = 1.2
+        ax1.plot(self.freq_grid, dft_norm, linewidth=2, 
+                color=DFT_COLOR, label='DFT (anharmonic)', alpha=0.8)
+        ax1.plot(self.freq_grid, ml_norm + offset, linewidth=2, 
+                color=ML_COLOR, label=f'ML ({ml_name})', alpha=0.9)
+        
+        # Fill under curves for better visibility
+        ax1.fill_between(self.freq_grid, 0, dft_norm, color=DFT_COLOR, alpha=0.1)
+        ax1.fill_between(self.freq_grid, offset, ml_norm + offset, color=ML_COLOR, alpha=0.15)
+        
+        # Styling
+        ax1.set_ylabel('Absorbance (normalized)', fontsize=12, fontweight='600')
         ax1.set_xlim(self.freq_range)
-        ax1.legend(loc='upper right', frameon=True)
-        ax1.grid(True, alpha=0.3)
-        ax1.set_title(f'IR Spectrum Comparison: {ml_name} vs DFT', 
-                     fontsize=12, fontweight='bold')
+        ax1.set_ylim(-0.1, offset + 1.3)
+        ax1.legend(loc='upper right', frameon=True, fancybox=True, shadow=True, fontsize=10)
+        ax1.grid(True, alpha=0.2, linestyle='--', linewidth=0.5)
+        ax1.spines['top'].set_visible(False)
+        ax1.spines['right'].set_visible(False)
         
-        # Panel B: Stick spectra
-        # Plot DFT sticks
-        for freq, intensity, label in zip(dft_spectrum.frequencies, 
-                                          dft_spectrum.intensities,
-                                          dft_spectrum.labels):
-            color = {'fundamental': '#348ABD', 'overtone': '#988ED5', 
-                    'combination': '#8EBA42'}.get(label, 'gray')
-            ax2.vlines(freq, 0, -intensity, colors='black', 
-                      linewidth=1, alpha=0.4)
+        # Title with molecule name
+        title = f'IR Spectrum Comparison: {ml_name} vs DFT'
+        if molecule_name:
+            title = f'{molecule_name.upper()} - {title}'
+        ax1.set_title(title, fontsize=13, fontweight='bold', pad=15)
         
-        # Plot ML sticks
-        y_offset = np.max(ml_spectrum.intensities) * 0.1
-        for freq, intensity, label in zip(ml_spectrum.frequencies,
-                                          ml_spectrum.intensities,
-                                          ml_spectrum.labels):
-            color = {'fundamental': '#348ABD', 'overtone': '#988ED5',
-                    'combination': '#8EBA42'}.get(label, 'gray')
-            ax2.vlines(freq, 0, intensity, colors=color, linewidth=1, alpha=0.7)
+        # Add horizontal reference lines
+        ax1.axhline(y=0, color='gray', linewidth=0.5, linestyle='-', alpha=0.3)
+        ax1.axhline(y=offset, color='gray', linewidth=0.5, linestyle='-', alpha=0.3)
         
-        ax2.axhline(y=0, color='black', linewidth=0.8)
-        ax2.set_xlabel('Wavenumber (cm^-1)', fontsize=11)
-        ax2.set_ylabel('Intensity', fontsize=11)
+        # Panel B: Stick spectra comparison (overlaid)
+        # Normalize intensities
+        dft_max = np.max(dft_spectrum.intensities) if len(dft_spectrum.intensities) > 0 else 1
+        ml_max = np.max(ml_spectrum.intensities) if len(ml_spectrum.intensities) > 0 else 1
+        
+        # Plot DFT sticks (pointing down from 0)
+        for freq, intensity in zip(dft_spectrum.frequencies, dft_spectrum.intensities):
+            norm_intensity = (intensity / dft_max) if dft_max > 0 else 0
+            ax2.vlines(freq, 0, -norm_intensity, colors=STICK_DFT_COLOR, 
+                      linewidth=1.5, alpha=0.7)
+        
+        # Plot ML sticks (pointing up from 0)
+        for freq, intensity in zip(ml_spectrum.frequencies, ml_spectrum.intensities):
+            norm_intensity = (intensity / ml_max) if ml_max > 0 else 0
+            ax2.vlines(freq, 0, norm_intensity, colors=STICK_ML_COLOR, 
+                      linewidth=1.5, alpha=0.8)
+        
+        # Styling
+        ax2.axhline(y=0, color='black', linewidth=1.2)
+        ax2.set_xlabel('Wavenumber (cm$^{-1}$)', fontsize=12, fontweight='600')
+        ax2.set_ylabel('Normalized Intensity', fontsize=11)
         ax2.set_xlim(self.freq_range)
-        ax2.grid(True, alpha=0.3, axis='x')
-        ax2.text(0.02, 0.95, 'DFT (below) | ML (above)', 
-                transform=ax2.transAxes, fontsize=9, 
-                verticalalignment='top',
-                bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+        ax2.grid(True, alpha=0.2, linestyle='--', linewidth=0.5, axis='x')
+        ax2.spines['top'].set_visible(False)
+        ax2.spines['right'].set_visible(False)
+        
+        # Legend for stick spectra
+        from matplotlib.lines import Line2D
+        legend_elements = [
+            Line2D([0], [0], color=STICK_DFT_COLOR, linewidth=2, label='DFT'),
+            Line2D([0], [0], color=STICK_ML_COLOR, linewidth=2, label='ML')
+        ]
+        ax2.legend(handles=legend_elements, loc='upper right', 
+                  frameon=True, fancybox=True, fontsize=9)
         
         plt.tight_layout()
         
@@ -362,9 +399,10 @@ class SpectrumAnalyzer:
                        dft_spectrum: SpectrumData,
                        metrics: ComparisonMetrics,
                        ml_name: str,
+                       molecule_name: str = None,
                        save_path: Optional[str] = None) -> plt.Figure:
         """
-        Create regression plot for frequency correlation
+        Create regression plot for frequency correlation with modern design
         
         Parameters
         ----------
@@ -374,6 +412,8 @@ class SpectrumAnalyzer:
             Calculated metrics
         ml_name : str
             Name of ML calculator
+        molecule_name : str, optional
+            Name of molecule for title
         save_path : str, optional
             Path to save figure
             
@@ -382,7 +422,12 @@ class SpectrumAnalyzer:
         matplotlib.figure.Figure
             The created figure
         """
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
+        # Modern color palette
+        POINT_COLOR = '#5E81AC'      # Muted blue
+        PERFECT_COLOR = '#4C566A'    # Dark gray
+        FIT_COLOR = '#BF616A'        # Coral red
+        
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5.5))
         
         # Match peaks for plotting
         dft_freq, ml_freq, dft_int, ml_int = self.match_peaks(
@@ -390,73 +435,80 @@ class SpectrumAnalyzer:
         )
         
         # Panel A: Frequency correlation
-        colors = {'fundamental': '#348ABD', 'overtone': '#988ED5',
-                 'combination': '#8EBA42'}
-        
-        # Color by label type (need to track labels through matching)
-        scatter_colors = []
-        for i, f_ml in enumerate(ml_freq):
-            idx = np.argmin(np.abs(ml_spectrum.frequencies - f_ml))
-            label = ml_spectrum.labels[idx]
-            scatter_colors.append(colors.get(label, 'gray'))
-        
-        ax1.scatter(dft_freq, ml_freq, c=scatter_colors, s=50, 
-                   alpha=0.6, edgecolors='black', linewidth=0.5)
+        ax1.scatter(dft_freq, ml_freq, c=POINT_COLOR, s=80, 
+                   alpha=0.7, edgecolors='white', linewidth=1.5, zorder=3)
         
         # Perfect agreement line
         lim_min = min(dft_freq.min(), ml_freq.min())
         lim_max = max(dft_freq.max(), ml_freq.max())
-        ax1.plot([lim_min, lim_max], [lim_min, lim_max], 
-                'k--', linewidth=1, alpha=0.5, label='Perfect agreement')
+        padding = (lim_max - lim_min) * 0.05
+        ax1.plot([lim_min - padding, lim_max + padding], 
+                [lim_min - padding, lim_max + padding], 
+                color=PERFECT_COLOR, linewidth=1.5, linestyle='--', 
+                alpha=0.5, label='Perfect agreement', zorder=1)
         
         # Regression line
         regression_line = metrics.slope_freq * dft_freq + metrics.intercept_freq
-        ax1.plot(dft_freq, regression_line, 'r-', linewidth=1.5, 
-                alpha=0.7, label='Linear fit')
+        ax1.plot(dft_freq, regression_line, color=FIT_COLOR, linewidth=2.5, 
+                alpha=0.8, label='Linear fit', zorder=2)
         
-        ax1.set_xlabel('DFT Frequency (cm^-1)', fontsize=11)
-        ax1.set_ylabel('ML Frequency (cm^-1)', fontsize=11)
-        ax1.set_title('Frequency Correlation', fontsize=12, fontweight='bold')
-        ax1.legend(loc='upper left')
-        ax1.grid(True, alpha=0.3)
+        ax1.set_xlabel('DFT Frequency (cm$^{-1}$)', fontsize=12, fontweight='600')
+        ax1.set_ylabel('ML Frequency (cm$^{-1}$)', fontsize=12, fontweight='600')
+        ax1.set_title('Frequency Correlation', fontsize=12, fontweight='bold', pad=12)
+        ax1.legend(loc='upper left', frameon=True, fancybox=True, shadow=True, fontsize=10)
+        ax1.grid(True, alpha=0.2, linestyle='--', linewidth=0.5)
+        ax1.spines['top'].set_visible(False)
+        ax1.spines['right'].set_visible(False)
         
-        # Add statistics text box
-        textstr = f'R^2 = {metrics.r2_freq:.4f}\n'
-        textstr += f'MAE = {metrics.mae_freq:.2f} cm^-1\n'
-        textstr += f'RMSE = {metrics.rmse_freq:.2f} cm^-1\n'
+        # Set equal aspect for better diagonal visualization
+        ax1.set_aspect('equal', adjustable='box')
+        
+        # Add statistics text box - modern style
+        textstr = f'$R^2$ = {metrics.r2_freq:.4f}\n'
+        textstr += f'MAE = {metrics.mae_freq:.1f} cm$^{{-1}}$\n'
+        textstr += f'RMSE = {metrics.rmse_freq:.1f} cm$^{{-1}}$\n'
         textstr += f'Slope = {metrics.slope_freq:.4f}\n'
-        textstr += f'n = {metrics.num_peaks}'
+        textstr += f'$n$ = {metrics.num_peaks}'
         
+        props = dict(boxstyle='round,pad=0.8', facecolor='white', 
+                    edgecolor='gray', alpha=0.9, linewidth=1.5)
         ax1.text(0.05, 0.95, textstr, transform=ax1.transAxes,
-                fontsize=9, verticalalignment='top',
-                bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+                fontsize=10, verticalalignment='top', bbox=props,
+                family='monospace')
         
         # Panel B: Intensity correlation
-        if len(dft_int) > 0:
-            ax2.scatter(dft_int, ml_int, c=scatter_colors, s=50,
-                       alpha=0.6, edgecolors='black', linewidth=0.5)
+        if len(dft_int) > 0 and np.max(dft_int) > 0:
+            ax2.scatter(dft_int, ml_int, c=POINT_COLOR, s=80,
+                       alpha=0.7, edgecolors='white', linewidth=1.5, zorder=3)
             
             # Perfect agreement line
             lim_min = 0
-            lim_max = max(dft_int.max(), ml_int.max()) * 1.1
+            lim_max = max(dft_int.max(), ml_int.max()) * 1.05
             ax2.plot([lim_min, lim_max], [lim_min, lim_max],
-                    'k--', linewidth=1, alpha=0.5, label='Perfect agreement')
+                    color=PERFECT_COLOR, linewidth=1.5, linestyle='--', 
+                    alpha=0.5, label='Perfect agreement', zorder=1)
             
-            ax2.set_xlabel('DFT Intensity (km/mol)', fontsize=11)
-            ax2.set_ylabel('ML Intensity (km/mol)', fontsize=11)
-            ax2.set_title('Intensity Correlation', fontsize=12, fontweight='bold')
-            ax2.legend(loc='upper left')
-            ax2.grid(True, alpha=0.3)
+            ax2.set_xlabel('DFT Intensity (km/mol)', fontsize=12, fontweight='600')
+            ax2.set_ylabel('ML Intensity (km/mol)', fontsize=12, fontweight='600')
+            ax2.set_title('Intensity Correlation', fontsize=12, fontweight='bold', pad=12)
+            ax2.legend(loc='upper left', frameon=True, fancybox=True, shadow=True, fontsize=10)
+            ax2.grid(True, alpha=0.2, linestyle='--', linewidth=0.5)
+            ax2.spines['top'].set_visible(False)
+            ax2.spines['right'].set_visible(False)
             
             # Add R^2 for intensity
-            textstr = f'R^2 = {metrics.r2_intensity:.4f}\n'
-            textstr += f'MAE = {metrics.mae_intensity:.2f}'
+            textstr = f'$R^2$ = {metrics.r2_intensity:.4f}\n'
+            textstr += f'MAE = {metrics.mae_intensity:.1f}'
             ax2.text(0.05, 0.95, textstr, transform=ax2.transAxes,
-                    fontsize=9, verticalalignment='top',
-                    bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+                    fontsize=10, verticalalignment='top', bbox=props,
+                    family='monospace')
         
-        plt.suptitle(f'Regression Analysis: {ml_name} vs DFT',
-                    fontsize=13, fontweight='bold', y=1.02)
+        # Main title
+        title = f'Regression Analysis: {ml_name} vs DFT'
+        if molecule_name:
+            title = f'{molecule_name.upper()} - {title}'
+        plt.suptitle(title, fontsize=14, fontweight='bold', y=0.99)
+        
         plt.tight_layout()
         
         if save_path:
