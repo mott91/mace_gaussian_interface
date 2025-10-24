@@ -1,8 +1,10 @@
 """
-Comprehensive Analysis Workflow
+Comprehensive Analysis Workflow - FIXED VERSION
 
-Scans results directories, compares all ML calculators against DFT baseline,
-generates plots, tables, and comprehensive HTML report.
+Changes:
+- PNG instead of PDF for HTML display
+- Combined plots with all ML methods vs wb97xd DFT baseline  
+- Filters wb97xd DFT as the reference baseline
 """
 
 import json
@@ -59,25 +61,53 @@ class ComparisonWorkflow:
         
         logger.info(f"Initialized workflow for {molecule_name}")
     
-    def find_dft_baseline(self) -> Optional[Path]:
+    def find_dft_baseline(self, prefer_wb97xd: bool = True) -> Optional[Path]:
         """
         Find DFT anharmonic baseline results
+        
+        Scans all subdirectories for results.json files with calculator_type='dft'
+        Prefers wb97xd if multiple DFT results exist
+        
+        Parameters
+        ----------
+        prefer_wb97xd : bool
+            If True, prefer wb97xd DFT method when multiple DFT results exist
         
         Returns
         -------
         Path or None
             Path to DFT baseline results.json
         """
-        # Look for freq_anharm directory
-        dft_dir = self.molecule_dir / "freq_anharm"
-        if dft_dir.exists():
-            json_path = dft_dir / "results.json"
-            if json_path.exists():
-                logger.info(f"Found DFT baseline: {json_path}")
-                return json_path
+        dft_results = []
         
-        logger.warning("No DFT anharmonic baseline found!")
-        return None
+        # Scan all subdirectories for DFT results
+        for item in self.molecule_dir.iterdir():
+            if item.is_dir() and item.name != "geometry_opt":
+                json_path = item / "results.json"
+                if json_path.exists():
+                    try:
+                        with open(json_path, 'r') as f:
+                            data = json.load(f)
+                            if data.get('calculator_type') == 'dft':
+                                dft_results.append((item.name, json_path))
+                    except (json.JSONDecodeError, KeyError) as e:
+                        logger.warning(f"Error reading {json_path}: {e}")
+                        continue
+        
+        if not dft_results:
+            logger.warning("No DFT anharmonic baseline found!")
+            return None
+        
+        # Prefer wb97xd if requested and available
+        if prefer_wb97xd:
+            for name, path in dft_results:
+                if 'wb97' in name.lower():
+                    logger.info(f"Found DFT baseline (wb97xd): {path}")
+                    return path
+        
+        # Otherwise return first DFT result
+        logger.info(f"Found DFT baseline: {dft_results[0][1]}")
+        return dft_results[0][1]
     
     def find_ml_results(self) -> List[Tuple[str, Path]]:
         """
@@ -92,16 +122,20 @@ class ComparisonWorkflow:
         
         # Scan molecule directory for ML results
         for item in self.molecule_dir.iterdir():
-            if item.is_dir() and item.name != "geometry_opt" and item.name != "freq_anharm":
+            if item.is_dir() and item.name != "geometry_opt":
                 json_path = item / "results.json"
                 if json_path.exists():
-                    # Check if it's an ML calculation
-                    with open(json_path, 'r') as f:
-                        data = json.load(f)
-                        if data.get('calculator_type') == 'ml':
-                            name = f"{data['energy_calculator']}_{data['dipole_calculator']}"
-                            ml_results.append((name, json_path))
-                            logger.info(f"Found ML result: {name}")
+                    try:
+                        with open(json_path, 'r') as f:
+                            data = json.load(f)
+                            # Check if it's an ML calculation
+                            if data.get('calculator_type') == 'ml':
+                                name = f"{data['energy_calculator']}_{data['dipole_calculator']}"
+                                ml_results.append((name, json_path))
+                                logger.info(f"Found ML result: {name}")
+                    except (json.JSONDecodeError, KeyError) as e:
+                        logger.warning(f"Error reading {json_path}: {e}")
+                        continue
         
         return ml_results
     
@@ -186,9 +220,9 @@ class ComparisonWorkflow:
         # Calculate metrics
         metrics = self.analyzer.calculate_metrics(ml_spectrum, dft_spectrum)
         
-        # Create plots
-        spectrum_plot_path = self.plots_dir / f"spectrum_{ml_name}.pdf"
-        regression_plot_path = self.plots_dir / f"regression_{ml_name}.pdf"
+        # Create plots - SAVE AS PNG NOT PDF!
+        spectrum_plot_path = self.plots_dir / f"spectrum_{ml_name}.png"
+        regression_plot_path = self.plots_dir / f"regression_{ml_name}.png"
         
         self.analyzer.plot_spectra_comparison(
             ml_spectrum, dft_spectrum, ml_name, 
@@ -226,8 +260,47 @@ class ComparisonWorkflow:
             'spectrum_plot': spectrum_plot_path.name,
             'regression_plot': regression_plot_path.name,
             'table_file': table_path.name,
-            'comparison_df': comparison_df
+            'comparison_df': comparison_df,
+            'ml_spectrum': ml_spectrum,  # Store for combined plots
+            'dft_spectrum': dft_spectrum
         }
+    
+    def create_combined_plots(self, comparisons: List[Dict], dft_spectrum: SpectrumData):
+        """
+        Create combined plots with all ML methods vs DFT
+        
+        Parameters
+        ----------
+        comparisons : list
+            List of comparison results from run_single_comparison
+        dft_spectrum : SpectrumData
+            DFT reference spectrum
+        """
+        if not comparisons:
+            return
+        
+        # Create combined spectrum plot
+        combined_spectrum_path = self.plots_dir / "spectrum_combined.png"
+        self.analyzer.plot_combined_spectra(
+            ml_spectra=[c['ml_spectrum'] for c in comparisons],
+            ml_names=[c['name'] for c in comparisons],
+            dft_spectrum=dft_spectrum,
+            molecule_name=self.molecule_name,
+            save_path=str(combined_spectrum_path)
+        )
+        
+        # Create combined regression plot
+        combined_regression_path = self.plots_dir / "regression_combined.png"
+        self.analyzer.plot_combined_regression(
+            ml_spectra=[c['ml_spectrum'] for c in comparisons],
+            ml_names=[c['name'] for c in comparisons],
+            dft_spectrum=dft_spectrum,
+            metrics_list=[c['metrics'] for c in comparisons],
+            molecule_name=self.molecule_name,
+            save_path=str(combined_regression_path)
+        )
+        
+        logger.info("Created combined plots")
     
     def run_full_analysis(self) -> Dict:
         """
@@ -242,15 +315,14 @@ class ComparisonWorkflow:
         logger.info(f"STARTING ANALYSIS FOR {self.molecule_name.upper()}")
         logger.info("=" * 60)
         
-        # Find DFT baseline
-        dft_path = self.find_dft_baseline()
+        # Find DFT baseline (prefer wb97xd)
+        dft_path = self.find_dft_baseline(prefer_wb97xd=True)
         if dft_path is None:
             logger.error("=" * 60)
             logger.error(f"NO DFT BASELINE FOUND FOR {self.molecule_name.upper()}")
             logger.error("=" * 60)
             logger.error(f"Searched in: {self.molecule_dir}")
             logger.error("Could not find any directory with calculator_type='dft' in results.json")
-            logger.error("Analysis cannot proceed without DFT baseline for comparison.")
             logger.error("=" * 60)
             
             # Return empty result instead of raising exception
@@ -281,6 +353,12 @@ class ComparisonWorkflow:
         logger.info(f"Found DFT baseline: {dft_path.parent.name}")
         logger.info(f"Found {len(ml_results)} ML calculations to compare")
         
+        # Load DFT spectrum once for combined plots
+        dft_results = self.analyzer.load_results(dft_path)
+        dft_spectrum = self.analyzer.extract_spectrum_data(
+            dft_results, include_overtones=True, include_combinations=True
+        )
+        
         # Run comparisons
         comparisons = []
         for ml_name, ml_path in ml_results:
@@ -291,6 +369,11 @@ class ComparisonWorkflow:
                           f"R^2={result['metrics'].r2_freq:.4f}")
             except Exception as e:
                 logger.error(f"  [FAIL] {ml_name} failed: {e}")
+                import traceback
+                traceback.print_exc()
+        
+        # Create combined plots
+        self.create_combined_plots(comparisons, dft_spectrum)
         
         # Only save summary if we have comparisons
         if comparisons:
@@ -299,6 +382,7 @@ class ComparisonWorkflow:
                 'molecule': self.molecule_name,
                 'analysis_date': datetime.now().isoformat(),
                 'num_ml_calculators': len(comparisons),
+                'dft_method': dft_path.parent.name,
                 'comparisons': [
                     {
                         'name': c['name'],
@@ -323,7 +407,8 @@ class ComparisonWorkflow:
         return {
             'molecule': self.molecule_name,
             'comparisons': comparisons,
-            'output_dir': self.output_dir
+            'output_dir': self.output_dir,
+            'has_combined_plots': True
         }
     
     def generate_html_report(self, analysis_results: Dict):
@@ -388,7 +473,7 @@ if __name__ == "__main__":
     
     if len(sys.argv) < 2:
         print("Usage: python comparison_workflow.py <molecule_name>")
-        print("Example: python comparison_workflow.py acoh")
+        print("Example: python comparison_workflow.py water")
         sys.exit(1)
     
     molecule_name = sys.argv[1]

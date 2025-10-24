@@ -1,0 +1,40 @@
+{
+  "molecule": "acoh",
+  "analysis_date": "2025-10-24T16:21:13.047899",
+  "num_ml_calculators": 4,
+  "dft_method": "wb97xd_def2tzvp_wb97xd_def2tzvp",
+  "comparisons": [
+    {
+      "name": "mace_mp_mace_ml",
+      "mae_freq": 0,
+      "rmse_freq": 0,
+      "r2_freq": 0,
+      "r2_intensity": 0,
+      "speedup": 32.405623400182556
+    },
+    {
+      "name": "mace_omol_espaloma",
+      "mae_freq": 0,
+      "rmse_freq": 0,
+      "r2_freq": 0,
+      "r2_intensity": 0,
+      "speedup": 25.249637430794145
+    },
+    {
+      "name": "mace_mp_espaloma",
+      "mae_freq": 0,
+      "rmse_freq": 0,
+      "r2_freq": 0,
+      "r2_intensity": 0,
+      "speedup": 38.61021185326717
+    },
+    {
+      "name": "mace_omol_mace_ml",
+      "mae_freq": 0,
+      "rmse_freq": 0,
+      "r2_freq": 0,
+      "r2_intensity": 0,
+      "speedup": 22.649158568205014
+    }
+  ]
+}
