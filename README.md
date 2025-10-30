@@ -1,93 +1,155 @@
 # MACE-Gaussian Interface
 
-Interface between MACE machine learning potentials and Gaussian quantum chemistry software for enhanced molecular calculations with ML-accelerated dipole moments and IR intensities.
+Interface between MACE machine learning potentials and Gaussian 16 for enhanced IR spectroscopy calculations. Combines ML-accelerated dipole calculations with quantum chemistry for fast, accurate anharmonic frequency predictions.
 
 ## Features
 
-- Multiple dipole calculation methods (MACE ML, Espaloma, xTB, geometry-based)
-- Automatic geometry optimization using MACE potentials
-- Real-time communication with Gaussian via ZMQ
-- Anharmonic frequency calculations with ML-enhanced dipole derivatives
+- **ML-Enhanced Calculations**: Multiple dipole calculators (MACE, Espaloma, xTB, geometric)
+- **Anharmonic Frequencies**: Full anharmonic treatment including overtones and combination bands
+- **DFT Baselines**: Pure DFT calculations for rigorous comparison
+- **Comprehensive Analysis**: Statistical comparison, regression plots, publication-ready HTML reports
+- **Modern CLI**: Interactive command-line interface for workflow management
+- **Real-time Integration**: ZMQ communication between Python and Gaussian
 
 ## Installation
 
 ### Prerequisites
 
-- Python 3.9+
-- Gaussian 16
-- CUDA-capable GPU (recommended)
+- **Python 3.9-3.12**
+- **Gaussian 16** (must be in PATH as `g16`)
+- **CUDA-capable GPU** (recommended for ML calculations)
+- **uv package manager** (recommended) or pip
 
 ### Quick Start
 
-1. **Install uv**:
+1. **Install uv** (if not already installed):
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
 2. **Clone and install**:
 ```bash
-git clone https://github.com/mott91/mace-gaussian-interface.git
-cd mace-gaussian-interface
+git clone https://github.com/your-username/mace_gaussian.git
+cd mace_gaussian
 uv sync
 ```
 
-3. **Test installation**:
+3. **Verify installation**:
 ```bash
-uv run python gm_main.py --diagnose
+python cli.py diagnose
 ```
+
+This checks for Gaussian, CUDA, and available dipole calculators.
 
 ## Usage
 
-### Run calculations with uv (recommended):
-```bash
-uv run python gm_main.py molecule.xyz
-```
+### Quick Example
 
-### Or activate environment:
 ```bash
-source .venv/bin/activate
-python gm_main.py molecule.xyz
-```
+# Run calculations on a test molecule
+python cli.py run water.xyz
 
-## Workflow
-
-1. **Check environment**:
-```bash
-uv run python gm_main.py --diagnose
-```
-
-2. **Run calculation**:
-```bash
-uv run python gm_main.py your_molecule.xyz
+# Generate analysis report
+python run_analysis.py water
 ```
 
 This will:
-- Optimize geometry using MACE
-- Generate Gaussian input file (`molecule_freq_anharm.gjf`)
-- Launch Gaussian with ML-enhanced dipole calculations
+1. Optimize geometry with MACE
+2. Run ML calculations (multiple energy/dipole combos)
+3. Run DFT baseline for comparison
+4. Generate statistical analysis and HTML report
+
+### Available Test Molecules
+
+The repo includes test molecules:
+- `water.xyz` - Simple (3 atoms, ~5-10 min)
+- `co.xyz` - Diatomic linear molecule (2 atoms, ~2-5 min)
+- `ammonia.xyz` - Small molecule (4 atoms, ~5-15 min)
+- `formaldehyde.xyz` - Carbonyl test (4 atoms, ~10-20 min)
+- `acoh.xyz` - Acetic acid (8 atoms, ~75 min DFT)
+
+## Workflow Overview
+
+```
+Input XYZ → Geometry Opt (MACE) → ML Frequency Calcs → DFT Baseline → Analysis & Report
+```
+
+### Step-by-Step
+
+#### 1. Run Calculations
+```bash
+# Basic run (includes DFT baseline)
+python cli.py run molecule.xyz
+
+# Skip DFT baseline (faster, for testing)
+python cli.py run molecule.xyz --skip-dft-baseline
+
+# Customize calculators
+python cli.py run molecule.xyz \
+  --energy-calculators mace_mp,mace_omol \
+  --dipole-calculators espaloma,mace_ml
+```
+
+#### 2. Check Results
+```bash
+# List all results
+python cli.py list
+
+# List specific molecule
+python cli.py list water
+```
+
+#### 3. Generate Analysis Report
+```bash
+# Create comprehensive analysis with plots and HTML report
+python run_analysis.py water
+```
+
+The analysis generates:
+- `analysis_results/water/plots/` - Spectrum and regression plots
+- `analysis_results/water/data/` - CSV comparison tables
+- `analysis_results/water/report.html` - **Interactive HTML report**
+
+## Output Structure
+
+```
+comparison_results/
+  └── water/
+      ├── geometry_opt/
+      │   ├── optimized.xyz
+      │   └── results.json
+      ├── wb97xd_def2tzvp/          # DFT baseline
+      │   ├── gaussian_dft.log
+      │   └── results.json
+      └── mace_mp_espaloma/          # ML calculation
+          ├── gaussian_freq.log
+          └── results.json
+
+analysis_results/
+  └── water/
+      ├── plots/
+      │   ├── spectrum_combined.png
+      │   ├── regression_combined.png
+      │   └── ...
+      ├── data/
+      │   └── comparison_*.csv
+      └── report.html               # Open this in browser!
+```
 
 ## Configuration
 
-Edit `gm_main.py` to change settings:
+Most settings have sensible defaults. Advanced users can edit:
 
-```python
-DIPOLE_METHOD = 'mace_ml'  # Options: 'auto', 'mace_ml', 'espaloma', 'xtb', 'geometry'
-CALCULATE_DIPOLE_DERIVATIVES = True
-```
+**Energy Calculators** (in `cli.py` or command line):
+- `mace_omol` - MACE-OFF (default)
+- `mace_mp` - MACE-MP
+- `mace_off` - MACE-OFF v2
 
-## Example
-
-```bash
-# Create a simple water molecule file (water.xyz)
-echo "3
-Water molecule
-O     0.000000     0.000000     0.117000
-H     0.000000     0.757000    -0.467000  
-H     0.000000    -0.757000    -0.467000" > water.xyz
-
-# Run calculation
-uv run python gm_main.py water.xyz
-```
+**Dipole Calculators**:
+- `espaloma` - ML charge-based (reliable, default)
+- `mace_ml` - Custom MACE dipole model
+- `xtb` - Semi-empirical
+- `geometry` - Geometric fallback
 
 ## Troubleshooting
 
@@ -118,3 +180,41 @@ ls -la /home/bin/gm_helper.py
 Core packages installed automatically:
 - numpy, ase, torch, mace-torch, pyzmq
 - espaloma_charge, rdkit (for dipole calculations)
+
+## For Developers
+
+See `CLAUDE.md` for detailed architecture documentation including:
+- Code structure and key design patterns
+- How to add new calculators
+- Parser internals
+- Known issues and workarounds
+
+## Common Issues
+
+**"Gaussian not found"**: Make sure `g16` is in your PATH
+```bash
+which g16  # Should return path to Gaussian
+```
+
+**"No CUDA devices"**: ML will fallback to CPU (slower but works)
+
+**"Anharmonic intensities missing"**: This happens when:
+- Molecule has imaginary frequencies (not at minimum)
+- Linear molecules (Gaussian limitation)
+- Parser sees `R²=N/A` in plots for limited data
+
+**DFT baseline takes forever**: This is normal! DFT anharmonic calculations are expensive:
+- Water: ~15-30 min
+- Acetic acid: ~75 min  
+- Consider `--skip-dft-baseline` for quick tests
+
+## Citation
+
+If you use this code, please cite:
+- MACE: [Batatia et al., NeurIPS 2022]
+- Your relevant publications
+
+## License
+
+[Your license here]
+
