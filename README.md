@@ -160,14 +160,14 @@ analysis_results/
 Most settings have sensible defaults. Advanced users can edit:
 
 **Energy Calculators** (in `cli.py` or command line):
-- `mace_omol` - MACE-OFF (default)
+- `mace_omol` - MACE-OMOL
 - `mace_mp` - MACE-MP
-- `mace_off` - MACE-OFF v2
+- `mace_off` - MACE-OFF (not included yet)
 
 **Dipole Calculators**:
-- `espaloma` - ML charge-based (reliable, default)
+- `espaloma` - ML charge-based
 - `mace_ml` - Custom MACE dipole model
-- `xtb` - Semi-empirical
+- `xtb` - Semi-empirical (not working for now)
 - `geometry` - Geometric fallback
 
 ## Troubleshooting
@@ -239,14 +239,4 @@ python -c "import mace_dipole_core; print('mace-dipole OK')"
 - Water: ~15-30 min
 - Acetic acid: ~75 min  
 - Consider `--skip-dft-baseline` for quick tests
-
-## Citation
-
-If you use this code, please cite:
-- MACE: [Batatia et al., NeurIPS 2022]
-- Your relevant publications
-
-## License
-
-[Your license here]
 
