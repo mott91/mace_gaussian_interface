@@ -7,52 +7,52 @@
   "frequencies": {
     "harmonic": [
       {
-        "freq_cm": 510.1781,
-        "ir_intensity": 43.0516
+        "freq_cm": 510.178,
+        "ir_intensity": 43.0172
       },
       {
-        "freq_cm": 539.0843,
-        "ir_intensity": 4.1239
+        "freq_cm": 539.0844,
+        "ir_intensity": 4.124
       },
       {
-        "freq_cm": 859.1572,
-        "ir_intensity": 11.1236
+        "freq_cm": 859.157,
+        "ir_intensity": 11.1156
       },
       {
-        "freq_cm": 883.6891,
-        "ir_intensity": 3.277
+        "freq_cm": 883.6893,
+        "ir_intensity": 3.2768
       },
       {
-        "freq_cm": 886.7201,
-        "ir_intensity": 4.6388
+        "freq_cm": 886.72,
+        "ir_intensity": 4.6392
       },
       {
-        "freq_cm": 1031.8529,
-        "ir_intensity": 125.7489
+        "freq_cm": 1031.8527,
+        "ir_intensity": 125.7527
       },
       {
         "freq_cm": 1168.3549,
-        "ir_intensity": 34.49
+        "ir_intensity": 34.4924
       },
       {
-        "freq_cm": 1304.9889,
-        "ir_intensity": 28.987
+        "freq_cm": 1304.9887,
+        "ir_intensity": 28.9609
       },
       {
-        "freq_cm": 1306.7737,
+        "freq_cm": 1306.774,
         "ir_intensity": 18.032
       },
       {
-        "freq_cm": 1338.8773,
-        "ir_intensity": 36.5077
+        "freq_cm": 1338.8772,
+        "ir_intensity": 36.4977
       },
       {
         "freq_cm": 1828.9294,
-        "ir_intensity": 229.2393
+        "ir_intensity": 229.3925
       },
       {
-        "freq_cm": 3021.0913,
-        "ir_intensity": 1.7908
+        "freq_cm": 3021.0911,
+        "ir_intensity": 1.7907
       },
       {
         "freq_cm": 3069.0823,
@@ -60,11 +60,11 @@
       },
       {
         "freq_cm": 3142.712,
-        "ir_intensity": 12.3725
+        "ir_intensity": 12.3713
       },
       {
-        "freq_cm": 3796.9137,
-        "ir_intensity": 83.3429
+        "freq_cm": 3796.9141,
+        "ir_intensity": 83.3568
       }
     ],
     "anharmonic": [],
@@ -72,13 +72,8 @@
     "combination_bands": []
   },
   "energy_eV": 0.8585736588337919,
-  "dipole": {
-    "x": -0.37665120683878006,
-    "y": -0.042380822464397,
-    "z": -0.639567149298373,
-    "magnitude": 0.7434436119757272
-  },
-  "runtime_s": 133.3471188545227,
+  "dipole": null,
+  "runtime_s": 134.58441638946533,
   "files": {
     "gaussian_log": "gaussian_freq.log",
     "gaussian_input": "gaussian_freq.gjf"

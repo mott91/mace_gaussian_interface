@@ -301,7 +301,7 @@
                 </div>
                 <div class="summary-card">
                     <div class="label">Average MAE</div>
-                    <div class="value">12.6</div>
+                    <div class="value">24.0</div>
                     <div class="label">cm^-1</div>
                 </div>
                 <div class="summary-card">
@@ -329,10 +329,20 @@
                 Direct comparison of all ML methods against the DFT baseline in a single view.
             </p>
 
-            <h3>Combined IR Spectrum</h3>
+            <h3>Combined IR Spectrum (Fundamentals)</h3>
             <div class="plot-container">
                 <img src="plots/spectrum_combined.png" alt="Combined spectrum comparison" style="width: 100%; max-width: 1200px;">
             </div>
+
+            
+            <h3>Extended IR Spectrum (400-8000 cm⁻¹, includes overtones)</h3>
+            <div class="plot-container">
+                <img src="plots/spectrum_combined_extended.png" alt="Extended spectrum with overtones" style="width: 100%; max-width: 1400px;">
+            </div>
+            <p style="color: #666; font-size: 0.9em; margin-bottom: 30px;">
+                Extended frequency range shows fundamental modes, overtones, and combination bands.
+            </p>
+            
 
             <h3>Combined Regression Analysis</h3>
             <div class="plot-container">
@@ -355,23 +365,35 @@
                 <div class="stats-grid">
                     <div class="stat-item">
                         <div class="stat-label">R^2 (Frequency)</div>
-                        <div class="stat-value metric-bad">0.0000</div>
+                        <div class="stat-value metric-good">1.0000</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">MAE</div>
-                        <div class="stat-value metric-warning">12.05 cm^-1</div>
+                        <div class="stat-value metric-bad">34.81 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">RMSE</div>
-                        <div class="stat-value">12.05 cm^-1</div>
+                        <div class="stat-value">41.59 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Max Error</div>
-                        <div class="stat-value">12.05 cm^-1</div>
+                        <div class="stat-value">57.57 cm^-1</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-label">Matched Peaks</div>
-                        <div class="stat-value">1</div>
+                        <div class="stat-label">Matched Modes</div>
+                        <div class="stat-value">2</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Match Rate</div>
+                        <div class="stat-value">100.0%</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Missing Modes (DFT only)</div>
+                        <div class="stat-value">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Spurious Modes (ML only)</div>
+                        <div class="stat-value">0</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Speedup</div>
@@ -422,6 +444,15 @@
       <td>7.36</td>
       <td>-77.37</td>
     </tr>
+    <tr>
+      <td>4408.76</td>
+      <td>4351.19</td>
+      <td>-57.57</td>
+      <td>-1.31</td>
+      <td>0.23</td>
+      <td>9.27</td>
+      <td>9.04</td>
+    </tr>
   </tbody>
 </table>
         </section>
@@ -450,8 +481,20 @@
                         <div class="stat-value">18.19 cm^-1</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-label">Matched Peaks</div>
+                        <div class="stat-label">Matched Modes</div>
                         <div class="stat-value">2</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Match Rate</div>
+                        <div class="stat-value">100.0%</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Missing Modes (DFT only)</div>
+                        <div class="stat-value">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Spurious Modes (ML only)</div>
+                        <div class="stat-value">0</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Speedup</div>
@@ -507,9 +550,9 @@
       <td>4390.57</td>
       <td>-18.19</td>
       <td>-0.41</td>
-      <td>0.26</td>
+      <td>0.23</td>
       <td>0.01</td>
-      <td>-0.25</td>
+      <td>-0.23</td>
     </tr>
   </tbody>
 </table>
@@ -524,23 +567,35 @@
                 <div class="stats-grid">
                     <div class="stat-item">
                         <div class="stat-label">R^2 (Frequency)</div>
-                        <div class="stat-value metric-bad">0.0000</div>
+                        <div class="stat-value metric-good">1.0000</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">MAE</div>
-                        <div class="stat-value metric-warning">12.05 cm^-1</div>
+                        <div class="stat-value metric-bad">34.81 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">RMSE</div>
-                        <div class="stat-value">12.05 cm^-1</div>
+                        <div class="stat-value">41.59 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Max Error</div>
-                        <div class="stat-value">12.05 cm^-1</div>
+                        <div class="stat-value">57.57 cm^-1</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-label">Matched Peaks</div>
-                        <div class="stat-value">1</div>
+                        <div class="stat-label">Matched Modes</div>
+                        <div class="stat-value">2</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Match Rate</div>
+                        <div class="stat-value">100.0%</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Missing Modes (DFT only)</div>
+                        <div class="stat-value">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Spurious Modes (ML only)</div>
+                        <div class="stat-value">0</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Speedup</div>
@@ -591,6 +646,15 @@
       <td>0.99</td>
       <td>-83.74</td>
     </tr>
+    <tr>
+      <td>4408.76</td>
+      <td>4351.19</td>
+      <td>-57.57</td>
+      <td>-1.31</td>
+      <td>0.23</td>
+      <td>0.01</td>
+      <td>-0.23</td>
+    </tr>
   </tbody>
 </table>
         </section>
@@ -619,8 +683,20 @@
                         <div class="stat-value">18.19 cm^-1</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-label">Matched Peaks</div>
+                        <div class="stat-label">Matched Modes</div>
                         <div class="stat-value">2</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Match Rate</div>
+                        <div class="stat-value">100.0%</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Missing Modes (DFT only)</div>
+                        <div class="stat-value">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Spurious Modes (ML only)</div>
+                        <div class="stat-value">0</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Speedup</div>
@@ -676,9 +752,9 @@
       <td>4390.57</td>
       <td>-18.19</td>
       <td>-0.41</td>
-      <td>0.26</td>
-      <td>10.60</td>
-      <td>10.35</td>
+      <td>0.23</td>
+      <td>9.64</td>
+      <td>9.40</td>
     </tr>
   </tbody>
 </table>
@@ -695,7 +771,8 @@
                         <th>MAE (cm^-1)</th>
                         <th>RMSE (cm^-1)</th>
                         <th>Max Error (cm^-1)</th>
-                        <th>Peaks</th>
+                        <th>Matched Modes</th>
+                        <th>Match Rate</th>
                         <th>Speedup</th>
                     </tr>
                 </thead>
@@ -703,11 +780,12 @@
                     
             <tr>
                 <td>mace_mp_mace_ml</td>
-                <td>0.0000</td>
-                <td>12.05</td>
-                <td>12.05</td>
-                <td>12.05</td>
-                <td>1</td>
+                <td>1.0000</td>
+                <td>34.81</td>
+                <td>41.59</td>
+                <td>57.57</td>
+                <td>2/2</td>
+                <td>100.0%</td>
                 <td>4.4x</td>
             </tr>
             
@@ -717,17 +795,19 @@
                 <td>13.22</td>
                 <td>14.12</td>
                 <td>18.19</td>
-                <td>2</td>
+                <td>2/2</td>
+                <td>100.0%</td>
                 <td>3.2x</td>
             </tr>
             
             <tr>
                 <td>mace_mp_espaloma</td>
-                <td>0.0000</td>
-                <td>12.05</td>
-                <td>12.05</td>
-                <td>12.05</td>
-                <td>1</td>
+                <td>1.0000</td>
+                <td>34.81</td>
+                <td>41.59</td>
+                <td>57.57</td>
+                <td>2/2</td>
+                <td>100.0%</td>
                 <td>1.7x</td>
             </tr>
             
@@ -737,7 +817,8 @@
                 <td>13.22</td>
                 <td>14.12</td>
                 <td>18.19</td>
-                <td>2</td>
+                <td>2/2</td>
+                <td>100.0%</td>
                 <td>2.7x</td>
             </tr>
             
@@ -749,7 +830,7 @@
 
         <footer>
             <p>Generated by IR Spectral Analysis Framework</p>
-            <p class="timestamp">Report generated: 2025-10-30 13:37:07</p>
+            <p class="timestamp">Report generated: 2025-10-30 16:53:26</p>
         </footer>
         
 </div>

@@ -158,8 +158,8 @@ class ComparisonWorkflow:
         pd.DataFrame
             Comparison table
         """
-        # Match peaks
-        dft_freq, ml_freq, dft_int, ml_int = self.analyzer.match_peaks(
+        # Match modes
+        dft_freq, ml_freq, dft_int, ml_int, _ = self.analyzer.match_by_mode(
             dft_spectrum, ml_spectrum
         )
         
@@ -279,7 +279,7 @@ class ComparisonWorkflow:
         if not comparisons:
             return
         
-        # Create combined spectrum plot
+        # Create combined spectrum plot (400-4000 cm⁻¹)
         combined_spectrum_path = self.plots_dir / "spectrum_combined.png"
         self.analyzer.plot_combined_spectra(
             ml_spectra=[c['ml_spectrum'] for c in comparisons],
@@ -288,7 +288,17 @@ class ComparisonWorkflow:
             molecule_name=self.molecule_name,
             save_path=str(combined_spectrum_path)
         )
-        
+
+        # Create extended combined spectrum plot (400-8000 cm⁻¹, includes overtones)
+        combined_spectrum_extended_path = self.plots_dir / "spectrum_combined_extended.png"
+        self.analyzer.plot_combined_spectra_extended(
+            ml_spectra=[c['ml_spectrum'] for c in comparisons],
+            ml_names=[c['name'] for c in comparisons],
+            dft_spectrum=dft_spectrum,
+            molecule_name=self.molecule_name,
+            save_path=str(combined_spectrum_extended_path)
+        )
+
         # Create combined regression plot
         combined_regression_path = self.plots_dir / "regression_combined.png"
         self.analyzer.plot_combined_regression(

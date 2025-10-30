@@ -43,6 +43,7 @@ class SpectrumData:
     frequencies: np.ndarray
     intensities: np.ndarray
     labels: List[str]  # e.g., ['fundamental', 'overtone', 'combination']
+    mode_ids: List[str]  # Unique mode identifiers for matching (e.g., 'F1', 'O1_2', 'C1_2')
     
 
 @dataclass
@@ -57,6 +58,11 @@ class ComparisonMetrics:
     r2_intensity: float
     max_error_freq: float
     num_peaks: int
+    # Mode matching statistics
+    num_matched: int  # Number of modes successfully matched
+    num_dft_only: int  # Number of modes only in DFT (missing in ML)
+    num_ml_only: int  # Number of modes only in ML (spurious)
+    match_rate: float  # Fraction of DFT modes matched (num_matched / total_dft_modes)
 
 
 class SpectrumAnalyzer:
@@ -123,34 +129,51 @@ class SpectrumAnalyzer:
         frequencies = []
         intensities = []
         labels = []
-        
+        mode_ids = []
+
         # Get anharmonic fundamentals
         anharmonic = results.get('frequencies', {}).get('anharmonic', [])
-        for entry in anharmonic:
+        for idx, entry in enumerate(anharmonic):
             frequencies.append(entry['freq_cm'])
             intensities.append(entry['ir_intensity'])
             labels.append('fundamental')
-        
+            # Mode ID: F{mode_number}
+            # Fallback to index if 'mode' key doesn't exist (old result files)
+            mode_num = entry.get('mode', idx + 1)
+            mode_ids.append(f"F{mode_num}")
+
         # Add overtones
         if include_overtones:
             overtones = results.get('frequencies', {}).get('overtones', [])
-            for entry in overtones:
+            for idx, entry in enumerate(overtones):
                 frequencies.append(entry['freq_anharmonic'])
                 intensities.append(entry['ir_intensity'])
                 labels.append('overtone')
-        
+                # Mode ID: O{mode}_{level}
+                # Fallback for old result files
+                mode_num = entry.get('mode', idx + 1)
+                overtone_level = entry.get('overtone_level', 2)
+                mode_ids.append(f"O{mode_num}_{overtone_level}")
+
         # Add combination bands
         if include_combinations:
             combinations = results.get('frequencies', {}).get('combination_bands', [])
-            for entry in combinations:
+            for idx, entry in enumerate(combinations):
                 frequencies.append(entry['freq_anharmonic'])
                 intensities.append(entry['ir_intensity'])
                 labels.append('combination')
-        
+                # Mode ID: C{mode1}_{mode2} (sorted to ensure C1_2 == C2_1)
+                # Fallback for old result files
+                mode1 = entry.get('mode1', idx + 1)
+                mode2 = entry.get('mode2', idx + 2)
+                m1, m2 = sorted([mode1, mode2])
+                mode_ids.append(f"C{m1}_{m2}")
+
         return SpectrumData(
             frequencies=np.array(frequencies),
             intensities=np.array(intensities),
-            labels=labels
+            labels=labels,
+            mode_ids=mode_ids
         )
     
     def broaden_spectrum(self, spectrum: SpectrumData) -> np.ndarray:
@@ -180,51 +203,80 @@ class SpectrumAnalyzer:
         
         return broadened
     
-    def match_peaks(self, spectrum1: SpectrumData, 
-                   spectrum2: SpectrumData,
-                   tolerance: float = 50.0) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    def match_by_mode(self, dft_spectrum: SpectrumData,
+                     ml_spectrum: SpectrumData) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, Dict]:
         """
-        Match peaks between two spectra based on frequency proximity
-        
+        Match peaks between spectra using mode numbers (rigorous mode-by-mode comparison).
+
+        This is more rigorous than frequency-proximity matching because it ensures
+        we're comparing the same physical modes even if frequencies are significantly different.
+
         Parameters
         ----------
-        spectrum1, spectrum2 : SpectrumData
-            Spectra to match
-        tolerance : float
-            Maximum frequency difference for matching in cm^-1
-            
+        dft_spectrum : SpectrumData
+            DFT reference spectrum (ground truth)
+        ml_spectrum : SpectrumData
+            ML predicted spectrum
+
         Returns
         -------
-        freq1, freq2, int1, int2 : np.ndarray
+        dft_freq, ml_freq, dft_int, ml_int : np.ndarray
             Matched frequencies and intensities
+        match_stats : dict
+            Dictionary with matching statistics: 'matched', 'dft_only', 'ml_only', 'match_rate'
         """
-        freq1_matched = []
-        freq2_matched = []
-        int1_matched = []
-        int2_matched = []
-        
+        dft_freq_matched = []
+        ml_freq_matched = []
+        dft_int_matched = []
+        ml_int_matched = []
+
         # Handle empty spectra
-        if len(spectrum1.frequencies) == 0 or len(spectrum2.frequencies) == 0:
-            logger.warning("One or both spectra are empty, no peaks to match")
-            return (np.array([]), np.array([]), np.array([]), np.array([]))
-        
-        # For each peak in spectrum1, find closest in spectrum2
-        used_indices = set()
-        
-        for i, f1 in enumerate(spectrum1.frequencies):
-            # Find closest peak in spectrum2
-            differences = np.abs(spectrum2.frequencies - f1)
-            min_idx = np.argmin(differences)
-            
-            if differences[min_idx] <= tolerance and min_idx not in used_indices:
-                freq1_matched.append(f1)
-                freq2_matched.append(spectrum2.frequencies[min_idx])
-                int1_matched.append(spectrum1.intensities[i])
-                int2_matched.append(spectrum2.intensities[min_idx])
-                used_indices.add(min_idx)
-        
-        return (np.array(freq1_matched), np.array(freq2_matched),
-                np.array(int1_matched), np.array(int2_matched))
+        if len(dft_spectrum.frequencies) == 0 or len(ml_spectrum.frequencies) == 0:
+            logger.warning("One or both spectra are empty, no modes to match")
+            stats = {'matched': 0, 'dft_only': 0, 'ml_only': 0, 'match_rate': 0.0}
+            return (np.array([]), np.array([]), np.array([]), np.array([]), stats)
+
+        # Create mode ID lookups
+        dft_mode_dict = {mode_id: i for i, mode_id in enumerate(dft_spectrum.mode_ids)}
+        ml_mode_dict = {mode_id: i for i, mode_id in enumerate(ml_spectrum.mode_ids)}
+
+        # Find matched modes
+        dft_modes_set = set(dft_spectrum.mode_ids)
+        ml_modes_set = set(ml_spectrum.mode_ids)
+
+        matched_modes = dft_modes_set & ml_modes_set
+        dft_only_modes = dft_modes_set - ml_modes_set
+        ml_only_modes = ml_modes_set - dft_modes_set
+
+        # Extract matched data
+        for mode_id in sorted(matched_modes):
+            dft_idx = dft_mode_dict[mode_id]
+            ml_idx = ml_mode_dict[mode_id]
+
+            dft_freq_matched.append(dft_spectrum.frequencies[dft_idx])
+            ml_freq_matched.append(ml_spectrum.frequencies[ml_idx])
+            dft_int_matched.append(dft_spectrum.intensities[dft_idx])
+            ml_int_matched.append(ml_spectrum.intensities[ml_idx])
+
+        # Calculate match statistics
+        num_dft_modes = len(dft_modes_set)
+        match_rate = len(matched_modes) / num_dft_modes if num_dft_modes > 0 else 0.0
+
+        match_stats = {
+            'matched': len(matched_modes),
+            'dft_only': len(dft_only_modes),
+            'ml_only': len(ml_only_modes),
+            'match_rate': match_rate,
+            'dft_only_modes': sorted(list(dft_only_modes)),
+            'ml_only_modes': sorted(list(ml_only_modes))
+        }
+
+        logger.info(f"Mode matching: {len(matched_modes)} matched, "
+                   f"{len(dft_only_modes)} DFT-only, {len(ml_only_modes)} ML-only "
+                   f"(match rate: {match_rate:.1%})")
+
+        return (np.array(dft_freq_matched), np.array(ml_freq_matched),
+                np.array(dft_int_matched), np.array(ml_int_matched), match_stats)
     
     def calculate_metrics(self, ml_spectrum: SpectrumData, 
                          dft_spectrum: SpectrumData) -> ComparisonMetrics:
@@ -241,36 +293,43 @@ class SpectrumAnalyzer:
         ComparisonMetrics
             Statistical comparison metrics
         """
-        # Match peaks
-        dft_freq, ml_freq, dft_int, ml_int = self.match_peaks(
+        # Match modes using mode numbers (rigorous mode-by-mode comparison)
+        dft_freq, ml_freq, dft_int, ml_int, match_stats = self.match_by_mode(
             dft_spectrum, ml_spectrum
         )
-        
+
         if len(dft_freq) == 0:
-            logger.warning("No matching peaks found!")
-            return ComparisonMetrics(0, 0, 0, 0, 0, 0, 0, 0, 0)
-        
+            logger.warning("No matching modes found!")
+            return ComparisonMetrics(
+                mae_freq=0, rmse_freq=0, r2_freq=0, slope_freq=0, intercept_freq=0,
+                mae_intensity=0, r2_intensity=0, max_error_freq=0, num_peaks=0,
+                num_matched=match_stats['matched'],
+                num_dft_only=match_stats['dft_only'],
+                num_ml_only=match_stats['ml_only'],
+                match_rate=match_stats['match_rate']
+            )
+
         # Frequency metrics
         freq_errors = ml_freq - dft_freq
         mae_freq = np.mean(np.abs(freq_errors))
         rmse_freq = np.sqrt(np.mean(freq_errors**2))
         max_error_freq = np.max(np.abs(freq_errors))
-        
+
         # Regression for frequencies
         slope_freq, intercept_freq, r_value_freq, _, _ = linregress(dft_freq, ml_freq)
         r2_freq = r_value_freq**2
-        
+
         # Intensity metrics
         int_errors = ml_int - dft_int
         mae_intensity = np.mean(np.abs(int_errors))
-        
+
         # Regression for intensities (if intensities exist)
         if len(dft_int) > 0 and np.any(dft_int > 0):
             _, _, r_value_int, _, _ = linregress(dft_int, ml_int)
             r2_intensity = r_value_int**2
         else:
             r2_intensity = 0.0
-        
+
         return ComparisonMetrics(
             mae_freq=mae_freq,
             rmse_freq=rmse_freq,
@@ -280,7 +339,11 @@ class SpectrumAnalyzer:
             mae_intensity=mae_intensity,
             r2_intensity=r2_intensity,
             max_error_freq=max_error_freq,
-            num_peaks=len(dft_freq)
+            num_peaks=len(dft_freq),
+            num_matched=match_stats['matched'],
+            num_dft_only=match_stats['dft_only'],
+            num_ml_only=match_stats['ml_only'],
+            match_rate=match_stats['match_rate']
         )
     
     def plot_spectra_comparison(self, 
@@ -330,29 +393,35 @@ class SpectrumAnalyzer:
             dft_norm = dft_broadened
             ml_norm = ml_broadened
         
-        # Dynamic offset: make it 1.5x the max normalized peak height for clear separation
+        # Calculate heights for layout
+        dft_height = np.max(dft_norm)
+        ml_height = np.max(ml_norm)
+
+        # Use fixed offset of 1.5 to ensure consistent spacing
+        # This gives each curve equal vertical space regardless of intensity differences
         offset = 1.5
-        
+
+        # Set ylim to give both curves equal space: DFT gets [0, 1.3], ML gets [1.5, 2.8]
+        # This ensures even tiny ML peaks are visible
+        ylim_top = offset + 1.3
+
         # Plot DFT on bottom, ML on top with offset
-        ax1.plot(self.freq_grid, dft_norm, linewidth=2, 
+        ax1.plot(self.freq_grid, dft_norm, linewidth=2,
                 color=DFT_COLOR, label='DFT (anharmonic)', alpha=0.8)
-        ax1.plot(self.freq_grid, ml_norm + offset, linewidth=2, 
+        ax1.plot(self.freq_grid, ml_norm + offset, linewidth=2,
                 color=ML_COLOR, label=f'ML ({ml_name})', alpha=0.9)
-        
+
         # Fill under curves for better visibility
         ax1.fill_between(self.freq_grid, 0, dft_norm, color=DFT_COLOR, alpha=0.1)
         ax1.fill_between(self.freq_grid, offset, ml_norm + offset, color=ML_COLOR, alpha=0.15)
-        
+
         # Add separation line
         ax1.axhline(y=offset, color='gray', linewidth=0.8, linestyle='--', alpha=0.3)
-        
+
         # Styling - NO GRIDLINES
         ax1.set_ylabel('Absorbance (normalized)', fontsize=12, fontweight='600')
         ax1.set_xlabel('Wavenumber (cm$^{-1}$)', fontsize=12, fontweight='600')
         ax1.set_xlim(self.freq_range)
-        
-        # Dynamic ylim based on actual data
-        ylim_top = offset + np.max(ml_norm) * 1.15
         ax1.set_ylim(-0.05, ylim_top)
         
         ax1.legend(loc='upper right', frameon=True, fancybox=True, shadow=True, fontsize=10)
@@ -446,8 +515,8 @@ class SpectrumAnalyzer:
         
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5.5))
         
-        # Match peaks for plotting
-        dft_freq, ml_freq, dft_int, ml_int = self.match_peaks(
+        # Match peaks for plotting (use mode-based matching)
+        dft_freq, ml_freq, dft_int, ml_int, _ = self.match_by_mode(
             dft_spectrum, ml_spectrum
         )
         
@@ -558,19 +627,31 @@ class SpectrumAnalyzer:
 
         fig, ax = plt.subplots(figsize=(14, 7))
 
-        # Broaden and normalize DFT spectrum
+        # Broaden DFT spectrum
         dft_broadened = self.broaden_spectrum(dft_spectrum)
-        dft_norm = dft_broadened / np.max(dft_broadened) if np.max(dft_broadened) > 0 else dft_broadened
+        dft_max = np.max(dft_broadened)
+
+        # Normalize to DFT maximum for global comparison
+        if dft_max > 0:
+            dft_norm = dft_broadened / dft_max
+        else:
+            dft_norm = dft_broadened
 
         # Plot DFT (black, no offset)
         ax.plot(self.freq_grid, dft_norm, linewidth=2.5,
                 color='#2E3440', label='DFT (wb97xd)', alpha=0.9, zorder=10)
 
         # Plot all ML methods with vertical offsets
-        offset_step = 1.1  # larger offset between curves
+        # Normalize all ML spectra to DFT maximum (not their own) for comparable peak heights
+        offset_step = 1.5  # Fixed spacing like individual plots
         for idx, (ml_spectrum, ml_name) in enumerate(zip(ml_spectra, ml_names)):
             ml_broadened = self.broaden_spectrum(ml_spectrum)
-            ml_norm = ml_broadened / np.max(ml_broadened) if np.max(ml_broadened) > 0 else ml_broadened
+
+            # Normalize to DFT max (global normalization)
+            if dft_max > 0:
+                ml_norm = ml_broadened / dft_max
+            else:
+                ml_norm = ml_broadened
 
             offset = (idx + 1) * offset_step
             color = colors[idx % len(colors)]
@@ -581,11 +662,11 @@ class SpectrumAnalyzer:
 
         # Styling
         ax.set_xlabel('Wavenumber (cm$^{-1}$)', fontsize=13, fontweight='600')
-        ax.set_ylabel('Absorbance (normalized, offset)', fontsize=13, fontweight='600')
+        ax.set_ylabel('Absorbance (normalized to DFT, offset)', fontsize=13, fontweight='600')
         ax.set_xlim(self.freq_range)
 
-        # Adjust y-limits to fit all offsets
-        ax.set_ylim(-0.05, 1.15 + len(ml_spectra) * offset_step)
+        # Adjust y-limits: DFT gets [0, 1.3], each ML gets 1.5 units of space
+        ax.set_ylim(-0.05, 1.3 + len(ml_spectra) * offset_step)
 
         ax.grid(True, which='major', linestyle='--', alpha=0.4)
         ax.grid(True, which='minor', linestyle=':', alpha=0.2)
@@ -613,6 +694,103 @@ class SpectrumAnalyzer:
         return fig
 
 
+    def plot_combined_spectra_extended(self,
+                                       ml_spectra: List[SpectrumData],
+                                       ml_names: List[str],
+                                       dft_spectrum: SpectrumData,
+                                       molecule_name: str = None,
+                                       save_path: Optional[str] = None) -> plt.Figure:
+        """
+        Create extended combined spectrum plot (400-8000 cm⁻¹) including overtones and combination bands.
+
+        This uses a temporary extended frequency range to show the full anharmonic spectrum.
+        """
+        import matplotlib.pyplot as plt
+        import numpy as np
+
+        # Color palette for multiple methods
+        colors = ['#88C0D0', '#81A1C1', '#B48EAD', '#A3BE8C', '#EBCB8B', '#BF616A']
+
+        fig, ax = plt.subplots(figsize=(16, 7))
+
+        # Save original frequency grid and create extended one
+        original_grid = self.freq_grid
+        original_range = self.freq_range
+
+        # Create extended frequency grid (400-8000 cm⁻¹)
+        extended_range = (400, 8000)
+        self.freq_range = extended_range
+        self.freq_grid = np.arange(extended_range[0], extended_range[1], self.freq_step)
+
+        # Broaden DFT spectrum with extended range
+        dft_broadened = self.broaden_spectrum(dft_spectrum)
+        dft_max = np.max(dft_broadened)
+
+        # Normalize to DFT maximum for global comparison
+        if dft_max > 0:
+            dft_norm = dft_broadened / dft_max
+        else:
+            dft_norm = dft_broadened
+
+        # Plot DFT (black, no offset)
+        ax.plot(self.freq_grid, dft_norm, linewidth=2.5,
+                color='#2E3440', label='DFT (wb97xd)', alpha=0.9, zorder=10)
+
+        # Plot all ML methods with vertical offsets
+        offset_step = 1.5
+        for idx, (ml_spectrum, ml_name) in enumerate(zip(ml_spectra, ml_names)):
+            ml_broadened = self.broaden_spectrum(ml_spectrum)
+
+            # Normalize to DFT max (global normalization)
+            if dft_max > 0:
+                ml_norm = ml_broadened / dft_max
+            else:
+                ml_norm = ml_broadened
+
+            offset = (idx + 1) * offset_step
+            color = colors[idx % len(colors)]
+
+            ax.plot(self.freq_grid, ml_norm + offset, linewidth=2,
+                    color=color, label=f"{ml_name} (+{offset:.2f})",
+                    alpha=0.9, linestyle='-')
+
+        # Restore original frequency grid
+        self.freq_grid = original_grid
+        self.freq_range = original_range
+
+        # Styling
+        ax.set_xlabel('Wavenumber (cm$^{-1}$)', fontsize=13, fontweight='600')
+        ax.set_ylabel('Absorbance (normalized to DFT, offset)', fontsize=13, fontweight='600')
+        ax.set_xlim(extended_range)
+
+        # Adjust y-limits
+        ax.set_ylim(-0.05, 1.3 + len(ml_spectra) * offset_step)
+
+        ax.grid(True, which='major', linestyle='--', alpha=0.4)
+        ax.grid(True, which='minor', linestyle=':', alpha=0.2)
+
+        # Clean spines
+        for spine in ['top', 'right']:
+            ax.spines[spine].set_visible(False)
+
+        # Title
+        title = 'Extended IR Spectrum (with Overtones): All ML Methods vs DFT'
+        if molecule_name:
+            title = f'{molecule_name.upper()} - {title}'
+        ax.set_title(title, fontsize=14, fontweight='bold', pad=15)
+
+        # Legend - outside plot area
+        ax.legend(loc='upper left', bbox_to_anchor=(1.02, 1),
+                  frameon=True, fancybox=True, shadow=True, fontsize=10)
+
+        plt.tight_layout()
+
+        if save_path:
+            fig.savefig(save_path, dpi=300, bbox_inches='tight')
+            logger.info(f"Saved extended combined spectrum plot to {save_path}")
+
+        return fig
+
 
     def plot_combined_regression(self,
                                ml_spectra: List[SpectrumData],
@@ -635,7 +813,7 @@ class SpectrumAnalyzer:
       all_dft_freq, all_ml_freq, all_dft_int, all_ml_int = [], [], [], []
 
       for ml_spectrum in ml_spectra:
-          dft_freq, ml_freq, dft_int, ml_int = self.match_peaks(dft_spectrum, ml_spectrum)
+          dft_freq, ml_freq, dft_int, ml_int, _ = self.match_by_mode(dft_spectrum, ml_spectrum)
           all_dft_freq.extend(dft_freq)
           all_ml_freq.extend(ml_freq)
           all_dft_int.extend(dft_int)
@@ -645,7 +823,7 @@ class SpectrumAnalyzer:
       # PANEL A: FREQUENCY CORRELATION
       # -----------------------------
       for idx, (ml_spectrum, ml_name, metrics) in enumerate(zip(ml_spectra, ml_names, metrics_list)):
-          dft_freq, ml_freq, _, _ = self.match_peaks(dft_spectrum, ml_spectrum)
+          dft_freq, ml_freq, _, _, _ = self.match_by_mode(dft_spectrum, ml_spectrum)
           if len(dft_freq) == 0:
               continue
 
@@ -685,7 +863,7 @@ class SpectrumAnalyzer:
       # PANEL B: INTENSITY CORRELATION
       # -----------------------------
       for idx, (ml_spectrum, ml_name, metrics) in enumerate(zip(ml_spectra, ml_names, metrics_list)):
-          _, _, dft_int, ml_int = self.match_peaks(dft_spectrum, ml_spectrum)
+          _, _, dft_int, ml_int, _ = self.match_by_mode(dft_spectrum, ml_spectrum)
           if len(dft_int) == 0:
               continue
 

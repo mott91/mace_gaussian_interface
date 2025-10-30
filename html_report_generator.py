@@ -338,11 +338,25 @@ class HTMLReportGenerator:
     def create_combined_plots_section(self) -> str:
         """Create section with combined plots showing all ML methods"""
         combined_spectrum = self.plots_dir / "spectrum_combined.png"
+        combined_spectrum_extended = self.plots_dir / "spectrum_combined_extended.png"
         combined_regression = self.plots_dir / "regression_combined.png"
 
         # Check if combined plots exist
         if not combined_spectrum.exists() or not combined_regression.exists():
             return ""
+
+        # Build extended spectrum section if it exists
+        extended_section = ""
+        if combined_spectrum_extended.exists():
+            extended_section = """
+            <h3>Extended IR Spectrum (400-8000 cm⁻¹, includes overtones)</h3>
+            <div class="plot-container">
+                <img src="plots/spectrum_combined_extended.png" alt="Extended spectrum with overtones" style="width: 100%; max-width: 1400px;">
+            </div>
+            <p style="color: #666; font-size: 0.9em; margin-bottom: 30px;">
+                Extended frequency range shows fundamental modes, overtones, and combination bands.
+            </p>
+            """
 
         return f"""
         <section id="combined" class="comparison-section">
@@ -351,10 +365,12 @@ class HTMLReportGenerator:
                 Direct comparison of all ML methods against the DFT baseline in a single view.
             </p>
 
-            <h3>Combined IR Spectrum</h3>
+            <h3>Combined IR Spectrum (Fundamentals)</h3>
             <div class="plot-container">
                 <img src="plots/spectrum_combined.png" alt="Combined spectrum comparison" style="width: 100%; max-width: 1200px;">
             </div>
+
+            {extended_section}
 
             <h3>Combined Regression Analysis</h3>
             <div class="plot-container">
@@ -469,8 +485,20 @@ class HTMLReportGenerator:
                         <div class="stat-value">{m.max_error_freq:.2f} cm^-1</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-label">Matched Peaks</div>
-                        <div class="stat-value">{m.num_peaks}</div>
+                        <div class="stat-label">Matched Modes</div>
+                        <div class="stat-value">{m.num_matched}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Match Rate</div>
+                        <div class="stat-value">{m.match_rate:.1%}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Missing Modes (DFT only)</div>
+                        <div class="stat-value">{m.num_dft_only}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Spurious Modes (ML only)</div>
+                        <div class="stat-value">{m.num_ml_only}</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Speedup</div>
@@ -526,7 +554,8 @@ class HTMLReportGenerator:
                 <td>{m.mae_freq:.2f}</td>
                 <td>{m.rmse_freq:.2f}</td>
                 <td>{m.max_error_freq:.2f}</td>
-                <td>{m.num_peaks}</td>
+                <td>{m.num_matched}/{m.num_matched + m.num_dft_only}</td>
+                <td>{m.match_rate:.1%}</td>
                 <td>{comp['speedup']:.1f}x</td>
             </tr>
             """)
@@ -542,7 +571,8 @@ class HTMLReportGenerator:
                         <th>MAE (cm^-1)</th>
                         <th>RMSE (cm^-1)</th>
                         <th>Max Error (cm^-1)</th>
-                        <th>Peaks</th>
+                        <th>Matched Modes</th>
+                        <th>Match Rate</th>
                         <th>Speedup</th>
                     </tr>
                 </thead>

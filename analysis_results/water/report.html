@@ -11,233 +11,271 @@
                 padding: 0;
                 box-sizing: border-box;
             }
-            
+
             body {
-                font-family: 'Helvetica Neue', Arial, sans-serif;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
                 line-height: 1.6;
-                color: #333;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                padding: 20px;
+                color: #1a1a1a;
+                background: #f5f5f5;
+                padding: 0;
             }
-            
+
             .container {
-                max-width: 1200px;
-                margin: 0 auto;
+                max-width: 100%;
+                margin: 0;
                 background: white;
-                border-radius: 10px;
-                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-                overflow: hidden;
+                min-height: 100vh;
             }
-            
+
             header {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
                 color: white;
-                padding: 40px;
-                text-align: center;
+                padding: 3rem 4rem;
+                border-bottom: 3px solid #3498db;
             }
-            
+
             header h1 {
-                font-size: 2.5em;
-                margin-bottom: 10px;
-                text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+                font-size: 2.2em;
+                margin-bottom: 0.5rem;
+                font-weight: 600;
+                letter-spacing: -0.5px;
             }
-            
+
             header .subtitle {
-                font-size: 1.2em;
-                opacity: 0.9;
+                font-size: 1.1em;
+                opacity: 0.85;
+                font-weight: 300;
             }
-            
+
             nav {
-                background: #f8f9fa;
-                padding: 15px 40px;
-                border-bottom: 2px solid #e0e0e0;
+                background: white;
+                padding: 1rem 4rem;
+                border-bottom: 1px solid #e5e7eb;
                 position: sticky;
                 top: 0;
                 z-index: 100;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             }
-            
+
             nav a {
-                color: #667eea;
+                color: #374151;
                 text-decoration: none;
-                margin-right: 25px;
-                font-weight: 600;
-                transition: color 0.3s;
+                margin-right: 2rem;
+                font-weight: 500;
+                font-size: 0.95rem;
+                transition: all 0.2s;
+                padding-bottom: 0.25rem;
+                border-bottom: 2px solid transparent;
             }
-            
+
             nav a:hover {
-                color: #764ba2;
+                color: #3498db;
+                border-bottom-color: #3498db;
             }
-            
+
             .content {
-                padding: 40px;
+                padding: 3rem 4rem;
+                max-width: 1600px;
+                margin: 0 auto;
             }
-            
+
             section {
-                margin-bottom: 60px;
+                margin-bottom: 4rem;
             }
-            
+
             h2 {
-                color: #667eea;
-                font-size: 2em;
-                margin-bottom: 20px;
-                padding-bottom: 10px;
-                border-bottom: 3px solid #667eea;
+                color: #1a1a1a;
+                font-size: 1.75em;
+                margin-bottom: 1.5rem;
+                padding-bottom: 0.75rem;
+                border-bottom: 2px solid #e5e7eb;
+                font-weight: 600;
+                letter-spacing: -0.3px;
             }
-            
+
             h3 {
-                color: #764ba2;
-                font-size: 1.5em;
-                margin: 30px 0 15px 0;
+                color: #374151;
+                font-size: 1.3em;
+                margin: 2rem 0 1rem 0;
+                font-weight: 600;
             }
-            
+
             .summary-grid {
                 display: grid;
                 grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-                gap: 20px;
-                margin: 30px 0;
+                gap: 1.5rem;
+                margin: 2rem 0;
             }
-            
+
             .summary-card {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                padding: 25px;
-                border-radius: 10px;
-                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-                transition: transform 0.3s;
-            }
-            
-            .summary-card:hover {
-                transform: translateY(-5px);
-            }
-            
-            .summary-card .value {
-                font-size: 2.5em;
-                font-weight: bold;
-                margin: 10px 0;
-            }
-            
-            .summary-card .label {
-                font-size: 0.9em;
-                opacity: 0.9;
-            }
-            
-            .comparison-section {
-                background: #f8f9fa;
-                padding: 30px;
-                border-radius: 10px;
-                margin: 20px 0;
-            }
-            
-            .plot-container {
-                text-align: center;
-                margin: 30px 0;
                 background: white;
-                padding: 20px;
-                border-radius: 10px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                border: 1px solid #e5e7eb;
+                padding: 1.5rem;
+                border-radius: 8px;
+                transition: all 0.2s;
             }
-            
+
+            .summary-card:hover {
+                box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+                transform: translateY(-2px);
+            }
+
+            .summary-card .value {
+                font-size: 2.2em;
+                font-weight: 600;
+                margin: 0.5rem 0;
+                color: #1a1a1a;
+            }
+
+            .summary-card .label {
+                font-size: 0.85rem;
+                color: #6b7280;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                font-weight: 500;
+            }
+
+            .comparison-section {
+                background: #fafafa;
+                padding: 2rem;
+                border-radius: 8px;
+                margin-bottom: 2.5rem;
+                border: 1px solid #e5e7eb;
+            }
+
+            .plot-container {
+                background: white;
+                padding: 1.5rem;
+                border-radius: 6px;
+                border: 1px solid #e5e7eb;
+                margin: 1.5rem 0;
+            }
+
             .plot-container img {
-                max-width: 100%;
+                width: 100%;
                 height: auto;
-                border-radius: 5px;
+                display: block;
+                border-radius: 4px;
             }
-            
+
             table {
                 width: 100%;
                 border-collapse: collapse;
-                margin: 20px 0;
+                margin: 1.5rem 0;
                 background: white;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                border: 1px solid #e5e7eb;
+                border-radius: 6px;
+                overflow: hidden;
+                font-size: 0.9rem;
             }
-            
+
             thead {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
+                background: #f9fafb;
+                border-bottom: 2px solid #e5e7eb;
             }
-            
+
             th, td {
-                padding: 12px;
+                padding: 0.875rem 1rem;
                 text-align: left;
-                border-bottom: 1px solid #e0e0e0;
+                border-bottom: 1px solid #f3f4f6;
             }
-            
+
+            th {
+                font-weight: 600;
+                color: #374151;
+                font-size: 0.85rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            td {
+                color: #4b5563;
+            }
+
             tbody tr:hover {
-                background: #f8f9fa;
+                background: #f9fafb;
             }
-            
+
             .metric-good {
-                color: #28a745;
-                font-weight: bold;
+                color: #059669;
+                font-weight: 600;
             }
-            
+
             .metric-warning {
-                color: #ffc107;
-                font-weight: bold;
+                color: #d97706;
+                font-weight: 600;
             }
-            
+
             .metric-bad {
-                color: #dc3545;
-                font-weight: bold;
+                color: #dc2626;
+                font-weight: 600;
             }
-            
+
             .stats-box {
                 background: white;
-                padding: 20px;
-                border-radius: 10px;
-                border-left: 4px solid #667eea;
-                margin: 20px 0;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                padding: 1.5rem;
+                border-radius: 6px;
+                border: 1px solid #e5e7eb;
+                margin: 1.5rem 0;
             }
-            
+
             .stats-box h4 {
-                color: #667eea;
-                margin-bottom: 15px;
+                color: #374151;
+                margin-bottom: 1rem;
+                font-weight: 600;
+                font-size: 1.1rem;
             }
-            
+
             .stats-grid {
                 display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 15px;
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                gap: 1rem;
             }
-            
+
             .stat-item {
-                padding: 10px;
-                background: #f8f9fa;
-                border-radius: 5px;
+                padding: 1rem;
+                background: #f9fafb;
+                border-radius: 6px;
+                border: 1px solid #f3f4f6;
             }
-            
+
             .stat-label {
-                font-size: 0.9em;
-                color: #666;
+                font-size: 0.8rem;
+                color: #6b7280;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-bottom: 0.25rem;
+                font-weight: 500;
             }
-            
+
             .stat-value {
-                font-size: 1.4em;
-                font-weight: bold;
-                color: #667eea;
+                font-size: 1.5em;
+                font-weight: 600;
+                color: #1a1a1a;
             }
-            
+
             .warning-box {
-                background: #fff3cd;
-                border-left: 4px solid #ffc107;
-                padding: 15px;
-                margin: 20px 0;
-                border-radius: 5px;
+                background: #fef3c7;
+                border-left: 3px solid #f59e0b;
+                padding: 1rem;
+                margin: 1.5rem 0;
+                border-radius: 4px;
+                color: #92400e;
             }
-            
+
             footer {
-                background: #f8f9fa;
-                padding: 30px;
+                background: #f9fafb;
+                padding: 2rem;
                 text-align: center;
-                color: #666;
-                border-top: 2px solid #e0e0e0;
+                color: #6b7280;
+                border-top: 1px solid #e5e7eb;
+                font-size: 0.9rem;
             }
-            
+
             .timestamp {
                 font-style: italic;
-                color: #999;
-                margin-top: 10px;
+                color: #9ca3af;
+                margin-top: 0.5rem;
             }
         </style>
         
@@ -263,12 +301,12 @@
                 </div>
                 <div class="summary-card">
                     <div class="label">Average MAE</div>
-                    <div class="value">18.9</div>
+                    <div class="value">60.1</div>
                     <div class="label">cm^-1</div>
                 </div>
                 <div class="summary-card">
                     <div class="label">Best R^2</div>
-                    <div class="value">0.9999</div>
+                    <div class="value">1.0000</div>
                 </div>
                 <div class="summary-card">
                     <div class="label">Avg Speedup</div>
@@ -291,10 +329,20 @@
                 Direct comparison of all ML methods against the DFT baseline in a single view.
             </p>
 
-            <h3>Combined IR Spectrum</h3>
+            <h3>Combined IR Spectrum (Fundamentals)</h3>
             <div class="plot-container">
                 <img src="plots/spectrum_combined.png" alt="Combined spectrum comparison" style="width: 100%; max-width: 1200px;">
             </div>
+
+            
+            <h3>Extended IR Spectrum (400-8000 cm⁻¹, includes overtones)</h3>
+            <div class="plot-container">
+                <img src="plots/spectrum_combined_extended.png" alt="Extended spectrum with overtones" style="width: 100%; max-width: 1400px;">
+            </div>
+            <p style="color: #666; font-size: 0.9em; margin-bottom: 30px;">
+                Extended frequency range shows fundamental modes, overtones, and combination bands.
+            </p>
+            
 
             <h3>Combined Regression Analysis</h3>
             <div class="plot-container">
@@ -317,23 +365,35 @@
                 <div class="stats-grid">
                     <div class="stat-item">
                         <div class="stat-label">R^2 (Frequency)</div>
-                        <div class="stat-value metric-good">0.9999</div>
+                        <div class="stat-value metric-good">0.9990</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">MAE</div>
-                        <div class="stat-value metric-warning">13.91 cm^-1</div>
+                        <div class="stat-value metric-bad">70.31 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">RMSE</div>
-                        <div class="stat-value">21.75 cm^-1</div>
+                        <div class="stat-value">103.17 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Max Error</div>
-                        <div class="stat-value">46.97 cm^-1</div>
+                        <div class="stat-value">220.80 cm^-1</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-label">Matched Peaks</div>
-                        <div class="stat-value">5</div>
+                        <div class="stat-label">Matched Modes</div>
+                        <div class="stat-value">9</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Match Rate</div>
+                        <div class="stat-value">100.0%</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Missing Modes (DFT only)</div>
+                        <div class="stat-value">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Spurious Modes (ML only)</div>
+                        <div class="stat-value">0</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Speedup</div>
@@ -376,6 +436,24 @@
   </thead>
   <tbody>
     <tr>
+      <td>1569.79</td>
+      <td>1444.61</td>
+      <td>-125.18</td>
+      <td>-7.97</td>
+      <td>82.24</td>
+      <td>111.97</td>
+      <td>29.73</td>
+    </tr>
+    <tr>
+      <td>3101.13</td>
+      <td>2880.34</td>
+      <td>-220.80</td>
+      <td>-7.12</td>
+      <td>1.64</td>
+      <td>0.48</td>
+      <td>-1.16</td>
+    </tr>
+    <tr>
       <td>3691.66</td>
       <td>3685.08</td>
       <td>-6.58</td>
@@ -395,21 +473,39 @@
     </tr>
     <tr>
       <td>5248.09</td>
+      <td>5136.39</td>
+      <td>-111.70</td>
+      <td>-2.13</td>
+      <td>0.10</td>
+      <td>0.19</td>
+      <td>0.09</td>
+    </tr>
+    <tr>
+      <td>5337.51</td>
       <td>5201.12</td>
-      <td>-46.97</td>
-      <td>-0.89</td>
-      <td>0.13</td>
-      <td>4.48</td>
-      <td>4.36</td>
+      <td>-136.39</td>
+      <td>-2.56</td>
+      <td>3.02</td>
+      <td>3.44</td>
+      <td>0.42</td>
     </tr>
     <tr>
       <td>7293.43</td>
-      <td>7294.38</td>
-      <td>0.95</td>
-      <td>0.01</td>
+      <td>7285.12</td>
+      <td>-8.31</td>
+      <td>-0.11</td>
       <td>0.71</td>
-      <td>2.56</td>
-      <td>1.85</td>
+      <td>0.30</td>
+      <td>-0.40</td>
+    </tr>
+    <tr>
+      <td>7303.11</td>
+      <td>7294.38</td>
+      <td>-8.73</td>
+      <td>-0.12</td>
+      <td>1.77</td>
+      <td>1.40</td>
+      <td>-0.37</td>
     </tr>
     <tr>
       <td>7471.97</td>
@@ -433,23 +529,35 @@
                 <div class="stats-grid">
                     <div class="stat-item">
                         <div class="stat-label">R^2 (Frequency)</div>
-                        <div class="stat-value metric-good">0.9999</div>
+                        <div class="stat-value metric-good">1.0000</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">MAE</div>
-                        <div class="stat-value metric-bad">23.81 cm^-1</div>
+                        <div class="stat-value metric-bad">49.92 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">RMSE</div>
-                        <div class="stat-value">32.33 cm^-1</div>
+                        <div class="stat-value">58.59 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Max Error</div>
-                        <div class="stat-value">47.74 cm^-1</div>
+                        <div class="stat-value">91.30 cm^-1</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-label">Matched Peaks</div>
-                        <div class="stat-value">4</div>
+                        <div class="stat-label">Matched Modes</div>
+                        <div class="stat-value">9</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Match Rate</div>
+                        <div class="stat-value">100.0%</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Missing Modes (DFT only)</div>
+                        <div class="stat-value">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Spurious Modes (ML only)</div>
+                        <div class="stat-value">0</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Speedup</div>
@@ -511,21 +619,66 @@
     </tr>
     <tr>
       <td>3691.66</td>
-      <td>3739.40</td>
-      <td>47.74</td>
-      <td>1.29</td>
+      <td>3643.79</td>
+      <td>-47.87</td>
+      <td>-1.30</td>
       <td>4.65</td>
+      <td>338.50</td>
+      <td>333.85</td>
+    </tr>
+    <tr>
+      <td>3786.87</td>
+      <td>3739.40</td>
+      <td>-47.46</td>
+      <td>-1.25</td>
+      <td>45.18</td>
       <td>683.55</td>
-      <td>678.90</td>
+      <td>638.37</td>
     </tr>
     <tr>
       <td>5248.09</td>
+      <td>5200.52</td>
+      <td>-47.56</td>
+      <td>-0.91</td>
+      <td>0.10</td>
+      <td>0.16</td>
+      <td>0.06</td>
+    </tr>
+    <tr>
+      <td>5337.51</td>
       <td>5291.55</td>
-      <td>43.47</td>
-      <td>0.83</td>
-      <td>0.13</td>
-      <td>1.90</td>
+      <td>-45.96</td>
+      <td>-0.86</td>
+      <td>3.02</td>
+      <td>1.43</td>
+      <td>-1.59</td>
+    </tr>
+    <tr>
+      <td>7293.43</td>
+      <td>7202.14</td>
+      <td>-91.30</td>
+      <td>-1.25</td>
+      <td>0.71</td>
+      <td>4.17</td>
+      <td>3.46</td>
+    </tr>
+    <tr>
+      <td>7303.11</td>
+      <td>7219.06</td>
+      <td>-84.04</td>
+      <td>-1.15</td>
       <td>1.77</td>
+      <td>8.55</td>
+      <td>6.78</td>
+    </tr>
+    <tr>
+      <td>7471.97</td>
+      <td>7390.96</td>
+      <td>-81.02</td>
+      <td>-1.08</td>
+      <td>0.03</td>
+      <td>4.35</td>
+      <td>4.32</td>
     </tr>
   </tbody>
 </table>
@@ -540,23 +693,35 @@
                 <div class="stats-grid">
                     <div class="stat-item">
                         <div class="stat-label">R^2 (Frequency)</div>
-                        <div class="stat-value metric-good">0.9999</div>
+                        <div class="stat-value metric-good">0.9990</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">MAE</div>
-                        <div class="stat-value metric-warning">13.91 cm^-1</div>
+                        <div class="stat-value metric-bad">70.31 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">RMSE</div>
-                        <div class="stat-value">21.75 cm^-1</div>
+                        <div class="stat-value">103.17 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Max Error</div>
-                        <div class="stat-value">46.97 cm^-1</div>
+                        <div class="stat-value">220.80 cm^-1</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-label">Matched Peaks</div>
-                        <div class="stat-value">5</div>
+                        <div class="stat-label">Matched Modes</div>
+                        <div class="stat-value">9</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Match Rate</div>
+                        <div class="stat-value">100.0%</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Missing Modes (DFT only)</div>
+                        <div class="stat-value">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Spurious Modes (ML only)</div>
+                        <div class="stat-value">0</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Speedup</div>
@@ -599,6 +764,24 @@
   </thead>
   <tbody>
     <tr>
+      <td>1569.79</td>
+      <td>1444.61</td>
+      <td>-125.18</td>
+      <td>-7.97</td>
+      <td>82.24</td>
+      <td>721.97</td>
+      <td>639.73</td>
+    </tr>
+    <tr>
+      <td>3101.13</td>
+      <td>2880.34</td>
+      <td>-220.80</td>
+      <td>-7.12</td>
+      <td>1.64</td>
+      <td>0.16</td>
+      <td>-1.48</td>
+    </tr>
+    <tr>
       <td>3691.66</td>
       <td>3685.08</td>
       <td>-6.58</td>
@@ -618,21 +801,39 @@
     </tr>
     <tr>
       <td>5248.09</td>
+      <td>5136.39</td>
+      <td>-111.70</td>
+      <td>-2.13</td>
+      <td>0.10</td>
+      <td>0.38</td>
+      <td>0.28</td>
+    </tr>
+    <tr>
+      <td>5337.51</td>
       <td>5201.12</td>
-      <td>-46.97</td>
-      <td>-0.89</td>
-      <td>0.13</td>
-      <td>2.41</td>
-      <td>2.28</td>
+      <td>-136.39</td>
+      <td>-2.56</td>
+      <td>3.02</td>
+      <td>1.85</td>
+      <td>-1.17</td>
     </tr>
     <tr>
       <td>7293.43</td>
-      <td>7294.38</td>
-      <td>0.95</td>
-      <td>0.01</td>
+      <td>7285.12</td>
+      <td>-8.31</td>
+      <td>-0.11</td>
       <td>0.71</td>
-      <td>19.18</td>
-      <td>18.48</td>
+      <td>5.10</td>
+      <td>4.39</td>
+    </tr>
+    <tr>
+      <td>7303.11</td>
+      <td>7294.38</td>
+      <td>-8.73</td>
+      <td>-0.12</td>
+      <td>1.77</td>
+      <td>10.49</td>
+      <td>8.72</td>
     </tr>
     <tr>
       <td>7471.97</td>
@@ -656,23 +857,35 @@
                 <div class="stats-grid">
                     <div class="stat-item">
                         <div class="stat-label">R^2 (Frequency)</div>
-                        <div class="stat-value metric-good">0.9999</div>
+                        <div class="stat-value metric-good">1.0000</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">MAE</div>
-                        <div class="stat-value metric-bad">23.81 cm^-1</div>
+                        <div class="stat-value metric-bad">49.92 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">RMSE</div>
-                        <div class="stat-value">32.33 cm^-1</div>
+                        <div class="stat-value">58.59 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Max Error</div>
-                        <div class="stat-value">47.74 cm^-1</div>
+                        <div class="stat-value">91.30 cm^-1</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-label">Matched Peaks</div>
-                        <div class="stat-value">4</div>
+                        <div class="stat-label">Matched Modes</div>
+                        <div class="stat-value">9</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Match Rate</div>
+                        <div class="stat-value">100.0%</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Missing Modes (DFT only)</div>
+                        <div class="stat-value">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Spurious Modes (ML only)</div>
+                        <div class="stat-value">0</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Speedup</div>
@@ -734,21 +947,66 @@
     </tr>
     <tr>
       <td>3691.66</td>
-      <td>3739.40</td>
-      <td>47.74</td>
-      <td>1.29</td>
+      <td>3643.79</td>
+      <td>-47.87</td>
+      <td>-1.30</td>
       <td>4.65</td>
+      <td>0.01</td>
+      <td>-4.65</td>
+    </tr>
+    <tr>
+      <td>3786.87</td>
+      <td>3739.40</td>
+      <td>-47.46</td>
+      <td>-1.25</td>
+      <td>45.18</td>
       <td>49.18</td>
-      <td>44.53</td>
+      <td>4.00</td>
     </tr>
     <tr>
       <td>5248.09</td>
+      <td>5200.52</td>
+      <td>-47.56</td>
+      <td>-0.91</td>
+      <td>0.10</td>
+      <td>0.20</td>
+      <td>0.11</td>
+    </tr>
+    <tr>
+      <td>5337.51</td>
       <td>5291.55</td>
-      <td>43.47</td>
-      <td>0.83</td>
-      <td>0.13</td>
-      <td>4.04</td>
-      <td>3.91</td>
+      <td>-45.96</td>
+      <td>-0.86</td>
+      <td>3.02</td>
+      <td>3.04</td>
+      <td>0.02</td>
+    </tr>
+    <tr>
+      <td>7293.43</td>
+      <td>7202.14</td>
+      <td>-91.30</td>
+      <td>-1.25</td>
+      <td>0.71</td>
+      <td>0.28</td>
+      <td>-0.43</td>
+    </tr>
+    <tr>
+      <td>7303.11</td>
+      <td>7219.06</td>
+      <td>-84.04</td>
+      <td>-1.15</td>
+      <td>1.77</td>
+      <td>1.19</td>
+      <td>-0.58</td>
+    </tr>
+    <tr>
+      <td>7471.97</td>
+      <td>7390.96</td>
+      <td>-81.02</td>
+      <td>-1.08</td>
+      <td>0.03</td>
+      <td>0.02</td>
+      <td>-0.01</td>
     </tr>
   </tbody>
 </table>
@@ -765,7 +1023,8 @@
                         <th>MAE (cm^-1)</th>
                         <th>RMSE (cm^-1)</th>
                         <th>Max Error (cm^-1)</th>
-                        <th>Peaks</th>
+                        <th>Matched Modes</th>
+                        <th>Match Rate</th>
                         <th>Speedup</th>
                     </tr>
                 </thead>
@@ -773,41 +1032,45 @@
                     
             <tr>
                 <td>mace_mp_mace_ml</td>
-                <td>0.9999</td>
-                <td>13.91</td>
-                <td>21.75</td>
-                <td>46.97</td>
-                <td>5</td>
+                <td>0.9990</td>
+                <td>70.31</td>
+                <td>103.17</td>
+                <td>220.80</td>
+                <td>9/9</td>
+                <td>100.0%</td>
                 <td>3.1x</td>
             </tr>
             
             <tr>
                 <td>mace_omol_espaloma</td>
-                <td>0.9999</td>
-                <td>23.81</td>
-                <td>32.33</td>
-                <td>47.74</td>
-                <td>4</td>
+                <td>1.0000</td>
+                <td>49.92</td>
+                <td>58.59</td>
+                <td>91.30</td>
+                <td>9/9</td>
+                <td>100.0%</td>
                 <td>2.5x</td>
             </tr>
             
             <tr>
                 <td>mace_mp_espaloma</td>
-                <td>0.9999</td>
-                <td>13.91</td>
-                <td>21.75</td>
-                <td>46.97</td>
-                <td>5</td>
+                <td>0.9990</td>
+                <td>70.31</td>
+                <td>103.17</td>
+                <td>220.80</td>
+                <td>9/9</td>
+                <td>100.0%</td>
                 <td>1.9x</td>
             </tr>
             
             <tr>
                 <td>mace_omol_mace_ml</td>
-                <td>0.9999</td>
-                <td>23.81</td>
-                <td>32.33</td>
-                <td>47.74</td>
-                <td>4</td>
+                <td>1.0000</td>
+                <td>49.92</td>
+                <td>58.59</td>
+                <td>91.30</td>
+                <td>9/9</td>
+                <td>100.0%</td>
                 <td>2.3x</td>
             </tr>
             
@@ -819,7 +1082,7 @@
 
         <footer>
             <p>Generated by IR Spectral Analysis Framework</p>
-            <p class="timestamp">Report generated: 2025-10-29 13:31:25</p>
+            <p class="timestamp">Report generated: 2025-10-30 16:58:29</p>
         </footer>
         
 </div>

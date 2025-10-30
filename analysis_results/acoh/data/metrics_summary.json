@@ -1,8 +1,8 @@
 {
   "molecule": "acoh",
-  "analysis_date": "2025-10-24T16:21:13.047899",
+  "analysis_date": "2025-10-30T16:56:23.048832",
   "num_ml_calculators": 4,
-  "dft_method": "wb97xd_def2tzvp_wb97xd_def2tzvp",
+  "dft_method": "wb97xd_def2tzvp",
   "comparisons": [
     {
       "name": "mace_mp_mace_ml",
@@ -10,15 +10,15 @@
       "rmse_freq": 0,
       "r2_freq": 0,
       "r2_intensity": 0,
-      "speedup": 32.405623400182556
+      "speedup": 33.65155664543532
     },
     {
       "name": "mace_omol_espaloma",
-      "mae_freq": 0,
-      "rmse_freq": 0,
-      "r2_freq": 0,
-      "r2_intensity": 0,
-      "speedup": 25.249637430794145
+      "mae_freq": 649.4339047619047,
+      "rmse_freq": 906.5811429012039,
+      "r2_freq": 0.6469872681433328,
+      "r2_intensity": 0.018374164926366593,
+      "speedup": 26.451746995240022
     },
     {
       "name": "mace_mp_espaloma",
@@ -26,15 +26,15 @@
       "rmse_freq": 0,
       "r2_freq": 0,
       "r2_intensity": 0,
-      "speedup": 38.61021185326717
+      "speedup": 39.002411345803814
     },
     {
       "name": "mace_omol_mace_ml",
-      "mae_freq": 0,
-      "rmse_freq": 0,
-      "r2_freq": 0,
-      "r2_intensity": 0,
-      "speedup": 22.649158568205014
+      "mae_freq": 649.4339047619047,
+      "rmse_freq": 906.5811429012039,
+      "r2_freq": 0.6469872681433328,
+      "r2_intensity": 0.009421435215502016,
+      "speedup": 22.899327226319976
     }
   ]
 }

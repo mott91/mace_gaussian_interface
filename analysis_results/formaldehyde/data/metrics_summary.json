@@ -1,39 +1,39 @@
 {
   "molecule": "formaldehyde",
-  "analysis_date": "2025-10-29T13:31:02.949487",
+  "analysis_date": "2025-10-30T16:58:12.652199",
   "num_ml_calculators": 4,
   "dft_method": "wb97xd_def2tzvp",
   "comparisons": [
     {
       "name": "mace_mp_mace_ml",
-      "mae_freq": 20.87237499999989,
-      "rmse_freq": 25.20642822525633,
-      "r2_freq": 0.9997438040591985,
-      "r2_intensity": 0.0034670155501709144,
+      "mae_freq": 345.873,
+      "rmse_freq": 405.7826998969605,
+      "r2_freq": 0.9777389287885331,
+      "r2_intensity": 0.7830305993440352,
       "speedup": 6.8410373961225615
     },
     {
       "name": "mace_omol_espaloma",
-      "mae_freq": 23.89076923076921,
-      "rmse_freq": 25.677710043477813,
-      "r2_freq": 0.9994114215663766,
-      "r2_intensity": 0.4419648424071855,
+      "mae_freq": 80.82677777777775,
+      "rmse_freq": 114.91399296784881,
+      "r2_freq": 0.9979232667716342,
+      "r2_intensity": 0.4349853470381369,
       "speedup": 5.154646063432939
     },
     {
       "name": "mace_mp_espaloma",
-      "mae_freq": 20.87237499999989,
-      "rmse_freq": 25.20642822525633,
-      "r2_freq": 0.9997438040591985,
-      "r2_intensity": 0.0006231744877167045,
+      "mae_freq": 345.873,
+      "rmse_freq": 405.7826998969605,
+      "r2_freq": 0.9777389287885331,
+      "r2_intensity": 0.44928790091982385,
       "speedup": 6.590559960032476
     },
     {
       "name": "mace_omol_mace_ml",
-      "mae_freq": 23.89076923076921,
-      "rmse_freq": 25.677710043477813,
-      "r2_freq": 0.9994114215663766,
-      "r2_intensity": 0.9749460089344191,
+      "mae_freq": 80.82677777777775,
+      "rmse_freq": 114.91399296784881,
+      "r2_freq": 0.9979232667716342,
+      "r2_intensity": 0.8662825597262758,
       "speedup": 4.418472245629083
     }
   ]

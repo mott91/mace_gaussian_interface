@@ -7,27 +7,27 @@
   "frequencies": {
     "harmonic": [
       {
-        "freq_cm": 510.1781,
+        "freq_cm": 510.178,
         "ir_intensity": 179.9439
       },
       {
-        "freq_cm": 539.0843,
+        "freq_cm": 539.0844,
         "ir_intensity": 176.0921
       },
       {
-        "freq_cm": 859.1572,
+        "freq_cm": 859.157,
         "ir_intensity": 3.052
       },
       {
-        "freq_cm": 883.6891,
-        "ir_intensity": 156.3904
+        "freq_cm": 883.6893,
+        "ir_intensity": 156.3903
       },
       {
-        "freq_cm": 886.7201,
-        "ir_intensity": 9.7161
+        "freq_cm": 886.72,
+        "ir_intensity": 9.716
       },
       {
-        "freq_cm": 1031.8529,
+        "freq_cm": 1031.8527,
         "ir_intensity": 574.9032
       },
       {
@@ -35,23 +35,23 @@
         "ir_intensity": 86.2425
       },
       {
-        "freq_cm": 1304.9889,
-        "ir_intensity": 42.6596
+        "freq_cm": 1304.9887,
+        "ir_intensity": 42.6595
       },
       {
-        "freq_cm": 1306.7737,
+        "freq_cm": 1306.774,
         "ir_intensity": 23.2374
       },
       {
-        "freq_cm": 1338.8773,
-        "ir_intensity": 119.6003
+        "freq_cm": 1338.8772,
+        "ir_intensity": 119.6004
       },
       {
         "freq_cm": 1828.9294,
         "ir_intensity": 333.9686
       },
       {
-        "freq_cm": 3021.0913,
+        "freq_cm": 3021.0911,
         "ir_intensity": 15.4256
       },
       {
@@ -63,7 +63,7 @@
         "ir_intensity": 50.7757
       },
       {
-        "freq_cm": 3796.9137,
+        "freq_cm": 3796.9141,
         "ir_intensity": 621.128
       }
     ],
@@ -72,13 +72,8 @@
     "combination_bands": []
   },
   "energy_eV": 0.8585736588337919,
-  "dipole": {
-    "x": -0.870195797747522,
-    "y": 0.069929284803629,
-    "z": -1.380752296173654,
-    "magnitude": 1.6335873820152416
-  },
-  "runtime_s": 119.21837329864502,
+  "dipole": null,
+  "runtime_s": 116.12038731575012,
   "files": {
     "gaussian_log": "gaussian_freq.log",
     "gaussian_input": "gaussian_freq.gjf"

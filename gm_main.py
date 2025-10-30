@@ -683,7 +683,7 @@ def ase_to_gjf(
         f.write("\n")  # blank line after coordinates
 
 
-def geometry_optimisation(mol, fmax=0.00005):
+def geometry_optimisation(mol, fmax=0.000001):
     ei = mol.get_potential_energy()
     print("Initial Energy: ", ei, "eV")
     opt = LBFGS(mol)
