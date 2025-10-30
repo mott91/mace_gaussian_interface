@@ -89,7 +89,7 @@
       {
         "mode": 2,
         "freq_cm": 3071.032,
-        "ir_intensity": 14.56888127,
+        "ir_intensity": 14.56888131,
         "freq_harmonic": 3189.795
       },
       {
@@ -119,25 +119,25 @@
       {
         "mode": 7,
         "freq_cm": 1428.4,
-        "ir_intensity": 19.00625697,
+        "ir_intensity": 19.006257,
         "freq_harmonic": 1460.546
       },
       {
         "mode": 8,
         "freq_cm": 1379.817,
-        "ir_intensity": 17.38922277,
+        "ir_intensity": 17.38922278,
         "freq_harmonic": 1412.29
       },
       {
         "mode": 9,
         "freq_cm": 1322.474,
-        "ir_intensity": 4.18857186,
+        "ir_intensity": 4.18857187,
         "freq_harmonic": 1339.694
       },
       {
         "mode": 10,
         "freq_cm": 1176.302,
-        "ir_intensity": 49.43282502,
+        "ir_intensity": 49.432825,
         "freq_harmonic": 1215.98
       },
       {
@@ -286,7 +286,7 @@
         "overtone_level": 2,
         "freq_harmonic": 1325.899,
         "freq_anharmonic": 1259.546,
-        "ir_intensity": 19.66054112
+        "ir_intensity": 19.66054111
       },
       {
         "mode": 15,
@@ -1149,7 +1149,7 @@
         "mode2": 14,
         "freq_harmonic": 1206.721,
         "freq_anharmonic": 1161.58,
-        "ir_intensity": 3.87689917
+        "ir_intensity": 3.87689916
       },
       {
         "mode1": 16,
@@ -1373,7 +1373,7 @@
         "mode2": 15,
         "freq_harmonic": 661.222,
         "freq_anharmonic": 654.618,
-        "ir_intensity": 5.25108958
+        "ir_intensity": 5.25108959
       },
       {
         "mode1": 18,
@@ -2220,7 +2220,7 @@
         "mode2": 14,
         "freq_harmonic": 1206.721,
         "freq_anharmonic": 1161.58,
-        "ir_intensity": 13.31504825
+        "ir_intensity": 13.31504824
       },
       {
         "mode1": 16,
@@ -2444,7 +2444,7 @@
         "mode2": 15,
         "freq_harmonic": 661.222,
         "freq_anharmonic": 654.618,
-        "ir_intensity": 32.00138649
+        "ir_intensity": 32.0013865
       },
       {
         "mode1": 18,
@@ -2469,7 +2469,7 @@
     "z": -0.0,
     "magnitude": 0.37902805400902484
   },
-  "runtime_s": 200.1569046974182,
+  "runtime_s": 188.86078262329102,
   "files": {
     "gaussian_log": "gaussian_freq.log",
     "gaussian_input": "gaussian_freq.gjf"

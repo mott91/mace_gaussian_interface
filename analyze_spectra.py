@@ -203,6 +203,11 @@ class SpectrumAnalyzer:
         int1_matched = []
         int2_matched = []
         
+        # Handle empty spectra
+        if len(spectrum1.frequencies) == 0 or len(spectrum2.frequencies) == 0:
+            logger.warning("One or both spectra are empty, no peaks to match")
+            return (np.array([]), np.array([]), np.array([]), np.array([]))
+        
         # For each peak in spectrum1, find closest in spectrum2
         used_indices = set()
         
@@ -641,17 +646,22 @@ class SpectrumAnalyzer:
       # -----------------------------
       for idx, (ml_spectrum, ml_name, metrics) in enumerate(zip(ml_spectra, ml_names, metrics_list)):
           dft_freq, ml_freq, _, _ = self.match_peaks(dft_spectrum, ml_spectrum)
-          if not dft_freq:
+          if len(dft_freq) == 0:
               continue
 
           color = colors[idx % len(colors)]
           marker = markers[idx % len(markers)]
+          # Format R² label based on number of peaks
+          if metrics.num_peaks < 3:
+              r2_label = f'{ml_name} (R²=N/A, N={metrics.num_peaks})'
+          else:
+              r2_label = f'{ml_name} (R²={metrics.r2_freq:.3f})'
           ax1.scatter(dft_freq, ml_freq, c=color, marker=marker, s=80,
                       alpha=0.85, edgecolors='white', linewidth=1.2,
-                      label=f'{ml_name} (R²={metrics.r2_freq:.3f})', zorder=3)
+                      label=r2_label, zorder=3)
 
       # Perfect agreement line
-      if all_dft_freq and all_ml_freq:
+      if len(all_dft_freq) > 0 and len(all_ml_freq) > 0:
           lim_min = min(all_dft_freq + all_ml_freq)
           lim_max = max(all_dft_freq + all_ml_freq)
           ax1.plot([lim_min, lim_max], [lim_min, lim_max],
@@ -676,16 +686,21 @@ class SpectrumAnalyzer:
       # -----------------------------
       for idx, (ml_spectrum, ml_name, metrics) in enumerate(zip(ml_spectra, ml_names, metrics_list)):
           _, _, dft_int, ml_int = self.match_peaks(dft_spectrum, ml_spectrum)
-          if not dft_int:
+          if len(dft_int) == 0:
               continue
 
           color = colors[idx % len(colors)]
           marker = markers[idx % len(markers)]
+          # Format R² label based on number of peaks
+          if metrics.num_peaks < 3:
+              r2_label = f'{ml_name} (R²=N/A, N={metrics.num_peaks})'
+          else:
+              r2_label = f'{ml_name} (R²={metrics.r2_intensity:.3f})'
           ax2.scatter(dft_int, ml_int, c=color, marker=marker, s=80,
                       alpha=0.85, edgecolors='white', linewidth=1.2, zorder=3,
-                      label=f'{ml_name} (R²={metrics.r2_int:.3f})')
+                      label=r2_label)
 
-      if all_dft_int and all_ml_int:
+      if len(all_dft_int) > 0 and len(all_ml_int) > 0:
           lim_max = max(max(all_dft_int), max(all_ml_int)) * 1.05
           ax2.plot([0, lim_max], [0, lim_max],
                    color='#4C566A', linewidth=1.0, linestyle='--', alpha=0.35, zorder=1)

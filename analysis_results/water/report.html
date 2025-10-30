@@ -218,6 +218,14 @@
                 color: #667eea;
             }
             
+            .warning-box {
+                background: #fff3cd;
+                border-left: 4px solid #ffc107;
+                padding: 15px;
+                margin: 20px 0;
+                border-radius: 5px;
+            }
+            
             footer {
                 background: #f8f9fa;
                 padding: 30px;
@@ -243,7 +251,7 @@
             <div class="subtitle">ML vs DFT Comparison</div>
         </header>
         
-<nav><a href="#overview">Overview</a> <a href="#comp1">mace_mp_mace_ml</a> <a href="#comp2">mace_omol_espaloma</a> <a href="#comp3">mace_mp_espaloma</a> <a href="#comp4">mace_omol_mace_ml</a> <a href="#summary">Summary</a></nav>
+<nav><a href="#overview">Overview</a> <a href="#combined">Combined</a> <a href="#comp1">mace_mp_mace_ml</a> <a href="#comp2">mace_omol_espaloma</a> <a href="#comp3">mace_mp_espaloma</a> <a href="#comp4">mace_omol_mace_ml</a> <a href="#summary">Summary</a></nav>
 <div class="content">
 
         <section id="overview">
@@ -255,16 +263,16 @@
                 </div>
                 <div class="summary-card">
                     <div class="label">Average MAE</div>
-                    <div class="value">19.8</div>
+                    <div class="value">18.9</div>
                     <div class="label">cm^-1</div>
                 </div>
                 <div class="summary-card">
                     <div class="label">Best R^2</div>
-                    <div class="value">1.0000</div>
+                    <div class="value">0.9999</div>
                 </div>
                 <div class="summary-card">
                     <div class="label">Avg Speedup</div>
-                    <div class="value">2.3x</div>
+                    <div class="value">2.5x</div>
                 </div>
             </div>
             
@@ -277,6 +285,30 @@
         </section>
         
 
+        <section id="combined" class="comparison-section">
+            <h2>Combined Analysis: All Methods</h2>
+            <p style="color: #666; margin-bottom: 20px;">
+                Direct comparison of all ML methods against the DFT baseline in a single view.
+            </p>
+
+            <h3>Combined IR Spectrum</h3>
+            <div class="plot-container">
+                <img src="plots/spectrum_combined.png" alt="Combined spectrum comparison" style="width: 100%; max-width: 1200px;">
+            </div>
+
+            <h3>Combined Regression Analysis</h3>
+            <div class="plot-container">
+                <img src="plots/regression_combined.png" alt="Combined regression analysis" style="width: 100%; max-width: 1200px;">
+            </div>
+
+            <p style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-left: 4px solid #667eea; border-radius: 4px;">
+                <strong>Note:</strong> The combined plots allow for quick visual comparison of how different ML methods
+                perform relative to each other and the DFT reference. R² values of "N/A" indicate insufficient data points (N&lt;3)
+                for statistical correlation.
+            </p>
+        </section>
+        
+
         <section id="comp1" class="comparison-section">
             <h2>mace_mp_mace_ml</h2>
             
@@ -285,27 +317,27 @@
                 <div class="stats-grid">
                     <div class="stat-item">
                         <div class="stat-label">R^2 (Frequency)</div>
-                        <div class="stat-value metric-good">1.0000</div>
+                        <div class="stat-value metric-good">0.9999</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">MAE</div>
-                        <div class="stat-value metric-bad">21.98 cm^-1</div>
+                        <div class="stat-value metric-warning">13.91 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">RMSE</div>
-                        <div class="stat-value">28.17 cm^-1</div>
+                        <div class="stat-value">21.75 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Max Error</div>
-                        <div class="stat-value">39.59 cm^-1</div>
+                        <div class="stat-value">46.97 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Matched Peaks</div>
-                        <div class="stat-value">2</div>
+                        <div class="stat-value">5</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Speedup</div>
-                        <div class="stat-value">2.8x</div>
+                        <div class="stat-value">3.1x</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">ML Runtime</div>
@@ -313,7 +345,7 @@
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">DFT Runtime</div>
-                        <div class="stat-value">43.3 s</div>
+                        <div class="stat-value">47.8 s</div>
                     </div>
                 </div>
             </div>
@@ -344,22 +376,49 @@
   </thead>
   <tbody>
     <tr>
-      <td>3724.68</td>
+      <td>3691.66</td>
       <td>3685.08</td>
-      <td>-39.59</td>
-      <td>-1.06</td>
-      <td>43.01</td>
+      <td>-6.58</td>
+      <td>-0.18</td>
+      <td>4.65</td>
       <td>0.00</td>
-      <td>-43.01</td>
+      <td>-4.65</td>
     </tr>
     <tr>
-      <td>5196.75</td>
+      <td>3786.87</td>
+      <td>3780.36</td>
+      <td>-6.51</td>
+      <td>-0.17</td>
+      <td>45.18</td>
+      <td>49.42</td>
+      <td>4.24</td>
+    </tr>
+    <tr>
+      <td>5248.09</td>
       <td>5201.12</td>
-      <td>4.37</td>
-      <td>0.08</td>
-      <td>0.12</td>
+      <td>-46.97</td>
+      <td>-0.89</td>
+      <td>0.13</td>
       <td>4.48</td>
       <td>4.36</td>
+    </tr>
+    <tr>
+      <td>7293.43</td>
+      <td>7294.38</td>
+      <td>0.95</td>
+      <td>0.01</td>
+      <td>0.71</td>
+      <td>2.56</td>
+      <td>1.85</td>
+    </tr>
+    <tr>
+      <td>7471.97</td>
+      <td>7463.41</td>
+      <td>-8.56</td>
+      <td>-0.11</td>
+      <td>0.03</td>
+      <td>0.03</td>
+      <td>-0.01</td>
     </tr>
   </tbody>
 </table>
@@ -374,35 +433,35 @@
                 <div class="stats-grid">
                     <div class="stat-item">
                         <div class="stat-label">R^2 (Frequency)</div>
-                        <div class="stat-value metric-good">1.0000</div>
+                        <div class="stat-value metric-good">0.9999</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">MAE</div>
-                        <div class="stat-value metric-warning">17.66 cm^-1</div>
+                        <div class="stat-value metric-bad">23.81 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">RMSE</div>
-                        <div class="stat-value">21.56 cm^-1</div>
+                        <div class="stat-value">32.33 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Max Error</div>
-                        <div class="stat-value">45.34 cm^-1</div>
+                        <div class="stat-value">47.74 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Matched Peaks</div>
-                        <div class="stat-value">8</div>
+                        <div class="stat-value">4</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Speedup</div>
-                        <div class="stat-value">2.1x</div>
+                        <div class="stat-value">2.5x</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">ML Runtime</div>
-                        <div class="stat-value">20.2 s</div>
+                        <div class="stat-value">18.9 s</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">DFT Runtime</div>
-                        <div class="stat-value">43.3 s</div>
+                        <div class="stat-value">47.8 s</div>
                     </div>
                 </div>
             </div>
@@ -433,76 +492,40 @@
   </thead>
   <tbody>
     <tr>
-      <td>1580.60</td>
+      <td>1569.79</td>
       <td>1570.25</td>
-      <td>-10.35</td>
-      <td>-0.65</td>
-      <td>80.41</td>
-      <td>715.44</td>
-      <td>635.03</td>
-    </tr>
-    <tr>
-      <td>3123.01</td>
-      <td>3104.71</td>
-      <td>-18.30</td>
-      <td>-0.59</td>
-      <td>1.72</td>
-      <td>2.60</td>
-      <td>0.88</td>
-    </tr>
-    <tr>
-      <td>3633.41</td>
-      <td>3643.79</td>
-      <td>10.38</td>
-      <td>0.29</td>
-      <td>4.32</td>
-      <td>338.50</td>
-      <td>334.19</td>
-    </tr>
-    <tr>
-      <td>3724.68</td>
-      <td>3739.40</td>
-      <td>14.72</td>
-      <td>0.40</td>
-      <td>43.01</td>
-      <td>683.55</td>
-      <td>640.54</td>
-    </tr>
-    <tr>
-      <td>5196.75</td>
-      <td>5200.52</td>
-      <td>3.77</td>
-      <td>0.07</td>
-      <td>0.12</td>
-      <td>0.21</td>
-      <td>0.08</td>
-    </tr>
-    <tr>
-      <td>5280.85</td>
-      <td>5291.55</td>
-      <td>10.71</td>
-      <td>0.20</td>
-      <td>3.89</td>
-      <td>1.90</td>
-      <td>-1.99</td>
-    </tr>
-    <tr>
-      <td>7174.40</td>
-      <td>7202.14</td>
-      <td>27.74</td>
-      <td>0.39</td>
-      <td>0.70</td>
-      <td>4.17</td>
-      <td>3.47</td>
-    </tr>
-    <tr>
-      <td>7345.62</td>
-      <td>7390.96</td>
-      <td>45.34</td>
-      <td>0.62</td>
+      <td>0.46</td>
       <td>0.03</td>
-      <td>4.35</td>
-      <td>4.32</td>
+      <td>82.24</td>
+      <td>715.44</td>
+      <td>633.19</td>
+    </tr>
+    <tr>
+      <td>3101.13</td>
+      <td>3104.71</td>
+      <td>3.57</td>
+      <td>0.12</td>
+      <td>1.64</td>
+      <td>2.60</td>
+      <td>0.96</td>
+    </tr>
+    <tr>
+      <td>3691.66</td>
+      <td>3739.40</td>
+      <td>47.74</td>
+      <td>1.29</td>
+      <td>4.65</td>
+      <td>683.55</td>
+      <td>678.90</td>
+    </tr>
+    <tr>
+      <td>5248.09</td>
+      <td>5291.55</td>
+      <td>43.47</td>
+      <td>0.83</td>
+      <td>0.13</td>
+      <td>1.90</td>
+      <td>1.77</td>
     </tr>
   </tbody>
 </table>
@@ -517,35 +540,35 @@
                 <div class="stats-grid">
                     <div class="stat-item">
                         <div class="stat-label">R^2 (Frequency)</div>
-                        <div class="stat-value metric-good">1.0000</div>
+                        <div class="stat-value metric-good">0.9999</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">MAE</div>
-                        <div class="stat-value metric-bad">21.98 cm^-1</div>
+                        <div class="stat-value metric-warning">13.91 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">RMSE</div>
-                        <div class="stat-value">28.17 cm^-1</div>
+                        <div class="stat-value">21.75 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Max Error</div>
-                        <div class="stat-value">39.59 cm^-1</div>
+                        <div class="stat-value">46.97 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Matched Peaks</div>
-                        <div class="stat-value">2</div>
+                        <div class="stat-value">5</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Speedup</div>
-                        <div class="stat-value">2.3x</div>
+                        <div class="stat-value">1.9x</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">ML Runtime</div>
-                        <div class="stat-value">18.6 s</div>
+                        <div class="stat-value">25.7 s</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">DFT Runtime</div>
-                        <div class="stat-value">43.3 s</div>
+                        <div class="stat-value">47.8 s</div>
                     </div>
                 </div>
             </div>
@@ -576,22 +599,49 @@
   </thead>
   <tbody>
     <tr>
-      <td>3724.68</td>
+      <td>3691.66</td>
       <td>3685.08</td>
-      <td>-39.59</td>
-      <td>-1.06</td>
-      <td>43.01</td>
+      <td>-6.58</td>
+      <td>-0.18</td>
+      <td>4.65</td>
       <td>333.50</td>
-      <td>290.48</td>
+      <td>328.84</td>
     </tr>
     <tr>
-      <td>5196.75</td>
+      <td>3786.87</td>
+      <td>3780.36</td>
+      <td>-6.51</td>
+      <td>-0.17</td>
+      <td>45.18</td>
+      <td>679.48</td>
+      <td>634.30</td>
+    </tr>
+    <tr>
+      <td>5248.09</td>
       <td>5201.12</td>
-      <td>4.37</td>
-      <td>0.08</td>
-      <td>0.12</td>
+      <td>-46.97</td>
+      <td>-0.89</td>
+      <td>0.13</td>
       <td>2.41</td>
       <td>2.28</td>
+    </tr>
+    <tr>
+      <td>7293.43</td>
+      <td>7294.38</td>
+      <td>0.95</td>
+      <td>0.01</td>
+      <td>0.71</td>
+      <td>19.18</td>
+      <td>18.48</td>
+    </tr>
+    <tr>
+      <td>7471.97</td>
+      <td>7463.41</td>
+      <td>-8.56</td>
+      <td>-0.11</td>
+      <td>0.03</td>
+      <td>5.13</td>
+      <td>5.10</td>
     </tr>
   </tbody>
 </table>
@@ -606,35 +656,35 @@
                 <div class="stats-grid">
                     <div class="stat-item">
                         <div class="stat-label">R^2 (Frequency)</div>
-                        <div class="stat-value metric-good">1.0000</div>
+                        <div class="stat-value metric-good">0.9999</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">MAE</div>
-                        <div class="stat-value metric-warning">17.66 cm^-1</div>
+                        <div class="stat-value metric-bad">23.81 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">RMSE</div>
-                        <div class="stat-value">21.56 cm^-1</div>
+                        <div class="stat-value">32.33 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Max Error</div>
-                        <div class="stat-value">45.34 cm^-1</div>
+                        <div class="stat-value">47.74 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Matched Peaks</div>
-                        <div class="stat-value">8</div>
+                        <div class="stat-value">4</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Speedup</div>
-                        <div class="stat-value">1.9x</div>
+                        <div class="stat-value">2.3x</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">ML Runtime</div>
-                        <div class="stat-value">22.6 s</div>
+                        <div class="stat-value">20.5 s</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">DFT Runtime</div>
-                        <div class="stat-value">43.3 s</div>
+                        <div class="stat-value">47.8 s</div>
                     </div>
                 </div>
             </div>
@@ -665,76 +715,40 @@
   </thead>
   <tbody>
     <tr>
-      <td>1580.60</td>
+      <td>1569.79</td>
       <td>1570.25</td>
-      <td>-10.35</td>
-      <td>-0.65</td>
-      <td>80.41</td>
-      <td>108.90</td>
-      <td>28.49</td>
-    </tr>
-    <tr>
-      <td>3123.01</td>
-      <td>3104.71</td>
-      <td>-18.30</td>
-      <td>-0.59</td>
-      <td>1.72</td>
-      <td>0.81</td>
-      <td>-0.90</td>
-    </tr>
-    <tr>
-      <td>3633.41</td>
-      <td>3643.79</td>
-      <td>10.38</td>
-      <td>0.29</td>
-      <td>4.32</td>
-      <td>0.01</td>
-      <td>-4.31</td>
-    </tr>
-    <tr>
-      <td>3724.68</td>
-      <td>3739.40</td>
-      <td>14.72</td>
-      <td>0.40</td>
-      <td>43.01</td>
-      <td>49.18</td>
-      <td>6.17</td>
-    </tr>
-    <tr>
-      <td>5196.75</td>
-      <td>5200.52</td>
-      <td>3.77</td>
-      <td>0.07</td>
-      <td>0.12</td>
-      <td>0.26</td>
-      <td>0.14</td>
-    </tr>
-    <tr>
-      <td>5280.85</td>
-      <td>5291.55</td>
-      <td>10.71</td>
-      <td>0.20</td>
-      <td>3.89</td>
-      <td>4.04</td>
-      <td>0.15</td>
-    </tr>
-    <tr>
-      <td>7174.40</td>
-      <td>7202.14</td>
-      <td>27.74</td>
-      <td>0.39</td>
-      <td>0.70</td>
-      <td>0.28</td>
-      <td>-0.43</td>
-    </tr>
-    <tr>
-      <td>7345.62</td>
-      <td>7390.96</td>
-      <td>45.34</td>
-      <td>0.62</td>
+      <td>0.46</td>
       <td>0.03</td>
-      <td>0.02</td>
-      <td>-0.01</td>
+      <td>82.24</td>
+      <td>108.90</td>
+      <td>26.66</td>
+    </tr>
+    <tr>
+      <td>3101.13</td>
+      <td>3104.71</td>
+      <td>3.57</td>
+      <td>0.12</td>
+      <td>1.64</td>
+      <td>0.81</td>
+      <td>-0.83</td>
+    </tr>
+    <tr>
+      <td>3691.66</td>
+      <td>3739.40</td>
+      <td>47.74</td>
+      <td>1.29</td>
+      <td>4.65</td>
+      <td>49.18</td>
+      <td>44.53</td>
+    </tr>
+    <tr>
+      <td>5248.09</td>
+      <td>5291.55</td>
+      <td>43.47</td>
+      <td>0.83</td>
+      <td>0.13</td>
+      <td>4.04</td>
+      <td>3.91</td>
     </tr>
   </tbody>
 </table>
@@ -759,42 +773,42 @@
                     
             <tr>
                 <td>mace_mp_mace_ml</td>
-                <td>1.0000</td>
-                <td>21.98</td>
-                <td>28.17</td>
-                <td>39.59</td>
-                <td>2</td>
-                <td>2.8x</td>
+                <td>0.9999</td>
+                <td>13.91</td>
+                <td>21.75</td>
+                <td>46.97</td>
+                <td>5</td>
+                <td>3.1x</td>
             </tr>
             
             <tr>
                 <td>mace_omol_espaloma</td>
-                <td>1.0000</td>
-                <td>17.66</td>
-                <td>21.56</td>
-                <td>45.34</td>
-                <td>8</td>
-                <td>2.1x</td>
+                <td>0.9999</td>
+                <td>23.81</td>
+                <td>32.33</td>
+                <td>47.74</td>
+                <td>4</td>
+                <td>2.5x</td>
             </tr>
             
             <tr>
                 <td>mace_mp_espaloma</td>
-                <td>1.0000</td>
-                <td>21.98</td>
-                <td>28.17</td>
-                <td>39.59</td>
-                <td>2</td>
-                <td>2.3x</td>
+                <td>0.9999</td>
+                <td>13.91</td>
+                <td>21.75</td>
+                <td>46.97</td>
+                <td>5</td>
+                <td>1.9x</td>
             </tr>
             
             <tr>
                 <td>mace_omol_mace_ml</td>
-                <td>1.0000</td>
-                <td>17.66</td>
-                <td>21.56</td>
-                <td>45.34</td>
-                <td>8</td>
-                <td>1.9x</td>
+                <td>0.9999</td>
+                <td>23.81</td>
+                <td>32.33</td>
+                <td>47.74</td>
+                <td>4</td>
+                <td>2.3x</td>
             </tr>
             
                 </tbody>
@@ -805,7 +819,7 @@
 
         <footer>
             <p>Generated by IR Spectral Analysis Framework</p>
-            <p class="timestamp">Report generated: 2025-10-24 16:34:26</p>
+            <p class="timestamp">Report generated: 2025-10-29 13:31:25</p>
         </footer>
         
 </div>

@@ -1,0 +1,13 @@
+{
+  "molecule": "ammonia",
+  "calculator": "mace_omol",
+  "initial_energy_eV": -1538.8130714506572,
+  "final_energy_eV": -1538.8136603218463,
+  "converged": true,
+  "num_steps": 0,
+  "runtime_s": 4.548579454421997,
+  "files": {
+    "initial_geometry": "initial.xyz",
+    "optimized_geometry": "optimized.xyz"
+  }
+}

@@ -7,114 +7,114 @@
   "frequencies": {
     "harmonic": [
       {
-        "freq_cm": 1537.9807,
-        "ir_intensity": 53.6883
+        "freq_cm": 1609.1262,
+        "ir_intensity": 47.4553
       },
       {
-        "freq_cm": 3851.0676,
-        "ir_intensity": 3.0063
+        "freq_cm": 3692.4209,
+        "ir_intensity": 2.2955
       },
       {
-        "freq_cm": 3973.56,
-        "ir_intensity": 28.4489
+        "freq_cm": 3791.2743,
+        "ir_intensity": 19.7783
       }
     ],
     "anharmonic": [
       {
         "mode": 1,
-        "freq_cm": 3671.088,
-        "ir_intensity": 1.70387403,
-        "freq_harmonic": 3851.068
+        "freq_cm": 3514.515,
+        "ir_intensity": 1.14025958,
+        "freq_harmonic": 3692.421
       },
       {
         "mode": 2,
-        "freq_cm": 1476.77,
-        "ir_intensity": 56.58648855,
-        "freq_harmonic": 1537.981
+        "freq_cm": 1555.499,
+        "ir_intensity": 49.38125811,
+        "freq_harmonic": 1609.126
       },
       {
         "mode": 3,
-        "freq_cm": 3787.941,
-        "ir_intensity": 24.20517538,
-        "freq_harmonic": 3973.56
+        "freq_cm": 3606.162,
+        "ir_intensity": 16.08322747,
+        "freq_harmonic": 3791.274
       }
     ],
     "overtones": [
       {
         "mode": 1,
         "overtone_level": 2,
-        "freq_harmonic": 7702.135,
-        "freq_anharmonic": 7254.066,
-        "ir_intensity": 0.6814098
+        "freq_harmonic": 7384.842,
+        "freq_anharmonic": 6941.831,
+        "ir_intensity": 0.63130988
       },
       {
         "mode": 2,
         "overtone_level": 2,
-        "freq_harmonic": 3075.961,
-        "freq_anharmonic": 2907.083,
-        "ir_intensity": 0.67153513
+        "freq_harmonic": 3218.252,
+        "freq_anharmonic": 3073.84,
+        "ir_intensity": 0.66881604
       },
       {
         "mode": 3,
         "overtone_level": 2,
-        "freq_harmonic": 7947.12,
-        "freq_anharmonic": 7478.088,
-        "ir_intensity": 0.00376515
+        "freq_harmonic": 7582.549,
+        "freq_anharmonic": 7116.437,
+        "ir_intensity": 0.00607199
       }
     ],
     "combination_bands": [
       {
         "mode1": 2,
         "mode2": 1,
-        "freq_harmonic": 5389.048,
-        "freq_anharmonic": 5129.06,
-        "ir_intensity": 0.19096039
+        "freq_harmonic": 5301.547,
+        "freq_anharmonic": 5052.063,
+        "ir_intensity": 0.18520001
       },
       {
         "mode1": 3,
         "mode2": 1,
-        "freq_harmonic": 7824.628,
-        "freq_anharmonic": 7294.085,
-        "ir_intensity": 3.51288501
+        "freq_harmonic": 7483.695,
+        "freq_anharmonic": 6957.217,
+        "ir_intensity": 3.05854006
       },
       {
         "mode1": 3,
         "mode2": 2,
-        "freq_harmonic": 5511.541,
-        "freq_anharmonic": 5254.002,
-        "ir_intensity": 4.01233357
+        "freq_harmonic": 5400.401,
+        "freq_anharmonic": 5146.675,
+        "ir_intensity": 3.29002047
       },
       {
         "mode1": 2,
         "mode2": 1,
-        "freq_harmonic": 5389.048,
-        "freq_anharmonic": 5129.06,
-        "ir_intensity": 0.14852957
+        "freq_harmonic": 5301.547,
+        "freq_anharmonic": 5052.063,
+        "ir_intensity": 0.14624453
       },
       {
         "mode1": 3,
         "mode2": 1,
-        "freq_harmonic": 7824.628,
-        "freq_anharmonic": 7294.085,
-        "ir_intensity": 1.92132369
+        "freq_harmonic": 7483.695,
+        "freq_anharmonic": 6957.217,
+        "ir_intensity": 1.75382407
       },
       {
         "mode1": 3,
         "mode2": 2,
-        "freq_harmonic": 5511.541,
-        "freq_anharmonic": 5254.002,
-        "ir_intensity": 3.04659104
+        "freq_harmonic": 5400.401,
+        "freq_anharmonic": 5146.675,
+        "ir_intensity": 2.55022935
       }
     ]
   },
-  "energy_eV": 0.100355592475248,
+  "energy_eV": 0.08231444339414999,
   "dipole": {
     "x": 0.0,
     "y": 0.0,
-    "z": -1.9316013183616152,
-    "magnitude": 1.9316013183616152
+    "z": -1.973108288472138,
+    "magnitude": 1.973108288472138
   },
-  "runtime_s": 15.401124954223633,
+  "runtime_s": 17.856138467788696,
   "files": {
     "gaussian_log": "gaussian_freq.log",
     "gaussian_input": "gaussian_freq.gjf"

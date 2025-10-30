@@ -1,0 +1,13 @@
+{
+  "molecule": "co",
+  "calculator": "mace_omol",
+  "initial_energy_eV": -3084.112620237841,
+  "final_energy_eV": -3084.1134584117262,
+  "converged": true,
+  "num_steps": 0,
+  "runtime_s": 5.045360803604126,
+  "files": {
+    "initial_geometry": "initial.xyz",
+    "optimized_geometry": "optimized.xyz"
+  }
+}

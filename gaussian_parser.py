@@ -278,35 +278,40 @@ class GaussianLogParser:
     def parse_dipole_moment(self) -> Optional[Dict[str, float]]:
         """
         Parse dipole moment from log file.
-        
+
         Returns
         -------
         dict or None
             Dictionary with dipole moment components and magnitude in Debye
         """
         # Look for "Dipole=" line in archive section
-        # Format: Dipole=x,y,z
+        # Format: Dipole=x,y,z (may have '-' for undefined components in linear molecules)
         archive_pattern = r'Dipole=([-\d\.]+),([-\d\.]+),([-\d\.]+)'
-        
+
         match = re.search(archive_pattern, self.content)
         if match:
-            x = float(match.group(1))
-            y = float(match.group(2))
-            z = float(match.group(3))
-            magnitude = (x**2 + y**2 + z**2)**0.5
-            
-            # Convert from a.u. to Debye (1 a.u. = 2.54174 Debye)
-            AU_TO_DEBYE = 2.54174623
-            
-            dipole = {
-                'x': x * AU_TO_DEBYE,
-                'y': y * AU_TO_DEBYE,
-                'z': z * AU_TO_DEBYE,
-                'magnitude': magnitude * AU_TO_DEBYE
-            }
-            logger.info(f"Parsed dipole moment: {dipole['magnitude']:.4f} Debye")
-            return dipole
-            
+            try:
+                x = float(match.group(1))
+                y = float(match.group(2))
+                z = float(match.group(3))
+                magnitude = (x**2 + y**2 + z**2)**0.5
+
+                # Convert from a.u. to Debye (1 a.u. = 2.54174 Debye)
+                AU_TO_DEBYE = 2.54174623
+
+                dipole = {
+                    'x': x * AU_TO_DEBYE,
+                    'y': y * AU_TO_DEBYE,
+                    'z': z * AU_TO_DEBYE,
+                    'magnitude': magnitude * AU_TO_DEBYE
+                }
+                logger.info(f"Parsed dipole moment: {dipole['magnitude']:.4f} Debye")
+                return dipole
+            except ValueError:
+                # Handle linear molecules where some components may be '-' or undefined
+                logger.warning("Could not parse dipole moment values (may be linear molecule)")
+                return None
+
         logger.warning("Could not find dipole moment in log file")
         return None
     

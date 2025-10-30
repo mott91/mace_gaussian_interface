@@ -82,9 +82,9 @@ def check_baseline_exists(
     basis = config['basis']
     calculator_name = f"{method}_{basis}"
     
-    # Check if directory exists
+    # Check if directory exists (DFT uses same calculator for energy and dipole)
     mol_dir = results_mgr.create_molecule_directory(molecule_name)
-    freq_dir = mol_dir / f"{calculator_name}_{calculator_name}"
+    freq_dir = mol_dir / calculator_name
     
     if not freq_dir.exists():
         return False
@@ -138,8 +138,8 @@ def create_gaussian_dft_input(
     symbols = atoms.get_chemical_symbols()
     positions = atoms.get_positions()  # Angstrom
     
-    # Construct route card - pure DFT, no external interface
-    route = f"# freq(anharm) {method}/{basis}"
+    # Construct route card - pure DFT with geometry optimization, no external interface
+    route = f"# opt freq(anharm) {method}/{basis}"
     if extra_keywords:
         route += f" {extra_keywords}"
     
