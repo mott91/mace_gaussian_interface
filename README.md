@@ -15,23 +15,31 @@ Interface between MACE machine learning potentials and Gaussian 16 for enhanced 
 
 ### Prerequisites
 
-- **Python 3.9-3.12**
+- **Python 3.10** (required)
 - **Gaussian 16** (must be in PATH as `g16`)
-- **CUDA-capable GPU** (recommended for ML calculations)
-- **uv package manager** (recommended) or pip
+- **CUDA-capable GPU** (required for ML calculations)
+- **micromamba or conda** (for environment management)
 
 ### Quick Start
 
-1. **Install uv** (if not already installed):
+1. **Install micromamba** (if not already installed):
 ```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
+"${SHELL}" <(curl -L micro.mamba.pm/install.sh)
 ```
 
-2. **Clone and install**:
+2. **Clone and setup**:
 ```bash
 git clone https://github.com/your-username/mace_gaussian.git
 cd mace_gaussian
-uv sync
+
+# Create environment from exact specification
+micromamba env create -f environment.yml
+
+# Activate environment
+micromamba activate mace4ir_v2
+
+# Install custom MACE packages (critical step!)
+./install_mace_packages.sh
 ```
 
 3. **Verify installation**:
@@ -40,6 +48,17 @@ python cli.py diagnose
 ```
 
 This checks for Gaussian, CUDA, and available dipole calculators.
+
+**Important:** The `install_mace_packages.sh` step is critical - it installs the dual MACE packages (standard + dipole-enabled) that are required for this project to work.
+
+### Environment Files
+
+The repository includes:
+- `environment.yml` - Complete conda/micromamba environment with exact package versions
+- `requirements_mace4ir_v2.txt` - Pip package list for reference
+- `install_mace_packages.sh` - Script to install custom MACE packages from `mace_ML_pkg/` and `mace_dipole_pkg/`
+
+The `mace4ir_v2` environment is the exact Python environment used for development and testing.
 
 ## Usage
 
@@ -197,6 +216,19 @@ which g16  # Should return path to Gaussian
 ```
 
 **"No CUDA devices"**: ML will fallback to CPU (slower but works)
+
+**Environment issues**: If you get import errors:
+```bash
+# Make sure you're in the correct environment
+micromamba activate mace4ir_v2
+
+# Verify MACE packages are installed
+python -c "import mace; print('mace-torch OK')"
+python -c "import mace_dipole_core; print('mace-dipole OK')"
+
+# If MACE imports fail, reinstall:
+./install_mace_packages.sh
+```
 
 **"Anharmonic intensities missing"**: This happens when:
 - Molecule has imaginary frequencies (not at minimum)
