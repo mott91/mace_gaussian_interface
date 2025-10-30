@@ -1,0 +1,122 @@
+{
+  "molecule": "water",
+  "energy_calculator": "pbepbe_def2svp",
+  "dipole_calculator": "pbepbe_def2svp",
+  "calculator_type": "dft",
+  "timestamp": null,
+  "frequencies": {
+    "harmonic": [
+      {
+        "freq_cm": 1609.1262,
+        "ir_intensity": 47.4553
+      },
+      {
+        "freq_cm": 3692.4209,
+        "ir_intensity": 2.2955
+      },
+      {
+        "freq_cm": 3791.2743,
+        "ir_intensity": 19.7783
+      }
+    ],
+    "anharmonic": [
+      {
+        "mode": 1,
+        "freq_cm": 3514.515,
+        "ir_intensity": 1.14025958,
+        "freq_harmonic": 3692.421
+      },
+      {
+        "mode": 2,
+        "freq_cm": 1555.499,
+        "ir_intensity": 49.38125811,
+        "freq_harmonic": 1609.126
+      },
+      {
+        "mode": 3,
+        "freq_cm": 3606.162,
+        "ir_intensity": 16.08322747,
+        "freq_harmonic": 3791.274
+      }
+    ],
+    "overtones": [
+      {
+        "mode": 1,
+        "overtone_level": 2,
+        "freq_harmonic": 7384.842,
+        "freq_anharmonic": 6941.831,
+        "ir_intensity": 0.63130988
+      },
+      {
+        "mode": 2,
+        "overtone_level": 2,
+        "freq_harmonic": 3218.252,
+        "freq_anharmonic": 3073.84,
+        "ir_intensity": 0.66881604
+      },
+      {
+        "mode": 3,
+        "overtone_level": 2,
+        "freq_harmonic": 7582.549,
+        "freq_anharmonic": 7116.437,
+        "ir_intensity": 0.00607199
+      }
+    ],
+    "combination_bands": [
+      {
+        "mode1": 2,
+        "mode2": 1,
+        "freq_harmonic": 5301.547,
+        "freq_anharmonic": 5052.063,
+        "ir_intensity": 0.18520001
+      },
+      {
+        "mode1": 3,
+        "mode2": 1,
+        "freq_harmonic": 7483.695,
+        "freq_anharmonic": 6957.217,
+        "ir_intensity": 3.05854006
+      },
+      {
+        "mode1": 3,
+        "mode2": 2,
+        "freq_harmonic": 5400.401,
+        "freq_anharmonic": 5146.675,
+        "ir_intensity": 3.29002047
+      },
+      {
+        "mode1": 2,
+        "mode2": 1,
+        "freq_harmonic": 5301.547,
+        "freq_anharmonic": 5052.063,
+        "ir_intensity": 0.14624453
+      },
+      {
+        "mode1": 3,
+        "mode2": 1,
+        "freq_harmonic": 7483.695,
+        "freq_anharmonic": 6957.217,
+        "ir_intensity": 1.75382407
+      },
+      {
+        "mode1": 3,
+        "mode2": 2,
+        "freq_harmonic": 5400.401,
+        "freq_anharmonic": 5146.675,
+        "ir_intensity": 2.55022935
+      }
+    ]
+  },
+  "energy_eV": 0.08231444339414999,
+  "dipole": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": -1.973108288472138,
+    "magnitude": 1.973108288472138
+  },
+  "runtime_s": 17.856138467788696,
+  "files": {
+    "gaussian_log": "gaussian_freq.log",
+    "gaussian_input": "gaussian_freq.gjf"
+  }
+}

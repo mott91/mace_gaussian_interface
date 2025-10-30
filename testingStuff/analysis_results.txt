@@ -1,0 +1,355 @@
+=== RUFF ===
+F401 `espaloma_charge` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> diagnostics.py:78:16
+   |
+76 |     try:
+77 |         print("1. Testing espaloma_charge import...")
+78 |         import espaloma_charge
+   |                ^^^^^^^^^^^^^^^
+79 |         print("   \u2713 espaloma_charge imported successfully")
+   |
+help: Remove unused import: `espaloma_charge`
+
+F841 Local variable `test_charges` is assigned to but never used
+   --> gm_main.py:135:13
+    |
+133 |             # Test basic functionality
+134 |             test_mol = Chem.MolFromSmiles("N")
+135 |             test_charges = espaloma_charge.charge(test_mol)
+    |             ^^^^^^^^^^^^
+136 |
+137 |             self.available = True
+    |
+help: Remove assignment to unused variable `test_charges`
+
+F401 `xtb.ase.calculator.XTB` imported but unused; consider using `importlib.util.find_spec` to test for availability
+   --> gm_main.py:196:44
+    |
+194 |     def _check_availability(self):
+195 |         try:
+196 |             from xtb.ase.calculator import XTB
+    |                                            ^^^
+197 |
+198 |             self.available = True
+    |
+help: Remove unused import: `xtb.ase.calculator.XTB`
+
+F401 `.__version__.__version__` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+ --> mace_ML_pkg/mace/__init__.py:1:26
+  |
+1 | from .__version__ import __version__
+  |                          ^^^^^^^^^^^
+  |
+help: Use an explicit re-export: `__version__ as __version__`
+
+E741 Ambiguous variable name: `l`
+  --> mace_ML_pkg/mace/modules/wrapper_ops.py:52:17
+   |
+50 |         @classmethod
+51 |         def iterator(cls) -> Iterator["O3_e3nn"]:
+52 |             for l in itertools.count(0):
+   |                 ^
+53 |                 yield O3_e3nn(l=l, p=1 * (-1) ** l)
+54 |                 yield O3_e3nn(l=l, p=-1 * (-1) ** l)
+   |
+
+F401 `cuequivariance` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> mace_ML_pkg/tests/test_calculator.py:20:30
+   |
+19 | try:
+20 |     import cuequivariance as cue  # pylint: disable=unused-import
+   |                              ^^^
+21 |
+22 |     CUET_AVAILABLE = True
+   |
+help: Remove unused import: `cuequivariance`
+
+F401 `cuequivariance` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> mace_ML_pkg/tests/test_cueq.py:15:30
+   |
+14 | try:
+15 |     import cuequivariance as cue  # pylint: disable=unused-import
+   |                              ^^^
+16 |
+17 |     CUET_AVAILABLE = True
+   |
+help: Remove unused import: `cuequivariance`
+
+F401 `cuequivariance` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> mace_ML_pkg/tests/test_run_train.py:16:30
+   |
+15 | try:
+16 |     import cuequivariance as cue  # pylint: disable=unused-import
+   |                              ^^^
+17 |
+18 |     CUET_AVAILABLE = True
+   |
+help: Remove unused import: `cuequivariance`
+
+F401 `.__version__.__version__` imported but unused; consider removing, adding to `__all__`, or using a redundant alias
+ --> mace_dipole_pkg/mace_dipole_core/__init__.py:1:26
+  |
+1 | from .__version__ import __version__
+  |                          ^^^^^^^^^^^
+  |
+help: Use an explicit re-export: `__version__ as __version__`
+
+F841 Local variable `mus_list` is assigned to but never used
+   --> mace_dipole_pkg/mace_dipole_core/cli/eval_mu_alpha.py:139:5
+    |
+138 |     # Collect data
+139 |     mus_list = []
+    |     ^^^^^^^^
+140 |     # contributions_list = []
+141 |     alphas_list = []
+    |
+help: Remove assignment to unused variable `mus_list`
+
+F841 Local variable `alphas_list` is assigned to but never used
+   --> mace_dipole_pkg/mace_dipole_core/cli/eval_mu_alpha.py:141:5
+    |
+139 |     mus_list = []
+140 |     # contributions_list = []
+141 |     alphas_list = []
+    |     ^^^^^^^^^^^
+142 |     alphas_sh_list = []
+143 |     dmu_dr_collection = []
+    |
+help: Remove assignment to unused variable `alphas_list`
+
+F841 Local variable `alphas_sh_list` is assigned to but never used
+   --> mace_dipole_pkg/mace_dipole_core/cli/eval_mu_alpha.py:142:5
+    |
+140 |     # contributions_list = []
+141 |     alphas_list = []
+142 |     alphas_sh_list = []
+    |     ^^^^^^^^^^^^^^
+143 |     dmu_dr_collection = []
+144 |     dalpha_dr_collection = []
+    |
+help: Remove assignment to unused variable `alphas_sh_list`
+
+F821 Undefined name `mace`
+  --> mace_dipole_pkg/mace_dipole_core/cli/run_train.py:83:39
+   |
+82 |     try:
+83 |         logging.info(f"MACE version: {mace.__version__}")
+   |                                       ^^^^
+84 |     except AttributeError:
+85 |         logging.info("Cannot find MACE version, please install MACE via pip")
+   |
+
+F841 Local variable `dipoles_weight` is assigned to but never used
+   --> mace_dipole_pkg/mace_dipole_core/data/utils.py:169:9
+    |
+167 |     if dipole is None:
+168 |         dipole = np.zeros(3)
+169 |         dipoles_weight = 0.0
+    |         ^^^^^^^^^^^^^^
+170 |     if polarizability is None:
+171 |         polarizability = np.zeros(9)
+    |
+help: Remove assignment to unused variable `dipoles_weight`
+
+F821 Undefined name `change_of_basis`
+  --> mace_dipole_pkg/mace_dipole_core/tools/torch_tools.py:95:37
+   |
+93 |     Convert cartesian notation to spherical notation
+94 |     """
+95 |     change_of_basis: torch.Tensor = change_of_basis.to(t.device)
+   |                                     ^^^^^^^^^^^^^^^
+96 |     return torch.einsum("ijk,...jk->...i", change_of_basis, t)
+   |
+
+E722 Do not use bare `except`
+  --> plot_freqs.py:18:17
+   |
+16 |                         frequencies.append(freq)
+17 |                         intensities.append(intensity)
+18 |                 except:
+   |                 ^^^^^^
+19 |                     continue
+20 |     return frequencies, intensities
+   |
+
+E741 Ambiguous variable name: `I`
+  --> plot_freqs.py:24:12
+   |
+22 | def make_spectrum(frequencies, intensities, freq_range, sigma=40):
+23 |     spectrum = np.zeros_like(freq_range)
+24 |     for f, I in zip(frequencies, intensities):
+   |            ^
+25 |         spectrum += I * np.exp(-((freq_range - f) ** 2) / (2 * sigma ** 2))
+26 |     if spectrum.max() > spectrum.min():
+   |
+
+Found 17 errors.
+No fixes available (5 hidden fixes can be enabled with the `--unsafe-fixes` option).
+
+
+=== VULTURE ===
+gm_main.py:135: unused variable 'test_charges' (60% confidence)
+
+
+=== RADON COMPLEXITY ===
+gm_main.py
+    F 580:0 write_gaussian_output - B
+    M 342:4 DipoleCalculatorFactory.get_calculator - B
+    F 528:0 calculate_dipole_properties - A
+    F 394:0 is_calc_finished - A
+    F 739:0 calculator - A
+    M 85:4 DipoleCalculatorBase.calculate_dipole_derivatives - A
+    C 322:0 DipoleCalculatorFactory - A
+    F 701:0 ase_to_gjf - A
+    C 62:0 DipoleCalculatorBase - A
+    C 122:0 EspalomaDipoleCalculator - A
+    M 143:4 EspalomaDipoleCalculator.calculate_dipole - A
+    C 221:0 MACEMLDipoleCalculator - A
+    M 233:4 MACEMLDipoleCalculator._check_availability - A
+    C 256:0 GeometryDipoleCalculator - A
+    M 266:4 GeometryDipoleCalculator.calculate_dipole - A
+    F 415:0 parse_gaussian_input - A
+    F 496:0 calculate_hessian - A
+    F 652:0 run_next_calculation - A
+    M 128:4 EspalomaDipoleCalculator._check_availability - A
+    C 188:0 XTBDipoleCalculator - A
+    M 194:4 XTBDipoleCalculator._check_availability - A
+    M 224:4 MACEMLDipoleCalculator.__init__ - A
+    M 250:4 MACEMLDipoleCalculator.calculate_dipole - A
+    M 330:4 DipoleCalculatorFactory._register_calculators - A
+    M 364:4 DipoleCalculatorFactory.list_available - A
+    F 379:0 zmq_server - A
+    F 463:0 update_molecule_geometry - A
+    F 478:0 calculate_energy_and_forces - A
+    F 726:0 geometry_optimisation - A
+    M 65:4 DipoleCalculatorBase.__init__ - A
+    M 71:4 DipoleCalculatorBase._check_availability - A
+    M 76:4 DipoleCalculatorBase.calculate_dipole - A
+    M 125:4 EspalomaDipoleCalculator.__init__ - A
+    M 191:4 XTBDipoleCalculator.__init__ - A
+    M 204:4 XTBDipoleCalculator.calculate_dipole - A
+    M 259:4 GeometryDipoleCalculator.__init__ - A
+    M 262:4 GeometryDipoleCalculator._check_availability - A
+    M 325:4 DipoleCalculatorFactory.__init__ - A
+
+38 blocks (classes, functions, methods) analyzed.
+Average complexity: A (2.473684210526316)
+
+
+=== RADON MAINTAINABILITY ===
+gm_main.py - A
+
+
+=== PYLINT ===
+************* Module gm_main
+gm_main.py:380:0: C0301: Line too long (129/100) (line-too-long)
+gm_main.py:395:0: C0301: Line too long (102/100) (line-too-long)
+gm_main.py:397:0: C0301: Line too long (103/100) (line-too-long)
+gm_main.py:401:0: C0301: Line too long (108/100) (line-too-long)
+gm_main.py:621:0: C0301: Line too long (130/100) (line-too-long)
+gm_main.py:632:0: C0301: Line too long (121/100) (line-too-long)
+gm_main.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+gm_main.py:52:4: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:65:23: W0621: Redefining name 'name' from outer scope (line 791) (redefined-outer-name)
+gm_main.py:73:8: W0107: Unnecessary pass statement (unnecessary-pass)
+gm_main.py:83:8: W0107: Unnecessary pass statement (unnecessary-pass)
+gm_main.py:112:15: W0718: Catching too general exception Exception (broad-exception-caught)
+gm_main.py:113:12: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:130:12: C0415: Import outside toplevel (espaloma_charge) (import-outside-toplevel)
+gm_main.py:131:12: C0415: Import outside toplevel (rdkit.Chem) (import-outside-toplevel)
+gm_main.py:134:23: E1101: Module 'rdkit.Chem' has no 'MolFromSmiles' member (no-member)
+gm_main.py:141:12: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:135:12: W0612: Unused variable 'test_charges' (unused-variable)
+gm_main.py:143:4: R0914: Too many local variables (17/15) (too-many-locals)
+gm_main.py:151:8: W0621: Redefining name 'mol' from outer scope (line 830) (redefined-outer-name)
+gm_main.py:145:8: C0415: Import outside toplevel (rdkit.Chem) (import-outside-toplevel)
+gm_main.py:146:8: C0415: Import outside toplevel (rdkit.Chem.rdDetermineBonds) (import-outside-toplevel)
+gm_main.py:147:8: C0415: Import outside toplevel (espaloma_charge) (import-outside-toplevel)
+gm_main.py:148:8: C0415: Import outside toplevel (torch) (import-outside-toplevel)
+gm_main.py:151:14: E1101: Module 'rdkit.Chem' has no 'RWMol' member (no-member)
+gm_main.py:153:19: E1101: Module 'rdkit.Chem' has no 'Atom' member (no-member)
+gm_main.py:157:15: E1101: Module 'rdkit.Chem' has no 'Conformer' member (no-member)
+gm_main.py:164:8: I1101: Module 'rdkit.Chem.rdDetermineBonds' has no 'DetermineBonds' member, but source is unavailable. Consider adding this module to extension-pkg-allow-list if you want to perform analysis based on run-time introspection of living objects. (c-extension-no-member)
+gm_main.py:184:8: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:196:12: C0415: Import outside toplevel (xtb.ase.calculator.XTB) (import-outside-toplevel)
+gm_main.py:202:12: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:196:12: W0611: Unused XTB imported from xtb.ase.calculator (unused-import)
+gm_main.py:206:8: E0401: Unable to import 'xtb.ase.calculator' (import-error)
+gm_main.py:206:8: C0415: Import outside toplevel (xtb.ase.calculator.XTB) (import-outside-toplevel)
+gm_main.py:217:8: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:243:12: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:248:12: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:306:12: W0621: Redefining name 'charge' from outer scope (line 862) (redefined-outer-name)
+gm_main.py:318:8: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:339:12: W0621: Redefining name 'calc' from outer scope (line 849) (redefined-outer-name)
+gm_main.py:348:16: W0621: Redefining name 'calc' from outer scope (line 849) (redefined-outer-name)
+gm_main.py:350:20: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:385:40: W0621: Redefining name 'socket' from outer scope (line 883) (redefined-outer-name)
+gm_main.py:387:21: W1514: Using open without explicitly specifying an encoding (unspecified-encoding)
+gm_main.py:388:32: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+gm_main.py:394:21: W0621: Redefining name 'proc' from outer scope (line 879) (redefined-outer-name)
+gm_main.py:394:27: W0621: Redefining name 'socket' from outer scope (line 883) (redefined-outer-name)
+gm_main.py:398:8: R1705: Unnecessary "elif" after "return", remove the leading "el" from "elif" (no-else-return)
+gm_main.py:438:4: W0621: Redefining name 'charge' from outer scope (line 862) (redefined-outer-name)
+gm_main.py:431:9: W1514: Using open without explicitly specifying an encoding (unspecified-encoding)
+gm_main.py:446:4: C0103: Variable name "BOHR_TO_ANGSTROM" doesn't conform to snake_case naming style (invalid-name)
+gm_main.py:463:61: W0621: Redefining name 'charge' from outer scope (line 862) (redefined-outer-name)
+gm_main.py:478:39: W0621: Redefining name 'calculator' from outer scope (line 739) (redefined-outer-name)
+gm_main.py:478:39: W0613: Unused argument 'calculator' (unused-argument)
+gm_main.py:496:29: W0621: Redefining name 'calculator' from outer scope (line 739) (redefined-outer-name)
+gm_main.py:523:11: W0718: Catching too general exception Exception (broad-exception-caught)
+gm_main.py:515:8: C0103: Variable name "ANGSTROM_TO_BOHR" doesn't conform to snake_case naming style (invalid-name)
+gm_main.py:516:8: C0103: Variable name "EV_TO_HARTREE" doesn't conform to snake_case naming style (invalid-name)
+gm_main.py:524:8: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:570:11: W0718: Catching too general exception Exception (broad-exception-caught)
+gm_main.py:550:8: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:556:12: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:567:8: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:571:8: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:580:0: R0913: Too many arguments (8/5) (too-many-arguments)
+gm_main.py:580:0: R0917: Too many positional arguments (8/5) (too-many-positional-arguments)
+gm_main.py:580:0: R0914: Too many local variables (18/15) (too-many-locals)
+gm_main.py:604:4: C0103: Variable name "EV_TO_HARTREE" doesn't conform to snake_case naming style (invalid-name)
+gm_main.py:608:4: C0103: Variable name "ANGSTROM_TO_BOHR" doesn't conform to snake_case naming style (invalid-name)
+gm_main.py:614:9: W1514: Using open without explicitly specifying an encoding (unspecified-encoding)
+gm_main.py:652:0: R0914: Too many local variables (20/15) (too-many-locals)
+gm_main.py:653:4: W0621: Redefining name 'mol' from outer scope (line 830) (redefined-outer-name)
+gm_main.py:654:4: W0621: Redefining name 'msg' from outer scope (line 888) (redefined-outer-name)
+gm_main.py:655:4: W0621: Redefining name 'calculator' from outer scope (line 739) (redefined-outer-name)
+gm_main.py:676:19: W0621: Redefining name 'charge' from outer scope (line 862) (redefined-outer-name)
+gm_main.py:701:0: C0116: Missing function or method docstring (missing-function-docstring)
+gm_main.py:701:0: R0913: Too many arguments (6/5) (too-many-arguments)
+gm_main.py:701:0: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+gm_main.py:706:4: W0621: Redefining name 'charge' from outer scope (line 862) (redefined-outer-name)
+gm_main.py:707:4: W0621: Redefining name 'multiplicity' from outer scope (line 863) (redefined-outer-name)
+gm_main.py:716:9: W1514: Using open without explicitly specifying an encoding (unspecified-encoding)
+gm_main.py:726:0: C0116: Missing function or method docstring (missing-function-docstring)
+gm_main.py:726:26: W0621: Redefining name 'mol' from outer scope (line 830) (redefined-outer-name)
+gm_main.py:739:0: C0116: Missing function or method docstring (missing-function-docstring)
+gm_main.py:743:8: W0621: Redefining name 'calc' from outer scope (line 849) (redefined-outer-name)
+gm_main.py:741:8: C0415: Import outside toplevel (mace.calculators.mace_mp) (import-outside-toplevel)
+gm_main.py:749:8: C0415: Import outside toplevel (mace.calculators.mace_off) (import-outside-toplevel)
+gm_main.py:758:8: C0415: Import outside toplevel (mace.calculators.mace_omol) (import-outside-toplevel)
+gm_main.py:739:0: R1710: Either all return statements in a function should return an expression, or none of them should. (inconsistent-return-statements)
+gm_main.py:793:8: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:885:12: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:901:19: W0718: Catching too general exception Exception (broad-exception-caught)
+gm_main.py:902:16: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+gm_main.py:8:0: C0411: standard import "os" should be placed before third party imports "numpy", "zmq" (wrong-import-order)
+gm_main.py:9:0: C0411: standard import "time" should be placed before third party imports "numpy", "zmq" (wrong-import-order)
+gm_main.py:10:0: C0411: standard import "warnings" should be placed before third party imports "numpy", "zmq" (wrong-import-order)
+gm_main.py:11:0: C0411: standard import "contextlib.contextmanager" should be placed before third party imports "numpy", "zmq" (wrong-import-order)
+gm_main.py:12:0: C0411: standard import "sys" should be placed before third party imports "numpy", "zmq" (wrong-import-order)
+gm_main.py:13:0: C0411: standard import "subprocess" should be placed before third party imports "numpy", "zmq" (wrong-import-order)
+gm_main.py:14:0: C0411: standard import "pathlib.Path" should be placed before third party imports "numpy", "zmq" (wrong-import-order)
+gm_main.py:16:0: C0411: third party import "ase.io.read" should be placed before first party import "mace_calculators.MACEDipoleCalculator"  (wrong-import-order)
+gm_main.py:17:0: C0411: third party import "ase.optimize.LBFGS" should be placed before first party import "mace_calculators.MACEDipoleCalculator"  (wrong-import-order)
+gm_main.py:18:0: C0411: third party import "ase.data.chemical_symbols" should be placed before first party import "mace_calculators.MACEDipoleCalculator"  (wrong-import-order)
+gm_main.py:19:0: C0411: standard import "abc.ABC" should be placed before third party imports "numpy", "zmq", "ase.io.read", "ase.optimize.LBFGS", "ase.data.chemical_symbols" and first party import "mace_calculators.MACEDipoleCalculator"  (wrong-import-order)
+gm_main.py:20:0: C0411: standard import "typing.Tuple" should be placed before third party imports "numpy", "zmq", "ase.io.read", "ase.optimize.LBFGS", "ase.data.chemical_symbols" and first party import "mace_calculators.MACEDipoleCalculator"  (wrong-import-order)
+gm_main.py:21:0: C0411: standard import "logging" should be placed before third party imports "numpy", "zmq", "ase.io.read", "ase.optimize.LBFGS", "ase.data.chemical_symbols" and first party import "mace_calculators.MACEDipoleCalculator"  (wrong-import-order)
+gm_main.py:879:11: R1732: Consider using 'with' for resource-allocating operations (consider-using-with)
+
+------------------------------------------------------------------
+Your code has been rated at 6.89/10 (previous run: 6.85/10, +0.04)
+

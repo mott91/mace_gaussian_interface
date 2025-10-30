@@ -1,0 +1,47 @@
+{
+  "molecule": "co",
+  "energy_calculator": "mace_omol",
+  "dipole_calculator": "mace_ml",
+  "calculator_type": "ml",
+  "timestamp": null,
+  "frequencies": {
+    "harmonic": [
+      {
+        "freq_cm": 2240.5493,
+        "ir_intensity": 2.4751
+      }
+    ],
+    "anharmonic": [
+      {
+        "mode": 1,
+        "freq_cm": 2210.374,
+        "ir_intensity": 6.86351782,
+        "freq_harmonic": 2240.549
+      }
+    ],
+    "overtones": [
+      {
+        "mode": 1,
+        "overtone_level": 2,
+        "freq_harmonic": 4481.099,
+        "freq_anharmonic": 4390.573,
+        "ir_intensity": 10.60492398
+      },
+      {
+        "mode": 1,
+        "overtone_level": 2,
+        "freq_harmonic": 4481.099,
+        "freq_anharmonic": 4390.573,
+        "ir_intensity": 9.63593252
+      }
+    ],
+    "combination_bands": []
+  },
+  "energy_eV": -0.381258732692706,
+  "dipole": null,
+  "runtime_s": 10.513169288635254,
+  "files": {
+    "gaussian_log": "gaussian_freq.log",
+    "gaussian_input": "gaussian_freq.gjf"
+  }
+}

@@ -55,3 +55,11 @@ Thumbs.db
 
 # uv
 uv.lock
+
+# Results directories (large, generated files - keep local only)
+comparison_results/
+analysis_results/
+testingStuff/
+
+# But keep example test molecules
+!*.xyz

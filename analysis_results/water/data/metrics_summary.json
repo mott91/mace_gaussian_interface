@@ -1,0 +1,40 @@
+{
+  "molecule": "water",
+  "analysis_date": "2025-10-29T13:31:25.902473",
+  "num_ml_calculators": 4,
+  "dft_method": "wb97xd_def2tzvp",
+  "comparisons": [
+    {
+      "name": "mace_mp_mace_ml",
+      "mae_freq": 13.911599999999908,
+      "rmse_freq": 21.751032977769146,
+      "r2_freq": 0.9998940533768544,
+      "r2_intensity": 0.9742870311651232,
+      "speedup": 3.106469025982783
+    },
+    {
+      "name": "mace_omol_espaloma",
+      "mae_freq": 23.81099999999998,
+      "rmse_freq": 32.33359410118206,
+      "r2_freq": 0.9999029161910933,
+      "r2_intensity": 0.4072034626762699,
+      "speedup": 2.526099259807478
+    },
+    {
+      "name": "mace_mp_espaloma",
+      "mae_freq": 13.911599999999908,
+      "rmse_freq": 21.751032977769146,
+      "r2_freq": 0.9998940533768544,
+      "r2_intensity": 0.8528500381633757,
+      "speedup": 1.8642075656035086
+    },
+    {
+      "name": "mace_omol_mace_ml",
+      "mae_freq": 23.81099999999998,
+      "rmse_freq": 32.33359410118206,
+      "r2_freq": 0.9999029161910933,
+      "r2_intensity": 0.8416154825533788,
+      "speedup": 2.328847762606457
+    }
+  ]
+}

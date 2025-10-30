@@ -98,3 +98,7 @@ class MACEDipoleCalculator:
             logger.error(f"Error in MACE dipole calculation: {e}")
             logger.error("Full traceback:", exc_info=True)
             raise
+        finally:
+            # Clean up monkey-patched modules to prevent contamination
+            cleanup_mace_modules()
+            logger.debug("Cleaned up MACE modules after dipole calculation")

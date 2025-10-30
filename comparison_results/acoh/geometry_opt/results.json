@@ -1,0 +1,13 @@
+{
+  "molecule": "acoh",
+  "calculator": "mace_omol",
+  "initial_energy_eV": -6234.168318808463,
+  "final_energy_eV": -6234.310135282208,
+  "converged": true,
+  "num_steps": 0,
+  "runtime_s": 7.515936613082886,
+  "files": {
+    "initial_geometry": "initial.xyz",
+    "optimized_geometry": "optimized.xyz"
+  }
+}
