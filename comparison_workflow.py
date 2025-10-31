@@ -1,10 +1,10 @@
 """
-Comprehensive Analysis Workflow - FIXED VERSION
+Comprehensive Analysis Workflow
 
 Changes:
 - PNG instead of PDF for HTML display
-- Combined plots with all ML methods vs wb97xd DFT baseline  
-- Filters wb97xd DFT as the reference baseline
+- Combined plots with all ML methods vs B3LYP DFT baseline
+- Filters B3LYP DFT as the reference baseline
 """
 
 import json
@@ -61,25 +61,25 @@ class ComparisonWorkflow:
         
         logger.info(f"Initialized workflow for {molecule_name}")
     
-    def find_dft_baseline(self, prefer_wb97xd: bool = True) -> Optional[Path]:
+    def find_dft_baseline(self, prefer_b3lyp: bool = True) -> Optional[Path]:
         """
         Find DFT anharmonic baseline results
-        
+
         Scans all subdirectories for results.json files with calculator_type='dft'
-        Prefers wb97xd if multiple DFT results exist
-        
+        Prefers B3LYP if multiple DFT results exist
+
         Parameters
         ----------
-        prefer_wb97xd : bool
-            If True, prefer wb97xd DFT method when multiple DFT results exist
-        
+        prefer_b3lyp : bool
+            If True, prefer B3LYP DFT method when multiple DFT results exist
+
         Returns
         -------
         Path or None
             Path to DFT baseline results.json
         """
         dft_results = []
-        
+
         # Scan all subdirectories for DFT results
         for item in self.molecule_dir.iterdir():
             if item.is_dir() and item.name != "geometry_opt":
@@ -93,18 +93,18 @@ class ComparisonWorkflow:
                     except (json.JSONDecodeError, KeyError) as e:
                         logger.warning(f"Error reading {json_path}: {e}")
                         continue
-        
+
         if not dft_results:
             logger.warning("No DFT anharmonic baseline found!")
             return None
-        
-        # Prefer wb97xd if requested and available
-        if prefer_wb97xd:
+
+        # Prefer B3LYP if requested and available
+        if prefer_b3lyp:
             for name, path in dft_results:
-                if 'wb97' in name.lower():
-                    logger.info(f"Found DFT baseline (wb97xd): {path}")
+                if 'b3lyp' in name.lower():
+                    logger.info(f"Found DFT baseline (B3LYP): {path}")
                     return path
-        
+
         # Otherwise return first DFT result
         logger.info(f"Found DFT baseline: {dft_results[0][1]}")
         return dft_results[0][1]
@@ -325,8 +325,8 @@ class ComparisonWorkflow:
         logger.info(f"STARTING ANALYSIS FOR {self.molecule_name.upper()}")
         logger.info("=" * 60)
         
-        # Find DFT baseline (prefer wb97xd)
-        dft_path = self.find_dft_baseline(prefer_wb97xd=True)
+        # Find DFT baseline (prefer B3LYP)
+        dft_path = self.find_dft_baseline(prefer_b3lyp=True)
         if dft_path is None:
             logger.error("=" * 60)
             logger.error(f"NO DFT BASELINE FOUND FOR {self.molecule_name.upper()}")

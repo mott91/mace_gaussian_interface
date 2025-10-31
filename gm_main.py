@@ -956,16 +956,27 @@ def run_frequency_calculation(
         
         gjf_final = str(freq_dir / "gaussian_freq.gjf")
         log_final = str(freq_dir / "gaussian_freq.log")
-        
+        chk_final = str(freq_dir / "gaussian_freq.chk")
+
         # Move files (not copy, since they're in different locations)
         if os.path.exists(gjf_temp):
             shutil.move(gjf_temp, gjf_final)
         if os.path.exists(log_temp):
             shutil.move(log_temp, log_final)
-        # Clean up checkpoint file
+        # Save checkpoint file for mode matching
         if os.path.exists(chk_temp):
-            os.remove(chk_temp)
-        
+            shutil.move(chk_temp, chk_final)
+            # Automatically convert to .fchk for mode matching
+            try:
+                from fchk_parser import convert_chk_to_fchk
+                fchk_final = chk_final.replace('.chk', '.fchk')
+                logger.info("Converting .chk to .fchk for mode matching...")
+                convert_chk_to_fchk(chk_final, fchk_final)
+                logger.info(f"✓ Created {fchk_final}")
+            except Exception as e:
+                logger.warning(f"Could not convert .chk to .fchk: {e}")
+                logger.warning("Mode matching will not be available for this calculation")
+
                 # Parse Gaussian log file to extract frequencies
         parsed_data = {}
         if os.path.exists(log_final):

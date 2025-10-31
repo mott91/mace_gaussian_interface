@@ -19,32 +19,55 @@ from results_manager import ResultsManager
 logger = logging.getLogger(__name__)
 
 
-# DFT methods that the NNPs were trained on
-# NOTE: wb97mv requires Gaussian 16 Rev. C.01 or later
-# Using wb97xd as alternative - similar range-separated hybrid with dispersion
+def sanitize_calculator_name(method: str, basis: str) -> str:
+    """
+    Create a filesystem-safe calculator name from method and basis.
+
+    Removes problematic characters like parentheses, commas from basis set names.
+    E.g., 'b3lyp' + '6-31G(d,p)' -> 'b3lyp_6-31Gdp'
+
+    Parameters
+    ----------
+    method : str
+        DFT method (e.g., 'b3lyp')
+    basis : str
+        Basis set (e.g., '6-31G(d,p)')
+
+    Returns
+    -------
+    calculator_name : str
+        Filesystem-safe name
+    """
+    # Remove special characters from basis set name
+    basis_clean = basis.replace('(', '').replace(')', '').replace(',', '').replace(' ', '')
+    return f"{method}_{basis_clean}"
+
+
+# DFT methods for baseline calculations
+# Using B3LYP/6-31G(d,p) - standard for frequency calculations
 DFT_BASELINES = {
     'mace_omol': {
-        'method': 'wb97xd',  # Alternative to wb97mv for older Gaussian versions
-        'basis': 'def2tzvp',
-        'description': 'wB97X-D/def2-TZVP (MACE-OMOL alternative)',
+        'method': 'b3lyp',
+        'basis': '6-31G(d,p)',
+        'description': 'B3LYP/6-31G(d,p)',
         'extra_keywords': ''
     },
     'mace_off': {
-        'method': 'wb97xd',
-        'basis': 'def2tzvp',
-        'description': 'wB97X-D/def2-TZVP (MACE-OFF reference)',
+        'method': 'b3lyp',
+        'basis': '6-31G(d,p)',
+        'description': 'B3LYP/6-31G(d,p)',
         'extra_keywords': ''
     },
     'mace_mp': {
-        'method': 'pbepbe',
-        'basis': 'def2svp',
-        'description': 'PBE/def2-SVP (MACE-MP reference)',
+        'method': 'b3lyp',
+        'basis': '6-31G(d,p)',
+        'description': 'B3LYP/6-31G(d,p)',
         'extra_keywords': ''
     }
 }
 
-# If you have Gaussian 16 Rev. C.01 or later, you can use the original functional:
-# Change mace_omol 'method' to 'wb97mv' for \u03c9B97M-V/def2-TZVP
+# Alternative baselines (e.g., functionals the NNPs were originally trained on)
+# Note: These require specific Gaussian versions and may not be widely available
 ALTERNATIVE_BASELINES = {
     'mace_omol_original': {
         'method': 'wb97mv',  # Requires G16 Rev. C.01+
@@ -80,8 +103,8 @@ def check_baseline_exists(
     config = DFT_BASELINES[baseline_name]
     method = config['method']
     basis = config['basis']
-    calculator_name = f"{method}_{basis}"
-    
+    calculator_name = sanitize_calculator_name(method, basis)
+
     # Check if directory exists (DFT uses same calculator for energy and dipole)
     mol_dir = results_mgr.create_molecule_directory(molecule_name)
     freq_dir = mol_dir / calculator_name
@@ -123,9 +146,9 @@ def create_gaussian_dft_input(
     filename : str
         Output filename for .gjf file
     method : str
-        DFT method (e.g., 'wb97mv', 'pbepbe')
+        DFT method (e.g., 'b3lyp', 'pbepbe')
     basis : str
-        Basis set (e.g., 'def2tzvp', 'def2svp')
+        Basis set (e.g., '6-31G(d,p)', 'def2tzvp')
     charge : int
         Molecular charge
     multiplicity : int
@@ -265,8 +288,8 @@ def run_dft_baseline_calculation(
     basis = config['basis']
     description = config['description']
     extra_keywords = config.get('extra_keywords', '')
-    calculator_name = f"{method}_{basis}"
-    
+    calculator_name = sanitize_calculator_name(method, basis)
+
     # Check if already exists
     if skip_if_exists and check_baseline_exists(results_mgr, molecule_name, baseline_name):
         print(f"  \u2192 Skipping {calculator_name} (already exists)")
@@ -313,7 +336,7 @@ def run_dft_baseline_calculation(
                     log_content = f.read()
                     if 'Unrecognized' in log_content or 'Unknown' in log_content:
                         print(f"  \u26a0 Possible issue: Functional '{method}' may not be available in your Gaussian version")
-                        print(f"    Try updating DFT_BASELINES in dft_baseline.py to use 'wb97xd' instead")
+                        print(f"    Check DFT_BASELINES in dft_baseline.py and ensure the functional is supported")
             
             return False
         
@@ -351,7 +374,17 @@ def run_dft_baseline_calculation(
             shutil.move(log_file, final_log)
         if Path(chk_file).exists():
             shutil.move(chk_file, final_chk)
-        
+            # Automatically convert to .fchk for mode matching
+            try:
+                from fchk_parser import convert_chk_to_fchk
+                final_fchk = freq_dir / "gaussian_dft.fchk"
+                logger.info("Converting .chk to .fchk for mode matching...")
+                convert_chk_to_fchk(str(final_chk), str(final_fchk))
+                logger.info(f"✓ Created {final_fchk}")
+            except Exception as e:
+                logger.warning(f"Could not convert .chk to .fchk: {e}")
+                logger.warning("Mode matching will not be available for this calculation")
+
         # Save results (point to the final file locations)
         results_mgr.save_frequency_results(
             molecule_name=molecule_name,

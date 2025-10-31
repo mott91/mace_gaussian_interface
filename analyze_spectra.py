@@ -639,7 +639,7 @@ class SpectrumAnalyzer:
 
         # Plot DFT (black, no offset)
         ax.plot(self.freq_grid, dft_norm, linewidth=2.5,
-                color='#2E3440', label='DFT (wb97xd)', alpha=0.9, zorder=10)
+                color='#2E3440', label='DFT (B3LYP)', alpha=0.9, zorder=10)
 
         # Plot all ML methods with vertical offsets
         # Normalize all ML spectra to DFT maximum (not their own) for comparable peak heights
@@ -734,7 +734,7 @@ class SpectrumAnalyzer:
 
         # Plot DFT (black, no offset)
         ax.plot(self.freq_grid, dft_norm, linewidth=2.5,
-                color='#2E3440', label='DFT (wb97xd)', alpha=0.9, zorder=10)
+                color='#2E3440', label='DFT (B3LYP)', alpha=0.9, zorder=10)
 
         # Plot all ML methods with vertical offsets
         offset_step = 1.5
