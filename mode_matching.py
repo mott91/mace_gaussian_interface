@@ -251,7 +251,7 @@ def plot_mode_overlap_heatmap(
     matches: Optional[Dict[int, Tuple[int, float]]] = None
 ) -> None:
     """
-    Plot heatmap of mode overlap matrix.
+    Plot heatmap of mode overlap matrix with elegant pastel styling.
 
     Parameters
     ----------
@@ -272,33 +272,46 @@ def plot_mode_overlap_heatmap(
     """
     n_modes_calc, n_modes_ref = alignment_matrix.shape
 
-    fig, ax = plt.subplots(figsize=(10, 8))
+    # Set elegant style with clean background
+    plt.style.use('seaborn-v0_8-whitegrid')
+    fig, ax = plt.subplots(figsize=(10, 8), facecolor='white')
+    ax.set_facecolor('#fafafa')
 
-    # Create custom colormap: white (0) -> blue (weak) -> red (strong)
+    # Create elegant pastel colormap: ivory -> soft lavender -> muted mauve
     from matplotlib.colors import LinearSegmentedColormap
-    colors = ['white', 'blue', 'red']
-    n_bins = 100
-    cmap = LinearSegmentedColormap.from_list('custom', colors, N=n_bins)
+    colors = [
+        '#f8f8f5',  # Warm ivory (no overlap)
+        '#e8dff5',  # Soft lavender (weak overlap)
+        '#c8b6d8',  # Muted periwinkle (medium overlap)
+        '#a896bc'   # Dusty mauve (strong overlap)
+    ]
+    n_bins = 256
+    cmap = LinearSegmentedColormap.from_list('pastel_elegant', colors, N=n_bins)
 
-    # Create heatmap
+    # Create heatmap with subtle styling
     im = ax.imshow(
         alignment_matrix,
-        cmap=cmap,  # White (no overlap) -> Blue (weak) -> Red (strong)
+        cmap=cmap,
         vmin=0,
         vmax=1,
         aspect='auto',
-        origin='lower'  # Start at bottom (y=0) so diagonal ascends
+        origin='lower',
+        interpolation='nearest'
     )
 
-    # Add colorbar
-    cbar = plt.colorbar(im, ax=ax)
-    cbar.set_label('Mode Overlap', rotation=270, labelpad=20, fontsize=12)
+    # Add elegant colorbar with refined styling
+    cbar = plt.colorbar(im, ax=ax, pad=0.02)
+    cbar.ax.tick_params(labelsize=9, length=3, width=0.5, colors='#5a5a5a')
+    cbar.set_label('Mode Overlap', rotation=270, labelpad=18, fontsize=10,
+                   color='#4a4a4a', family='sans-serif', weight='normal')
+    cbar.outline.set_linewidth(0.5)
+    cbar.outline.set_edgecolor('#d0d0d0')
 
     # Set ticks
     ax.set_xticks(np.arange(n_modes_ref))
     ax.set_yticks(np.arange(n_modes_calc))
 
-    # Create labels with frequencies if available
+    # Create refined labels with frequencies
     if freqs_ref is not None:
         x_labels = [f"{i}\n{freqs_ref[i]:.0f}" for i in range(n_modes_ref)]
     else:
@@ -309,48 +322,66 @@ def plot_mode_overlap_heatmap(
     else:
         y_labels = [f"{i}" for i in range(n_modes_calc)]
 
-    ax.set_xticklabels(x_labels, fontsize=9)
-    ax.set_yticklabels(y_labels, fontsize=9)
+    ax.set_xticklabels(x_labels, fontsize=8.5, color='#4a4a4a', family='sans-serif')
+    ax.set_yticklabels(y_labels, fontsize=8.5, color='#4a4a4a', family='sans-serif')
 
-    # Labels (using standard text to avoid font rendering issues)
-    ax.set_xlabel(f'{ref_label} Mode (cm-1)', fontsize=12)
-    ax.set_ylabel(f'{calc_label} Mode (cm-1)', fontsize=12)
-    ax.set_title('Vibrational Mode Overlap Matrix', fontsize=14, fontweight='bold', pad=20)
+    # Elegant axis labels with proper unicode
+    ax.set_xlabel(f'{ref_label} Mode (cm⁻¹)', fontsize=10.5, color='#3a3a3a',
+                  family='sans-serif', weight='normal', labelpad=8)
+    ax.set_ylabel(f'{calc_label} Mode (cm⁻¹)', fontsize=10.5, color='#3a3a3a',
+                  family='sans-serif', weight='normal', labelpad=8)
+    ax.set_title('Vibrational Mode Overlap Matrix', fontsize=11.5,
+                 color='#2a2a2a', family='sans-serif', weight='normal', pad=15)
 
-    # No grid - cleaner appearance without white crosses
-    # ax.set_xticks(np.arange(n_modes_ref) - 0.5, minor=True)
-    # ax.set_yticks(np.arange(n_modes_calc) - 0.5, minor=True)
-    # ax.grid(which='minor', color='gray', linestyle='-', linewidth=0.5, alpha=0.15)
+    # Subtle tick styling
+    ax.tick_params(axis='both', which='major', length=4, width=0.5, colors='#6a6a6a')
 
-    # Highlight best matches if provided (disabled - clutters the plot)
-    # if matches is not None:
-    #     for calc_idx, (ref_idx, overlap) in matches.items():
-    #         # Add a circle marker on the best match
-    #         ax.plot(ref_idx, calc_idx, 'o',
-    #                markersize=8,
-    #                markerfacecolor='none',
-    #                markeredgecolor='blue',
-    #                markeredgewidth=2)
+    # Add subtle grid lines between cells
+    ax.set_xticks(np.arange(n_modes_ref + 1) - 0.5, minor=True)
+    ax.set_yticks(np.arange(n_modes_calc + 1) - 0.5, minor=True)
+    ax.grid(which='minor', color='#e5e5e5', linestyle='-', linewidth=0.5, alpha=0.4)
+    ax.tick_params(which='minor', size=0)
 
-    # Add overlap values as text in ALL boxes
+    # Remove top and right spines for cleaner look
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_linewidth(0.5)
+    ax.spines['bottom'].set_linewidth(0.5)
+    ax.spines['left'].set_color('#c0c0c0')
+    ax.spines['bottom'].set_color('#c0c0c0')
+
+    # Add overlap values as text with refined color logic
     for i in range(n_modes_calc):
         for j in range(n_modes_ref):
-            # Use white text on dark red (high overlap), black on blue/white (low overlap)
-            text_color = 'white' if alignment_matrix[i, j] > 0.75 else 'black'
-            ax.text(j, i, f'{alignment_matrix[i, j]:.2f}',
+            value = alignment_matrix[i, j]
+            # Softer text color choices for better readability
+            if value > 0.7:
+                text_color = '#2a2a2a'  # Dark gray for high overlap
+                weight = 'semibold'
+            elif value > 0.3:
+                text_color = '#4a4a4a'  # Medium gray
+                weight = 'normal'
+            else:
+                text_color = '#7a7a7a'  # Light gray for low overlap
+                weight = 'normal'
+
+            ax.text(j, i, f'{value:.2f}',
                    ha='center', va='center',
-                   color=text_color, fontsize=7)
+                   color=text_color, fontsize=7.5,
+                   family='monospace', weight=weight)
 
     plt.tight_layout()
 
     if output_file:
-        plt.savefig(output_file, dpi=300, bbox_inches='tight')
+        plt.savefig(output_file, dpi=300, bbox_inches='tight', facecolor='white',
+                    edgecolor='none')
         logger.info(f"Saved mode overlap heatmap to {output_file}")
         print(f"Saved heatmap: {output_file}")
     else:
         plt.show()
 
     plt.close()
+    plt.style.use('default')  # Reset style
 
 
 # Example usage
