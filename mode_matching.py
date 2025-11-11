@@ -15,6 +15,8 @@ import numpy as np
 from pathlib import Path
 from typing import Tuple, List, Dict, Optional
 import logging
+import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 
 from fchk_parser import extract_modes_from_fchk, get_fchk_from_chk
 
@@ -239,6 +241,118 @@ def create_alignment_matrix(
     return alignment_matrix
 
 
+def plot_mode_overlap_heatmap(
+    alignment_matrix: np.ndarray,
+    output_file: Optional[str] = None,
+    calc_label: str = "ML Calculation",
+    ref_label: str = "DFT Reference",
+    freqs_calc: Optional[np.ndarray] = None,
+    freqs_ref: Optional[np.ndarray] = None,
+    matches: Optional[Dict[int, Tuple[int, float]]] = None
+) -> None:
+    """
+    Plot heatmap of mode overlap matrix.
+
+    Parameters
+    ----------
+    alignment_matrix : np.ndarray
+        Shape (n_modes_calc, n_modes_ref), overlap values between 0 and 1
+    output_file : str, optional
+        If provided, save plot to this file
+    calc_label : str
+        Label for calculation modes (y-axis)
+    ref_label : str
+        Label for reference modes (x-axis)
+    freqs_calc : np.ndarray, optional
+        Frequencies for calculation modes (for labels)
+    freqs_ref : np.ndarray, optional
+        Frequencies for reference modes (for labels)
+    matches : dict, optional
+        If provided, highlight the best matches with markers
+    """
+    n_modes_calc, n_modes_ref = alignment_matrix.shape
+
+    fig, ax = plt.subplots(figsize=(10, 8))
+
+    # Create custom colormap: white (0) -> blue (weak) -> red (strong)
+    from matplotlib.colors import LinearSegmentedColormap
+    colors = ['white', 'blue', 'red']
+    n_bins = 100
+    cmap = LinearSegmentedColormap.from_list('custom', colors, N=n_bins)
+
+    # Create heatmap
+    im = ax.imshow(
+        alignment_matrix,
+        cmap=cmap,  # White (no overlap) -> Blue (weak) -> Red (strong)
+        vmin=0,
+        vmax=1,
+        aspect='auto',
+        origin='lower'  # Start at bottom (y=0) so diagonal ascends
+    )
+
+    # Add colorbar
+    cbar = plt.colorbar(im, ax=ax)
+    cbar.set_label('Mode Overlap', rotation=270, labelpad=20, fontsize=12)
+
+    # Set ticks
+    ax.set_xticks(np.arange(n_modes_ref))
+    ax.set_yticks(np.arange(n_modes_calc))
+
+    # Create labels with frequencies if available
+    if freqs_ref is not None:
+        x_labels = [f"{i}\n{freqs_ref[i]:.0f}" for i in range(n_modes_ref)]
+    else:
+        x_labels = [f"{i}" for i in range(n_modes_ref)]
+
+    if freqs_calc is not None:
+        y_labels = [f"{i}: {freqs_calc[i]:.0f}" for i in range(n_modes_calc)]
+    else:
+        y_labels = [f"{i}" for i in range(n_modes_calc)]
+
+    ax.set_xticklabels(x_labels, fontsize=9)
+    ax.set_yticklabels(y_labels, fontsize=9)
+
+    # Labels (using standard text to avoid font rendering issues)
+    ax.set_xlabel(f'{ref_label} Mode (cm-1)', fontsize=12)
+    ax.set_ylabel(f'{calc_label} Mode (cm-1)', fontsize=12)
+    ax.set_title('Vibrational Mode Overlap Matrix', fontsize=14, fontweight='bold', pad=20)
+
+    # No grid - cleaner appearance without white crosses
+    # ax.set_xticks(np.arange(n_modes_ref) - 0.5, minor=True)
+    # ax.set_yticks(np.arange(n_modes_calc) - 0.5, minor=True)
+    # ax.grid(which='minor', color='gray', linestyle='-', linewidth=0.5, alpha=0.15)
+
+    # Highlight best matches if provided (disabled - clutters the plot)
+    # if matches is not None:
+    #     for calc_idx, (ref_idx, overlap) in matches.items():
+    #         # Add a circle marker on the best match
+    #         ax.plot(ref_idx, calc_idx, 'o',
+    #                markersize=8,
+    #                markerfacecolor='none',
+    #                markeredgecolor='blue',
+    #                markeredgewidth=2)
+
+    # Add overlap values as text in ALL boxes
+    for i in range(n_modes_calc):
+        for j in range(n_modes_ref):
+            # Use white text on dark red (high overlap), black on blue/white (low overlap)
+            text_color = 'white' if alignment_matrix[i, j] > 0.75 else 'black'
+            ax.text(j, i, f'{alignment_matrix[i, j]:.2f}',
+                   ha='center', va='center',
+                   color=text_color, fontsize=7)
+
+    plt.tight_layout()
+
+    if output_file:
+        plt.savefig(output_file, dpi=300, bbox_inches='tight')
+        logger.info(f"Saved mode overlap heatmap to {output_file}")
+        print(f"Saved heatmap: {output_file}")
+    else:
+        plt.show()
+
+    plt.close()
+
+
 # Example usage
 if __name__ == "__main__":
     import sys
@@ -246,11 +360,13 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     if len(sys.argv) < 3:
-        print("Usage: python mode_matching.py <calc.chk or calc.fchk> <ref.chk or ref.fchk>")
+        print("Usage: python mode_matching.py <calc.chk or calc.fchk> <ref.chk or ref.fchk> [output.png]")
+        print("\nOptional: Provide output filename to save heatmap")
         sys.exit(1)
 
     calc_file = sys.argv[1]
     ref_file = sys.argv[2]
+    output_file = sys.argv[3] if len(sys.argv) > 3 else None
 
     print("Extracting modes from calculation...")
     modes_calc, freqs_calc, coords_calc, masses_calc, n_atoms_calc = extract_mode_data_from_checkpoint(calc_file)
@@ -276,3 +392,25 @@ if __name__ == "__main__":
         print(f"{calc_idx:<12} {ref_idx:<12} {overlap:>11.4f}")
 
     print("="*60)
+
+    # Create alignment matrix and plot heatmap
+    print("\nCreating overlap heatmap...")
+    alignment_matrix = create_alignment_matrix(modes_calc, modes_ref)
+
+    # Determine output filename
+    if output_file is None:
+        calc_name = Path(calc_file).stem
+        ref_name = Path(ref_file).stem
+        output_file = f"mode_overlap_{calc_name}_vs_{ref_name}.png"
+
+    plot_mode_overlap_heatmap(
+        alignment_matrix,
+        output_file=output_file,
+        calc_label="ML Calculation",
+        ref_label="DFT Reference",
+        freqs_calc=freqs_calc,
+        freqs_ref=freqs_ref,
+        matches=matches
+    )
+
+    print(f"\n✓ Heatmap saved to: {output_file}")

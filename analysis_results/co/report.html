@@ -289,7 +289,7 @@
             <div class="subtitle">ML vs DFT Comparison</div>
         </header>
         
-<nav><a href="#overview">Overview</a> <a href="#combined">Combined</a> <a href="#comp1">mace_mp_mace_ml</a> <a href="#comp2">mace_omol_espaloma</a> <a href="#comp3">mace_mp_espaloma</a> <a href="#comp4">mace_omol_mace_ml</a> <a href="#summary">Summary</a></nav>
+<nav><a href="#overview">Overview</a> <a href="#combined">Combined</a> <a href="#mode-overlap">Mode Matching</a> <a href="#comp1">mace_mp_mace_ml</a> <a href="#comp2">mace_omol_espaloma</a> <a href="#comp3">mace_mp_espaloma</a> <a href="#comp4">mace_omol_mace_ml</a> <a href="#summary">Summary</a></nav>
 <div class="content">
 
         <section id="overview">
@@ -301,7 +301,7 @@
                 </div>
                 <div class="summary-card">
                     <div class="label">Average MAE</div>
-                    <div class="value">24.0</div>
+                    <div class="value">25.5</div>
                     <div class="label">cm^-1</div>
                 </div>
                 <div class="summary-card">
@@ -310,7 +310,7 @@
                 </div>
                 <div class="summary-card">
                     <div class="label">Avg Speedup</div>
-                    <div class="value">3.0x</div>
+                    <div class="value">0.9x</div>
                 </div>
             </div>
             
@@ -357,6 +357,72 @@
         </section>
         
 
+        <section id="mode-overlap" class="comparison-section">
+            <h2>Mode Matching Analysis</h2>
+            <p style="color: #666; margin-bottom: 20px;">
+                Vibrational modes can change order between DFT and ML calculations. Mode matching via normal mode overlap
+                ensures we compare the correct physical modes rather than just matching by mode number.
+            </p>
+
+            <div style="padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px; margin-bottom: 25px;">
+                <strong>⚠ Important:</strong> If red spots appear off-diagonal (not on the main diagonal), this indicates
+                mode reordering occurred between ML and DFT calculations.
+                Perfect overlap = 1.00 (dark red), orthogonal modes = 0.00 (white).
+            </div>
+
+            
+            <h3>Mode Overlap: MACE MP ESPALOMA vs B3LYP</h3>
+            <div class="plot-container">
+                <img src="plots/mode_overlap_mace_mp_espaloma_vs_b3lyp.png" alt="Mode overlap heatmap" style="width: 100%; max-width: 900px;">
+            </div>
+            <p style="color: #666; font-size: 0.9em; margin-bottom: 30px;">
+                Heatmap shows the overlap (dot product) between vibrational modes. Red = high overlap (modes match),
+                Blue = weak overlap, White = no overlap (modes are orthogonal).
+            </p>
+            
+
+            <h3>Mode Overlap: MACE MP ESPALOMA vs B3LYP_6-31GDP</h3>
+            <div class="plot-container">
+                <img src="plots/mode_overlap_mace_mp_espaloma_vs_b3lyp_6-31Gdp.png" alt="Mode overlap heatmap" style="width: 100%; max-width: 900px;">
+            </div>
+            <p style="color: #666; font-size: 0.9em; margin-bottom: 30px;">
+                Heatmap shows the overlap (dot product) between vibrational modes. Red = high overlap (modes match),
+                Blue = weak overlap, White = no overlap (modes are orthogonal).
+            </p>
+            
+
+            <h3>Mode Overlap: MACE MP MACE ML vs B3LYP_6-31GDP</h3>
+            <div class="plot-container">
+                <img src="plots/mode_overlap_mace_mp_mace_ml_vs_b3lyp_6-31Gdp.png" alt="Mode overlap heatmap" style="width: 100%; max-width: 900px;">
+            </div>
+            <p style="color: #666; font-size: 0.9em; margin-bottom: 30px;">
+                Heatmap shows the overlap (dot product) between vibrational modes. Red = high overlap (modes match),
+                Blue = weak overlap, White = no overlap (modes are orthogonal).
+            </p>
+            
+
+            <h3>Mode Overlap: MACE OMOL ESPALOMA vs B3LYP_6-31GDP</h3>
+            <div class="plot-container">
+                <img src="plots/mode_overlap_mace_omol_espaloma_vs_b3lyp_6-31Gdp.png" alt="Mode overlap heatmap" style="width: 100%; max-width: 900px;">
+            </div>
+            <p style="color: #666; font-size: 0.9em; margin-bottom: 30px;">
+                Heatmap shows the overlap (dot product) between vibrational modes. Red = high overlap (modes match),
+                Blue = weak overlap, White = no overlap (modes are orthogonal).
+            </p>
+            
+
+            <h3>Mode Overlap: MACE OMOL MACE ML vs B3LYP_6-31GDP</h3>
+            <div class="plot-container">
+                <img src="plots/mode_overlap_mace_omol_mace_ml_vs_b3lyp_6-31Gdp.png" alt="Mode overlap heatmap" style="width: 100%; max-width: 900px;">
+            </div>
+            <p style="color: #666; font-size: 0.9em; margin-bottom: 30px;">
+                Heatmap shows the overlap (dot product) between vibrational modes. Red = high overlap (modes match),
+                Blue = weak overlap, White = no overlap (modes are orthogonal).
+            </p>
+            
+        </section>
+        
+
         <section id="comp1" class="comparison-section">
             <h2>mace_mp_mace_ml</h2>
             
@@ -369,15 +435,15 @@
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">MAE</div>
-                        <div class="stat-value metric-bad">34.81 cm^-1</div>
+                        <div class="stat-value metric-warning">14.71 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">RMSE</div>
-                        <div class="stat-value">41.59 cm^-1</div>
+                        <div class="stat-value">16.52 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Max Error</div>
-                        <div class="stat-value">57.57 cm^-1</div>
+                        <div class="stat-value">22.23 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Matched Modes</div>
@@ -397,15 +463,15 @@
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Speedup</div>
-                        <div class="stat-value">4.4x</div>
+                        <div class="stat-value">1.3x</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">ML Runtime</div>
-                        <div class="stat-value">6.4 s</div>
+                        <div class="stat-value">6.9 s</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">DFT Runtime</div>
-                        <div class="stat-value">28.4 s</div>
+                        <div class="stat-value">9.2 s</div>
                     </div>
                 </div>
             </div>
@@ -436,22 +502,22 @@
   </thead>
   <tbody>
     <tr>
-      <td>2218.63</td>
+      <td>2184.35</td>
       <td>2206.58</td>
-      <td>-12.05</td>
-      <td>-0.54</td>
-      <td>84.73</td>
+      <td>22.23</td>
+      <td>1.02</td>
+      <td>67.43</td>
       <td>7.36</td>
-      <td>-77.37</td>
+      <td>-60.07</td>
     </tr>
     <tr>
-      <td>4408.76</td>
+      <td>4344.01</td>
       <td>4351.19</td>
-      <td>-57.57</td>
-      <td>-1.31</td>
-      <td>0.23</td>
+      <td>7.18</td>
+      <td>0.17</td>
+      <td>0.35</td>
       <td>9.27</td>
-      <td>9.04</td>
+      <td>8.92</td>
     </tr>
   </tbody>
 </table>
@@ -470,15 +536,15 @@
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">MAE</div>
-                        <div class="stat-value metric-warning">13.22 cm^-1</div>
+                        <div class="stat-value metric-bad">36.30 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">RMSE</div>
-                        <div class="stat-value">14.12 cm^-1</div>
+                        <div class="stat-value">37.72 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Max Error</div>
-                        <div class="stat-value">18.19 cm^-1</div>
+                        <div class="stat-value">46.57 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Matched Modes</div>
@@ -498,15 +564,15 @@
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Speedup</div>
-                        <div class="stat-value">3.2x</div>
+                        <div class="stat-value">0.9x</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">ML Runtime</div>
-                        <div class="stat-value">8.8 s</div>
+                        <div class="stat-value">10.2 s</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">DFT Runtime</div>
-                        <div class="stat-value">28.4 s</div>
+                        <div class="stat-value">9.2 s</div>
                     </div>
                 </div>
             </div>
@@ -537,22 +603,22 @@
   </thead>
   <tbody>
     <tr>
-      <td>2218.63</td>
+      <td>2184.35</td>
       <td>2210.37</td>
-      <td>-8.26</td>
-      <td>-0.37</td>
-      <td>84.73</td>
+      <td>26.03</td>
+      <td>1.19</td>
+      <td>67.43</td>
       <td>1.00</td>
-      <td>-83.74</td>
+      <td>-66.43</td>
     </tr>
     <tr>
-      <td>4408.76</td>
+      <td>4344.01</td>
       <td>4390.57</td>
-      <td>-18.19</td>
-      <td>-0.41</td>
-      <td>0.23</td>
+      <td>46.57</td>
+      <td>1.07</td>
+      <td>0.35</td>
       <td>0.01</td>
-      <td>-0.23</td>
+      <td>-0.35</td>
     </tr>
   </tbody>
 </table>
@@ -571,15 +637,15 @@
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">MAE</div>
-                        <div class="stat-value metric-bad">34.81 cm^-1</div>
+                        <div class="stat-value metric-warning">14.71 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">RMSE</div>
-                        <div class="stat-value">41.59 cm^-1</div>
+                        <div class="stat-value">16.52 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Max Error</div>
-                        <div class="stat-value">57.57 cm^-1</div>
+                        <div class="stat-value">22.23 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Matched Modes</div>
@@ -599,15 +665,15 @@
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Speedup</div>
-                        <div class="stat-value">1.7x</div>
+                        <div class="stat-value">0.6x</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">ML Runtime</div>
-                        <div class="stat-value">16.8 s</div>
+                        <div class="stat-value">15.9 s</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">DFT Runtime</div>
-                        <div class="stat-value">28.4 s</div>
+                        <div class="stat-value">9.2 s</div>
                     </div>
                 </div>
             </div>
@@ -638,22 +704,22 @@
   </thead>
   <tbody>
     <tr>
-      <td>2218.63</td>
+      <td>2184.35</td>
       <td>2206.58</td>
-      <td>-12.05</td>
-      <td>-0.54</td>
-      <td>84.73</td>
+      <td>22.23</td>
+      <td>1.02</td>
+      <td>67.43</td>
       <td>0.99</td>
-      <td>-83.74</td>
+      <td>-66.44</td>
     </tr>
     <tr>
-      <td>4408.76</td>
+      <td>4344.01</td>
       <td>4351.19</td>
-      <td>-57.57</td>
-      <td>-1.31</td>
-      <td>0.23</td>
+      <td>7.18</td>
+      <td>0.17</td>
+      <td>0.35</td>
       <td>0.01</td>
-      <td>-0.23</td>
+      <td>-0.34</td>
     </tr>
   </tbody>
 </table>
@@ -672,15 +738,15 @@
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">MAE</div>
-                        <div class="stat-value metric-warning">13.22 cm^-1</div>
+                        <div class="stat-value metric-bad">36.30 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">RMSE</div>
-                        <div class="stat-value">14.12 cm^-1</div>
+                        <div class="stat-value">37.72 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Max Error</div>
-                        <div class="stat-value">18.19 cm^-1</div>
+                        <div class="stat-value">46.57 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Matched Modes</div>
@@ -700,15 +766,15 @@
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Speedup</div>
-                        <div class="stat-value">2.7x</div>
+                        <div class="stat-value">0.9x</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">ML Runtime</div>
-                        <div class="stat-value">10.5 s</div>
+                        <div class="stat-value">10.0 s</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">DFT Runtime</div>
-                        <div class="stat-value">28.4 s</div>
+                        <div class="stat-value">9.2 s</div>
                     </div>
                 </div>
             </div>
@@ -739,22 +805,22 @@
   </thead>
   <tbody>
     <tr>
-      <td>2218.63</td>
+      <td>2184.35</td>
       <td>2210.37</td>
-      <td>-8.26</td>
-      <td>-0.37</td>
-      <td>84.73</td>
+      <td>26.03</td>
+      <td>1.19</td>
+      <td>67.43</td>
       <td>6.86</td>
-      <td>-77.87</td>
+      <td>-60.57</td>
     </tr>
     <tr>
-      <td>4408.76</td>
+      <td>4344.01</td>
       <td>4390.57</td>
-      <td>-18.19</td>
-      <td>-0.41</td>
-      <td>0.23</td>
+      <td>46.57</td>
+      <td>1.07</td>
+      <td>0.35</td>
       <td>9.64</td>
-      <td>9.40</td>
+      <td>9.28</td>
     </tr>
   </tbody>
 </table>
@@ -781,45 +847,45 @@
             <tr>
                 <td>mace_mp_mace_ml</td>
                 <td>1.0000</td>
-                <td>34.81</td>
-                <td>41.59</td>
-                <td>57.57</td>
+                <td>14.71</td>
+                <td>16.52</td>
+                <td>22.23</td>
                 <td>2/2</td>
                 <td>100.0%</td>
-                <td>4.4x</td>
+                <td>1.3x</td>
             </tr>
             
             <tr>
                 <td>mace_omol_espaloma</td>
                 <td>1.0000</td>
-                <td>13.22</td>
-                <td>14.12</td>
-                <td>18.19</td>
+                <td>36.30</td>
+                <td>37.72</td>
+                <td>46.57</td>
                 <td>2/2</td>
                 <td>100.0%</td>
-                <td>3.2x</td>
+                <td>0.9x</td>
             </tr>
             
             <tr>
                 <td>mace_mp_espaloma</td>
                 <td>1.0000</td>
-                <td>34.81</td>
-                <td>41.59</td>
-                <td>57.57</td>
+                <td>14.71</td>
+                <td>16.52</td>
+                <td>22.23</td>
                 <td>2/2</td>
                 <td>100.0%</td>
-                <td>1.7x</td>
+                <td>0.6x</td>
             </tr>
             
             <tr>
                 <td>mace_omol_mace_ml</td>
                 <td>1.0000</td>
-                <td>13.22</td>
-                <td>14.12</td>
-                <td>18.19</td>
+                <td>36.30</td>
+                <td>37.72</td>
+                <td>46.57</td>
                 <td>2/2</td>
                 <td>100.0%</td>
-                <td>2.7x</td>
+                <td>0.9x</td>
             </tr>
             
                 </tbody>
@@ -830,7 +896,7 @@
 
         <footer>
             <p>Generated by IR Spectral Analysis Framework</p>
-            <p class="timestamp">Report generated: 2025-10-30 16:53:26</p>
+            <p class="timestamp">Report generated: 2025-11-11 14:43:04</p>
         </footer>
         
 </div>

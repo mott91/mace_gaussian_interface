@@ -16,6 +16,7 @@ from datetime import datetime
 import logging
 
 from analyze_spectra import SpectrumAnalyzer, SpectrumData, ComparisonMetrics
+from mode_matching import extract_mode_data_from_checkpoint, match_modes, create_alignment_matrix, plot_mode_overlap_heatmap
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -311,7 +312,79 @@ class ComparisonWorkflow:
         )
         
         logger.info("Created combined plots")
-    
+
+    def generate_mode_overlap_heatmaps(self, ml_results: List[Tuple[str, Path]], dft_baseline_name: str):
+        """
+        Generate mode overlap heatmaps for all ML calculations vs DFT baseline.
+
+        Parameters
+        ----------
+        ml_results : list
+            List of (ml_name, ml_results_path) tuples
+        dft_baseline_name : str
+            Name of DFT baseline directory (e.g., 'b3lyp_6-31Gdp')
+        """
+        logger.info("Generating mode overlap heatmaps...")
+
+        # Find DFT .fchk file
+        dft_dir = self.molecule_dir / dft_baseline_name
+        dft_fchk_candidates = list(dft_dir.glob("*.fchk"))
+
+        if not dft_fchk_candidates:
+            logger.warning(f"No .fchk file found for DFT baseline in {dft_dir}")
+            return
+
+        dft_fchk = dft_fchk_candidates[0]
+        logger.info(f"Using DFT .fchk: {dft_fchk.name}")
+
+        # Generate heatmap for each ML calculation
+        for ml_name, ml_path in ml_results:
+            try:
+                # Find ML .fchk file
+                ml_dir = ml_path.parent
+                ml_fchk_candidates = list(ml_dir.glob("*.fchk"))
+
+                if not ml_fchk_candidates:
+                    logger.warning(f"No .fchk file found for {ml_name} in {ml_dir}")
+                    continue
+
+                ml_fchk = ml_fchk_candidates[0]
+
+                # Extract modes
+                logger.info(f"  Generating heatmap for {ml_name}...")
+                modes_ml, freqs_ml, *_ = extract_mode_data_from_checkpoint(str(ml_fchk))
+                modes_dft, freqs_dft, *_ = extract_mode_data_from_checkpoint(str(dft_fchk))
+
+                # Check if same number of atoms
+                if modes_ml.shape[1] != modes_dft.shape[1]:
+                    logger.warning(f"  Skipping {ml_name}: different number of atoms")
+                    continue
+
+                # Create alignment matrix and match modes
+                alignment_matrix = create_alignment_matrix(modes_ml, modes_dft)
+                matches = match_modes(modes_ml, modes_dft)
+
+                # Generate heatmap
+                output_file = self.plots_dir / f"mode_overlap_{ml_name}_vs_{dft_baseline_name}.png"
+                plot_mode_overlap_heatmap(
+                    alignment_matrix,
+                    output_file=str(output_file),
+                    calc_label="ML Calculation",
+                    ref_label="DFT Reference",
+                    freqs_calc=freqs_ml,
+                    freqs_ref=freqs_dft,
+                    matches=None  # Don't pass matches to avoid clutter
+                )
+
+                logger.info(f"  ✓ Saved heatmap: {output_file.name}")
+
+            except Exception as e:
+                logger.warning(f"  Failed to generate heatmap for {ml_name}: {e}")
+                import traceback
+                traceback.print_exc()
+
+        logger.info("Mode overlap heatmaps complete")
+
     def run_full_analysis(self) -> Dict:
         """
         Run complete analysis workflow
@@ -384,7 +457,10 @@ class ComparisonWorkflow:
         
         # Create combined plots
         self.create_combined_plots(comparisons, dft_spectrum)
-        
+
+        # Generate mode overlap heatmaps
+        self.generate_mode_overlap_heatmaps(ml_results, dft_path.parent.name)
+
         # Only save summary if we have comparisons
         if comparisons:
             # Save summary metrics

@@ -112,13 +112,17 @@ def parse_fchk_section(content: str, section_name: str, data_type: str = 'R') ->
 
     for line in lines:
         if not line.strip():
-            break  # Empty line marks end of section
-        if line.strip().startswith(section_name[0]):
+            continue  # Skip empty lines, don't break
+        # Check if this is a new section starting (sections typically start at column 1)
+        if re.match(r'^[A-Z]', line):
             break  # New section starting
         try:
             # Parse values from line
             line_values = line.split()
             values.extend([float(v) if data_type == 'R' else int(v) for v in line_values])
+            # Stop if we've collected enough values
+            if len(values) >= n_values:
+                break
         except ValueError:
             break  # Can't parse, must be end of section
 
@@ -180,21 +184,47 @@ def extract_modes_from_fchk(fchk_file: str) -> Tuple[np.ndarray, np.ndarray, np.
     coords = coords_bohr * BOHR_TO_ANGSTROM
     coords = coords.reshape(n_atoms, 3)
 
-    # Extract vibrational frequencies
+    # Extract vibrational frequencies and modes
+    # Prefer anharmonic sections if available (these contain actual vibrational modes only)
+    frequencies = None
+    vib_modes = None
+
+    # Try anharmonic sections first
     try:
-        frequencies = parse_fchk_section(content, 'Vib-E2', 'R')
-        n_modes = len(frequencies)
-        logger.info(f"Found {n_modes} vibrational frequencies")
+        frequencies = parse_fchk_section(content, 'Anharmonic Vib-E2', 'R')
+        # Anharmonic E2 section has multiple values per mode, extract first N
+        # where N = number of modes (check Anharmonic Number of Normal Modes)
+        nmodes_match = re.search(r'^Anharmonic Number of Normal Modes\s+I\s+(\d+)', content, re.MULTILINE)
+        if nmodes_match:
+            n_modes = int(nmodes_match.group(1))
+            frequencies = frequencies[:n_modes]
+        else:
+            n_modes = None
+        logger.info(f"Found {len(frequencies)} anharmonic vibrational frequencies")
     except ValueError:
-        logger.warning("Could not find 'Vib-E2' (frequencies), trying 'Vib-Modes'")
+        logger.debug("No anharmonic frequencies found, using harmonic")
         n_modes = None
 
-    # Extract normal modes (Vib-Modes section)
-    # Format: all modes concatenated, each mode has n_atoms * 3 values
     try:
-        vib_modes = parse_fchk_section(content, 'Vib-Modes', 'R')
+        vib_modes = parse_fchk_section(content, 'Anharmonic Vib-Modes', 'R')
+        logger.info(f"Using anharmonic vibrational modes")
     except ValueError:
-        raise ValueError("Could not find 'Vib-Modes' section in .fchk file")
+        logger.debug("No anharmonic modes found, using harmonic")
+
+    # Fall back to harmonic if anharmonic not available
+    if frequencies is None:
+        try:
+            frequencies = parse_fchk_section(content, 'Vib-E2', 'R')
+            logger.info(f"Found {len(frequencies)} harmonic vibrational frequencies")
+        except ValueError:
+            logger.warning("Could not find frequencies")
+
+    if vib_modes is None:
+        try:
+            vib_modes = parse_fchk_section(content, 'Vib-Modes', 'R')
+            logger.info(f"Using harmonic vibrational modes")
+        except ValueError:
+            raise ValueError("Could not find 'Vib-Modes' or 'Anharmonic Vib-Modes' section in .fchk file")
 
     # Determine number of modes if not already found
     if n_modes is None:

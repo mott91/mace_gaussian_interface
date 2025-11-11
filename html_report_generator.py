@@ -328,13 +328,61 @@ class HTMLReportGenerator:
     
     def create_navigation(self, comparisons: List[Dict]) -> str:
         """Create navigation menu"""
-        nav_items = ['<a href="#overview">Overview</a>', '<a href="#combined">Combined</a>']
+        nav_items = ['<a href="#overview">Overview</a>', '<a href="#combined">Combined</a>', '<a href="#mode-overlap">Mode Matching</a>']
         for i, comp in enumerate(comparisons, 1):
             nav_items.append(f'<a href="#comp{i}">{comp["name"]}</a>')
         nav_items.append('<a href="#summary">Summary</a>')
 
         return f'<nav>{" ".join(nav_items)}</nav>'
     
+    def create_mode_overlap_section(self) -> str:
+        """Create section with mode overlap heatmaps"""
+        # Find all mode overlap heatmap files
+        mode_overlap_files = list(self.plots_dir.glob("mode_overlap_*.png"))
+
+        if not mode_overlap_files:
+            return ""
+
+        # Build heatmap sections
+        heatmap_sections = []
+        for heatmap_file in sorted(mode_overlap_files):
+            filename = heatmap_file.name
+            # Extract method names from filename (e.g., mode_overlap_mace_mp_espaloma_vs_wb97xd.png)
+            parts = filename.replace("mode_overlap_", "").replace(".png", "").split("_vs_")
+            ml_method = parts[0] if len(parts) > 0 else "ML"
+            dft_method = parts[1] if len(parts) > 1 else "DFT"
+
+            heatmap_sections.append(f"""
+            <h3>Mode Overlap: {ml_method.upper().replace('_', ' ')} vs {dft_method.upper()}</h3>
+            <div class="plot-container">
+                <img src="plots/{filename}" alt="Mode overlap heatmap" style="width: 100%; max-width: 900px;">
+            </div>
+            <p style="color: #666; font-size: 0.9em; margin-bottom: 30px;">
+                Heatmap shows the overlap (dot product) between vibrational modes. Red = high overlap (modes match),
+                Blue = weak overlap, White = no overlap (modes are orthogonal).
+            </p>
+            """)
+
+        heatmaps_html = "\n".join(heatmap_sections)
+
+        return f"""
+        <section id="mode-overlap" class="comparison-section">
+            <h2>Mode Matching Analysis</h2>
+            <p style="color: #666; margin-bottom: 20px;">
+                Vibrational modes can change order between DFT and ML calculations. Mode matching via normal mode overlap
+                ensures we compare the correct physical modes rather than just matching by mode number.
+            </p>
+
+            <div style="padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px; margin-bottom: 25px;">
+                <strong>⚠ Important:</strong> If red spots appear off-diagonal (not on the main diagonal), this indicates
+                mode reordering occurred between ML and DFT calculations.
+                Perfect overlap = 1.00 (dark red), orthogonal modes = 0.00 (white).
+            </div>
+
+            {heatmaps_html}
+        </section>
+        """
+
     def create_combined_plots_section(self) -> str:
         """Create section with combined plots showing all ML methods"""
         combined_spectrum = self.plots_dir / "spectrum_combined.png"
@@ -620,6 +668,7 @@ class HTMLReportGenerator:
             '<div class="content">',
             self.create_overview(comparisons),
             self.create_combined_plots_section(),  # Add combined plots after overview
+            self.create_mode_overlap_section(),  # Add mode overlap heatmaps
         ]
 
         # Add comparison sections
