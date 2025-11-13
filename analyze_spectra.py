@@ -99,7 +99,114 @@ class SpectrumAnalyzer:
         
         logger.info(f"Initialized analyzer: {freq_range[0]}-{freq_range[1]} cm^-1, "
                    f"FWHM={bandwidth_fwhm} cm^-1, step={freq_step} cm^-1")
-    
+
+    def extract_spectrum_from_fchk(self, fchk_path, log_path=None) -> SpectrumData:
+        """
+        Extract harmonic spectrum data directly from .fchk and .log files.
+
+        This method extracts ALL vibrational modes including degenerate ones,
+        which is essential for proper eigenvector-based mode matching.
+
+        Parameters
+        ----------
+        fchk_path : str or Path
+            Path to .fchk file
+        log_path : str or Path, optional
+            Path to .log file for IR intensities. If None, tries to find it.
+
+        Returns
+        -------
+        SpectrumData
+            Spectrum with all fundamental modes (including degenerates)
+        """
+        from pathlib import Path
+        from mode_matching import extract_mode_data_from_checkpoint
+        import re
+
+        fchk_path = Path(fchk_path)
+
+        # Extract frequencies from .fchk (all modes including degenerates)
+        modes, frequencies, *_ = extract_mode_data_from_checkpoint(
+            str(fchk_path), force_harmonic=True
+        )
+        n_modes = modes.shape[0]
+
+        logger.info(f"Extracted {n_modes} harmonic modes from {fchk_path.name}")
+
+        # Try to find .log file for IR intensities
+        if log_path is None:
+            # Try to find .log in same directory
+            log_candidates = list(fchk_path.parent.glob("*.log"))
+            if log_candidates:
+                log_path = log_candidates[0]
+            else:
+                logger.warning(f"No .log file found for IR intensities, using zeros")
+                intensities = np.zeros(n_modes)
+                return SpectrumData(
+                    frequencies=frequencies[:n_modes],
+                    intensities=intensities,
+                    labels=['fundamental'] * n_modes,
+                    mode_ids=[f"F{i+1}" for i in range(n_modes)]
+                )
+
+        log_path = Path(log_path)
+
+        # Parse IR intensities from .log file (keeping all degenerates)
+        with open(log_path, 'r') as f:
+            log_content = f.read()
+
+        intensities = []
+        freq_pattern = r'Frequencies\s+--\s+([\d\.\s]+)'
+        ir_pattern = r'IR Inten\s+--\s+([\d\.\s]+)'
+
+        lines = log_content.split('\n')
+
+        # Find the harmonic frequencies section
+        in_harmonic_section = False
+        for i, line in enumerate(lines):
+            # Check if we're entering the harmonic section
+            if 'Harmonic frequencies (cm**-1)' in line:
+                in_harmonic_section = True
+                logger.debug("Found harmonic frequencies section")
+                continue
+
+            # Check if we're leaving the harmonic section (anharmonic or other section starts)
+            if in_harmonic_section and ('Anharmonic' in line or 'THERMOCHEMISTRY' in line or
+                                        'Temperature' in line and 'Pressure' in line):
+                logger.debug("Leaving harmonic frequencies section")
+                break
+
+            # Extract frequencies and intensities while in harmonic section
+            if in_harmonic_section and 'Frequencies --' in line:
+                freq_match = re.search(freq_pattern, line)
+                if freq_match:
+                    # Look for IR intensities in the next few lines
+                    for j in range(i+1, min(i+10, len(lines))):
+                        if 'IR Inten' in lines[j]:
+                            ir_match = re.search(ir_pattern, lines[j])
+                            if ir_match:
+                                # Add ALL intensities (including degenerates)
+                                intensities.extend([float(x) for x in ir_match.group(1).split()])
+                                break
+
+        # Trim to match number of modes
+        if len(intensities) > n_modes:
+            intensities = intensities[:n_modes]
+        elif len(intensities) < n_modes:
+            logger.warning(f"Only found {len(intensities)} IR intensities for {n_modes} modes, padding with zeros")
+            intensities.extend([0.0] * (n_modes - len(intensities)))
+
+        intensities = np.array(intensities)
+
+        logger.info(f"Extracted {len(intensities)} IR intensities from {log_path.name}")
+
+        return SpectrumData(
+            frequencies=frequencies[:n_modes],
+            intensities=intensities,
+            labels=['fundamental'] * n_modes,
+            mode_ids=[f"F{i+1}" for i in range(n_modes)]
+        )
+
     def load_results(self, json_path: str) -> Dict:
         """Load results from JSON file"""
         with open(json_path, 'r') as f:

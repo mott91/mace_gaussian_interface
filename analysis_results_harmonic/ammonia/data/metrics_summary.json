@@ -1,0 +1,40 @@
+{
+  "molecule": "ammonia",
+  "analysis_date": "2025-11-13T16:59:57.843824",
+  "num_ml_calculators": 4,
+  "dft_method": "b3lyp_6-31Gdp",
+  "comparisons": [
+    {
+      "name": "mace_mp_mace_ml",
+      "mae_freq": 93.58993333333343,
+      "rmse_freq": 123.52308823848819,
+      "r2_freq": 0.9998875158860732,
+      "r2_intensity": 0.9989461501986641,
+      "speedup": 1.587965478690215
+    },
+    {
+      "name": "mace_omol_espaloma",
+      "mae_freq": 26.43145,
+      "rmse_freq": 35.34768153144322,
+      "r2_freq": 0.9999634864074232,
+      "r2_intensity": 0.7435704916676898,
+      "speedup": 1.1758046802306548
+    },
+    {
+      "name": "mace_mp_espaloma",
+      "mae_freq": 93.58993333333343,
+      "rmse_freq": 123.52308823848819,
+      "r2_freq": 0.9998875158860732,
+      "r2_intensity": 0.7443682091846969,
+      "speedup": 1.3014706645503884
+    },
+    {
+      "name": "mace_omol_mace_ml",
+      "mae_freq": 26.43145,
+      "rmse_freq": 35.34768153144322,
+      "r2_freq": 0.9999634864074232,
+      "r2_intensity": 0.9990354318745078,
+      "speedup": 1.0513525384129385
+    }
+  ]
+}

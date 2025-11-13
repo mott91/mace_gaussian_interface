@@ -1,0 +1,40 @@
+{
+  "molecule": "C2H6_ase",
+  "analysis_date": "2025-11-13T17:01:04.290970",
+  "num_ml_calculators": 4,
+  "dft_method": "b3lyp_6-31Gdp",
+  "comparisons": [
+    {
+      "name": "mace_mp_mace_ml",
+      "mae_freq": 1236.6347,
+      "rmse_freq": 1505.2662400332829,
+      "r2_freq": 0.05348030068119958,
+      "r2_intensity": 0.019643895431091477,
+      "speedup": 3.9891550166039855
+    },
+    {
+      "name": "mace_omol_espaloma",
+      "mae_freq": 87.02483999999997,
+      "rmse_freq": 137.45189741041048,
+      "r2_freq": 0.9805596350067881,
+      "r2_intensity": 0.11102138897060655,
+      "speedup": 3.2713283067222125
+    },
+    {
+      "name": "mace_mp_espaloma",
+      "mae_freq": 988.9970000000001,
+      "rmse_freq": 1312.3227972769762,
+      "r2_freq": 0.0063849955194092934,
+      "r2_intensity": 0.10119758868604943,
+      "speedup": 4.398629493780616
+    },
+    {
+      "name": "mace_omol_mace_ml",
+      "mae_freq": 281.20232000000004,
+      "rmse_freq": 520.7081462124345,
+      "r2_freq": 0.7662964851580356,
+      "r2_intensity": 0.2581901163822989,
+      "speedup": 2.7281606582804403
+    }
+  ]
+}

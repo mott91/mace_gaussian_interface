@@ -337,21 +337,48 @@ class ComparisonWorkflow:
         # Extract mode mapping from eigenvector matching
         mode_mapping = self.extract_mode_mapping(ml_path, dft_path)
 
-        # Load results
-        ml_results = self.analyzer.load_results(ml_path)
-        dft_results = self.analyzer.load_results(dft_path)
-
         # Extract spectra
-        # If use_harmonic=True: only harmonic fundamentals (overtones/combinations ignored)
-        # If use_harmonic=False: anharmonic with overtones and combinations
-        ml_spectrum = self.analyzer.extract_spectrum_data(
-            ml_results, include_overtones=True, include_combinations=True,
-            use_harmonic=self.use_harmonic
-        )
-        dft_spectrum = self.analyzer.extract_spectrum_data(
-            dft_results, include_overtones=True, include_combinations=True,
-            use_harmonic=self.use_harmonic
-        )
+        # HARMONIC MODE: Extract directly from .fchk files to get ALL degenerate modes
+        # ANHARMONIC MODE: Extract from results.json (collapsed degenerates)
+        if self.use_harmonic:
+            # Find .fchk files
+            ml_dir = ml_path.parent
+            dft_dir = dft_path.parent
+
+            ml_fchk = self._select_best_fchk(list(ml_dir.glob("*.fchk")))
+            dft_fchk = self._select_best_fchk(list(dft_dir.glob("*.fchk")))
+
+            if not ml_fchk or not dft_fchk:
+                logger.error(f"  Missing .fchk files for harmonic analysis")
+                logger.error(f"  ML .fchk: {ml_fchk}")
+                logger.error(f"  DFT .fchk: {dft_fchk}")
+                raise FileNotFoundError("Harmonic analysis requires .fchk files")
+
+            logger.info(f"  Using .fchk-based extraction for harmonic analysis")
+            logger.info(f"    ML .fchk: {ml_fchk.name}")
+            logger.info(f"    DFT .fchk: {dft_fchk.name}")
+
+            # Extract spectrum directly from .fchk (includes all degenerate modes)
+            ml_spectrum = self.analyzer.extract_spectrum_from_fchk(ml_fchk)
+            dft_spectrum = self.analyzer.extract_spectrum_from_fchk(dft_fchk)
+
+            # Still load JSON results for runtime info
+            ml_results = self.analyzer.load_results(ml_path)
+            dft_results = self.analyzer.load_results(dft_path)
+
+        else:
+            # Anharmonic mode: use JSON extraction
+            ml_results = self.analyzer.load_results(ml_path)
+            dft_results = self.analyzer.load_results(dft_path)
+
+            ml_spectrum = self.analyzer.extract_spectrum_data(
+                ml_results, include_overtones=True, include_combinations=True,
+                use_harmonic=False
+            )
+            dft_spectrum = self.analyzer.extract_spectrum_data(
+                dft_results, include_overtones=True, include_combinations=True,
+                use_harmonic=False
+            )
 
         logger.info(f"  ML peaks: {len(ml_spectrum.frequencies)}, "
                    f"DFT peaks: {len(dft_spectrum.frequencies)}")
@@ -580,13 +607,23 @@ class ComparisonWorkflow:
         
         logger.info(f"Found DFT baseline: {dft_path.parent.name}")
         logger.info(f"Found {len(ml_results)} ML calculations to compare")
-        
+
         # Load DFT spectrum once for combined plots
-        dft_results = self.analyzer.load_results(dft_path)
-        dft_spectrum = self.analyzer.extract_spectrum_data(
-            dft_results, include_overtones=True, include_combinations=True,
-            use_harmonic=self.use_harmonic
-        )
+        if self.use_harmonic:
+            # Harmonic: extract from .fchk to get all degenerate modes
+            dft_dir = dft_path.parent
+            dft_fchk = self._select_best_fchk(list(dft_dir.glob("*.fchk")))
+            if not dft_fchk:
+                raise FileNotFoundError(f"No .fchk file found for DFT baseline in {dft_dir}")
+            logger.info(f"Using DFT .fchk for harmonic analysis: {dft_fchk.name}")
+            dft_spectrum = self.analyzer.extract_spectrum_from_fchk(dft_fchk)
+        else:
+            # Anharmonic: extract from JSON
+            dft_results = self.analyzer.load_results(dft_path)
+            dft_spectrum = self.analyzer.extract_spectrum_data(
+                dft_results, include_overtones=True, include_combinations=True,
+                use_harmonic=False
+            )
         
         # Run comparisons
         comparisons = []
