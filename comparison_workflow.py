@@ -101,14 +101,36 @@ class ComparisonWorkflow:
 
         # Prefer B3LYP if requested and available
         if prefer_b3lyp:
-            for name, path in dft_results:
-                if 'b3lyp' in name.lower():
-                    logger.info(f"Found DFT baseline (B3LYP): {path}")
-                    return path
+            b3lyp_results = [(name, path) for name, path in dft_results if 'b3lyp' in name.lower()]
+            if b3lyp_results:
+                # If multiple B3LYP results, prefer one with .fchk files
+                results_with_fchk = []
+                results_without_fchk = []
 
-        # Otherwise return first DFT result
-        logger.info(f"Found DFT baseline: {dft_results[0][1]}")
-        return dft_results[0][1]
+                for name, path in b3lyp_results:
+                    dft_dir = path.parent
+                    fchk_files = list(dft_dir.glob("*.fchk"))
+                    if fchk_files:
+                        results_with_fchk.append((name, path))
+                    else:
+                        results_without_fchk.append((name, path))
+
+                # Prefer results with .fchk files
+                if results_with_fchk:
+                    # If multiple with .fchk, use newest
+                    best_path = max(results_with_fchk, key=lambda x: x[1].stat().st_mtime)[1]
+                    logger.info(f"Found DFT baseline (B3LYP with .fchk): {best_path}")
+                    return best_path
+                else:
+                    # No .fchk files, use newest
+                    best_path = max(b3lyp_results, key=lambda x: x[1].stat().st_mtime)[1]
+                    logger.info(f"Found DFT baseline (B3LYP, no .fchk): {best_path}")
+                    return best_path
+
+        # Otherwise return newest DFT result
+        best_path = max(dft_results, key=lambda x: x[1].stat().st_mtime)[1]
+        logger.info(f"Found DFT baseline: {best_path}")
+        return best_path
     
     def find_ml_results(self) -> List[Tuple[str, Path]]:
         """
@@ -139,29 +161,66 @@ class ComparisonWorkflow:
                         continue
         
         return ml_results
-    
+
+    def _select_best_fchk(self, candidates: List[Path]) -> Optional[Path]:
+        """
+        Select best .fchk file from candidates.
+
+        Prefers standard names (gaussian_freq.fchk, gaussian_dft.fchk),
+        excludes temporary files, and falls back to newest file.
+
+        Parameters
+        ----------
+        candidates : list of Path
+            List of candidate .fchk files
+
+        Returns
+        -------
+        Path or None
+            Best .fchk file, or None if no candidates
+        """
+        if not candidates:
+            return None
+
+        # Filter out temporary files
+        non_temp = [f for f in candidates if not f.name.startswith('temp_')]
+        if non_temp:
+            candidates = non_temp
+
+        # Prefer standard names
+        for preferred_name in ['gaussian_freq.fchk', 'gaussian_dft.fchk']:
+            for f in candidates:
+                if f.name == preferred_name:
+                    return f
+
+        # Otherwise take the newest file
+        return max(candidates, key=lambda f: f.stat().st_mtime)
+
     def create_comparison_table(self,
                                dft_spectrum: SpectrumData,
                                ml_spectrum: SpectrumData,
-                               ml_name: str) -> pd.DataFrame:
+                               ml_name: str,
+                               mode_mapping: Optional[Dict[int, int]] = None) -> pd.DataFrame:
         """
         Create detailed comparison table
-        
+
         Parameters
         ----------
         dft_spectrum, ml_spectrum : SpectrumData
             Spectra to compare
         ml_name : str
             Name of ML calculator
-            
+        mode_mapping : dict, optional
+            Mapping from ML mode index to DFT mode index
+
         Returns
         -------
         pd.DataFrame
             Comparison table
         """
-        # Match modes
+        # Match modes with eigenvector mapping
         dft_freq, ml_freq, dft_int, ml_int, _ = self.analyzer.match_by_mode(
-            dft_spectrum, ml_spectrum
+            dft_spectrum, ml_spectrum, mode_mapping=mode_mapping
         )
         
         # Create DataFrame
@@ -180,13 +239,75 @@ class ComparisonWorkflow:
         
         return df
     
+    def extract_mode_mapping(self, ml_path: Path, dft_path: Path) -> Optional[Dict[int, int]]:
+        """
+        Extract mode mapping between ML and DFT calculations using eigenvector matching.
+
+        Parameters
+        ----------
+        ml_path : Path
+            Path to ML results.json
+        dft_path : Path
+            Path to DFT results.json
+
+        Returns
+        -------
+        dict or None
+            Mapping from ML mode index to DFT mode index, or None if .fchk files not found
+        """
+        try:
+            # Find .fchk files
+            ml_dir = ml_path.parent
+            dft_dir = dft_path.parent
+
+            ml_fchk_candidates = list(ml_dir.glob("*.fchk"))
+            dft_fchk_candidates = list(dft_dir.glob("*.fchk"))
+
+            ml_fchk = self._select_best_fchk(ml_fchk_candidates)
+            dft_fchk = self._select_best_fchk(dft_fchk_candidates)
+
+            if not ml_fchk or not dft_fchk:
+                logger.warning(f"  No .fchk files found for mode matching")
+                return None
+
+            logger.debug(f"  Using ML .fchk: {ml_fchk.name}")
+            logger.debug(f"  Using DFT .fchk: {dft_fchk.name}")
+
+            # Extract modes from checkpoints - USE HARMONIC MODES
+            # For mode matching, we use harmonic eigenvectors since they are the
+            # fundamental normal modes. Anharmonic modes include coupling/perturbations.
+            modes_ml, _, _, _, n_atoms_ml = extract_mode_data_from_checkpoint(str(ml_fchk), force_harmonic=True)
+            modes_dft, _, _, _, n_atoms_dft = extract_mode_data_from_checkpoint(str(dft_fchk), force_harmonic=True)
+
+            # # COMMENTED OUT: Old code that used anharmonic modes (kept for reference)
+            # # This was using whatever modes were available (anharmonic if present)
+            # modes_ml, _, _, _, n_atoms_ml = extract_mode_data_from_checkpoint(str(ml_fchk))
+            # modes_dft, _, _, _, n_atoms_dft = extract_mode_data_from_checkpoint(str(dft_fchk))
+
+            if n_atoms_ml != n_atoms_dft:
+                logger.warning(f"  Different number of atoms ({n_atoms_ml} vs {n_atoms_dft})")
+                return None
+
+            # Match modes using eigenvector overlap
+            matches = match_modes(modes_ml, modes_dft, threshold=0.5)
+
+            # Convert to simple mapping dict (ml_idx -> dft_idx)
+            mode_mapping = {ml_idx: dft_idx for ml_idx, (dft_idx, overlap) in matches.items()}
+
+            logger.info(f"  Extracted mode mapping for {len(mode_mapping)} modes")
+            return mode_mapping
+
+        except Exception as e:
+            logger.warning(f"  Failed to extract mode mapping: {e}")
+            return None
+
     def run_single_comparison(self,
                             ml_name: str,
                             ml_path: Path,
                             dft_path: Path) -> Dict:
         """
         Run complete comparison for one ML calculator
-        
+
         Parameters
         ----------
         ml_name : str
@@ -195,18 +316,21 @@ class ComparisonWorkflow:
             Path to ML results.json
         dft_path : Path
             Path to DFT results.json
-            
+
         Returns
         -------
         dict
             Comparison results including metrics and file paths
         """
         logger.info(f"Comparing {ml_name} vs DFT...")
-        
+
+        # Extract mode mapping from eigenvector matching
+        mode_mapping = self.extract_mode_mapping(ml_path, dft_path)
+
         # Load results
         ml_results = self.analyzer.load_results(ml_path)
         dft_results = self.analyzer.load_results(dft_path)
-        
+
         # Extract spectra (with overtones and combinations)
         ml_spectrum = self.analyzer.extract_spectrum_data(
             ml_results, include_overtones=True, include_combinations=True
@@ -214,32 +338,33 @@ class ComparisonWorkflow:
         dft_spectrum = self.analyzer.extract_spectrum_data(
             dft_results, include_overtones=True, include_combinations=True
         )
-        
+
         logger.info(f"  ML peaks: {len(ml_spectrum.frequencies)}, "
                    f"DFT peaks: {len(dft_spectrum.frequencies)}")
-        
-        # Calculate metrics
-        metrics = self.analyzer.calculate_metrics(ml_spectrum, dft_spectrum)
+
+        # Calculate metrics with mode mapping
+        metrics = self.analyzer.calculate_metrics(ml_spectrum, dft_spectrum, mode_mapping=mode_mapping)
         
         # Create plots - SAVE AS PNG NOT PDF!
         spectrum_plot_path = self.plots_dir / f"spectrum_{ml_name}.png"
         regression_plot_path = self.plots_dir / f"regression_{ml_name}.png"
-        
+
         self.analyzer.plot_spectra_comparison(
-            ml_spectrum, dft_spectrum, ml_name, 
+            ml_spectrum, dft_spectrum, ml_name,
             molecule_name=self.molecule_name,
             save_path=str(spectrum_plot_path)
         )
-        
+
         self.analyzer.plot_regression(
             ml_spectrum, dft_spectrum, metrics, ml_name,
             molecule_name=self.molecule_name,
-            save_path=str(regression_plot_path)
+            save_path=str(regression_plot_path),
+            mode_mapping=mode_mapping
         )
-        
-        # Create comparison table
+
+        # Create comparison table (also needs mode mapping)
         comparison_df = self.create_comparison_table(
-            dft_spectrum, ml_spectrum, ml_name
+            dft_spectrum, ml_spectrum, ml_name, mode_mapping=mode_mapping
         )
         
         table_path = self.data_dir / f"comparison_{ml_name}.csv"
@@ -263,7 +388,8 @@ class ComparisonWorkflow:
             'table_file': table_path.name,
             'comparison_df': comparison_df,
             'ml_spectrum': ml_spectrum,  # Store for combined plots
-            'dft_spectrum': dft_spectrum
+            'dft_spectrum': dft_spectrum,
+            'mode_mapping': mode_mapping  # Store mode mapping for combined plots
         }
     
     def create_combined_plots(self, comparisons: List[Dict], dft_spectrum: SpectrumData):
@@ -300,7 +426,7 @@ class ComparisonWorkflow:
             save_path=str(combined_spectrum_extended_path)
         )
 
-        # Create combined regression plot
+        # Create combined regression plot with mode mappings
         combined_regression_path = self.plots_dir / "regression_combined.png"
         self.analyzer.plot_combined_regression(
             ml_spectra=[c['ml_spectrum'] for c in comparisons],
@@ -308,12 +434,13 @@ class ComparisonWorkflow:
             dft_spectrum=dft_spectrum,
             metrics_list=[c['metrics'] for c in comparisons],
             molecule_name=self.molecule_name,
-            save_path=str(combined_regression_path)
+            save_path=str(combined_regression_path),
+            mode_mappings=[c.get('mode_mapping') for c in comparisons]  # Pass mode mappings
         )
         
         logger.info("Created combined plots")
 
-    def generate_mode_overlap_heatmaps(self, ml_results: List[Tuple[str, Path]], dft_baseline_name: str):
+    def generate_mode_overlap_heatmaps(self, ml_results: List[Tuple[str, Path]], dft_path: Path):
         """
         Generate mode overlap heatmaps for all ML calculations vs DFT baseline.
 
@@ -321,20 +448,20 @@ class ComparisonWorkflow:
         ----------
         ml_results : list
             List of (ml_name, ml_results_path) tuples
-        dft_baseline_name : str
-            Name of DFT baseline directory (e.g., 'b3lyp_6-31Gdp')
+        dft_path : Path
+            Path to DFT baseline results.json
         """
         logger.info("Generating mode overlap heatmaps...")
 
-        # Find DFT .fchk file
-        dft_dir = self.molecule_dir / dft_baseline_name
+        # Find DFT .fchk file from the DFT directory
+        dft_dir = dft_path.parent
         dft_fchk_candidates = list(dft_dir.glob("*.fchk"))
+        dft_fchk = self._select_best_fchk(dft_fchk_candidates)
 
-        if not dft_fchk_candidates:
+        if not dft_fchk:
             logger.warning(f"No .fchk file found for DFT baseline in {dft_dir}")
             return
 
-        dft_fchk = dft_fchk_candidates[0]
         logger.info(f"Using DFT .fchk: {dft_fchk.name}")
 
         # Generate heatmap for each ML calculation
@@ -343,17 +470,20 @@ class ComparisonWorkflow:
                 # Find ML .fchk file
                 ml_dir = ml_path.parent
                 ml_fchk_candidates = list(ml_dir.glob("*.fchk"))
+                ml_fchk = self._select_best_fchk(ml_fchk_candidates)
 
-                if not ml_fchk_candidates:
+                if not ml_fchk:
                     logger.warning(f"No .fchk file found for {ml_name} in {ml_dir}")
                     continue
 
-                ml_fchk = ml_fchk_candidates[0]
+                logger.info(f"  Using ML .fchk: {ml_fchk.name}")
 
-                # Extract modes
+                # Extract modes - USE HARMONIC MODES ONLY FOR HEATMAPS
+                # Harmonic modes are the true eigenvectors of the Hessian
+                # Anharmonic modes are perturbed versions and not suitable for mode overlap
                 logger.info(f"  Generating heatmap for {ml_name}...")
-                modes_ml, freqs_ml, *_ = extract_mode_data_from_checkpoint(str(ml_fchk))
-                modes_dft, freqs_dft, *_ = extract_mode_data_from_checkpoint(str(dft_fchk))
+                modes_ml, freqs_ml, *_ = extract_mode_data_from_checkpoint(str(ml_fchk), force_harmonic=True)
+                modes_dft, freqs_dft, *_ = extract_mode_data_from_checkpoint(str(dft_fchk), force_harmonic=True)
 
                 # Check if same number of atoms
                 if modes_ml.shape[1] != modes_dft.shape[1]:
@@ -365,6 +495,7 @@ class ComparisonWorkflow:
                 matches = match_modes(modes_ml, modes_dft)
 
                 # Generate heatmap
+                dft_baseline_name = dft_dir.name
                 output_file = self.plots_dir / f"mode_overlap_{ml_name}_vs_{dft_baseline_name}.png"
                 plot_mode_overlap_heatmap(
                     alignment_matrix,
@@ -458,8 +589,8 @@ class ComparisonWorkflow:
         # Create combined plots
         self.create_combined_plots(comparisons, dft_spectrum)
 
-        # Generate mode overlap heatmaps
-        self.generate_mode_overlap_heatmaps(ml_results, dft_path.parent.name)
+        # Generate mode overlap heatmaps using the same DFT path
+        self.generate_mode_overlap_heatmaps(ml_results, dft_path)
 
         # Only save summary if we have comparisons
         if comparisons:

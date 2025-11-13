@@ -204,7 +204,8 @@ class SpectrumAnalyzer:
         return broadened
     
     def match_by_mode(self, dft_spectrum: SpectrumData,
-                     ml_spectrum: SpectrumData) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, Dict]:
+                     ml_spectrum: SpectrumData,
+                     mode_mapping: Optional[Dict[int, int]] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, Dict]:
         """
         Match peaks between spectra using mode numbers (rigorous mode-by-mode comparison).
 
@@ -217,6 +218,10 @@ class SpectrumAnalyzer:
             DFT reference spectrum (ground truth)
         ml_spectrum : SpectrumData
             ML predicted spectrum
+        mode_mapping : dict, optional
+            Mapping from ML mode index to DFT mode index (from eigenvector matching).
+            If provided, uses this to remap ML mode numbers before matching.
+            Format: {ml_mode_idx: dft_mode_idx}
 
         Returns
         -------
@@ -240,9 +245,38 @@ class SpectrumAnalyzer:
         dft_mode_dict = {mode_id: i for i, mode_id in enumerate(dft_spectrum.mode_ids)}
         ml_mode_dict = {mode_id: i for i, mode_id in enumerate(ml_spectrum.mode_ids)}
 
+        # If mode mapping is provided, remap ML mode IDs based on eigenvector matching
+        if mode_mapping is not None:
+            logger.info(f"Using eigenvector-based mode mapping for {len(mode_mapping)} fundamental modes")
+            ml_mode_ids_remapped = []
+            for i, mode_id in enumerate(ml_spectrum.mode_ids):
+                # Only remap fundamental modes (F1, F2, etc.)
+                if mode_id.startswith('F'):
+                    ml_mode_num = int(mode_id[1:])  # Extract mode number from "F{num}"
+                    # Mode indices are 0-based, mode numbers are 1-based
+                    ml_idx = ml_mode_num - 1
+                    if ml_idx in mode_mapping:
+                        dft_idx = mode_mapping[ml_idx]
+                        dft_mode_num = dft_idx + 1
+                        remapped_id = f"F{dft_mode_num}"
+                        ml_mode_ids_remapped.append(remapped_id)
+                        logger.debug(f"  Remapped {mode_id} -> {remapped_id}")
+                    else:
+                        # No mapping found, keep original
+                        ml_mode_ids_remapped.append(mode_id)
+                else:
+                    # Keep overtones and combination bands as-is
+                    # (they're derived from fundamentals, so their numbering should follow)
+                    ml_mode_ids_remapped.append(mode_id)
+
+            # Update ML mode dict with remapped IDs
+            ml_mode_dict = {mode_id: i for i, mode_id in enumerate(ml_mode_ids_remapped)}
+            ml_modes_set = set(ml_mode_ids_remapped)
+        else:
+            ml_modes_set = set(ml_spectrum.mode_ids)
+
         # Find matched modes
         dft_modes_set = set(dft_spectrum.mode_ids)
-        ml_modes_set = set(ml_spectrum.mode_ids)
 
         matched_modes = dft_modes_set & ml_modes_set
         dft_only_modes = dft_modes_set - ml_modes_set
@@ -278,16 +312,19 @@ class SpectrumAnalyzer:
         return (np.array(dft_freq_matched), np.array(ml_freq_matched),
                 np.array(dft_int_matched), np.array(ml_int_matched), match_stats)
     
-    def calculate_metrics(self, ml_spectrum: SpectrumData, 
-                         dft_spectrum: SpectrumData) -> ComparisonMetrics:
+    def calculate_metrics(self, ml_spectrum: SpectrumData,
+                         dft_spectrum: SpectrumData,
+                         mode_mapping: Optional[Dict[int, int]] = None) -> ComparisonMetrics:
         """
         Calculate comparison metrics between ML and DFT spectra
-        
+
         Parameters
         ----------
         ml_spectrum, dft_spectrum : SpectrumData
             Spectra to compare
-            
+        mode_mapping : dict, optional
+            Mapping from ML mode index to DFT mode index (from eigenvector matching)
+
         Returns
         -------
         ComparisonMetrics
@@ -295,7 +332,7 @@ class SpectrumAnalyzer:
         """
         # Match modes using mode numbers (rigorous mode-by-mode comparison)
         dft_freq, ml_freq, dft_int, ml_int, match_stats = self.match_by_mode(
-            dft_spectrum, ml_spectrum
+            dft_spectrum, ml_spectrum, mode_mapping=mode_mapping
         )
 
         if len(dft_freq) == 0:
@@ -486,10 +523,11 @@ class SpectrumAnalyzer:
                        metrics: ComparisonMetrics,
                        ml_name: str,
                        molecule_name: str = None,
-                       save_path: Optional[str] = None) -> plt.Figure:
+                       save_path: Optional[str] = None,
+                       mode_mapping: Optional[Dict[int, int]] = None) -> plt.Figure:
         """
         Create regression plot for frequency correlation with modern design
-        
+
         Parameters
         ----------
         ml_spectrum, dft_spectrum : SpectrumData
@@ -502,7 +540,9 @@ class SpectrumAnalyzer:
             Name of molecule for title
         save_path : str, optional
             Path to save figure
-            
+        mode_mapping : dict, optional
+            Mapping from ML mode index to DFT mode index (from eigenvector matching)
+
         Returns
         -------
         matplotlib.figure.Figure
@@ -512,12 +552,12 @@ class SpectrumAnalyzer:
         POINT_COLOR = '#5E81AC'      # Muted blue
         PERFECT_COLOR = '#4C566A'    # Dark gray
         FIT_COLOR = '#BF616A'        # Coral red
-        
+
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5.5))
-        
-        # Match peaks for plotting (use mode-based matching)
+
+        # Match peaks for plotting (use mode-based matching with eigenvector mapping)
         dft_freq, ml_freq, dft_int, ml_int, _ = self.match_by_mode(
-            dft_spectrum, ml_spectrum
+            dft_spectrum, ml_spectrum, mode_mapping=mode_mapping
         )
         
         # Panel A: Frequency correlation
@@ -798,9 +838,15 @@ class SpectrumAnalyzer:
                                dft_spectrum: SpectrumData,
                                metrics_list: List[ComparisonMetrics],
                                molecule_name: str = None,
-                               save_path: Optional[str] = None) -> plt.Figure:
+                               save_path: Optional[str] = None,
+                               mode_mappings: Optional[List[Optional[Dict[int, int]]]] = None) -> plt.Figure:
       """
       Create a polished combined regression plot with all ML methods vs DFT.
+
+      Parameters
+      ----------
+      mode_mappings : list of dict, optional
+          List of mode mappings, one for each ML method (can be None for individual entries)
       """
       import matplotlib.pyplot as plt
       import numpy as np
@@ -812,8 +858,12 @@ class SpectrumAnalyzer:
 
       all_dft_freq, all_ml_freq, all_dft_int, all_ml_int = [], [], [], []
 
-      for ml_spectrum in ml_spectra:
-          dft_freq, ml_freq, dft_int, ml_int, _ = self.match_by_mode(dft_spectrum, ml_spectrum)
+      # If no mode_mappings provided, create list of Nones
+      if mode_mappings is None:
+          mode_mappings = [None] * len(ml_spectra)
+
+      for ml_spectrum, mode_mapping in zip(ml_spectra, mode_mappings):
+          dft_freq, ml_freq, dft_int, ml_int, _ = self.match_by_mode(dft_spectrum, ml_spectrum, mode_mapping=mode_mapping)
           all_dft_freq.extend(dft_freq)
           all_ml_freq.extend(ml_freq)
           all_dft_int.extend(dft_int)
@@ -822,8 +872,8 @@ class SpectrumAnalyzer:
       # -----------------------------
       # PANEL A: FREQUENCY CORRELATION
       # -----------------------------
-      for idx, (ml_spectrum, ml_name, metrics) in enumerate(zip(ml_spectra, ml_names, metrics_list)):
-          dft_freq, ml_freq, _, _, _ = self.match_by_mode(dft_spectrum, ml_spectrum)
+      for idx, (ml_spectrum, ml_name, metrics, mode_mapping) in enumerate(zip(ml_spectra, ml_names, metrics_list, mode_mappings)):
+          dft_freq, ml_freq, _, _, _ = self.match_by_mode(dft_spectrum, ml_spectrum, mode_mapping=mode_mapping)
           if len(dft_freq) == 0:
               continue
 
@@ -862,8 +912,8 @@ class SpectrumAnalyzer:
       # -----------------------------
       # PANEL B: INTENSITY CORRELATION
       # -----------------------------
-      for idx, (ml_spectrum, ml_name, metrics) in enumerate(zip(ml_spectra, ml_names, metrics_list)):
-          _, _, dft_int, ml_int, _ = self.match_by_mode(dft_spectrum, ml_spectrum)
+      for idx, (ml_spectrum, ml_name, metrics, mode_mapping) in enumerate(zip(ml_spectra, ml_names, metrics_list, mode_mappings)):
+          _, _, dft_int, ml_int, _ = self.match_by_mode(dft_spectrum, ml_spectrum, mode_mapping=mode_mapping)
           if len(dft_int) == 0:
               continue
 

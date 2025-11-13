@@ -53,13 +53,13 @@
       {
         "mode": 4,
         "freq_cm": 757.838,
-        "ir_intensity": 163.73495759,
+        "ir_intensity": 163.73495757,
         "freq_harmonic": 864.758
       },
       {
         "mode": 5,
         "freq_cm": 3533.745,
-        "ir_intensity": 9.42973211,
+        "ir_intensity": 9.4297321,
         "freq_harmonic": 3614.793
       },
       {
@@ -333,7 +333,7 @@
     "z": -0.8605511416777871,
     "magnitude": 0.8605511435780895
   },
-  "runtime_s": 28.855228424072266,
+  "runtime_s": 28.956122398376465,
   "files": {
     "gaussian_log": "gaussian_freq.log",
     "gaussian_input": "gaussian_freq.gjf"

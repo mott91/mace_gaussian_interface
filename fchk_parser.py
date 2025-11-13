@@ -132,7 +132,7 @@ def parse_fchk_section(content: str, section_name: str, data_type: str = 'R') ->
     return np.array(values[:n_values])
 
 
-def extract_modes_from_fchk(fchk_file: str) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, int]:
+def extract_modes_from_fchk(fchk_file: str, force_harmonic: bool = False) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, int]:
     """
     Extract vibrational mode data from .fchk file.
 
@@ -140,6 +140,11 @@ def extract_modes_from_fchk(fchk_file: str) -> Tuple[np.ndarray, np.ndarray, np.
     ----------
     fchk_file : str
         Path to .fchk file
+    force_harmonic : bool, optional
+        If True, force extraction of harmonic frequencies/modes only,
+        skipping anharmonic sections even if available. Default: False.
+        Use this for mode overlap calculations where harmonic eigenvectors
+        are needed.
 
     Returns
     -------
@@ -186,30 +191,35 @@ def extract_modes_from_fchk(fchk_file: str) -> Tuple[np.ndarray, np.ndarray, np.
 
     # Extract vibrational frequencies and modes
     # Prefer anharmonic sections if available (these contain actual vibrational modes only)
+    # UNLESS force_harmonic is True (for mode overlap calculations)
     frequencies = None
     vib_modes = None
 
-    # Try anharmonic sections first
-    try:
-        frequencies = parse_fchk_section(content, 'Anharmonic Vib-E2', 'R')
-        # Anharmonic E2 section has multiple values per mode, extract first N
-        # where N = number of modes (check Anharmonic Number of Normal Modes)
-        nmodes_match = re.search(r'^Anharmonic Number of Normal Modes\s+I\s+(\d+)', content, re.MULTILINE)
-        if nmodes_match:
-            n_modes = int(nmodes_match.group(1))
-            frequencies = frequencies[:n_modes]
-        else:
+    # Try anharmonic sections first (UNLESS force_harmonic=True)
+    if not force_harmonic:
+        try:
+            frequencies = parse_fchk_section(content, 'Anharmonic Vib-E2', 'R')
+            # Anharmonic E2 section has multiple values per mode, extract first N
+            # where N = number of modes (check Anharmonic Number of Normal Modes)
+            nmodes_match = re.search(r'^Anharmonic Number of Normal Modes\s+I\s+(\d+)', content, re.MULTILINE)
+            if nmodes_match:
+                n_modes = int(nmodes_match.group(1))
+                frequencies = frequencies[:n_modes]
+            else:
+                n_modes = None
+            logger.info(f"Found {len(frequencies)} anharmonic vibrational frequencies")
+        except ValueError:
+            logger.debug("No anharmonic frequencies found, using harmonic")
             n_modes = None
-        logger.info(f"Found {len(frequencies)} anharmonic vibrational frequencies")
-    except ValueError:
-        logger.debug("No anharmonic frequencies found, using harmonic")
-        n_modes = None
 
-    try:
-        vib_modes = parse_fchk_section(content, 'Anharmonic Vib-Modes', 'R')
-        logger.info(f"Using anharmonic vibrational modes")
-    except ValueError:
-        logger.debug("No anharmonic modes found, using harmonic")
+        try:
+            vib_modes = parse_fchk_section(content, 'Anharmonic Vib-Modes', 'R')
+            logger.info(f"Using anharmonic vibrational modes")
+        except ValueError:
+            logger.debug("No anharmonic modes found, using harmonic")
+    else:
+        logger.info("force_harmonic=True, skipping anharmonic sections")
+        n_modes = None
 
     # Fall back to harmonic if anharmonic not available
     if frequencies is None:

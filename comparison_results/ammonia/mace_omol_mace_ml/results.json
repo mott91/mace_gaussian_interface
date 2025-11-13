@@ -333,7 +333,7 @@
     "z": -0.8605511416777871,
     "magnitude": 0.8605511435780895
   },
-  "runtime_s": 44.21419930458069,
+  "runtime_s": 43.73539900779724,
   "files": {
     "gaussian_log": "gaussian_freq.log",
     "gaussian_input": "gaussian_freq.gjf"

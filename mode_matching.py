@@ -23,7 +23,7 @@ from fchk_parser import extract_modes_from_fchk, get_fchk_from_chk
 logger = logging.getLogger(__name__)
 
 
-def extract_mode_data_from_checkpoint(chk_or_fchk_file: str) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, int]:
+def extract_mode_data_from_checkpoint(chk_or_fchk_file: str, force_harmonic: bool = False) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, int]:
     """
     Extract vibrational modes, frequencies, coordinates, and masses from Gaussian checkpoint.
 
@@ -33,6 +33,9 @@ def extract_mode_data_from_checkpoint(chk_or_fchk_file: str) -> Tuple[np.ndarray
     ----------
     chk_or_fchk_file : str
         Path to Gaussian .chk or .fchk file
+    force_harmonic : bool, optional
+        If True, force extraction of harmonic frequencies/modes only.
+        Default: False. Set to True for mode overlap heatmaps.
 
     Returns
     -------
@@ -57,8 +60,8 @@ def extract_mode_data_from_checkpoint(chk_or_fchk_file: str) -> Tuple[np.ndarray
     else:
         raise ValueError(f"Expected .chk or .fchk file, got: {file_path.suffix}")
 
-    # Extract data from .fchk
-    modes, frequencies, coords, masses, n_atoms = extract_modes_from_fchk(fchk_file)
+    # Extract data from .fchk (force harmonic if requested)
+    modes, frequencies, coords, masses, n_atoms = extract_modes_from_fchk(fchk_file, force_harmonic=force_harmonic)
 
     logger.info(f"Extracted {modes.shape[0]} modes for {n_atoms} atoms from {fchk_file}")
 
@@ -277,13 +280,13 @@ def plot_mode_overlap_heatmap(
     fig, ax = plt.subplots(figsize=(10, 8), facecolor='white')
     ax.set_facecolor('#fafafa')
 
-    # Create elegant pastel colormap: ivory -> soft lavender -> muted mauve
+    # Create elegant pastel red colormap: ivory -> soft red -> medium red
     from matplotlib.colors import LinearSegmentedColormap
     colors = [
         '#f8f8f5',  # Warm ivory (no overlap)
-        '#e8dff5',  # Soft lavender (weak overlap)
-        '#c8b6d8',  # Muted periwinkle (medium overlap)
-        '#a896bc'   # Dusty mauve (strong overlap)
+        '#fad4d4',  # Soft pastel red (weak overlap)
+        '#f5a5a5',  # Medium pastel red (medium overlap)
+        '#e87d7d'   # Stronger pastel red (strong overlap)
     ]
     n_bins = 256
     cmap = LinearSegmentedColormap.from_list('pastel_elegant', colors, N=n_bins)
@@ -325,22 +328,19 @@ def plot_mode_overlap_heatmap(
     ax.set_xticklabels(x_labels, fontsize=8.5, color='#4a4a4a', family='sans-serif')
     ax.set_yticklabels(y_labels, fontsize=8.5, color='#4a4a4a', family='sans-serif')
 
-    # Elegant axis labels with proper unicode
-    ax.set_xlabel(f'{ref_label} Mode (cm⁻¹)', fontsize=10.5, color='#3a3a3a',
+    # Elegant axis labels with proper LaTeX formatting
+    ax.set_xlabel(f'{ref_label} Mode (cm$^{{-1}}$)', fontsize=14, color='#3a3a3a',
                   family='sans-serif', weight='normal', labelpad=8)
-    ax.set_ylabel(f'{calc_label} Mode (cm⁻¹)', fontsize=10.5, color='#3a3a3a',
+    ax.set_ylabel(f'{calc_label} Mode (cm$^{{-1}}$)', fontsize=14, color='#3a3a3a',
                   family='sans-serif', weight='normal', labelpad=8)
-    ax.set_title('Vibrational Mode Overlap Matrix', fontsize=11.5,
+    ax.set_title('Vibrational Mode Overlap Matrix', fontsize=16,
                  color='#2a2a2a', family='sans-serif', weight='normal', pad=15)
 
     # Subtle tick styling
     ax.tick_params(axis='both', which='major', length=4, width=0.5, colors='#6a6a6a')
 
-    # Add subtle grid lines between cells
-    ax.set_xticks(np.arange(n_modes_ref + 1) - 0.5, minor=True)
-    ax.set_yticks(np.arange(n_modes_calc + 1) - 0.5, minor=True)
-    ax.grid(which='minor', color='#e5e5e5', linestyle='-', linewidth=0.5, alpha=0.4)
-    ax.tick_params(which='minor', size=0)
+    # Grid lines removed for cleaner appearance
+    ax.grid(False)
 
     # Remove top and right spines for cleaner look
     ax.spines['top'].set_visible(False)

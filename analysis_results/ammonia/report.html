@@ -289,7 +289,7 @@
             <div class="subtitle">ML vs DFT Comparison</div>
         </header>
         
-<nav><a href="#overview">Overview</a> <a href="#combined">Combined</a> <a href="#comp1">mace_mp_mace_ml</a> <a href="#comp2">mace_omol_espaloma</a> <a href="#comp3">mace_mp_espaloma</a> <a href="#comp4">mace_omol_mace_ml</a> <a href="#summary">Summary</a></nav>
+<nav><a href="#overview">Overview</a> <a href="#combined">Combined</a> <a href="#mode-overlap">Mode Matching</a> <a href="#comp1">mace_mp_mace_ml</a> <a href="#comp2">mace_omol_espaloma</a> <a href="#comp3">mace_mp_espaloma</a> <a href="#comp4">mace_omol_mace_ml</a> <a href="#summary">Summary</a></nav>
 <div class="content">
 
         <section id="overview">
@@ -301,16 +301,16 @@
                 </div>
                 <div class="summary-card">
                     <div class="label">Average MAE</div>
-                    <div class="value">928.1</div>
+                    <div class="value">990.2</div>
                     <div class="label">cm^-1</div>
                 </div>
                 <div class="summary-card">
                     <div class="label">Best R^2</div>
-                    <div class="value">0.9975</div>
+                    <div class="value">0.9940</div>
                 </div>
                 <div class="summary-card">
                     <div class="label">Avg Speedup</div>
-                    <div class="value">3.5x</div>
+                    <div class="value">1.3x</div>
                 </div>
             </div>
             
@@ -357,6 +357,62 @@
         </section>
         
 
+        <section id="mode-overlap" class="comparison-section">
+            <h2>Mode Matching Analysis</h2>
+            <p style="color: #666; margin-bottom: 20px;">
+                Vibrational modes can change order between DFT and ML calculations. Mode matching via normal mode overlap
+                ensures we compare the correct physical modes rather than just matching by mode number.
+            </p>
+
+            <div style="padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px; margin-bottom: 25px;">
+                <strong>⚠ Important:</strong> If red spots appear off-diagonal (not on the main diagonal), this indicates
+                mode reordering occurred between ML and DFT calculations.
+                Perfect overlap = 1.00 (dark red), orthogonal modes = 0.00 (white).
+            </div>
+
+            
+            <h3>Mode Overlap: MACE MP ESPALOMA vs B3LYP_6-31GDP</h3>
+            <div class="plot-container">
+                <img src="plots/mode_overlap_mace_mp_espaloma_vs_b3lyp_6-31Gdp.png" alt="Mode overlap heatmap" style="width: 100%; max-width: 900px;">
+            </div>
+            <p style="color: #666; font-size: 0.9em; margin-bottom: 30px;">
+                Heatmap shows the overlap (dot product) between vibrational modes. Red = high overlap (modes match),
+                Blue = weak overlap, White = no overlap (modes are orthogonal).
+            </p>
+            
+
+            <h3>Mode Overlap: MACE MP MACE ML vs B3LYP_6-31GDP</h3>
+            <div class="plot-container">
+                <img src="plots/mode_overlap_mace_mp_mace_ml_vs_b3lyp_6-31Gdp.png" alt="Mode overlap heatmap" style="width: 100%; max-width: 900px;">
+            </div>
+            <p style="color: #666; font-size: 0.9em; margin-bottom: 30px;">
+                Heatmap shows the overlap (dot product) between vibrational modes. Red = high overlap (modes match),
+                Blue = weak overlap, White = no overlap (modes are orthogonal).
+            </p>
+            
+
+            <h3>Mode Overlap: MACE OMOL ESPALOMA vs B3LYP_6-31GDP</h3>
+            <div class="plot-container">
+                <img src="plots/mode_overlap_mace_omol_espaloma_vs_b3lyp_6-31Gdp.png" alt="Mode overlap heatmap" style="width: 100%; max-width: 900px;">
+            </div>
+            <p style="color: #666; font-size: 0.9em; margin-bottom: 30px;">
+                Heatmap shows the overlap (dot product) between vibrational modes. Red = high overlap (modes match),
+                Blue = weak overlap, White = no overlap (modes are orthogonal).
+            </p>
+            
+
+            <h3>Mode Overlap: MACE OMOL MACE ML vs B3LYP_6-31GDP</h3>
+            <div class="plot-container">
+                <img src="plots/mode_overlap_mace_omol_mace_ml_vs_b3lyp_6-31Gdp.png" alt="Mode overlap heatmap" style="width: 100%; max-width: 900px;">
+            </div>
+            <p style="color: #666; font-size: 0.9em; margin-bottom: 30px;">
+                Heatmap shows the overlap (dot product) between vibrational modes. Red = high overlap (modes match),
+                Blue = weak overlap, White = no overlap (modes are orthogonal).
+            </p>
+            
+        </section>
+        
+
         <section id="comp1" class="comparison-section">
             <h2>mace_mp_mace_ml</h2>
             
@@ -365,19 +421,19 @@
                 <div class="stats-grid">
                     <div class="stat-item">
                         <div class="stat-label">R^2 (Frequency)</div>
-                        <div class="stat-value metric-good">0.9975</div>
+                        <div class="stat-value metric-good">0.9940</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">MAE</div>
-                        <div class="stat-value metric-bad">151.15 cm^-1</div>
+                        <div class="stat-value metric-bad">205.00 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">RMSE</div>
-                        <div class="stat-value">183.28 cm^-1</div>
+                        <div class="stat-value">245.56 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Max Error</div>
-                        <div class="stat-value">350.85 cm^-1</div>
+                        <div class="stat-value">539.04 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Matched Modes</div>
@@ -397,15 +453,15 @@
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Speedup</div>
-                        <div class="stat-value">4.1x</div>
+                        <div class="stat-value">1.6x</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">ML Runtime</div>
-                        <div class="stat-value">28.9 s</div>
+                        <div class="stat-value">29.0 s</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">DFT Runtime</div>
-                        <div class="stat-value">119.3 s</div>
+                        <div class="stat-value">46.0 s</div>
                     </div>
                 </div>
             </div>
@@ -436,184 +492,184 @@
   </thead>
   <tbody>
     <tr>
-      <td>930.47</td>
+      <td>1015.89</td>
       <td>757.84</td>
-      <td>-172.63</td>
-      <td>-18.55</td>
-      <td>195.23</td>
+      <td>-258.05</td>
+      <td>-25.40</td>
+      <td>148.36</td>
       <td>163.74</td>
-      <td>-31.50</td>
+      <td>15.38</td>
     </tr>
     <tr>
-      <td>1624.96</td>
+      <td>1648.77</td>
       <td>1485.84</td>
-      <td>-139.12</td>
-      <td>-8.56</td>
-      <td>22.56</td>
+      <td>-162.93</td>
+      <td>-9.88</td>
+      <td>13.13</td>
       <td>9.27</td>
-      <td>-13.29</td>
+      <td>-3.86</td>
     </tr>
     <tr>
-      <td>1627.40</td>
+      <td>1648.82</td>
       <td>1485.95</td>
-      <td>-141.44</td>
-      <td>-8.69</td>
-      <td>22.60</td>
+      <td>-162.86</td>
+      <td>-9.88</td>
+      <td>13.13</td>
       <td>9.55</td>
-      <td>-13.05</td>
+      <td>-3.57</td>
     </tr>
     <tr>
-      <td>1746.62</td>
+      <td>1934.81</td>
       <td>1395.78</td>
-      <td>-350.85</td>
-      <td>-20.09</td>
+      <td>-539.04</td>
+      <td>-27.86</td>
+      <td>1.03</td>
       <td>0.00</td>
-      <td>0.00</td>
-      <td>-0.00</td>
+      <td>-1.03</td>
     </tr>
     <tr>
-      <td>2543.98</td>
+      <td>2654.18</td>
       <td>2220.96</td>
-      <td>-323.02</td>
-      <td>-12.70</td>
-      <td>0.02</td>
+      <td>-433.22</td>
+      <td>-16.32</td>
+      <td>0.07</td>
       <td>0.31</td>
-      <td>0.29</td>
+      <td>0.23</td>
     </tr>
     <tr>
-      <td>2547.14</td>
+      <td>2654.27</td>
       <td>2221.08</td>
-      <td>-326.06</td>
-      <td>-12.80</td>
-      <td>0.02</td>
+      <td>-433.19</td>
+      <td>-16.32</td>
+      <td>0.07</td>
       <td>0.31</td>
-      <td>0.29</td>
+      <td>0.23</td>
     </tr>
     <tr>
-      <td>3215.17</td>
-      <td>2924.80</td>
-      <td>-290.37</td>
-      <td>-9.03</td>
-      <td>0.00</td>
-      <td>0.00</td>
-      <td>-0.00</td>
-    </tr>
-    <tr>
-      <td>3239.93</td>
+      <td>3222.77</td>
       <td>2953.89</td>
-      <td>-286.04</td>
-      <td>-8.83</td>
-      <td>0.37</td>
+      <td>-268.87</td>
+      <td>-8.34</td>
+      <td>0.43</td>
       <td>0.87</td>
-      <td>0.50</td>
+      <td>0.44</td>
     </tr>
     <tr>
-      <td>3240.96</td>
+      <td>3285.43</td>
       <td>2953.88</td>
-      <td>-287.08</td>
-      <td>-8.86</td>
-      <td>0.46</td>
+      <td>-331.55</td>
+      <td>-10.09</td>
+      <td>0.12</td>
       <td>1.18</td>
-      <td>0.72</td>
+      <td>1.06</td>
     </tr>
     <tr>
-      <td>3414.54</td>
-      <td>3370.50</td>
-      <td>-44.03</td>
-      <td>-1.29</td>
-      <td>1.24</td>
-      <td>0.19</td>
-      <td>-1.05</td>
-    </tr>
-    <tr>
-      <td>3503.60</td>
-      <td>3533.64</td>
-      <td>30.03</td>
-      <td>0.86</td>
-      <td>1.51</td>
-      <td>9.16</td>
-      <td>7.65</td>
-    </tr>
-    <tr>
-      <td>3531.81</td>
-      <td>3533.74</td>
-      <td>1.93</td>
-      <td>0.05</td>
-      <td>1.37</td>
-      <td>9.43</td>
-      <td>8.06</td>
-    </tr>
-    <tr>
-      <td>4365.20</td>
-      <td>4138.08</td>
-      <td>-227.12</td>
-      <td>-5.20</td>
-      <td>1.16</td>
-      <td>2.70</td>
-      <td>1.53</td>
-    </tr>
-    <tr>
-      <td>4458.94</td>
-      <td>4322.31</td>
-      <td>-136.63</td>
-      <td>-3.06</td>
-      <td>1.66</td>
-      <td>2.18</td>
-      <td>0.53</td>
-    </tr>
-    <tr>
-      <td>4492.09</td>
-      <td>4322.40</td>
-      <td>-169.69</td>
-      <td>-3.78</td>
-      <td>1.65</td>
-      <td>2.18</td>
-      <td>0.53</td>
-    </tr>
-    <tr>
-      <td>5039.45</td>
-      <td>4845.40</td>
-      <td>-194.06</td>
-      <td>-3.85</td>
-      <td>0.11</td>
-      <td>0.05</td>
-      <td>-0.06</td>
-    </tr>
-    <tr>
-      <td>5043.13</td>
-      <td>4845.51</td>
-      <td>-197.62</td>
-      <td>-3.92</td>
+      <td>3302.45</td>
+      <td>2924.80</td>
+      <td>-377.65</td>
+      <td>-11.44</td>
       <td>0.10</td>
+      <td>0.00</td>
+      <td>-0.09</td>
+    </tr>
+    <tr>
+      <td>3335.74</td>
+      <td>3370.50</td>
+      <td>34.76</td>
+      <td>1.04</td>
+      <td>1.94</td>
+      <td>0.19</td>
+      <td>-1.75</td>
+    </tr>
+    <tr>
+      <td>3414.53</td>
+      <td>3533.74</td>
+      <td>119.21</td>
+      <td>3.49</td>
+      <td>1.25</td>
+      <td>9.43</td>
+      <td>8.18</td>
+    </tr>
+    <tr>
+      <td>3415.41</td>
+      <td>3533.64</td>
+      <td>118.23</td>
+      <td>3.46</td>
+      <td>1.24</td>
+      <td>9.16</td>
+      <td>7.91</td>
+    </tr>
+    <tr>
+      <td>4324.69</td>
+      <td>4138.08</td>
+      <td>-186.61</td>
+      <td>-4.32</td>
+      <td>1.97</td>
+      <td>2.70</td>
+      <td>0.73</td>
+    </tr>
+    <tr>
+      <td>4453.83</td>
+      <td>4322.40</td>
+      <td>-131.43</td>
+      <td>-2.95</td>
+      <td>1.37</td>
+      <td>2.18</td>
+      <td>0.81</td>
+    </tr>
+    <tr>
+      <td>4454.81</td>
+      <td>4322.31</td>
+      <td>-132.50</td>
+      <td>-2.97</td>
+      <td>1.37</td>
+      <td>2.18</td>
+      <td>0.81</td>
+    </tr>
+    <tr>
+      <td>4916.59</td>
+      <td>4845.51</td>
+      <td>-71.08</td>
+      <td>-1.45</td>
+      <td>0.22</td>
       <td>0.05</td>
-      <td>-0.05</td>
+      <td>-0.17</td>
     </tr>
     <tr>
-      <td>5109.47</td>
-      <td>5008.15</td>
-      <td>-101.32</td>
-      <td>-1.98</td>
-      <td>0.80</td>
-      <td>0.93</td>
-      <td>0.13</td>
+      <td>4916.69</td>
+      <td>4845.40</td>
+      <td>-71.29</td>
+      <td>-1.45</td>
+      <td>0.22</td>
+      <td>0.05</td>
+      <td>-0.17</td>
     </tr>
     <tr>
-      <td>5123.34</td>
-      <td>5011.99</td>
-      <td>-111.35</td>
-      <td>-2.17</td>
-      <td>0.83</td>
-      <td>1.19</td>
-      <td>0.36</td>
-    </tr>
-    <tr>
-      <td>5143.80</td>
+      <td>5048.25</td>
       <td>5008.34</td>
-      <td>-135.46</td>
-      <td>-2.63</td>
-      <td>0.80</td>
+      <td>-39.91</td>
+      <td>-0.79</td>
+      <td>0.60</td>
       <td>0.93</td>
-      <td>0.13</td>
+      <td>0.33</td>
+    </tr>
+    <tr>
+      <td>5049.26</td>
+      <td>5008.15</td>
+      <td>-41.11</td>
+      <td>-0.81</td>
+      <td>0.60</td>
+      <td>0.93</td>
+      <td>0.33</td>
+    </tr>
+    <tr>
+      <td>5056.83</td>
+      <td>5011.92</td>
+      <td>-44.90</td>
+      <td>-0.89</td>
+      <td>0.68</td>
+      <td>1.19</td>
+      <td>0.51</td>
     </tr>
   </tbody>
 </table>
@@ -628,19 +684,19 @@
                 <div class="stats-grid">
                     <div class="stat-item">
                         <div class="stat-label">R^2 (Frequency)</div>
-                        <div class="stat-value metric-warning">0.9289</div>
+                        <div class="stat-value metric-warning">0.9283</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">MAE</div>
-                        <div class="stat-value metric-bad">1704.99 cm^-1</div>
+                        <div class="stat-value metric-bad">1775.41 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">RMSE</div>
-                        <div class="stat-value">2302.50 cm^-1</div>
+                        <div class="stat-value">2413.46 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Max Error</div>
-                        <div class="stat-value">5648.66 cm^-1</div>
+                        <div class="stat-value">5806.06 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Matched Modes</div>
@@ -660,15 +716,15 @@
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Speedup</div>
-                        <div class="stat-value">3.1x</div>
+                        <div class="stat-value">1.2x</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">ML Runtime</div>
-                        <div class="stat-value">38.8 s</div>
+                        <div class="stat-value">39.1 s</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">DFT Runtime</div>
-                        <div class="stat-value">119.3 s</div>
+                        <div class="stat-value">46.0 s</div>
                     </div>
                 </div>
             </div>
@@ -699,184 +755,184 @@
   </thead>
   <tbody>
     <tr>
-      <td>930.47</td>
+      <td>1015.89</td>
       <td>1209.78</td>
-      <td>279.31</td>
-      <td>30.02</td>
-      <td>195.23</td>
+      <td>193.89</td>
+      <td>19.09</td>
+      <td>148.36</td>
       <td>1010.79</td>
-      <td>815.56</td>
+      <td>862.44</td>
     </tr>
     <tr>
-      <td>1624.96</td>
+      <td>1648.77</td>
       <td>1639.35</td>
-      <td>14.39</td>
-      <td>0.89</td>
-      <td>22.56</td>
+      <td>-9.41</td>
+      <td>-0.57</td>
+      <td>13.13</td>
       <td>394.43</td>
-      <td>371.87</td>
+      <td>381.30</td>
     </tr>
     <tr>
-      <td>1627.40</td>
+      <td>1648.82</td>
       <td>1638.54</td>
-      <td>11.15</td>
-      <td>0.69</td>
-      <td>22.60</td>
+      <td>-10.27</td>
+      <td>-0.62</td>
+      <td>13.13</td>
       <td>403.04</td>
-      <td>380.44</td>
+      <td>389.91</td>
     </tr>
     <tr>
-      <td>1746.62</td>
+      <td>1934.81</td>
       <td>2314.04</td>
-      <td>567.42</td>
-      <td>32.49</td>
-      <td>0.00</td>
+      <td>379.23</td>
+      <td>19.60</td>
+      <td>1.03</td>
       <td>20.34</td>
-      <td>20.33</td>
+      <td>19.31</td>
     </tr>
     <tr>
-      <td>2543.98</td>
+      <td>2654.18</td>
       <td>2838.51</td>
-      <td>294.53</td>
-      <td>11.58</td>
-      <td>0.02</td>
+      <td>184.33</td>
+      <td>6.94</td>
+      <td>0.07</td>
       <td>0.32</td>
-      <td>0.30</td>
+      <td>0.24</td>
     </tr>
     <tr>
-      <td>2547.14</td>
+      <td>2654.27</td>
       <td>2837.70</td>
-      <td>290.56</td>
-      <td>11.41</td>
-      <td>0.02</td>
+      <td>183.43</td>
+      <td>6.91</td>
+      <td>0.07</td>
       <td>0.32</td>
-      <td>0.30</td>
+      <td>0.24</td>
     </tr>
     <tr>
-      <td>3215.17</td>
-      <td>3265.05</td>
-      <td>49.88</td>
-      <td>1.55</td>
-      <td>0.00</td>
-      <td>13.29</td>
-      <td>13.29</td>
-    </tr>
-    <tr>
-      <td>3239.93</td>
+      <td>3222.77</td>
       <td>3239.85</td>
-      <td>-0.08</td>
-      <td>-0.00</td>
-      <td>0.37</td>
-      <td>16.41</td>
-      <td>16.04</td>
-    </tr>
-    <tr>
-      <td>3240.96</td>
-      <td>3265.82</td>
-      <td>24.86</td>
-      <td>0.77</td>
-      <td>0.46</td>
-      <td>15.99</td>
-      <td>15.53</td>
-    </tr>
-    <tr>
-      <td>3414.54</td>
-      <td>4381.89</td>
-      <td>967.35</td>
-      <td>28.33</td>
-      <td>1.24</td>
-      <td>6552.31</td>
-      <td>6551.08</td>
-    </tr>
-    <tr>
-      <td>3503.60</td>
-      <td>5735.51</td>
-      <td>2231.90</td>
-      <td>63.70</td>
-      <td>1.51</td>
-      <td>2419.51</td>
-      <td>2418.00</td>
-    </tr>
-    <tr>
-      <td>3531.81</td>
-      <td>5123.35</td>
-      <td>1591.54</td>
-      <td>45.06</td>
-      <td>1.37</td>
-      <td>517.95</td>
-      <td>516.59</td>
-    </tr>
-    <tr>
-      <td>4365.20</td>
-      <td>5774.14</td>
-      <td>1408.94</td>
-      <td>32.28</td>
-      <td>1.16</td>
-      <td>1.63</td>
-      <td>0.47</td>
-    </tr>
-    <tr>
-      <td>4458.94</td>
-      <td>7163.28</td>
-      <td>2704.34</td>
-      <td>60.65</td>
-      <td>1.66</td>
-      <td>0.96</td>
-      <td>-0.69</td>
-    </tr>
-    <tr>
-      <td>4492.09</td>
-      <td>6536.35</td>
-      <td>2044.26</td>
-      <td>45.51</td>
-      <td>1.65</td>
-      <td>0.84</td>
-      <td>-0.81</td>
-    </tr>
-    <tr>
-      <td>5039.45</td>
-      <td>6038.97</td>
-      <td>999.51</td>
-      <td>19.83</td>
-      <td>0.11</td>
-      <td>0.12</td>
-      <td>0.01</td>
-    </tr>
-    <tr>
-      <td>5043.13</td>
-      <td>6038.17</td>
-      <td>995.04</td>
-      <td>19.73</td>
-      <td>0.10</td>
-      <td>0.11</td>
-      <td>0.01</td>
-    </tr>
-    <tr>
-      <td>5109.47</td>
-      <td>7387.46</td>
-      <td>2278.00</td>
-      <td>44.58</td>
-      <td>0.80</td>
+      <td>17.08</td>
+      <td>0.53</td>
       <td>0.43</td>
-      <td>-0.37</td>
+      <td>16.41</td>
+      <td>15.98</td>
     </tr>
     <tr>
-      <td>5123.34</td>
-      <td>7384.64</td>
-      <td>2261.30</td>
-      <td>44.14</td>
-      <td>0.83</td>
-      <td>0.44</td>
-      <td>-0.39</td>
+      <td>3285.43</td>
+      <td>3265.82</td>
+      <td>-19.61</td>
+      <td>-0.60</td>
+      <td>0.12</td>
+      <td>15.99</td>
+      <td>15.88</td>
     </tr>
     <tr>
-      <td>5143.80</td>
+      <td>3302.45</td>
+      <td>3265.05</td>
+      <td>-37.40</td>
+      <td>-1.13</td>
+      <td>0.10</td>
+      <td>13.29</td>
+      <td>13.19</td>
+    </tr>
+    <tr>
+      <td>3335.74</td>
+      <td>4381.89</td>
+      <td>1046.14</td>
+      <td>31.36</td>
+      <td>1.94</td>
+      <td>6552.31</td>
+      <td>6550.38</td>
+    </tr>
+    <tr>
+      <td>3414.53</td>
+      <td>5123.35</td>
+      <td>1708.82</td>
+      <td>50.05</td>
+      <td>1.25</td>
+      <td>517.95</td>
+      <td>516.71</td>
+    </tr>
+    <tr>
+      <td>3415.41</td>
+      <td>5735.51</td>
+      <td>2320.09</td>
+      <td>67.93</td>
+      <td>1.24</td>
+      <td>2419.51</td>
+      <td>2418.27</td>
+    </tr>
+    <tr>
+      <td>4324.69</td>
+      <td>5774.14</td>
+      <td>1449.45</td>
+      <td>33.52</td>
+      <td>1.97</td>
+      <td>1.63</td>
+      <td>-0.34</td>
+    </tr>
+    <tr>
+      <td>4453.83</td>
+      <td>6536.35</td>
+      <td>2082.52</td>
+      <td>46.76</td>
+      <td>1.37</td>
+      <td>0.84</td>
+      <td>-0.53</td>
+    </tr>
+    <tr>
+      <td>4454.81</td>
+      <td>7163.28</td>
+      <td>2708.47</td>
+      <td>60.80</td>
+      <td>1.37</td>
+      <td>0.96</td>
+      <td>-0.41</td>
+    </tr>
+    <tr>
+      <td>4916.59</td>
+      <td>6038.17</td>
+      <td>1121.58</td>
+      <td>22.81</td>
+      <td>0.22</td>
+      <td>0.11</td>
+      <td>-0.10</td>
+    </tr>
+    <tr>
+      <td>4916.69</td>
+      <td>6038.97</td>
+      <td>1122.28</td>
+      <td>22.83</td>
+      <td>0.22</td>
+      <td>0.12</td>
+      <td>-0.10</td>
+    </tr>
+    <tr>
+      <td>5048.25</td>
       <td>6772.80</td>
-      <td>1629.00</td>
-      <td>31.67</td>
-      <td>0.80</td>
+      <td>1724.55</td>
+      <td>34.16</td>
+      <td>0.60</td>
       <td>0.39</td>
-      <td>-0.42</td>
+      <td>-0.22</td>
+    </tr>
+    <tr>
+      <td>5049.26</td>
+      <td>7387.46</td>
+      <td>2338.20</td>
+      <td>46.31</td>
+      <td>0.60</td>
+      <td>0.43</td>
+      <td>-0.17</td>
+    </tr>
+    <tr>
+      <td>5056.83</td>
+      <td>6773.19</td>
+      <td>1716.37</td>
+      <td>33.94</td>
+      <td>0.68</td>
+      <td>0.47</td>
+      <td>-0.21</td>
     </tr>
   </tbody>
 </table>
@@ -891,19 +947,19 @@
                 <div class="stats-grid">
                     <div class="stat-item">
                         <div class="stat-label">R^2 (Frequency)</div>
-                        <div class="stat-value metric-good">0.9975</div>
+                        <div class="stat-value metric-good">0.9940</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">MAE</div>
-                        <div class="stat-value metric-bad">151.15 cm^-1</div>
+                        <div class="stat-value metric-bad">205.00 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">RMSE</div>
-                        <div class="stat-value">183.28 cm^-1</div>
+                        <div class="stat-value">245.56 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Max Error</div>
-                        <div class="stat-value">350.85 cm^-1</div>
+                        <div class="stat-value">539.04 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Matched Modes</div>
@@ -923,15 +979,15 @@
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Speedup</div>
-                        <div class="stat-value">4.0x</div>
+                        <div class="stat-value">1.3x</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">ML Runtime</div>
-                        <div class="stat-value">30.0 s</div>
+                        <div class="stat-value">35.3 s</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">DFT Runtime</div>
-                        <div class="stat-value">119.3 s</div>
+                        <div class="stat-value">46.0 s</div>
                     </div>
                 </div>
             </div>
@@ -962,184 +1018,184 @@
   </thead>
   <tbody>
     <tr>
-      <td>930.47</td>
+      <td>1015.89</td>
       <td>757.84</td>
-      <td>-172.63</td>
-      <td>-18.55</td>
-      <td>195.23</td>
+      <td>-258.05</td>
+      <td>-25.40</td>
+      <td>148.36</td>
       <td>1081.27</td>
-      <td>886.03</td>
+      <td>932.91</td>
     </tr>
     <tr>
-      <td>1624.96</td>
+      <td>1648.77</td>
       <td>1485.84</td>
-      <td>-139.12</td>
-      <td>-8.56</td>
-      <td>22.56</td>
+      <td>-162.93</td>
+      <td>-9.88</td>
+      <td>13.13</td>
       <td>421.35</td>
-      <td>398.78</td>
+      <td>408.22</td>
     </tr>
     <tr>
-      <td>1627.40</td>
+      <td>1648.82</td>
       <td>1485.95</td>
-      <td>-141.44</td>
-      <td>-8.69</td>
-      <td>22.60</td>
+      <td>-162.86</td>
+      <td>-9.88</td>
+      <td>13.13</td>
       <td>421.42</td>
-      <td>398.82</td>
+      <td>408.29</td>
     </tr>
     <tr>
-      <td>1746.62</td>
+      <td>1934.81</td>
       <td>1395.78</td>
-      <td>-350.85</td>
-      <td>-20.09</td>
-      <td>0.00</td>
+      <td>-539.04</td>
+      <td>-27.86</td>
+      <td>1.03</td>
       <td>19.17</td>
-      <td>19.17</td>
+      <td>18.14</td>
     </tr>
     <tr>
-      <td>2543.98</td>
+      <td>2654.18</td>
       <td>2220.96</td>
-      <td>-323.02</td>
-      <td>-12.70</td>
-      <td>0.02</td>
+      <td>-433.22</td>
+      <td>-16.32</td>
+      <td>0.07</td>
       <td>0.39</td>
-      <td>0.37</td>
+      <td>0.31</td>
     </tr>
     <tr>
-      <td>2547.14</td>
+      <td>2654.27</td>
       <td>2221.08</td>
-      <td>-326.06</td>
-      <td>-12.80</td>
-      <td>0.02</td>
+      <td>-433.19</td>
+      <td>-16.32</td>
+      <td>0.07</td>
       <td>0.39</td>
-      <td>0.37</td>
+      <td>0.31</td>
     </tr>
     <tr>
-      <td>3215.17</td>
-      <td>2924.80</td>
-      <td>-290.37</td>
-      <td>-9.03</td>
-      <td>0.00</td>
-      <td>6.05</td>
-      <td>6.04</td>
-    </tr>
-    <tr>
-      <td>3239.93</td>
+      <td>3222.77</td>
       <td>2953.89</td>
-      <td>-286.04</td>
-      <td>-8.83</td>
-      <td>0.37</td>
+      <td>-268.87</td>
+      <td>-8.34</td>
+      <td>0.43</td>
       <td>5.65</td>
-      <td>5.28</td>
+      <td>5.22</td>
     </tr>
     <tr>
-      <td>3240.96</td>
+      <td>3285.43</td>
       <td>2953.88</td>
-      <td>-287.08</td>
-      <td>-8.86</td>
-      <td>0.46</td>
+      <td>-331.55</td>
+      <td>-10.09</td>
+      <td>0.12</td>
       <td>7.63</td>
-      <td>7.16</td>
+      <td>7.51</td>
     </tr>
     <tr>
-      <td>3414.54</td>
-      <td>3370.50</td>
-      <td>-44.03</td>
-      <td>-1.29</td>
-      <td>1.24</td>
-      <td>134.69</td>
-      <td>133.45</td>
-    </tr>
-    <tr>
-      <td>3503.60</td>
-      <td>3533.64</td>
-      <td>30.03</td>
-      <td>0.86</td>
-      <td>1.51</td>
-      <td>560.74</td>
-      <td>559.23</td>
-    </tr>
-    <tr>
-      <td>3531.81</td>
-      <td>3533.74</td>
-      <td>1.93</td>
-      <td>0.05</td>
-      <td>1.37</td>
-      <td>560.81</td>
-      <td>559.44</td>
-    </tr>
-    <tr>
-      <td>4365.20</td>
-      <td>4138.08</td>
-      <td>-227.12</td>
-      <td>-5.20</td>
-      <td>1.16</td>
-      <td>1.45</td>
-      <td>0.29</td>
-    </tr>
-    <tr>
-      <td>4458.94</td>
-      <td>4322.31</td>
-      <td>-136.63</td>
-      <td>-3.06</td>
-      <td>1.66</td>
-      <td>2.99</td>
-      <td>1.33</td>
-    </tr>
-    <tr>
-      <td>4492.09</td>
-      <td>4322.40</td>
-      <td>-169.69</td>
-      <td>-3.78</td>
-      <td>1.65</td>
-      <td>2.99</td>
-      <td>1.33</td>
-    </tr>
-    <tr>
-      <td>5039.45</td>
-      <td>4845.40</td>
-      <td>-194.06</td>
-      <td>-3.85</td>
-      <td>0.11</td>
-      <td>0.09</td>
-      <td>-0.02</td>
-    </tr>
-    <tr>
-      <td>5043.13</td>
-      <td>4845.51</td>
-      <td>-197.62</td>
-      <td>-3.92</td>
+      <td>3302.45</td>
+      <td>2924.80</td>
+      <td>-377.65</td>
+      <td>-11.44</td>
       <td>0.10</td>
+      <td>6.05</td>
+      <td>5.95</td>
+    </tr>
+    <tr>
+      <td>3335.74</td>
+      <td>3370.50</td>
+      <td>34.76</td>
+      <td>1.04</td>
+      <td>1.94</td>
+      <td>134.69</td>
+      <td>132.75</td>
+    </tr>
+    <tr>
+      <td>3414.53</td>
+      <td>3533.74</td>
+      <td>119.21</td>
+      <td>3.49</td>
+      <td>1.25</td>
+      <td>560.81</td>
+      <td>559.56</td>
+    </tr>
+    <tr>
+      <td>3415.41</td>
+      <td>3533.64</td>
+      <td>118.23</td>
+      <td>3.46</td>
+      <td>1.24</td>
+      <td>560.74</td>
+      <td>559.50</td>
+    </tr>
+    <tr>
+      <td>4324.69</td>
+      <td>4138.08</td>
+      <td>-186.61</td>
+      <td>-4.32</td>
+      <td>1.97</td>
+      <td>1.45</td>
+      <td>-0.52</td>
+    </tr>
+    <tr>
+      <td>4453.83</td>
+      <td>4322.40</td>
+      <td>-131.43</td>
+      <td>-2.95</td>
+      <td>1.37</td>
+      <td>2.99</td>
+      <td>1.62</td>
+    </tr>
+    <tr>
+      <td>4454.81</td>
+      <td>4322.31</td>
+      <td>-132.50</td>
+      <td>-2.97</td>
+      <td>1.37</td>
+      <td>2.99</td>
+      <td>1.62</td>
+    </tr>
+    <tr>
+      <td>4916.59</td>
+      <td>4845.51</td>
+      <td>-71.08</td>
+      <td>-1.45</td>
+      <td>0.22</td>
       <td>0.09</td>
-      <td>-0.01</td>
+      <td>-0.13</td>
     </tr>
     <tr>
-      <td>5109.47</td>
-      <td>5008.15</td>
-      <td>-101.32</td>
-      <td>-1.98</td>
-      <td>0.80</td>
-      <td>0.37</td>
-      <td>-0.42</td>
+      <td>4916.69</td>
+      <td>4845.40</td>
+      <td>-71.29</td>
+      <td>-1.45</td>
+      <td>0.22</td>
+      <td>0.09</td>
+      <td>-0.13</td>
     </tr>
     <tr>
-      <td>5123.34</td>
-      <td>5011.99</td>
-      <td>-111.35</td>
-      <td>-2.17</td>
-      <td>0.83</td>
-      <td>0.41</td>
-      <td>-0.42</td>
-    </tr>
-    <tr>
-      <td>5143.80</td>
+      <td>5048.25</td>
       <td>5008.34</td>
-      <td>-135.46</td>
-      <td>-2.63</td>
-      <td>0.80</td>
+      <td>-39.91</td>
+      <td>-0.79</td>
+      <td>0.60</td>
       <td>0.37</td>
-      <td>-0.43</td>
+      <td>-0.23</td>
+    </tr>
+    <tr>
+      <td>5049.26</td>
+      <td>5008.15</td>
+      <td>-41.11</td>
+      <td>-0.81</td>
+      <td>0.60</td>
+      <td>0.37</td>
+      <td>-0.23</td>
+    </tr>
+    <tr>
+      <td>5056.83</td>
+      <td>5011.92</td>
+      <td>-44.90</td>
+      <td>-0.89</td>
+      <td>0.68</td>
+      <td>0.41</td>
+      <td>-0.27</td>
     </tr>
   </tbody>
 </table>
@@ -1154,19 +1210,19 @@
                 <div class="stats-grid">
                     <div class="stat-item">
                         <div class="stat-label">R^2 (Frequency)</div>
-                        <div class="stat-value metric-warning">0.9289</div>
+                        <div class="stat-value metric-warning">0.9283</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">MAE</div>
-                        <div class="stat-value metric-bad">1704.99 cm^-1</div>
+                        <div class="stat-value metric-bad">1775.41 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">RMSE</div>
-                        <div class="stat-value">2302.50 cm^-1</div>
+                        <div class="stat-value">2413.46 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Max Error</div>
-                        <div class="stat-value">5648.66 cm^-1</div>
+                        <div class="stat-value">5806.06 cm^-1</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Matched Modes</div>
@@ -1186,15 +1242,15 @@
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Speedup</div>
-                        <div class="stat-value">2.7x</div>
+                        <div class="stat-value">1.1x</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">ML Runtime</div>
-                        <div class="stat-value">44.2 s</div>
+                        <div class="stat-value">43.7 s</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">DFT Runtime</div>
-                        <div class="stat-value">119.3 s</div>
+                        <div class="stat-value">46.0 s</div>
                     </div>
                 </div>
             </div>
@@ -1225,184 +1281,184 @@
   </thead>
   <tbody>
     <tr>
-      <td>930.47</td>
+      <td>1015.89</td>
       <td>1209.78</td>
-      <td>279.31</td>
-      <td>30.02</td>
-      <td>195.23</td>
+      <td>193.89</td>
+      <td>19.09</td>
+      <td>148.36</td>
       <td>170.34</td>
-      <td>-24.90</td>
+      <td>21.98</td>
     </tr>
     <tr>
-      <td>1624.96</td>
+      <td>1648.77</td>
       <td>1639.35</td>
-      <td>14.39</td>
-      <td>0.89</td>
-      <td>22.56</td>
+      <td>-9.41</td>
+      <td>-0.57</td>
+      <td>13.13</td>
       <td>9.48</td>
-      <td>-13.08</td>
+      <td>-3.65</td>
     </tr>
     <tr>
-      <td>1627.40</td>
+      <td>1648.82</td>
       <td>1638.54</td>
-      <td>11.15</td>
-      <td>0.69</td>
-      <td>22.60</td>
+      <td>-10.27</td>
+      <td>-0.62</td>
+      <td>13.13</td>
       <td>9.85</td>
-      <td>-12.75</td>
+      <td>-3.28</td>
     </tr>
     <tr>
-      <td>1746.62</td>
+      <td>1934.81</td>
       <td>2314.04</td>
-      <td>567.42</td>
-      <td>32.49</td>
-      <td>0.00</td>
-      <td>0.03</td>
-      <td>0.02</td>
-    </tr>
-    <tr>
-      <td>2543.98</td>
-      <td>2838.51</td>
-      <td>294.53</td>
-      <td>11.58</td>
-      <td>0.02</td>
-      <td>0.23</td>
-      <td>0.21</td>
-    </tr>
-    <tr>
-      <td>2547.14</td>
-      <td>2837.70</td>
-      <td>290.56</td>
-      <td>11.41</td>
-      <td>0.02</td>
-      <td>0.23</td>
-      <td>0.21</td>
-    </tr>
-    <tr>
-      <td>3215.17</td>
-      <td>3265.05</td>
-      <td>49.88</td>
-      <td>1.55</td>
-      <td>0.00</td>
-      <td>1.04</td>
+      <td>379.23</td>
+      <td>19.60</td>
       <td>1.03</td>
+      <td>0.03</td>
+      <td>-1.00</td>
     </tr>
     <tr>
-      <td>3239.93</td>
-      <td>3239.85</td>
-      <td>-0.08</td>
-      <td>-0.00</td>
-      <td>0.37</td>
-      <td>0.14</td>
-      <td>-0.23</td>
-    </tr>
-    <tr>
-      <td>3240.96</td>
-      <td>3265.82</td>
-      <td>24.86</td>
-      <td>0.77</td>
-      <td>0.46</td>
-      <td>1.27</td>
-      <td>0.80</td>
-    </tr>
-    <tr>
-      <td>3414.54</td>
-      <td>4381.89</td>
-      <td>967.35</td>
-      <td>28.33</td>
-      <td>1.24</td>
-      <td>33.90</td>
-      <td>32.66</td>
-    </tr>
-    <tr>
-      <td>3503.60</td>
-      <td>5735.51</td>
-      <td>2231.90</td>
-      <td>63.70</td>
-      <td>1.51</td>
-      <td>45.05</td>
-      <td>43.55</td>
-    </tr>
-    <tr>
-      <td>3531.81</td>
-      <td>5123.35</td>
-      <td>1591.54</td>
-      <td>45.06</td>
-      <td>1.37</td>
-      <td>12.11</td>
-      <td>10.74</td>
-    </tr>
-    <tr>
-      <td>4365.20</td>
-      <td>5774.14</td>
-      <td>1408.94</td>
-      <td>32.28</td>
-      <td>1.16</td>
-      <td>2.52</td>
-      <td>1.35</td>
-    </tr>
-    <tr>
-      <td>4458.94</td>
-      <td>7163.28</td>
-      <td>2704.34</td>
-      <td>60.65</td>
-      <td>1.66</td>
-      <td>1.83</td>
-      <td>0.18</td>
-    </tr>
-    <tr>
-      <td>4492.09</td>
-      <td>6536.35</td>
-      <td>2044.26</td>
-      <td>45.51</td>
-      <td>1.65</td>
-      <td>1.82</td>
-      <td>0.17</td>
-    </tr>
-    <tr>
-      <td>5039.45</td>
-      <td>6038.97</td>
-      <td>999.51</td>
-      <td>19.83</td>
-      <td>0.11</td>
-      <td>0.05</td>
-      <td>-0.06</td>
-    </tr>
-    <tr>
-      <td>5043.13</td>
-      <td>6038.17</td>
-      <td>995.04</td>
-      <td>19.73</td>
-      <td>0.10</td>
-      <td>0.04</td>
-      <td>-0.06</td>
-    </tr>
-    <tr>
-      <td>5109.47</td>
-      <td>7387.46</td>
-      <td>2278.00</td>
-      <td>44.58</td>
-      <td>0.80</td>
-      <td>0.87</td>
+      <td>2654.18</td>
+      <td>2838.51</td>
+      <td>184.33</td>
+      <td>6.94</td>
       <td>0.07</td>
+      <td>0.23</td>
+      <td>0.16</td>
     </tr>
     <tr>
-      <td>5123.34</td>
-      <td>7384.64</td>
-      <td>2261.30</td>
-      <td>44.14</td>
-      <td>0.83</td>
-      <td>1.13</td>
-      <td>0.30</td>
+      <td>2654.27</td>
+      <td>2837.70</td>
+      <td>183.43</td>
+      <td>6.91</td>
+      <td>0.07</td>
+      <td>0.23</td>
+      <td>0.16</td>
     </tr>
     <tr>
-      <td>5143.80</td>
+      <td>3222.77</td>
+      <td>3239.85</td>
+      <td>17.08</td>
+      <td>0.53</td>
+      <td>0.43</td>
+      <td>0.14</td>
+      <td>-0.29</td>
+    </tr>
+    <tr>
+      <td>3285.43</td>
+      <td>3265.82</td>
+      <td>-19.61</td>
+      <td>-0.60</td>
+      <td>0.12</td>
+      <td>1.27</td>
+      <td>1.15</td>
+    </tr>
+    <tr>
+      <td>3302.45</td>
+      <td>3265.05</td>
+      <td>-37.40</td>
+      <td>-1.13</td>
+      <td>0.10</td>
+      <td>1.04</td>
+      <td>0.94</td>
+    </tr>
+    <tr>
+      <td>3335.74</td>
+      <td>4381.89</td>
+      <td>1046.14</td>
+      <td>31.36</td>
+      <td>1.94</td>
+      <td>33.90</td>
+      <td>31.96</td>
+    </tr>
+    <tr>
+      <td>3414.53</td>
+      <td>5123.35</td>
+      <td>1708.82</td>
+      <td>50.05</td>
+      <td>1.25</td>
+      <td>12.11</td>
+      <td>10.86</td>
+    </tr>
+    <tr>
+      <td>3415.41</td>
+      <td>5735.51</td>
+      <td>2320.09</td>
+      <td>67.93</td>
+      <td>1.24</td>
+      <td>45.05</td>
+      <td>43.81</td>
+    </tr>
+    <tr>
+      <td>4324.69</td>
+      <td>5774.14</td>
+      <td>1449.45</td>
+      <td>33.52</td>
+      <td>1.97</td>
+      <td>2.52</td>
+      <td>0.55</td>
+    </tr>
+    <tr>
+      <td>4453.83</td>
+      <td>6536.35</td>
+      <td>2082.52</td>
+      <td>46.76</td>
+      <td>1.37</td>
+      <td>1.82</td>
+      <td>0.45</td>
+    </tr>
+    <tr>
+      <td>4454.81</td>
+      <td>7163.28</td>
+      <td>2708.47</td>
+      <td>60.80</td>
+      <td>1.37</td>
+      <td>1.83</td>
+      <td>0.46</td>
+    </tr>
+    <tr>
+      <td>4916.59</td>
+      <td>6038.17</td>
+      <td>1121.58</td>
+      <td>22.81</td>
+      <td>0.22</td>
+      <td>0.04</td>
+      <td>-0.17</td>
+    </tr>
+    <tr>
+      <td>4916.69</td>
+      <td>6038.97</td>
+      <td>1122.28</td>
+      <td>22.83</td>
+      <td>0.22</td>
+      <td>0.05</td>
+      <td>-0.17</td>
+    </tr>
+    <tr>
+      <td>5048.25</td>
       <td>6772.80</td>
-      <td>1629.00</td>
-      <td>31.67</td>
-      <td>0.80</td>
+      <td>1724.55</td>
+      <td>34.16</td>
+      <td>0.60</td>
       <td>0.87</td>
-      <td>0.06</td>
+      <td>0.26</td>
+    </tr>
+    <tr>
+      <td>5049.26</td>
+      <td>7387.46</td>
+      <td>2338.20</td>
+      <td>46.31</td>
+      <td>0.60</td>
+      <td>0.87</td>
+      <td>0.27</td>
+    </tr>
+    <tr>
+      <td>5056.83</td>
+      <td>6773.19</td>
+      <td>1716.37</td>
+      <td>33.94</td>
+      <td>0.68</td>
+      <td>1.13</td>
+      <td>0.46</td>
     </tr>
   </tbody>
 </table>
@@ -1428,46 +1484,46 @@
                     
             <tr>
                 <td>mace_mp_mace_ml</td>
-                <td>0.9975</td>
-                <td>151.15</td>
-                <td>183.28</td>
-                <td>350.85</td>
+                <td>0.9940</td>
+                <td>205.00</td>
+                <td>245.56</td>
+                <td>539.04</td>
                 <td>27/27</td>
                 <td>100.0%</td>
-                <td>4.1x</td>
+                <td>1.6x</td>
             </tr>
             
             <tr>
                 <td>mace_omol_espaloma</td>
-                <td>0.9289</td>
-                <td>1704.99</td>
-                <td>2302.50</td>
-                <td>5648.66</td>
+                <td>0.9283</td>
+                <td>1775.41</td>
+                <td>2413.46</td>
+                <td>5806.06</td>
                 <td>27/27</td>
                 <td>100.0%</td>
-                <td>3.1x</td>
+                <td>1.2x</td>
             </tr>
             
             <tr>
                 <td>mace_mp_espaloma</td>
-                <td>0.9975</td>
-                <td>151.15</td>
-                <td>183.28</td>
-                <td>350.85</td>
+                <td>0.9940</td>
+                <td>205.00</td>
+                <td>245.56</td>
+                <td>539.04</td>
                 <td>27/27</td>
                 <td>100.0%</td>
-                <td>4.0x</td>
+                <td>1.3x</td>
             </tr>
             
             <tr>
                 <td>mace_omol_mace_ml</td>
-                <td>0.9289</td>
-                <td>1704.99</td>
-                <td>2302.50</td>
-                <td>5648.66</td>
+                <td>0.9283</td>
+                <td>1775.41</td>
+                <td>2413.46</td>
+                <td>5806.06</td>
                 <td>27/27</td>
                 <td>100.0%</td>
-                <td>2.7x</td>
+                <td>1.1x</td>
             </tr>
             
                 </tbody>
@@ -1478,7 +1534,7 @@
 
         <footer>
             <p>Generated by IR Spectral Analysis Framework</p>
-            <p class="timestamp">Report generated: 2025-10-30 16:59:29</p>
+            <p class="timestamp">Report generated: 2025-11-13 16:11:04</p>
         </footer>
         
 </div>
