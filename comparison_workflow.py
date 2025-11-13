@@ -25,13 +25,14 @@ logger = logging.getLogger(__name__)
 class ComparisonWorkflow:
     """Orchestrates full comparison analysis workflow"""
     
-    def __init__(self, 
+    def __init__(self,
                  molecule_name: str,
                  base_results_dir: str = "comparison_results",
-                 output_dir: str = "analysis_results"):
+                 output_dir: str = "analysis_results",
+                 use_harmonic: bool = False):
         """
         Initialize workflow
-        
+
         Parameters
         ----------
         molecule_name : str
@@ -40,27 +41,36 @@ class ComparisonWorkflow:
             Base directory containing comparison_results
         output_dir : str
             Directory for analysis outputs
+        use_harmonic : bool
+            If True, analyze only harmonic fundamental frequencies.
+            Creates separate output directory with '_harmonic' suffix.
         """
         self.molecule_name = molecule_name
         self.base_results_dir = Path(base_results_dir)
         self.molecule_dir = self.base_results_dir / molecule_name
-        
-        # Create output directories
-        self.output_dir = Path(output_dir) / molecule_name
+        self.use_harmonic = use_harmonic
+
+        # Create output directories (separate folder for harmonic analysis)
+        if use_harmonic:
+            self.output_dir = Path(output_dir + "_harmonic") / molecule_name
+        else:
+            self.output_dir = Path(output_dir) / molecule_name
+
         self.plots_dir = self.output_dir / "plots"
         self.data_dir = self.output_dir / "data"
-        
+
         for dir_path in [self.output_dir, self.plots_dir, self.data_dir]:
             dir_path.mkdir(parents=True, exist_ok=True)
-        
+
         # Initialize analyzer
         self.analyzer = SpectrumAnalyzer(
             freq_range=(400, 4000),
             bandwidth_fwhm=8.0,
             freq_step=0.5
         )
-        
-        logger.info(f"Initialized workflow for {molecule_name}")
+
+        mode_str = "harmonic" if use_harmonic else "anharmonic"
+        logger.info(f"Initialized workflow for {molecule_name} ({mode_str} mode)")
     
     def find_dft_baseline(self, prefer_b3lyp: bool = True) -> Optional[Path]:
         """
@@ -331,12 +341,16 @@ class ComparisonWorkflow:
         ml_results = self.analyzer.load_results(ml_path)
         dft_results = self.analyzer.load_results(dft_path)
 
-        # Extract spectra (with overtones and combinations)
+        # Extract spectra
+        # If use_harmonic=True: only harmonic fundamentals (overtones/combinations ignored)
+        # If use_harmonic=False: anharmonic with overtones and combinations
         ml_spectrum = self.analyzer.extract_spectrum_data(
-            ml_results, include_overtones=True, include_combinations=True
+            ml_results, include_overtones=True, include_combinations=True,
+            use_harmonic=self.use_harmonic
         )
         dft_spectrum = self.analyzer.extract_spectrum_data(
-            dft_results, include_overtones=True, include_combinations=True
+            dft_results, include_overtones=True, include_combinations=True,
+            use_harmonic=self.use_harmonic
         )
 
         logger.info(f"  ML peaks: {len(ml_spectrum.frequencies)}, "
@@ -570,7 +584,8 @@ class ComparisonWorkflow:
         # Load DFT spectrum once for combined plots
         dft_results = self.analyzer.load_results(dft_path)
         dft_spectrum = self.analyzer.extract_spectrum_data(
-            dft_results, include_overtones=True, include_combinations=True
+            dft_results, include_overtones=True, include_combinations=True,
+            use_harmonic=self.use_harmonic
         )
         
         # Run comparisons
@@ -655,10 +670,11 @@ class ComparisonWorkflow:
 
 def analyze_molecule(molecule_name: str,
                     base_results_dir: str = "comparison_results",
-                    output_dir: str = "analysis_results") -> Dict:
+                    output_dir: str = "analysis_results",
+                    use_harmonic: bool = False) -> Dict:
     """
     Convenience function to run complete analysis
-    
+
     Parameters
     ----------
     molecule_name : str
@@ -667,7 +683,9 @@ def analyze_molecule(molecule_name: str,
         Base directory containing comparison_results
     output_dir : str
         Directory for analysis outputs
-        
+    use_harmonic : bool
+        If True, analyze only harmonic fundamental frequencies
+
     Returns
     -------
     dict
@@ -676,13 +694,46 @@ def analyze_molecule(molecule_name: str,
     workflow = ComparisonWorkflow(
         molecule_name=molecule_name,
         base_results_dir=base_results_dir,
-        output_dir=output_dir
+        output_dir=output_dir,
+        use_harmonic=use_harmonic
     )
-    
+
     results = workflow.run_full_analysis()
     workflow.generate_html_report(results)
-    
+
     return results
+
+
+def analyze_molecule_harmonic(molecule_name: str,
+                               base_results_dir: str = "comparison_results",
+                               output_dir: str = "analysis_results") -> Dict:
+    """
+    Convenience function to run harmonic-only analysis.
+
+    This analyzes only harmonic fundamental frequencies with proper
+    eigenvector-based mode matching. Overtones and combinations are
+    excluded since they don't have proper mode matching.
+
+    Parameters
+    ----------
+    molecule_name : str
+        Name of molecule to analyze
+    base_results_dir : str
+        Base directory containing comparison_results
+    output_dir : str
+        Directory for analysis outputs (will create output_dir_harmonic)
+
+    Returns
+    -------
+    dict
+        Analysis results
+    """
+    return analyze_molecule(
+        molecule_name=molecule_name,
+        base_results_dir=base_results_dir,
+        output_dir=output_dir,
+        use_harmonic=True
+    )
 
 
 if __name__ == "__main__":

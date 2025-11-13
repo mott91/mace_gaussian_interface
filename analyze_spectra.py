@@ -106,21 +106,26 @@ class SpectrumAnalyzer:
             data = json.load(f)
         return data
     
-    def extract_spectrum_data(self, results: Dict, 
+    def extract_spectrum_data(self, results: Dict,
                              include_overtones: bool = True,
-                             include_combinations: bool = True) -> SpectrumData:
+                             include_combinations: bool = True,
+                             use_harmonic: bool = False) -> SpectrumData:
         """
         Extract frequency and intensity data from results
-        
+
         Parameters
         ----------
         results : dict
             Results dictionary from JSON
         include_overtones : bool
-            Include overtones in spectrum
+            Include overtones in spectrum (only applies if use_harmonic=False)
         include_combinations : bool
-            Include combination bands in spectrum
-            
+            Include combination bands in spectrum (only applies if use_harmonic=False)
+        use_harmonic : bool
+            If True, extract only harmonic fundamental frequencies.
+            If False, extract anharmonic frequencies (default behavior).
+            When True, overtones/combinations are ignored.
+
         Returns
         -------
         SpectrumData
@@ -131,43 +136,60 @@ class SpectrumAnalyzer:
         labels = []
         mode_ids = []
 
-        # Get anharmonic fundamentals
-        anharmonic = results.get('frequencies', {}).get('anharmonic', [])
-        for idx, entry in enumerate(anharmonic):
-            frequencies.append(entry['freq_cm'])
-            intensities.append(entry['ir_intensity'])
-            labels.append('fundamental')
-            # Mode ID: F{mode_number}
-            # Fallback to index if 'mode' key doesn't exist (old result files)
-            mode_num = entry.get('mode', idx + 1)
-            mode_ids.append(f"F{mode_num}")
-
-        # Add overtones
-        if include_overtones:
-            overtones = results.get('frequencies', {}).get('overtones', [])
-            for idx, entry in enumerate(overtones):
-                frequencies.append(entry['freq_anharmonic'])
+        # HARMONIC MODE: Extract harmonic fundamentals only
+        if use_harmonic:
+            harmonic = results.get('frequencies', {}).get('harmonic', [])
+            for idx, entry in enumerate(harmonic):
+                frequencies.append(entry['freq_cm'])
                 intensities.append(entry['ir_intensity'])
-                labels.append('overtone')
-                # Mode ID: O{mode}_{level}
-                # Fallback for old result files
+                labels.append('fundamental')
+                # Mode ID: F{mode_number}
                 mode_num = entry.get('mode', idx + 1)
-                overtone_level = entry.get('overtone_level', 2)
-                mode_ids.append(f"O{mode_num}_{overtone_level}")
+                mode_ids.append(f"F{mode_num}")
 
-        # Add combination bands
-        if include_combinations:
-            combinations = results.get('frequencies', {}).get('combination_bands', [])
-            for idx, entry in enumerate(combinations):
-                frequencies.append(entry['freq_anharmonic'])
+            # Overtones/combinations ignored in harmonic mode
+            # (they don't have proper mode matching via eigenvector dot products)
+
+        # ANHARMONIC MODE: Extract anharmonic fundamentals (and optionally overtones/combinations)
+        else:
+            # # COMMENTED OUT: This is the old behavior (anharmonic frequencies)
+            # # Kept for reference - can be restored by setting use_harmonic=False
+            anharmonic = results.get('frequencies', {}).get('anharmonic', [])
+            for idx, entry in enumerate(anharmonic):
+                frequencies.append(entry['freq_cm'])
                 intensities.append(entry['ir_intensity'])
-                labels.append('combination')
-                # Mode ID: C{mode1}_{mode2} (sorted to ensure C1_2 == C2_1)
-                # Fallback for old result files
-                mode1 = entry.get('mode1', idx + 1)
-                mode2 = entry.get('mode2', idx + 2)
-                m1, m2 = sorted([mode1, mode2])
-                mode_ids.append(f"C{m1}_{m2}")
+                labels.append('fundamental')
+                # Mode ID: F{mode_number}
+                # Fallback to index if 'mode' key doesn't exist (old result files)
+                mode_num = entry.get('mode', idx + 1)
+                mode_ids.append(f"F{mode_num}")
+
+            # Add overtones (only in anharmonic mode)
+            if include_overtones:
+                overtones = results.get('frequencies', {}).get('overtones', [])
+                for idx, entry in enumerate(overtones):
+                    frequencies.append(entry['freq_anharmonic'])
+                    intensities.append(entry['ir_intensity'])
+                    labels.append('overtone')
+                    # Mode ID: O{mode}_{level}
+                    # Fallback for old result files
+                    mode_num = entry.get('mode', idx + 1)
+                    overtone_level = entry.get('overtone_level', 2)
+                    mode_ids.append(f"O{mode_num}_{overtone_level}")
+
+            # Add combination bands (only in anharmonic mode)
+            if include_combinations:
+                combinations = results.get('frequencies', {}).get('combination_bands', [])
+                for idx, entry in enumerate(combinations):
+                    frequencies.append(entry['freq_anharmonic'])
+                    intensities.append(entry['ir_intensity'])
+                    labels.append('combination')
+                    # Mode ID: C{mode1}_{mode2} (sorted to ensure C1_2 == C2_1)
+                    # Fallback for old result files
+                    mode1 = entry.get('mode1', idx + 1)
+                    mode2 = entry.get('mode2', idx + 2)
+                    m1, m2 = sorted([mode1, mode2])
+                    mode_ids.append(f"C{m1}_{m2}")
 
         return SpectrumData(
             frequencies=np.array(frequencies),
