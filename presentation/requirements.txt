@@ -1,0 +1,19 @@
+# PowerPoint generation
+python-pptx>=0.6.21
+
+# Image generation and plotting
+matplotlib>=3.7.0
+pillow>=10.0.0
+numpy>=1.24.0
+
+# Code syntax highlighting
+pygments>=2.15.0
+
+# Flowchart generation
+graphviz>=0.20.1
+
+# Optional: Mermaid rendering (requires Node.js)
+# Install separately: npm install -g @mermaid-js/mermaid-cli
+
+# Optional: Better fonts
+# matplotlib-inline>=0.1.6

@@ -1,0 +1,40 @@
+// MACE-Gaussian Interface Workflow
+digraph MACE_Gaussian_Pipeline {
+	graph [bgcolor=white dpi=300 fontname=Helvetica fontsize=12 nodesep=0.5 rankdir=TB ranksep=0.8 splines=ortho]
+	node [fillcolor="#E3F2FD" fontname=Helvetica fontsize=11 margin="0.3,0.2" shape=box style="rounded,filled"]
+	edge [color="#424242" fontname=Helvetica fontsize=10]
+	input [label="XYZ Input File" fillcolor="#C5E1A5"]
+	opt [label="Geometry Optimization
+(MACE-MP/OMOL)" fillcolor="#FFE082"]
+	freq [label="Frequency Calculation
+(Gaussian + ML Dipoles)" fillcolor="#FFE082"]
+	zmq [label="ZMQ Bridge
+(Real-time Communication)" fillcolor="#CE93D8" shape=hexagon]
+	dipole [label="ML Dipole Calculator
+(Espaloma/MACE-ML)" fillcolor="#90CAF9"]
+	anharm [label="Anharmonic Analysis
+(Gaussian)" fillcolor="#FFE082"]
+	parse [label="Parse Results
+(JSON Export)" fillcolor="#FFAB91"]
+	analyze [label="Statistical Analysis
+(Regression, KDE)" fillcolor="#FFAB91"]
+	report [label="HTML Report
+(Plots + Tables)" fillcolor="#C5E1A5"]
+	input -> opt [label=atoms]
+	opt -> freq [label="optimized
+geometry"]
+	freq -> zmq [label="geometry
+request"]
+	zmq -> dipole [label=IPC]
+	dipole -> zmq [label="dipoles +
+derivatives"]
+	zmq -> freq [label="inject
+data"]
+	freq -> anharm [label="harmonic
+frequencies"]
+	anharm -> parse [label="log file"]
+	parse -> analyze [label="frequencies +
+intensities"]
+	analyze -> report [label="metrics +
+plots"]
+}
