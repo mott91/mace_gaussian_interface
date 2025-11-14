@@ -210,7 +210,8 @@ class ComparisonWorkflow:
                                dft_spectrum: SpectrumData,
                                ml_spectrum: SpectrumData,
                                ml_name: str,
-                               mode_mapping: Optional[Dict[int, int]] = None) -> pd.DataFrame:
+                               mode_mapping: Optional[Dict[int, int]] = None,
+                               mode_overlaps: Optional[Dict[int, float]] = None) -> pd.DataFrame:
         """
         Create detailed comparison table
 
@@ -222,6 +223,8 @@ class ComparisonWorkflow:
             Name of ML calculator
         mode_mapping : dict, optional
             Mapping from ML mode index to DFT mode index
+        mode_overlaps : dict, optional
+            Mapping from ML mode index to eigenvector overlap value
 
         Returns
         -------
@@ -232,24 +235,66 @@ class ComparisonWorkflow:
         dft_freq, ml_freq, dft_int, ml_int, _ = self.analyzer.match_by_mode(
             dft_spectrum, ml_spectrum, mode_mapping=mode_mapping
         )
-        
+
+        # Build overlap column by determining which ML mode indices were used
+        overlaps = []
+        if mode_mapping is not None and mode_overlaps is not None:
+            # Remap ML mode IDs using mode_mapping (same logic as match_by_mode)
+            ml_mode_ids_remapped = []
+            original_ml_indices = []
+            for i, mode_id in enumerate(ml_spectrum.mode_ids):
+                if mode_id.startswith('F'):
+                    ml_mode_num = int(mode_id[1:])
+                    ml_idx = ml_mode_num - 1
+                    if ml_idx in mode_mapping:
+                        dft_idx = mode_mapping[ml_idx]
+                        dft_mode_num = dft_idx + 1
+                        remapped_id = f"F{dft_mode_num}"
+                        ml_mode_ids_remapped.append(remapped_id)
+                        original_ml_indices.append(ml_idx)
+                    else:
+                        ml_mode_ids_remapped.append(mode_id)
+                        original_ml_indices.append(None)
+                else:
+                    ml_mode_ids_remapped.append(mode_id)
+                    original_ml_indices.append(None)
+
+            # Find matches (same logic as match_by_mode)
+            dft_modes_set = set(dft_spectrum.mode_ids)
+            ml_modes_set = set(ml_mode_ids_remapped)
+            matched_modes = sorted(dft_modes_set & ml_modes_set)
+
+            # For each matched mode, find the overlap
+            ml_mode_dict = {mode_id: i for i, mode_id in enumerate(ml_mode_ids_remapped)}
+            for mode_id in matched_modes:
+                ml_list_idx = ml_mode_dict[mode_id]
+                ml_original_idx = original_ml_indices[ml_list_idx]
+                if ml_original_idx is not None and ml_original_idx in mode_overlaps:
+                    overlaps.append(mode_overlaps[ml_original_idx])
+                else:
+                    overlaps.append(None)
+        else:
+            overlaps = [None] * len(dft_freq)
+
         # Create DataFrame
-        df = pd.DataFrame({
+        df_data = {
             'DFT_Frequency_cm': dft_freq,
             'ML_Frequency_cm': ml_freq,
             'Freq_Difference_cm': ml_freq - dft_freq,
             'Percent_Error': 100 * (ml_freq - dft_freq) / dft_freq,
+            'Mode_Overlap': overlaps,
             'DFT_Intensity_km_mol': dft_int,
             'ML_Intensity_km_mol': ml_int,
             'Intensity_Difference': ml_int - dft_int
-        })
-        
+        }
+        df = pd.DataFrame(df_data)
+
         # Sort by DFT frequency
         df = df.sort_values('DFT_Frequency_cm').reset_index(drop=True)
-        
+
         return df
     
-    def extract_mode_mapping(self, ml_path: Path, dft_path: Path) -> Optional[Dict[int, int]]:
+    def extract_mode_mapping(self, ml_path: Path, dft_path: Path) -> Optional[Tuple[Dict[int, int], Dict[int, float]]]:
         """
         Extract mode mapping between ML and DFT calculations using eigenvector matching.
 
@@ -262,8 +307,11 @@ class ComparisonWorkflow:
 
         Returns
         -------
-        dict or None
-            Mapping from ML mode index to DFT mode index, or None if .fchk files not found
+        tuple of (dict, dict) or None
+            (mode_mapping, mode_overlaps) where:
+            - mode_mapping: ML mode index -> DFT mode index
+            - mode_overlaps: ML mode index -> overlap value
+            Returns None if .fchk files not found
         """
         try:
             # Find .fchk files
@@ -301,11 +349,12 @@ class ComparisonWorkflow:
             # Match modes using eigenvector overlap
             matches = match_modes(modes_ml, modes_dft, threshold=0.5)
 
-            # Convert to simple mapping dict (ml_idx -> dft_idx)
+            # Convert to mapping dicts (ml_idx -> dft_idx) and (ml_idx -> overlap)
             mode_mapping = {ml_idx: dft_idx for ml_idx, (dft_idx, overlap) in matches.items()}
+            mode_overlaps = {ml_idx: overlap for ml_idx, (dft_idx, overlap) in matches.items()}
 
             logger.info(f"  Extracted mode mapping for {len(mode_mapping)} modes")
-            return mode_mapping
+            return (mode_mapping, mode_overlaps)
 
         except Exception as e:
             logger.warning(f"  Failed to extract mode mapping: {e}")
@@ -335,7 +384,11 @@ class ComparisonWorkflow:
         logger.info(f"Comparing {ml_name} vs DFT...")
 
         # Extract mode mapping from eigenvector matching
-        mode_mapping = self.extract_mode_mapping(ml_path, dft_path)
+        mapping_result = self.extract_mode_mapping(ml_path, dft_path)
+        if mapping_result is not None:
+            mode_mapping, mode_overlaps = mapping_result
+        else:
+            mode_mapping, mode_overlaps = None, None
 
         # Extract spectra
         # HARMONIC MODE: Extract directly from .fchk files to get ALL degenerate modes
@@ -403,9 +456,9 @@ class ComparisonWorkflow:
             mode_mapping=mode_mapping
         )
 
-        # Create comparison table (also needs mode mapping)
+        # Create comparison table (also needs mode mapping and overlaps)
         comparison_df = self.create_comparison_table(
-            dft_spectrum, ml_spectrum, ml_name, mode_mapping=mode_mapping
+            dft_spectrum, ml_spectrum, ml_name, mode_mapping=mode_mapping, mode_overlaps=mode_overlaps
         )
         
         table_path = self.data_dir / f"comparison_{ml_name}.csv"

@@ -1,4 +1,4 @@
-DFT_Frequency_cm,ML_Frequency_cm,Freq_Difference_cm,Percent_Error,DFT_Intensity_km_mol,ML_Intensity_km_mol,Intensity_Difference
-1665.3001,1621.8515,-43.4486,-2.6091,70.3304,706.0973,635.7669
-3799.2203,3818.0578,18.8375,0.4958,1.6374,358.6082,356.9708
-3912.4174,3918.3625,5.9452,0.1520,20.2278,698.7514,678.5236
+DFT_Frequency_cm,ML_Frequency_cm,Freq_Difference_cm,Percent_Error,Mode_Overlap,DFT_Intensity_km_mol,ML_Intensity_km_mol,Intensity_Difference
+1665.3001,1621.8515,-43.4486,-2.6091,1.0000,70.3304,706.0973,635.7669
+3799.2203,3818.0578,18.8375,0.4958,1.0000,1.6374,358.6082,356.9708
+3912.4174,3918.3625,5.9452,0.1520,0.9999,20.2278,698.7514,678.5236

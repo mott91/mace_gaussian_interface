@@ -328,7 +328,7 @@ class HTMLReportGenerator:
     
     def create_navigation(self, comparisons: List[Dict]) -> str:
         """Create navigation menu"""
-        nav_items = ['<a href="#overview">Overview</a>', '<a href="#combined">Combined</a>', '<a href="#mode-overlap">Mode Matching</a>']
+        nav_items = ['<a href="#overview">Overview</a>', '<a href="#combined">Combined</a>']
         for i, comp in enumerate(comparisons, 1):
             nav_items.append(f'<a href="#comp{i}">{comp["name"]}</a>')
         nav_items.append('<a href="#summary">Summary</a>')
@@ -484,35 +484,62 @@ class HTMLReportGenerator:
         </section>
         """
     
-    def create_comparison_section(self, comparison: Dict, index: int) -> str:
+    def create_comparison_section(self, comparison: Dict, index: int, dft_method: str = "DFT") -> str:
         """Create detailed comparison section for one ML calculator"""
         m = comparison['metrics']
-        
+        ml_name = comparison['name']
+
         # Determine quality coloring
         r2_class = 'metric-good' if m.r2_freq > 0.95 else 'metric-warning' if m.r2_freq > 0.90 else 'metric-bad'
         mae_class = 'metric-good' if m.mae_freq < 10 else 'metric-warning' if m.mae_freq < 20 else 'metric-bad'
-        
+
+        # Find corresponding mode overlap heatmap
+        mode_overlap_files = list(self.plots_dir.glob(f"mode_overlap_{ml_name}_*.png"))
+        heatmap_section = ""
+        if mode_overlap_files:
+            heatmap_file = mode_overlap_files[0]
+            heatmap_section = f"""
+            <h3>Mode Overlap Matrix</h3>
+            <div class="plot-container">
+                <img src="plots/{heatmap_file.name}" alt="Mode overlap heatmap" style="width: 100%; max-width: 900px;">
+            </div>
+            <p style="color: #666; font-size: 0.9em; margin-bottom: 20px;">
+                Heatmap shows the eigenvector overlap (dot product) between vibrational modes.
+                Red = high overlap (modes match), White = no overlap. Perfect overlap = 1.00, orthogonal = 0.00.
+                Off-diagonal red spots indicate mode reordering between ML and DFT calculations.
+            </p>
+            """
+
         # Read comparison table - FIXED: Handle empty DataFrames properly
         table_path = self.data_dir / comparison['table_file']
-        
+
         # FIXED: Use proper pandas empty check
         try:
             df = pd.read_csv(table_path)
             if not df.empty:
+                # Custom formatter for Mode_Overlap column
+                formatters = {}
+                if 'Mode_Overlap' in df.columns:
+                    formatters['Mode_Overlap'] = lambda x: f'{x:.3f}' if pd.notna(x) else 'N/A'
+
                 table_html = df.head(20).to_html(
-                    index=False, 
+                    index=False,
                     float_format=lambda x: f'{x:.2f}',
-                    classes='data-table'
+                    formatters=formatters,
+                    classes='data-table',
+                    na_rep='N/A'
                 )
             else:
                 table_html = '<p class="warning-box">No matched peaks found for this calculator.</p>'
         except Exception as e:
             table_html = f'<p class="warning-box">Error loading comparison table: {e}</p>'
-        
+
         return f"""
         <section id="comp{index}" class="comparison-section">
             <h2>{comparison['name']}</h2>
-            
+
+            {heatmap_section}
+
             <div class="stats-box">
                 <h4>Statistical Metrics</h4>
                 <div class="stats-grid">
@@ -562,19 +589,22 @@ class HTMLReportGenerator:
                     </div>
                 </div>
             </div>
-            
+
             <h3>Spectral Comparison</h3>
             <div class="plot-container">
                 <img src="plots/{comparison['spectrum_plot']}" alt="Spectrum comparison">
             </div>
-            
+
             <h3>Regression Analysis</h3>
             <div class="plot-container">
                 <img src="plots/{comparison['regression_plot']}" alt="Regression plot">
             </div>
-            
+
             <h3>Detailed Frequency Comparison</h3>
             <p>Showing first 20 matched peaks (full table available in data/{comparison['table_file']})</p>
+            <p style="color: #666; font-size: 0.9em; margin-bottom: 10px;">
+                <strong>Mode_Overlap</strong> column shows the eigenvector dot product between matched modes (1.0 = perfect match, 0.0 = orthogonal).
+            </p>
             {table_html}
         </section>
         """
@@ -668,10 +698,9 @@ class HTMLReportGenerator:
             '<div class="content">',
             self.create_overview(comparisons),
             self.create_combined_plots_section(),  # Add combined plots after overview
-            self.create_mode_overlap_section(),  # Add mode overlap heatmaps
         ]
 
-        # Add comparison sections
+        # Add comparison sections (now includes mode overlap heatmaps within each section)
         for i, comp in enumerate(comparisons, 1):
             html_parts.append(self.create_comparison_section(comp, i))
         

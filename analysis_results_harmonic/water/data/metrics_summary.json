@@ -1,6 +1,6 @@
 {
   "molecule": "water",
-  "analysis_date": "2025-11-13T17:27:02.340383",
+  "analysis_date": "2025-11-14T14:40:51.753050",
   "num_ml_calculators": 4,
   "dft_method": "b3lyp_6-31Gdp",
   "comparisons": [

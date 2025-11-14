@@ -289,7 +289,7 @@
             <div class="subtitle">ML vs DFT Comparison</div>
         </header>
         
-<nav><a href="#overview">Overview</a> <a href="#combined">Combined</a> <a href="#mode-overlap">Mode Matching</a> <a href="#comp1">mace_mp_mace_ml</a> <a href="#comp2">mace_omol_espaloma</a> <a href="#comp3">mace_mp_espaloma</a> <a href="#comp4">mace_omol_mace_ml</a> <a href="#summary">Summary</a></nav>
+<nav><a href="#overview">Overview</a> <a href="#combined">Combined</a> <a href="#comp1">mace_mp_mace_ml</a> <a href="#comp2">mace_omol_espaloma</a> <a href="#comp3">mace_mp_espaloma</a> <a href="#comp4">mace_omol_mace_ml</a> <a href="#summary">Summary</a></nav>
 <div class="content">
 
         <section id="overview">
@@ -357,65 +357,21 @@
         </section>
         
 
-        <section id="mode-overlap" class="comparison-section">
-            <h2>Mode Matching Analysis</h2>
-            <p style="color: #666; margin-bottom: 20px;">
-                Vibrational modes can change order between DFT and ML calculations. Mode matching via normal mode overlap
-                ensures we compare the correct physical modes rather than just matching by mode number.
-            </p>
-
-            <div style="padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px; margin-bottom: 25px;">
-                <strong>⚠ Important:</strong> If red spots appear off-diagonal (not on the main diagonal), this indicates
-                mode reordering occurred between ML and DFT calculations.
-                Perfect overlap = 1.00 (dark red), orthogonal modes = 0.00 (white).
-            </div>
+        <section id="comp1" class="comparison-section">
+            <h2>mace_mp_mace_ml</h2>
 
             
-            <h3>Mode Overlap: MACE MP ESPALOMA vs B3LYP_6-31GDP</h3>
-            <div class="plot-container">
-                <img src="plots/mode_overlap_mace_mp_espaloma_vs_b3lyp_6-31Gdp.png" alt="Mode overlap heatmap" style="width: 100%; max-width: 900px;">
-            </div>
-            <p style="color: #666; font-size: 0.9em; margin-bottom: 30px;">
-                Heatmap shows the overlap (dot product) between vibrational modes. Red = high overlap (modes match),
-                Blue = weak overlap, White = no overlap (modes are orthogonal).
-            </p>
-            
-
-            <h3>Mode Overlap: MACE MP MACE ML vs B3LYP_6-31GDP</h3>
+            <h3>Mode Overlap Matrix</h3>
             <div class="plot-container">
                 <img src="plots/mode_overlap_mace_mp_mace_ml_vs_b3lyp_6-31Gdp.png" alt="Mode overlap heatmap" style="width: 100%; max-width: 900px;">
             </div>
-            <p style="color: #666; font-size: 0.9em; margin-bottom: 30px;">
-                Heatmap shows the overlap (dot product) between vibrational modes. Red = high overlap (modes match),
-                Blue = weak overlap, White = no overlap (modes are orthogonal).
+            <p style="color: #666; font-size: 0.9em; margin-bottom: 20px;">
+                Heatmap shows the eigenvector overlap (dot product) between vibrational modes.
+                Red = high overlap (modes match), White = no overlap. Perfect overlap = 1.00, orthogonal = 0.00.
+                Off-diagonal red spots indicate mode reordering between ML and DFT calculations.
             </p>
             
 
-            <h3>Mode Overlap: MACE OMOL ESPALOMA vs B3LYP_6-31GDP</h3>
-            <div class="plot-container">
-                <img src="plots/mode_overlap_mace_omol_espaloma_vs_b3lyp_6-31Gdp.png" alt="Mode overlap heatmap" style="width: 100%; max-width: 900px;">
-            </div>
-            <p style="color: #666; font-size: 0.9em; margin-bottom: 30px;">
-                Heatmap shows the overlap (dot product) between vibrational modes. Red = high overlap (modes match),
-                Blue = weak overlap, White = no overlap (modes are orthogonal).
-            </p>
-            
-
-            <h3>Mode Overlap: MACE OMOL MACE ML vs B3LYP_6-31GDP</h3>
-            <div class="plot-container">
-                <img src="plots/mode_overlap_mace_omol_mace_ml_vs_b3lyp_6-31Gdp.png" alt="Mode overlap heatmap" style="width: 100%; max-width: 900px;">
-            </div>
-            <p style="color: #666; font-size: 0.9em; margin-bottom: 30px;">
-                Heatmap shows the overlap (dot product) between vibrational modes. Red = high overlap (modes match),
-                Blue = weak overlap, White = no overlap (modes are orthogonal).
-            </p>
-            
-        </section>
-        
-
-        <section id="comp1" class="comparison-section">
-            <h2>mace_mp_mace_ml</h2>
-            
             <div class="stats-box">
                 <h4>Statistical Metrics</h4>
                 <div class="stats-grid">
@@ -465,19 +421,22 @@
                     </div>
                 </div>
             </div>
-            
+
             <h3>Spectral Comparison</h3>
             <div class="plot-container">
                 <img src="plots/spectrum_mace_mp_mace_ml.png" alt="Spectrum comparison">
             </div>
-            
+
             <h3>Regression Analysis</h3>
             <div class="plot-container">
                 <img src="plots/regression_mace_mp_mace_ml.png" alt="Regression plot">
             </div>
-            
+
             <h3>Detailed Frequency Comparison</h3>
             <p>Showing first 20 matched peaks (full table available in data/comparison_mace_mp_mace_ml.csv)</p>
+            <p style="color: #666; font-size: 0.9em; margin-bottom: 10px;">
+                <strong>Mode_Overlap</strong> column shows the eigenvector dot product between matched modes (1.0 = perfect match, 0.0 = orthogonal).
+            </p>
             <table border="1" class="dataframe data-table">
   <thead>
     <tr style="text-align: right;">
@@ -485,6 +444,7 @@
       <th>ML_Frequency_cm</th>
       <th>Freq_Difference_cm</th>
       <th>Percent_Error</th>
+      <th>Mode_Overlap</th>
       <th>DFT_Intensity_km_mol</th>
       <th>ML_Intensity_km_mol</th>
       <th>Intensity_Difference</th>
@@ -496,6 +456,7 @@
       <td>1462.06</td>
       <td>-203.24</td>
       <td>-12.20</td>
+      <td>1.000</td>
       <td>70.33</td>
       <td>83.26</td>
       <td>12.92</td>
@@ -505,6 +466,7 @@
       <td>3852.32</td>
       <td>53.09</td>
       <td>1.40</td>
+      <td>1.000</td>
       <td>1.64</td>
       <td>6.59</td>
       <td>4.95</td>
@@ -514,6 +476,7 @@
       <td>3975.13</td>
       <td>62.71</td>
       <td>1.60</td>
+      <td>1.000</td>
       <td>20.23</td>
       <td>58.14</td>
       <td>37.92</td>
@@ -525,7 +488,19 @@
 
         <section id="comp2" class="comparison-section">
             <h2>mace_omol_espaloma</h2>
+
             
+            <h3>Mode Overlap Matrix</h3>
+            <div class="plot-container">
+                <img src="plots/mode_overlap_mace_omol_espaloma_vs_b3lyp_6-31Gdp.png" alt="Mode overlap heatmap" style="width: 100%; max-width: 900px;">
+            </div>
+            <p style="color: #666; font-size: 0.9em; margin-bottom: 20px;">
+                Heatmap shows the eigenvector overlap (dot product) between vibrational modes.
+                Red = high overlap (modes match), White = no overlap. Perfect overlap = 1.00, orthogonal = 0.00.
+                Off-diagonal red spots indicate mode reordering between ML and DFT calculations.
+            </p>
+            
+
             <div class="stats-box">
                 <h4>Statistical Metrics</h4>
                 <div class="stats-grid">
@@ -575,19 +550,22 @@
                     </div>
                 </div>
             </div>
-            
+
             <h3>Spectral Comparison</h3>
             <div class="plot-container">
                 <img src="plots/spectrum_mace_omol_espaloma.png" alt="Spectrum comparison">
             </div>
-            
+
             <h3>Regression Analysis</h3>
             <div class="plot-container">
                 <img src="plots/regression_mace_omol_espaloma.png" alt="Regression plot">
             </div>
-            
+
             <h3>Detailed Frequency Comparison</h3>
             <p>Showing first 20 matched peaks (full table available in data/comparison_mace_omol_espaloma.csv)</p>
+            <p style="color: #666; font-size: 0.9em; margin-bottom: 10px;">
+                <strong>Mode_Overlap</strong> column shows the eigenvector dot product between matched modes (1.0 = perfect match, 0.0 = orthogonal).
+            </p>
             <table border="1" class="dataframe data-table">
   <thead>
     <tr style="text-align: right;">
@@ -595,6 +573,7 @@
       <th>ML_Frequency_cm</th>
       <th>Freq_Difference_cm</th>
       <th>Percent_Error</th>
+      <th>Mode_Overlap</th>
       <th>DFT_Intensity_km_mol</th>
       <th>ML_Intensity_km_mol</th>
       <th>Intensity_Difference</th>
@@ -606,6 +585,7 @@
       <td>1621.85</td>
       <td>-43.45</td>
       <td>-2.61</td>
+      <td>1.000</td>
       <td>70.33</td>
       <td>706.10</td>
       <td>635.77</td>
@@ -615,6 +595,7 @@
       <td>3818.06</td>
       <td>18.84</td>
       <td>0.50</td>
+      <td>1.000</td>
       <td>1.64</td>
       <td>358.61</td>
       <td>356.97</td>
@@ -624,6 +605,7 @@
       <td>3918.36</td>
       <td>5.95</td>
       <td>0.15</td>
+      <td>1.000</td>
       <td>20.23</td>
       <td>698.75</td>
       <td>678.52</td>
@@ -635,7 +617,19 @@
 
         <section id="comp3" class="comparison-section">
             <h2>mace_mp_espaloma</h2>
+
             
+            <h3>Mode Overlap Matrix</h3>
+            <div class="plot-container">
+                <img src="plots/mode_overlap_mace_mp_espaloma_vs_b3lyp_6-31Gdp.png" alt="Mode overlap heatmap" style="width: 100%; max-width: 900px;">
+            </div>
+            <p style="color: #666; font-size: 0.9em; margin-bottom: 20px;">
+                Heatmap shows the eigenvector overlap (dot product) between vibrational modes.
+                Red = high overlap (modes match), White = no overlap. Perfect overlap = 1.00, orthogonal = 0.00.
+                Off-diagonal red spots indicate mode reordering between ML and DFT calculations.
+            </p>
+            
+
             <div class="stats-box">
                 <h4>Statistical Metrics</h4>
                 <div class="stats-grid">
@@ -685,19 +679,22 @@
                     </div>
                 </div>
             </div>
-            
+
             <h3>Spectral Comparison</h3>
             <div class="plot-container">
                 <img src="plots/spectrum_mace_mp_espaloma.png" alt="Spectrum comparison">
             </div>
-            
+
             <h3>Regression Analysis</h3>
             <div class="plot-container">
                 <img src="plots/regression_mace_mp_espaloma.png" alt="Regression plot">
             </div>
-            
+
             <h3>Detailed Frequency Comparison</h3>
             <p>Showing first 20 matched peaks (full table available in data/comparison_mace_mp_espaloma.csv)</p>
+            <p style="color: #666; font-size: 0.9em; margin-bottom: 10px;">
+                <strong>Mode_Overlap</strong> column shows the eigenvector dot product between matched modes (1.0 = perfect match, 0.0 = orthogonal).
+            </p>
             <table border="1" class="dataframe data-table">
   <thead>
     <tr style="text-align: right;">
@@ -705,6 +702,7 @@
       <th>ML_Frequency_cm</th>
       <th>Freq_Difference_cm</th>
       <th>Percent_Error</th>
+      <th>Mode_Overlap</th>
       <th>DFT_Intensity_km_mol</th>
       <th>ML_Intensity_km_mol</th>
       <th>Intensity_Difference</th>
@@ -716,6 +714,7 @@
       <td>1462.06</td>
       <td>-203.24</td>
       <td>-12.20</td>
+      <td>1.000</td>
       <td>70.33</td>
       <td>703.00</td>
       <td>632.67</td>
@@ -725,6 +724,7 @@
       <td>3852.32</td>
       <td>53.09</td>
       <td>1.40</td>
+      <td>1.000</td>
       <td>1.64</td>
       <td>361.70</td>
       <td>360.07</td>
@@ -734,6 +734,7 @@
       <td>3975.13</td>
       <td>62.71</td>
       <td>1.60</td>
+      <td>1.000</td>
       <td>20.23</td>
       <td>698.75</td>
       <td>678.52</td>
@@ -745,7 +746,19 @@
 
         <section id="comp4" class="comparison-section">
             <h2>mace_omol_mace_ml</h2>
+
             
+            <h3>Mode Overlap Matrix</h3>
+            <div class="plot-container">
+                <img src="plots/mode_overlap_mace_omol_mace_ml_vs_b3lyp_6-31Gdp.png" alt="Mode overlap heatmap" style="width: 100%; max-width: 900px;">
+            </div>
+            <p style="color: #666; font-size: 0.9em; margin-bottom: 20px;">
+                Heatmap shows the eigenvector overlap (dot product) between vibrational modes.
+                Red = high overlap (modes match), White = no overlap. Perfect overlap = 1.00, orthogonal = 0.00.
+                Off-diagonal red spots indicate mode reordering between ML and DFT calculations.
+            </p>
+            
+
             <div class="stats-box">
                 <h4>Statistical Metrics</h4>
                 <div class="stats-grid">
@@ -795,19 +808,22 @@
                     </div>
                 </div>
             </div>
-            
+
             <h3>Spectral Comparison</h3>
             <div class="plot-container">
                 <img src="plots/spectrum_mace_omol_mace_ml.png" alt="Spectrum comparison">
             </div>
-            
+
             <h3>Regression Analysis</h3>
             <div class="plot-container">
                 <img src="plots/regression_mace_omol_mace_ml.png" alt="Regression plot">
             </div>
-            
+
             <h3>Detailed Frequency Comparison</h3>
             <p>Showing first 20 matched peaks (full table available in data/comparison_mace_omol_mace_ml.csv)</p>
+            <p style="color: #666; font-size: 0.9em; margin-bottom: 10px;">
+                <strong>Mode_Overlap</strong> column shows the eigenvector dot product between matched modes (1.0 = perfect match, 0.0 = orthogonal).
+            </p>
             <table border="1" class="dataframe data-table">
   <thead>
     <tr style="text-align: right;">
@@ -815,6 +831,7 @@
       <th>ML_Frequency_cm</th>
       <th>Freq_Difference_cm</th>
       <th>Percent_Error</th>
+      <th>Mode_Overlap</th>
       <th>DFT_Intensity_km_mol</th>
       <th>ML_Intensity_km_mol</th>
       <th>Intensity_Difference</th>
@@ -826,6 +843,7 @@
       <td>1621.85</td>
       <td>-43.45</td>
       <td>-2.61</td>
+      <td>1.000</td>
       <td>70.33</td>
       <td>83.40</td>
       <td>13.07</td>
@@ -835,6 +853,7 @@
       <td>3818.06</td>
       <td>18.84</td>
       <td>0.50</td>
+      <td>1.000</td>
       <td>1.64</td>
       <td>6.44</td>
       <td>4.80</td>
@@ -844,6 +863,7 @@
       <td>3918.36</td>
       <td>5.95</td>
       <td>0.15</td>
+      <td>1.000</td>
       <td>20.23</td>
       <td>58.14</td>
       <td>37.92</td>
@@ -922,7 +942,7 @@
 
         <footer>
             <p>Generated by IR Spectral Analysis Framework</p>
-            <p class="timestamp">Report generated: 2025-11-13 17:27:02</p>
+            <p class="timestamp">Report generated: 2025-11-14 14:40:51</p>
         </footer>
         
 </div>
