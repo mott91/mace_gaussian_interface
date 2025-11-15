@@ -28,92 +28,21 @@ DIM = RGBColor(139, 148, 158)      # #8B949E dim gray
 FONT_NAME = 'Meslo Nerd Font'
 
 
-def add_p10k_prompt(slide, y_pos, command="", show_command=True):
-    """Add Powerlevel10k-style prompt."""
-    # Top line of prompt with segments
-    prompt_top = slide.shapes.add_textbox(Inches(0.5), Inches(y_pos), Inches(9), Inches(0.25))
-    tf = prompt_top.text_frame
-    tf.clear()
-    p = tf.add_paragraph()
+def add_simple_prompt(slide, y_pos, command=""):
+    """Add simple green terminal prompt."""
+    prompt_box = slide.shapes.add_textbox(Inches(0.5), Inches(y_pos), Inches(9), Inches(0.3))
+    tf = prompt_box.text_frame
 
-    # Corner
-    run = p.add_run()
-    run.text = "╭─"
-    run.font.name = FONT_NAME
-    run.font.size = Pt(11)
-    run.font.color.rgb = DIM
+    # Simple prompt: mot@rs1-c724:~/presentation$ command
+    prompt_text = "mot@rs1-c724:~/presentation$ " + command
+    tf.text = prompt_text
+    p = tf.paragraphs[0]
+    p.font.name = FONT_NAME
+    p.font.size = Pt(11)
+    p.font.color.rgb = GREEN
+    p.font.bold = True
 
-    # User@host segment
-    run = p.add_run()
-    run.text = "  mot@rs1-c724 "
-    run.font.name = FONT_NAME
-    run.font.size = Pt(11)
-    run.font.color.rgb = CYAN
-    run.font.bold = True
-
-    # Separator
-    run = p.add_run()
-    run.text = " "
-    run.font.name = FONT_NAME
-    run.font.size = Pt(11)
-    run.font.color.rgb = DIM
-
-    # Directory segment
-    run = p.add_run()
-    run.text = " ~/presentation "
-    run.font.name = FONT_NAME
-    run.font.size = Pt(11)
-    run.font.color.rgb = PURPLE
-
-    # Separator
-    run = p.add_run()
-    run.text = " "
-    run.font.name = FONT_NAME
-    run.font.size = Pt(11)
-    run.font.color.rgb = DIM
-
-    # Git branch
-    run = p.add_run()
-    run.text = " master "
-    run.font.name = FONT_NAME
-    run.font.size = Pt(11)
-    run.font.color.rgb = GREEN
-
-    # Status icon
-    run = p.add_run()
-    run.text = "⚡"
-    run.font.name = FONT_NAME
-    run.font.size = Pt(11)
-    run.font.color.rgb = YELLOW
-
-    # Bottom line with arrow prompt
-    if show_command:
-        prompt_bottom = slide.shapes.add_textbox(Inches(0.5), Inches(y_pos + 0.25), Inches(9), Inches(0.25))
-        tf = prompt_bottom.text_frame
-        tf.clear()
-        p = tf.add_paragraph()
-
-        # Corner and arrow
-        run = p.add_run()
-        run.text = "╰─"
-        run.font.name = FONT_NAME
-        run.font.size = Pt(11)
-        run.font.color.rgb = DIM
-
-        run = p.add_run()
-        run.text = "❯ "
-        run.font.name = FONT_NAME
-        run.font.size = Pt(12)
-        run.font.color.rgb = GREEN
-        run.font.bold = True
-
-        # Command
-        if command:
-            run = p.add_run()
-            run.text = command
-            run.font.name = FONT_NAME
-            run.font.size = Pt(11)
-            run.font.color.rgb = TEXT
+    return len(prompt_text)  # Return length for cursor positioning
 
 
 def generate_ascii_art(text, style='banner'):
@@ -159,8 +88,19 @@ def create_clean_terminal_dark():
     slide.background.fill.solid()
     slide.background.fill.fore_color.rgb = BG
 
-    # Just the prompt, no command
-    add_p10k_prompt(slide, Inches(0.5), show_command=False)
+    # Simple prompt, no command
+    prompt_len = add_simple_prompt(slide, Inches(0.5), "")
+
+    # Blinking cursor at end of prompt
+    # Approximate cursor position based on character count (Meslo is monospace ~0.06" per char)
+    cursor_x = 0.5 + (prompt_len * 0.06)
+    cursor_box = slide.shapes.add_textbox(Inches(cursor_x), Inches(0.52), Inches(0.15), Inches(0.25))
+    tf = cursor_box.text_frame
+    tf.text = "█"
+    p = tf.paragraphs[0]
+    p.font.size = Pt(11)
+    p.font.name = FONT_NAME
+    p.font.color.rgb = GREEN
 
     # ASCII art title - ALL LINES COLORED
     ascii_art = generate_ascii_art("MACE", 'banner')
@@ -215,15 +155,6 @@ def create_clean_terminal_dark():
     p.font.color.rgb = DIM
     p.alignment = PP_ALIGN.CENTER
 
-    # Blinking cursor
-    cursor_box = slide.shapes.add_textbox(Inches(4.9), Inches(6.8), Inches(0.2), Inches(0.3))
-    tf = cursor_box.text_frame
-    tf.text = "█"
-    p = tf.paragraphs[0]
-    p.font.size = Pt(14)
-    p.font.name = FONT_NAME
-    p.font.color.rgb = GREEN
-
     # ========================================================================
     # Slide 2: cat motivation.md
     # ========================================================================
@@ -231,8 +162,8 @@ def create_clean_terminal_dark():
     slide.background.fill.solid()
     slide.background.fill.fore_color.rgb = BG
 
-    # P10k prompt with command
-    add_p10k_prompt(slide, Inches(0.5), "cat motivation.md", show_command=True)
+    # Simple prompt with command
+    add_simple_prompt(slide, Inches(0.5), "cat motivation.md")
 
     # ASCII title
     ascii_title = generate_ascii_art("MOTIVATION", 'simple')
@@ -297,8 +228,8 @@ def create_clean_terminal_dark():
     slide.background.fill.solid()
     slide.background.fill.fore_color.rgb = BG
 
-    # P10k prompt
-    add_p10k_prompt(slide, Inches(0.5), "ls -la architecture/", show_command=True)
+    # Simple prompt
+    add_simple_prompt(slide, Inches(0.5), "ls -la architecture/")
 
     # Title
     title_box = slide.shapes.add_textbox(Inches(0.8), Inches(1.2), Inches(8.4), Inches(0.6))
@@ -356,8 +287,8 @@ drwxr-xr-x 12 mot  group   384  Nov 15 11:00  ..
     slide.background.fill.solid()
     slide.background.fill.fore_color.rgb = BG
 
-    # P10k prompt
-    add_p10k_prompt(slide, Inches(0.5), "git diff --stat dft ml", show_command=True)
+    # Simple prompt
+    add_simple_prompt(slide, Inches(0.5), "git diff --stat dft ml")
 
     # Title
     title_box = slide.shapes.add_textbox(Inches(0.8), Inches(1.2), Inches(8.4), Inches(0.6))
@@ -418,11 +349,12 @@ drwxr-xr-x 12 mot  group   384  Nov 15 11:00  ..
     prs.save("../template_terminal_enhanced.pptx")
     print("✓ Clean Terminal Dark template created (4 slides)")
     print("\nChanges:")
-    print("  • Removed macOS title bar (no traffic lights)")
-    print("  • Removed slide borders")
-    print("  • Changed font to 'Meslo Nerd Font'")
-    print("  • Title slide: no command, no status bar")
-    print("  • Content slides: keep status bar for context")
+    print("  • Simple green prompt: mot@rs1-c724:~/presentation$ ")
+    print("  • Cursor positioned at end of prompt line")
+    print("  • No macOS chrome or borders")
+    print("  • Meslo Nerd Font throughout")
+    print("  • Title slide: no status bar")
+    print("  • Content slides: status bar at bottom")
     print("\nBlinking cursor: Select █ → Animations → Pulse → Repeat")
 
 
