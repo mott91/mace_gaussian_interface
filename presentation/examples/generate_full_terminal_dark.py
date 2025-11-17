@@ -18,7 +18,7 @@ DIM = RGBColor(139, 148, 158)      # #8B949E
 FONT = 'Consolas'
 
 
-def add_footer(slide):
+def add_footer(slide, page_num=None):
     """Add footer to slide (consistent across all slides)."""
     info_box = slide.shapes.add_textbox(Inches(1), Inches(6.5), Inches(8), Inches(0.6))
     tf = info_box.text_frame
@@ -28,6 +28,17 @@ def add_footer(slide):
     p.font.name = FONT
     p.font.color.rgb = DIM
     p.alignment = PP_ALIGN.CENTER
+
+    # Add page number in bottom right if provided
+    if page_num is not None:
+        page_box = slide.shapes.add_textbox(Inches(8.5), Inches(6.9), Inches(1), Inches(0.4))
+        tf = page_box.text_frame
+        tf.text = str(page_num)
+        p = tf.paragraphs[0]
+        p.font.size = Pt(12)
+        p.font.name = FONT
+        p.font.color.rgb = DIM
+        p.alignment = PP_ALIGN.RIGHT
 
 
 def create_title_slide(prs):
@@ -60,7 +71,7 @@ def create_title_slide(prs):
     add_footer(slide)
 
 
-def create_content_slide(prs, command, lines):
+def create_content_slide(prs, command, lines, page_num=None):
     """Create a content slide with command header and bullet points."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     slide.background.fill.solid()
@@ -91,7 +102,7 @@ def create_content_slide(prs, command, lines):
         p.space_after = Pt(6)
 
     # Footer
-    add_footer(slide)
+    add_footer(slide, page_num)
 
 
 def main():
@@ -103,7 +114,7 @@ def main():
     # Slide 0: Title
     create_title_slide(prs)
 
-    # Slide 1: Motivation
+    # Slide 1: Motivation (page 1)
     create_content_slide(prs, "$ cat motivation.md", [
         ("# Problem", ACCENT),
         ("  → DFT frequency calculations: slow", TEXT),
@@ -118,9 +129,9 @@ def main():
         ("# Impact", ACCENT),
         ("  → Enable rapid IR spectral predictions", TEXT),
         ("  → Maintain DFT-level accuracy", TEXT),
-    ])
+    ], page_num=1)
 
-    # Slide 2: Architecture Overview
+    # Slide 2: Architecture Overview (page 2)
     create_content_slide(prs, "$ cat architecture.md", [
         ("# System Architecture", ACCENT),
         ("", TEXT),
@@ -134,9 +145,9 @@ def main():
         ("  2. DFT baseline (B3LYP/6-31G(d,p))", TEXT),
         ("  3. ML frequency calculations", TEXT),
         ("  4. Statistical comparison & analysis", TEXT),
-    ])
+    ], page_num=2)
 
-    # Slide 3: ZMQ Bridge
+    # Slide 3: ZMQ Bridge (page 3)
     create_content_slide(prs, "$ cat zmq_bridge.md", [
         ("# Inter-Process Communication", ACCENT),
         ("", TEXT),
@@ -151,9 +162,9 @@ def main():
         ("  → Real-time injection of ML predictions", TEXT),
         ("  → No modification to Gaussian source", TEXT),
         ("  → File-based IPC for reliability", TEXT),
-    ])
+    ], page_num=3)
 
-    # Slide 4: Dipole Calculators
+    # Slide 4: Dipole Calculators (page 4)
     create_content_slide(prs, "$ ls -la calculators/", [
         ("# Modular Dipole System", ACCENT),
         ("", TEXT),
@@ -169,9 +180,9 @@ def main():
         ("# Implementation", ACCENT),
         ("  → Factory pattern with availability checks", TEXT),
         ("  → Seamless calculator switching", TEXT),
-    ])
+    ], page_num=4)
 
-    # Slide 5: Module Swapping
+    # Slide 5: Module Swapping (page 5)
     create_content_slide(prs, "$ cat module_swap.py", [
         ("# Dual MACE Architecture", ACCENT),
         ("", TEXT),
@@ -186,9 +197,9 @@ def main():
         ("# Challenge", ACCENT),
         ("  → Prevent module contamination", TEXT),
         ("  → Thread-safe switching mechanism", TEXT),
-    ])
+    ], page_num=5)
 
-    # Slide 6: Validation Method
+    # Slide 6: Validation Method (page 6)
     create_content_slide(prs, "$ cat validation.md", [
         ("# Comparison vs DFT Baseline", ACCENT),
         ("", TEXT),
@@ -205,9 +216,9 @@ def main():
         ("# Visualization", ACCENT),
         ("  → Regression plots (ML vs DFT)", TEXT),
         ("  → Gaussian KDE broadening (8 cm⁻¹)", TEXT),
-    ])
+    ], page_num=6)
 
-    # Slide 7: Results - Water
+    # Slide 7: Results - Water (page 7)
     create_content_slide(prs, "$ python analyze_spectra.py water", [
         ("# Water (H₂O) Benchmark", ACCENT),
         ("", TEXT),
@@ -223,9 +234,9 @@ def main():
         ("", TEXT),
         ("# Computational Speedup", ACCENT),
         ("  → 50-100× faster than pure DFT", TEXT),
-    ])
+    ], page_num=7)
 
-    # Slide 8: Calculator Combinations
+    # Slide 8: Calculator Combinations (page 8)
     create_content_slide(prs, "$ cat config.yaml", [
         ("# Energy Calculators", ACCENT),
         ("", TEXT),
@@ -242,9 +253,9 @@ def main():
         ("  → mace_omol + espaloma", TEXT),
         ("  → mace_mp + mace_ml", TEXT),
         ("  → All compared vs DFT baseline", TEXT),
-    ])
+    ], page_num=8)
 
-    # Slide 9: Workflow Pipeline
+    # Slide 9: Workflow Pipeline (page 9)
     create_content_slide(prs, "$ python cli.py run water.xyz", [
         ("# 4-Phase Pipeline", ACCENT),
         ("", TEXT),
@@ -259,9 +270,9 @@ def main():
         ("", TEXT),
         ("  Phase 4: Analysis & comparison", TEXT),
         ("    → Statistics, plots, HTML report", TEXT),
-    ])
+    ], page_num=9)
 
-    # Slide 10: Future Directions
+    # Slide 10: Future Directions (page 10)
     create_content_slide(prs, "$ git log --oneline --graph", [
         ("# Current Status", ACCENT),
         ("  → ZMQ bridge implemented & working", TEXT),
@@ -277,7 +288,7 @@ def main():
         ("", TEXT),
         ("# Long-term Vision", ACCENT),
         ("  → Universal ML-QM spectroscopy platform", TEXT),
-    ])
+    ], page_num=10)
 
     # Save presentation
     output_path = "../mace_gaussian_presentation.pptx"
