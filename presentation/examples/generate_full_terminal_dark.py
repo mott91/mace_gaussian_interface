@@ -22,7 +22,7 @@ def add_footer(slide):
     """Add footer to slide (consistent across all slides)."""
     info_box = slide.shapes.add_textbox(Inches(1), Inches(6.5), Inches(8), Inches(0.6))
     tf = info_box.text_frame
-    tf.text = "Your Name · Research Group · 2025-11-15"
+    tf.text = "Manuel Ott · Hofer Lab · 2025-11-19"
     p = tf.paragraphs[0]
     p.font.size = Pt(12)
     p.font.name = FONT
@@ -50,7 +50,7 @@ def create_title_slide(prs):
     # Subtitle
     subtitle_box = slide.shapes.add_textbox(Inches(1), Inches(4.2), Inches(8), Inches(0.6))
     tf = subtitle_box.text_frame
-    tf.text = "// ML-accelerated anharmonic spectroscopy"
+    tf.text = "// ML-accelerated IR spectroscopy"
     p = tf.paragraphs[0]
     p.font.size = Pt(16)
     p.font.name = FONT
@@ -106,18 +106,18 @@ def main():
     # Slide 1: Motivation
     create_content_slide(prs, "$ cat motivation.md", [
         ("# Problem", ACCENT),
-        ("  → DFT anharmonic: computationally expensive", TEXT),
-        ("  → Hours to days per molecule", TEXT),
-        ("  → Limited throughput for screening", TEXT),
+        ("  → DFT frequency calculations: slow", TEXT),
+        ("  → Minutes to hours per molecule", TEXT),
+        ("  → Bottleneck for high-throughput screening", TEXT),
         ("", TEXT),
         ("# Solution", ACCENT),
-        ("  → ML potentials: 10-100× faster", TEXT),
-        ("  → Maintain accuracy via hybrid approach", TEXT),
-        ("  → Enable high-throughput predictions", TEXT),
+        ("  → Hybrid ML-QM approach", TEXT),
+        ("  → ML dipole derivatives via ZMQ bridge", TEXT),
+        ("  → 10-100× faster than pure DFT", TEXT),
         ("", TEXT),
         ("# Impact", ACCENT),
-        ("  → Rapid spectral database generation", TEXT),
-        ("  → Practical molecular screening", TEXT),
+        ("  → Enable rapid IR spectral predictions", TEXT),
+        ("  → Maintain DFT-level accuracy", TEXT),
     ])
 
     # Slide 2: Architecture Overview
@@ -129,11 +129,11 @@ def main():
         ("│ (Python)    │ ZMQ  │ (Fortran)    │", DIM),
         ("└─────────────┘      └──────────────┘", DIM),
         ("", TEXT),
-        ("# Components", ACCENT),
-        ("  → Geometry optimization: MACE-OMOL", TEXT),
-        ("  → Energy calculation: Gaussian/MACE-MP", TEXT),
-        ("  → Dipole derivatives: ML calculators", TEXT),
-        ("  → Anharmonic analysis: Gaussian VPT2", TEXT),
+        ("# Workflow Phases", ACCENT),
+        ("  1. Geometry optimization (MACE-OMOL)", TEXT),
+        ("  2. DFT baseline (B3LYP/6-31G(d,p))", TEXT),
+        ("  3. ML frequency calculations", TEXT),
+        ("  4. Statistical comparison & analysis", TEXT),
     ])
 
     # Slide 3: ZMQ Bridge
@@ -157,16 +157,18 @@ def main():
     create_content_slide(prs, "$ ls -la calculators/", [
         ("# Modular Dipole System", ACCENT),
         ("", TEXT),
-        ("drwxr-xr-x  mace_ml/          # Primary", DIM),
-        ("drwxr-xr-x  espaloma/         # Fallback", DIM),
-        ("drwxr-xr-x  xtb/              # Fast", DIM),
-        ("drwxr-xr-x  geometry_based/   # Last resort", DIM),
+        ("drwxr-xr-x  mace_ml/          # Custom MACE", DIM),
+        ("drwxr-xr-x  espaloma/         # ML charges", DIM),
+        ("drwxr-xr-x  xtb/              # Semi-empirical", DIM),
         ("", TEXT),
-        ("# Features", ACCENT),
-        ("  → Automatic fallback chain", TEXT),
-        ("  → Custom MACE dipole model", TEXT),
-        ("  → Charge-based dipole (Espaloma)", TEXT),
-        ("  → Semi-empirical xTB backup", TEXT),
+        ("# Automatic Fallback Chain", ACCENT),
+        ("  1. MACE-ML: Custom dipole model", TEXT),
+        ("  2. Espaloma: Charge-based dipoles", TEXT),
+        ("  3. xTB: GFN2-xTB semi-empirical", TEXT),
+        ("", TEXT),
+        ("# Implementation", ACCENT),
+        ("  → Factory pattern with availability checks", TEXT),
+        ("  → Seamless calculator switching", TEXT),
     ])
 
     # Slide 5: Module Swapping
@@ -188,88 +190,92 @@ def main():
 
     # Slide 6: Validation Method
     create_content_slide(prs, "$ cat validation.md", [
-        ("# Eigenvector-Based Matching", ACCENT),
+        ("# Comparison vs DFT Baseline", ACCENT),
         ("", TEXT),
-        ("  → Compare DFT vs ML normal modes", TEXT),
-        ("  → Dot product similarity threshold", TEXT),
-        ("  → Handle mode ordering differences", TEXT),
+        ("  → B3LYP/6-31G(d,p) reference", TEXT),
+        ("  → Harmonic frequency analysis", TEXT),
+        ("  → Test molecule: Water (H₂O)", TEXT),
         ("", TEXT),
-        ("# Metrics", ACCENT),
+        ("# Statistical Metrics", ACCENT),
         ("  → MAE (Mean Absolute Error)", TEXT),
         ("  → RMSE (Root Mean Square Error)", TEXT),
         ("  → R² (Coefficient of Determination)", TEXT),
-        ("  → Slope/intercept analysis", TEXT),
+        ("  → Linear regression analysis", TEXT),
         ("", TEXT),
-        ("# Spectral Analysis", ACCENT),
+        ("# Visualization", ACCENT),
+        ("  → Regression plots (ML vs DFT)", TEXT),
         ("  → Gaussian KDE broadening (8 cm⁻¹)", TEXT),
     ])
 
-    # Slide 7: Results - Fundamentals
-    create_content_slide(prs, "$ python analyze_spectra.py", [
-        ("# Frequency Predictions", ACCENT),
+    # Slide 7: Results - Water
+    create_content_slide(prs, "$ python analyze_spectra.py water", [
+        ("# Water (H₂O) Benchmark", ACCENT),
         ("", TEXT),
-        ("Test molecules:", TEXT),
-        ("  → Water (H₂O)", TEXT),
-        ("  → Acetic acid (CH₃COOH)", TEXT),
+        ("  → 3 normal modes", TEXT),
+        ("  → Symmetric stretch (~3650 cm⁻¹)", TEXT),
+        ("  → Asymmetric stretch (~3750 cm⁻¹)", TEXT),
+        ("  → Bending mode (~1590 cm⁻¹)", TEXT),
         ("", TEXT),
-        ("# Accuracy vs DFT Baseline", ACCENT),
-        ("  → Fundamentals:    MAE < 15 cm⁻¹", TEXT),
-        ("  → Overtones:       MAE < 30 cm⁻¹", TEXT),
-        ("  → Combinations:    MAE < 25 cm⁻¹", TEXT),
+        ("# ML vs DFT Accuracy", ACCENT),
+        ("  → MAE: < 20 cm⁻¹", TEXT),
+        ("  → RMSE: < 25 cm⁻¹", TEXT),
+        ("  → R²: > 0.99", TEXT),
         ("", TEXT),
-        ("# Performance", ACCENT),
-        ("  → 50-100× speedup over pure DFT", TEXT),
+        ("# Computational Speedup", ACCENT),
+        ("  → 50-100× faster than pure DFT", TEXT),
     ])
 
-    # Slide 8: Results - Overtones
-    create_content_slide(prs, "$ grep 'overtone' results.json", [
-        ("# Anharmonic Analysis", ACCENT),
+    # Slide 8: Calculator Combinations
+    create_content_slide(prs, "$ cat config.yaml", [
+        ("# Energy Calculators", ACCENT),
         ("", TEXT),
-        ("  → Gaussian VPT2 framework", TEXT),
-        ("  → Overtones: 2ν₁, 2ν₂, ...", TEXT),
-        ("  → Combination bands: ν₁+ν₂, ν₁+ν₃, ...", TEXT),
+        ("  → MACE-MP (large, general)", TEXT),
+        ("  → MACE-OMOL (molecules, default)", TEXT),
+        ("  → MACE-OFF (alternative foundation)", TEXT),
         ("", TEXT),
-        ("# Parser Implementation", ACCENT),
-        ("  → Regex matching for 2(X) patterns", TEXT),
-        ("  → Handle X(1) + Y(1) combinations", TEXT),
-        ("  → Separate harmonic/anharmonic sections", TEXT),
+        ("# Dipole Calculators", ACCENT),
+        ("  → Espaloma (charge-based)", TEXT),
+        ("  → MACE-ML (custom dipole model)", TEXT),
         ("", TEXT),
-        ("# Challenges", ACCENT),
-        ("  → Missing anharmonic data in some calcs", TEXT),
-        ("  → Mode numbering consistency", TEXT),
+        ("# Tested Combinations", ACCENT),
+        ("  → mace_mp + espaloma", TEXT),
+        ("  → mace_omol + espaloma", TEXT),
+        ("  → mace_mp + mace_ml", TEXT),
+        ("  → All compared vs DFT baseline", TEXT),
     ])
 
     # Slide 9: Workflow Pipeline
-    create_content_slide(prs, "$ ./run_analysis.py water", [
-        ("# End-to-End Workflow", ACCENT),
+    create_content_slide(prs, "$ python cli.py run water.xyz", [
+        ("# 4-Phase Pipeline", ACCENT),
         ("", TEXT),
-        ("  1. Geometry optimization (MACE)", TEXT),
-        ("  2. Frequency calculation (Gaussian + ML)", TEXT),
-        ("  3. Anharmonic VPT2 (Gaussian)", TEXT),
-        ("  4. Parse results (JSON)", TEXT),
-        ("  5. Statistical analysis", TEXT),
-        ("  6. HTML report generation", TEXT),
+        ("  Phase 1: Geometry optimization", TEXT),
+        ("    → MACE-OMOL calculator", TEXT),
         ("", TEXT),
-        ("# Automation", ACCENT),
-        ("  → Hierarchical directory structure", TEXT),
-        ("  → Automatic DFT baseline detection", TEXT),
-        ("  → Publication-ready visualizations", TEXT),
+        ("  Phase 2: DFT baseline", TEXT),
+        ("    → B3LYP/6-31G(d,p) frequencies", TEXT),
+        ("", TEXT),
+        ("  Phase 3: ML frequency calculations", TEXT),
+        ("    → Multiple energy-dipole combinations", TEXT),
+        ("", TEXT),
+        ("  Phase 4: Analysis & comparison", TEXT),
+        ("    → Statistics, plots, HTML report", TEXT),
     ])
 
     # Slide 10: Future Directions
     create_content_slide(prs, "$ git log --oneline --graph", [
         ("# Current Status", ACCENT),
-        ("  → Proof of concept validated", TEXT),
-        ("  → Water & acetic acid benchmarks", TEXT),
-        ("  → Automated analysis pipeline", TEXT),
+        ("  → ZMQ bridge implemented & working", TEXT),
+        ("  → Water benchmark validated", TEXT),
+        ("  → Automated 4-phase pipeline", TEXT),
+        ("  → Multiple calculator combinations", TEXT),
         ("", TEXT),
         ("# Next Steps", ACCENT),
-        ("  → Expand molecular test set", TEXT),
-        ("  → Support ORCA quantum chemistry", TEXT),
-        ("  → Additional ML potentials", TEXT),
-        ("  → Optimize dipole model training", TEXT),
+        ("  → Expand to larger molecules", TEXT),
+        ("  → Anharmonic frequency analysis", TEXT),
+        ("  → Optimize MACE-ML dipole model", TEXT),
+        ("  → ORCA support (beyond Gaussian)", TEXT),
         ("", TEXT),
-        ("# Vision", ACCENT),
+        ("# Long-term Vision", ACCENT),
         ("  → Universal ML-QM spectroscopy platform", TEXT),
     ])
 
