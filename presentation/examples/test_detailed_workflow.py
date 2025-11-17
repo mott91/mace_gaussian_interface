@@ -674,6 +674,81 @@ def create_grid_modules_workflow(prs):
         p.line_spacing = 1.0
 
 
+def create_final_simplified_workflow(prs):
+    """Final simplified workflow with geometry opt on top, all analysis in one row."""
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    slide.background.fill.solid()
+    slide.background.fill.fore_color.rgb = BG
+
+    # Title
+    title_box = slide.shapes.add_textbox(Inches(0.4), Inches(0.3), Inches(9.2), Inches(0.5))
+    tf = title_box.text_frame
+    tf.text = "$ cat workflow_final.txt"
+    p = tf.paragraphs[0]
+    p.font.size = Pt(22)
+    p.font.name = FONT
+    p.font.color.rgb = ACCENT
+    p.font.bold = True
+
+    # Flowchart - use full width
+    flow_box = slide.shapes.add_textbox(Inches(0.1), Inches(0.9), Inches(9.8), Inches(6.4))
+    tf = flow_box.text_frame
+
+    lines = [
+        ("                                    [molecule.xyz]", GREEN),
+        ("                                          │", DIM),
+        ("        ┌─────────────────────────────────▼─────────────────────────────────────┐", ACCENT),
+        ("        │ GEOMETRY OPTIMIZER                                                     │", ACCENT),
+        ("        │ ────────────────────────────────────────────────────────────────────   │", TEXT),
+        ("        │ • load_geometry()  • mace_omol.optimize()  • save_optimized()          │", TEXT),
+        ("        └─────────────────────────┬──────────────────────────────────────────────┘", ACCENT),
+        ("                                  │", DIM),
+        ("                ┌─────────────────┴─────────────────┐", DIM),
+        ("                │                                   │", DIM),
+        ("┌───────────────▼─────────────┐     ┌───────────────▼──────────────────────────┐", ACCENT),
+        ("│ DFT BASELINE                │     │ ML FREQ CALC                             │", ACCENT),
+        ("│ ──────────────────────────  │     │ ────────────────────────────────────────  │", TEXT),
+        ("│    ╭─────────────────╮      │     │ • load_mace_calculator()                 │", TEXT),
+        ("│    │ Built-in opt    │      │     │   (MACE-MP/MACE-OMOL)                    │", TEXT),
+        ("│    │ B3LYP/6-31G(d,p)│      │     │ • get_dipole_calculator()                │", TEXT),
+        ("│    ╰────────┬────────╯      │     │   (Espaloma/MACE-ML/xTB)                 │", TEXT),
+        ("│             ▼               │     │ • setup_zmq_server()                     │", TEXT),
+        ("│ • gaussian_freq()           │     │ • launch_gaussian()                      │", TEXT),
+        ("│ • parse_gaussian()          │     │ • zmq_dipole_loop()                      │", TEXT),
+        ("│ • extract_frequencies()     │     │   (via ZMQ bridge - see slide)           │", TEXT),
+        ("└───────────────┬─────────────┘     └──────────────┬───────────────────────────┘", ACCENT),
+        ("                │                                  │", DIM),
+        ("                └──────────────┬───────────────────┘", DIM),
+        ("                               │", DIM),
+        ("┌──────────────────────────────▼───────────────────────────────────────────────────────────────────────────────────┐", ACCENT),
+        ("│ ANALYSIS & COMPARISON                                                                                             │", ACCENT),
+        ("│ ────────────────────────────────────────────────────────────────────────────────────────────────────────────────  │", TEXT),
+        ("│  ┌──────────┐  ┌───────────┐  ┌─────────────┐  ┌───────────┐  ┌────────────────┐  ┌─────────────┐             │", ACCENT),
+        ("│  │ load_all │─▶│ find_dft_ │─▶│ eigenvector │─▶│ kde_      │─▶│ calculate_     │─▶│ plot_       │             │", ACCENT),
+        ("│  │ results()│  │ baseline()│  │ matching()  │  │ broaden() │  │ metrics()      │  │ regression()│             │", TEXT),
+        ("│  └──────────┘  └───────────┘  └─────────────┘  └───────────┘  └────────────────┘  └─────────────┘             │", ACCENT),
+        ("└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘", ACCENT),
+        ("                                          │", DIM),
+        ("                                          ▼", DIM),
+        ("                            ┌─────────────────────────────────┐", ACCENT),
+        ("                            │ generate_html_report()          │", ACCENT),
+        ("                            │ (interactive plots,             │", TEXT),
+        ("                            │  publication-ready)             │", TEXT),
+        ("                            └─────────────────────────────────┘", ACCENT),
+    ]
+
+    for i, (line, color) in enumerate(lines):
+        if i > 0:
+            tf.add_paragraph()
+        p = tf.paragraphs[i]
+        p.text = line
+        p.font.size = Pt(8)
+        p.font.name = FONT
+        p.font.color.rgb = color
+        p.space_after = Pt(0)
+        p.line_spacing = 1.0
+
+
 def main():
     """Generate detailed workflow test slides."""
     prs = Presentation()
@@ -706,11 +781,14 @@ def main():
     create_grid_modules_workflow(prs)
     print("  ✓ Grid modules (side-by-side layout)")
 
+    create_final_simplified_workflow(prs)
+    print("  ✓ Final simplified workflow (geom opt on top, analysis in one row)")
+
     # Save presentation
     output_path = "../test_detailed_workflow.pptx"
     prs.save(output_path)
     print(f"\n✓ Test presentation created: {output_path}")
-    print(f"  → 8 slides with detailed workflow variations")
+    print(f"  → 9 slides with detailed workflow variations")
     print(f"  → Shows inputs, outputs, branches, and ZMQ details")
     print(f"  → Terminal Dark styling")
 
