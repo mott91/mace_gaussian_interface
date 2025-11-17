@@ -287,6 +287,218 @@ def create_compact_detailed_workflow(prs):
         p.line_spacing = 1.0
 
 
+def create_expanded_vertical_workflow(prs):
+    """Expanded vertical workflow - maximum detail, full width."""
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    slide.background.fill.solid()
+    slide.background.fill.fore_color.rgb = BG
+
+    # Title
+    title_box = slide.shapes.add_textbox(Inches(0.5), Inches(0.3), Inches(9), Inches(0.5))
+    tf = title_box.text_frame
+    tf.text = "$ cat workflow_expanded.txt"
+    p = tf.paragraphs[0]
+    p.font.size = Pt(24)
+    p.font.name = FONT
+    p.font.color.rgb = ACCENT
+    p.font.bold = True
+
+    # Flowchart - use full width
+    flow_box = slide.shapes.add_textbox(Inches(0.3), Inches(0.95), Inches(9.4), Inches(6.35))
+    tf = flow_box.text_frame
+
+    lines = [
+        ("INPUT: molecule.xyz (Cartesian coordinates, atom types)", GREEN),
+        ("    │", DIM),
+        ("    ▼", DIM),
+        ("┌─────────────────────────────────────────────────────────────────────────────────┐", ACCENT),
+        ("│  PHASE 1: GEOMETRY OPTIMIZATION                                                 │", ACCENT),
+        ("│  Calculator: MACE-OMOL (default) | Options: MACE-OFF, MACE-MP                  │", TEXT),
+        ("│  Method: BFGS optimizer, force convergence 0.01 eV/Å                           │", TEXT),
+        ("│  Output: optimized.xyz (relaxed structure), geometry_opt/results.json          │", TEXT),
+        ("│  Metrics: initial_energy, final_energy, n_steps, convergence_status            │", TEXT),
+        ("└─────────────────────────────────────────────────────────────────────────────────┘", ACCENT),
+        ("    │", DIM),
+        ("    ├─────────────────────────────────────┬──────────────────────────────────────┐", DIM),
+        ("    │                                     │                                      │", DIM),
+        ("    │ (optional, --skip-dft-baseline)     │ (default: True)                      │", DIM),
+        ("    ▼                                     ▼                                      ▼", DIM),
+        ("┌───────────────────────┐  ┌──────────────────────────────────────────────────────────────┐", GREEN),
+        ("│  PHASE 2: DFT         │  │  PHASE 3: ML FREQUENCY CALCULATIONS                          │", GREEN),
+        ("│  BASELINE             │  │  Configuration: --energy-calculators, --dipole-calculators   │", ORANGE),
+        ("│  ─────────────────    │  │  ─────────────────────────────────────────────────────────   │", TEXT),
+        ("│  Method: B3LYP        │  │  Energy Calculators:                                         │", TEXT),
+        ("│  Basis: 6-31G(d,p)    │  │    • MACE-MP (large, 2M params, general chemistry)           │", TEXT),
+        ("│  Freq: Harmonic       │  │    • MACE-OMOL (molecules, 1.5M params, organic focus)       │", TEXT),
+        ("│  Program: Gaussian 16 │  │  Dipole Calculators (with automatic fallback):               │", TEXT),
+        ("│                       │  │    1. MACE-ML: Custom dipole model (~/dipole_model/)         │", ORANGE),
+        ("│  Output:              │  │    2. Espaloma: Charge-based (Σ qᵢrᵢ)                        │", ORANGE),
+        ("│  b3lyp_6-31Gdp/       │  │    3. xTB: GFN2-xTB semi-empirical                           │", ORANGE),
+        ("│  results.json         │  │  ┌────────────────────────────────────────────────────────┐  │", ORANGE),
+        ("│  ├─ frequencies[]     │  │  │  ZMQ BRIDGE ARCHITECTURE (IPC)                         │  │", ORANGE),
+        ("│  ├─ intensities[]     │  │  │  ─────────────────────────────────                     │  │", ORANGE),
+        ("│  └─ runtime_s         │  │  │  Main Process (gm_main.py):                            │  │", ORANGE),
+        ("│                       │  │  │    • Binds ZMQ server socket (.ipc_file)               │  │", ORANGE),
+        ("└───────────────────────┘  │  │    • Loads ML dipole calculator                        │  │", ORANGE),
+        ("    │                      │  │    • Waits for geometry requests                       │  │", ORANGE),
+        ("    │                      │  │    • Computes dipole derivatives                       │  │", ORANGE),
+        ("    │                      │  │    • Writes Gaussian-format output                     │  │", ORANGE),
+        ("    │                      │  │  Helper Script (gm_helper.py):                         │  │", ORANGE),
+        ("    │                      │  │    • Launched by Gaussian External directive           │  │", ORANGE),
+        ("    │                      │  │    • Connects to ZMQ socket                            │  │", ORANGE),
+        ("    │                      │  │    • Sends: 'infile|outfile'                           │  │", ORANGE),
+        ("    │                      │  │    • Waits for: 'done' signal                          │  │", ORANGE),
+        ("    │                      │  │    • Returns control to Gaussian                       │  │", ORANGE),
+        ("    │                      │  │  Gaussian 16:                                          │  │", ORANGE),
+        ("    │                      │  │    • Freq calculation (harmonic/anharmonic)            │  │", ORANGE),
+        ("    │                      │  │    • Calls external for each geometry                  │  │", ORANGE),
+        ("    │                      │  └────────────────────────────────────────────────────────┘  │", ORANGE),
+        ("    │                      │  Combinations tested (4 total):                              │", TEXT),
+        ("    │                      │    • mace_mp_espaloma/results.json                           │", TEXT),
+        ("    │                      │    • mace_mp_mace_ml/results.json                            │", TEXT),
+        ("    │                      │    • mace_omol_espaloma/results.json                         │", TEXT),
+        ("    │                      │    • mace_omol_mace_ml/results.json                          │", TEXT),
+        ("    │                      └──────────────────────────────────────────────────────────────┘", GREEN),
+        ("    │                                     │", DIM),
+        ("    └─────────────────────────────────────┘", DIM),
+        ("    │", DIM),
+        ("    ▼", DIM),
+        ("┌─────────────────────────────────────────────────────────────────────────────────┐", ACCENT),
+        ("│  PHASE 4: ANALYSIS & COMPARISON (comparison_workflow.py)                        │", ACCENT),
+        ("│  ─────────────────────────────────────────────────────────────────────────────  │", TEXT),
+        ("│  Load Results: Parse all results.json files from comparison_results/            │", TEXT),
+        ("│  Find Baseline: Auto-detect b3lyp_6-31Gdp as reference                          │", TEXT),
+        ("│  Statistical Metrics:                                                           │", TEXT),
+        ("│    • MAE (Mean Absolute Error) in cm⁻¹                                          │", TEXT),
+        ("│    • RMSE (Root Mean Square Error) in cm⁻¹                                      │", TEXT),
+        ("│    • R² (Coefficient of Determination)                                          │", TEXT),
+        ("│    • Linear regression: slope, intercept                                        │", TEXT),
+        ("│  Visualizations:                                                                │", TEXT),
+        ("│    • Regression plots: ML freq vs DFT freq (scatter + fit line)                 │", TEXT),
+        ("│    • KDE spectra: Gaussian broadening (FWHM=8.0 cm⁻¹, grid 400-4000 cm⁻¹)      │", TEXT),
+        ("│    • Combined comparison plots (all methods overlaid)                           │", TEXT),
+        ("│  Output: {molecule}_spectral_analysis.html (interactive, publication-ready)     │", TEXT),
+        ("└─────────────────────────────────────────────────────────────────────────────────┘", ACCENT),
+    ]
+
+    for i, (line, color) in enumerate(lines):
+        if i > 0:
+            tf.add_paragraph()
+        p = tf.paragraphs[i]
+        p.text = line
+        p.font.size = Pt(8)
+        p.font.name = FONT
+        p.font.color.rgb = color
+        p.space_after = Pt(0)
+        p.line_spacing = 1.0
+
+
+def create_dim_only_workflow(prs):
+    """All DIM (gray) version - understated monochrome style."""
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    slide.background.fill.solid()
+    slide.background.fill.fore_color.rgb = BG
+
+    # Title
+    title_box = slide.shapes.add_textbox(Inches(0.5), Inches(0.3), Inches(9), Inches(0.5))
+    tf = title_box.text_frame
+    tf.text = "$ cat workflow_monochrome.txt"
+    p = tf.paragraphs[0]
+    p.font.size = Pt(24)
+    p.font.name = FONT
+    p.font.color.rgb = DIM
+    p.font.bold = True
+
+    # Flowchart - use full width, all DIM
+    flow_box = slide.shapes.add_textbox(Inches(0.3), Inches(0.95), Inches(9.4), Inches(6.35))
+    tf = flow_box.text_frame
+
+    lines = [
+        "INPUT: molecule.xyz (Cartesian coordinates, atom types)",
+        "    │",
+        "    ▼",
+        "┌─────────────────────────────────────────────────────────────────────────────────┐",
+        "│  PHASE 1: GEOMETRY OPTIMIZATION                                                 │",
+        "│  Calculator: MACE-OMOL (default) | Options: MACE-OFF, MACE-MP                  │",
+        "│  Method: BFGS optimizer, force convergence 0.01 eV/Å                           │",
+        "│  Output: optimized.xyz (relaxed structure), geometry_opt/results.json          │",
+        "│  Metrics: initial_energy, final_energy, n_steps, convergence_status            │",
+        "└─────────────────────────────────────────────────────────────────────────────────┘",
+        "    │",
+        "    ├─────────────────────────────────────┬──────────────────────────────────────┐",
+        "    │                                     │                                      │",
+        "    │ (optional, --skip-dft-baseline)     │ (default: True)                      │",
+        "    ▼                                     ▼                                      ▼",
+        "┌───────────────────────┐  ┌──────────────────────────────────────────────────────────────┐",
+        "│  PHASE 2: DFT         │  │  PHASE 3: ML FREQUENCY CALCULATIONS                          │",
+        "│  BASELINE             │  │  Configuration: --energy-calculators, --dipole-calculators   │",
+        "│  ─────────────────    │  │  ─────────────────────────────────────────────────────────   │",
+        "│  Method: B3LYP        │  │  Energy Calculators:                                         │",
+        "│  Basis: 6-31G(d,p)    │  │    • MACE-MP (large, 2M params, general chemistry)           │",
+        "│  Freq: Harmonic       │  │    • MACE-OMOL (molecules, 1.5M params, organic focus)       │",
+        "│  Program: Gaussian 16 │  │  Dipole Calculators (with automatic fallback):               │",
+        "│                       │  │    1. MACE-ML: Custom dipole model (~/dipole_model/)         │",
+        "│  Output:              │  │    2. Espaloma: Charge-based (Σ qᵢrᵢ)                        │",
+        "│  b3lyp_6-31Gdp/       │  │    3. xTB: GFN2-xTB semi-empirical                           │",
+        "│  results.json         │  │  ┌────────────────────────────────────────────────────────┐  │",
+        "│  ├─ frequencies[]     │  │  │  ZMQ BRIDGE ARCHITECTURE (IPC)                         │  │",
+        "│  ├─ intensities[]     │  │  │  ─────────────────────────────────                     │  │",
+        "│  └─ runtime_s         │  │  │  Main Process (gm_main.py):                            │  │",
+        "│                       │  │  │    • Binds ZMQ server socket (.ipc_file)               │  │",
+        "└───────────────────────┘  │  │    • Loads ML dipole calculator                        │  │",
+        "    │                      │  │    • Waits for geometry requests                       │  │",
+        "    │                      │  │    • Computes dipole derivatives                       │  │",
+        "    │                      │  │    • Writes Gaussian-format output                     │  │",
+        "    │                      │  │  Helper Script (gm_helper.py):                         │  │",
+        "    │                      │  │    • Launched by Gaussian External directive           │  │",
+        "    │                      │  │    • Connects to ZMQ socket                            │  │",
+        "    │                      │  │    • Sends: 'infile|outfile'                           │  │",
+        "    │                      │  │    • Waits for: 'done' signal                          │  │",
+        "    │                      │  │    • Returns control to Gaussian                       │  │",
+        "    │                      │  │  Gaussian 16:                                          │  │",
+        "    │                      │  │    • Freq calculation (harmonic/anharmonic)            │  │",
+        "    │                      │  │    • Calls external for each geometry                  │  │",
+        "    │                      │  └────────────────────────────────────────────────────────┘  │",
+        "    │                      │  Combinations tested (4 total):                              │",
+        "    │                      │    • mace_mp_espaloma/results.json                           │",
+        "    │                      │    • mace_mp_mace_ml/results.json                            │",
+        "    │                      │    • mace_omol_espaloma/results.json                         │",
+        "    │                      │    • mace_omol_mace_ml/results.json                          │",
+        "    │                      └──────────────────────────────────────────────────────────────┘",
+        "    │                                     │",
+        "    └─────────────────────────────────────┘",
+        "    │",
+        "    ▼",
+        "┌─────────────────────────────────────────────────────────────────────────────────┐",
+        "│  PHASE 4: ANALYSIS & COMPARISON (comparison_workflow.py)                        │",
+        "│  ─────────────────────────────────────────────────────────────────────────────  │",
+        "│  Load Results: Parse all results.json files from comparison_results/            │",
+        "│  Find Baseline: Auto-detect b3lyp_6-31Gdp as reference                          │",
+        "│  Statistical Metrics:                                                           │",
+        "│    • MAE (Mean Absolute Error) in cm⁻¹                                          │",
+        "│    • RMSE (Root Mean Square Error) in cm⁻¹                                      │",
+        "│    • R² (Coefficient of Determination)                                          │",
+        "│    • Linear regression: slope, intercept                                        │",
+        "│  Visualizations:                                                                │",
+        "│    • Regression plots: ML freq vs DFT freq (scatter + fit line)                 │",
+        "│    • KDE spectra: Gaussian broadening (FWHM=8.0 cm⁻¹, grid 400-4000 cm⁻¹)      │",
+        "│    • Combined comparison plots (all methods overlaid)                           │",
+        "│  Output: {molecule}_spectral_analysis.html (interactive, publication-ready)     │",
+        "└─────────────────────────────────────────────────────────────────────────────────┘",
+    ]
+
+    for i, line in enumerate(lines):
+        if i > 0:
+            tf.add_paragraph()
+        p = tf.paragraphs[i]
+        p.text = line
+        p.font.size = Pt(8)
+        p.font.name = FONT
+        p.font.color.rgb = DIM
+        p.space_after = Pt(0)
+        p.line_spacing = 1.0
+
+
 def main():
     """Generate detailed workflow test slides."""
     prs = Presentation()
@@ -307,11 +519,17 @@ def main():
     create_compact_detailed_workflow(prs)
     print("  ✓ Compact detailed workflow")
 
+    create_expanded_vertical_workflow(prs)
+    print("  ✓ Expanded vertical (maximum detail, full width)")
+
+    create_dim_only_workflow(prs)
+    print("  ✓ DIM-only monochrome version (full width)")
+
     # Save presentation
     output_path = "../test_detailed_workflow.pptx"
     prs.save(output_path)
     print(f"\n✓ Test presentation created: {output_path}")
-    print(f"  → 4 slides with detailed workflow variations")
+    print(f"  → 6 slides with detailed workflow variations")
     print(f"  → Shows inputs, outputs, branches, and ZMQ details")
     print(f"  → Terminal Dark styling")
 
