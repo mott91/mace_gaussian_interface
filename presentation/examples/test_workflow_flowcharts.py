@@ -248,6 +248,68 @@ def create_compact_workflow_slide(prs):
         p.space_after = Pt(6)
 
 
+def create_combined_workflow_slide(prs):
+    """Combined flowchart - detailed style with vertical language."""
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    slide.background.fill.solid()
+    slide.background.fill.fore_color.rgb = BG
+
+    # Title
+    title_box = slide.shapes.add_textbox(Inches(0.5), Inches(0.3), Inches(9), Inches(0.5))
+    tf = title_box.text_frame
+    tf.text = "$ cat workflow.txt"
+    p = tf.paragraphs[0]
+    p.font.size = Pt(24)
+    p.font.name = FONT
+    p.font.color.rgb = ACCENT
+    p.font.bold = True
+
+    # Flowchart box
+    flow_box = slide.shapes.add_textbox(Inches(1.2), Inches(1.2), Inches(7.6), Inches(5.8))
+    tf = flow_box.text_frame
+
+    flowchart_lines = [
+        ("water.xyz", TEXT),
+        ("    ↓", DIM),
+        ("╔═════════════════════════════════════════════════╗", ACCENT),
+        ("║  Phase 1: Geometry Optimization                ║", ACCENT),
+        ("║  → MACE-OMOL calculator                         ║", TEXT),
+        ("║  → Output: optimized.xyz                        ║", TEXT),
+        ("╚═════════════════════════════════════════════════╝", ACCENT),
+        ("    ↓", DIM),
+        ("╔═════════════════════════════════════════════════╗", ACCENT),
+        ("║  Phase 2: DFT Baseline                          ║", ACCENT),
+        ("║  → B3LYP/6-31G(d,p)                             ║", TEXT),
+        ("║  → Output: reference frequencies                ║", TEXT),
+        ("╚═════════════════════════════════════════════════╝", ACCENT),
+        ("    ↓", DIM),
+        ("╔═════════════════════════════════════════════════╗", ACCENT),
+        ("║  Phase 3: ML Frequency Calculations             ║", ACCENT),
+        ("║  → Energy: MACE-MP/MACE-OMOL                    ║", TEXT),
+        ("║  → Dipole: Espaloma/MACE-ML                     ║", TEXT),
+        ("║  → ZMQ bridge → Gaussian                        ║", TEXT),
+        ("╚═════════════════════════════════════════════════╝", ACCENT),
+        ("    ↓", DIM),
+        ("╔═════════════════════════════════════════════════╗", ACCENT),
+        ("║  Phase 4: Analysis & Comparison                 ║", ACCENT),
+        ("║  → Statistics: MAE, RMSE, R²                    ║", TEXT),
+        ("║  → Plots: regression, spectra                   ║", TEXT),
+        ("║  → Output: HTML report                          ║", TEXT),
+        ("╚═════════════════════════════════════════════════╝", ACCENT),
+    ]
+
+    for i, (line, color) in enumerate(flowchart_lines):
+        if i > 0:
+            tf.add_paragraph()
+        p = tf.paragraphs[i]
+        p.text = line
+        p.font.size = Pt(11)
+        p.font.name = FONT
+        p.font.color.rgb = color
+        p.space_after = Pt(2)
+        p.line_spacing = 1.0
+
+
 def main():
     """Generate test presentation with different flowchart styles."""
     prs = Presentation()
@@ -269,11 +331,14 @@ def main():
     create_compact_workflow_slide(prs)
     print("  ✓ Compact flowchart")
 
+    create_combined_workflow_slide(prs)
+    print("  ✓ Combined flowchart (detailed style + vertical language)")
+
     # Save presentation
     output_path = "../test_workflow_flowcharts.pptx"
     prs.save(output_path)
     print(f"\n✓ Test presentation created: {output_path}")
-    print(f"  → 4 slides with different flowchart styles")
+    print(f"  → 5 slides with different flowchart styles")
     print(f"  → Terminal Dark styling")
     print(f"\nReview the slides and pick your favorite style!")
 
