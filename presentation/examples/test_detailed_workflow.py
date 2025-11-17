@@ -499,6 +499,192 @@ def create_dim_only_workflow(prs):
         p.line_spacing = 1.0
 
 
+def create_modular_boxes_workflow(prs):
+    """Modular workflow with many interconnected boxes for each function."""
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    slide.background.fill.solid()
+    slide.background.fill.fore_color.rgb = BG
+
+    # Title
+    title_box = slide.shapes.add_textbox(Inches(0.5), Inches(0.3), Inches(9), Inches(0.5))
+    tf = title_box.text_frame
+    tf.text = "$ cat workflow_modular.txt"
+    p = tf.paragraphs[0]
+    p.font.size = Pt(22)
+    p.font.name = FONT
+    p.font.color.rgb = ACCENT
+    p.font.bold = True
+
+    # Flowchart - use full width
+    flow_box = slide.shapes.add_textbox(Inches(0.2), Inches(0.9), Inches(9.6), Inches(6.4))
+    tf = flow_box.text_frame
+
+    lines = [
+        ("[molecule.xyz]", GREEN),
+        ("      │", DIM),
+        ("┌─────▼──────────────────────┐", ACCENT),
+        ("│ load_geometry()            │", ACCENT),
+        ("└─────┬──────────────────────┘", ACCENT),
+        ("      │", DIM),
+        ("┌─────▼──────────────────────┐", ACCENT),
+        ("│ mace_omol.optimize()       │", ACCENT),
+        ("└─────┬──────────────────────┘", ACCENT),
+        ("      ├──────────────────────────────────┬───────────────────────────────────┐", DIM),
+        ("      │                                  │                                   │", DIM),
+        ("┌─────▼──────────┐  ┌──────────────────▼──────────────┐  ┌─────────────────▼─────────────┐", GREEN),
+        ("│ gaussian_dft() │  │ load_mace_calculator()          │  │ parse_geometry_results()      │", GREEN),
+        ("│ B3LYP/6-31Gdp  │  │ (MACE-MP/MACE-OMOL)             │  │ → optimized.xyz               │", TEXT),
+        ("└─────┬──────────┘  └──────────────────┬──────────────┘  └───────────────────────────────┘", GREEN),
+        ("      │                                │", DIM),
+        ("┌─────▼──────────┐  ┌──────────────────▼──────────────┐", ORANGE),
+        ("│ parse_freq()   │  │ get_dipole_calculator()         │", ORANGE),
+        ("└─────┬──────────┘  │ → espaloma/mace_ml/xtb          │", TEXT),
+        ("      │             └──────────────────┬──────────────┘", ORANGE),
+        ("      │                                │", DIM),
+        ("      │             ┌──────────────────▼──────────────┐", ORANGE),
+        ("      │             │ setup_zmq_server()              │", ORANGE),
+        ("      │             │ bind(.ipc_file)                 │", TEXT),
+        ("      │             └──────────────────┬──────────────┘", ORANGE),
+        ("      │                                │", DIM),
+        ("      │             ┌──────────────────▼──────────────┐", ORANGE),
+        ("      │             │ launch_gaussian()               │", ORANGE),
+        ("      │             │ External=\"gm_helper.py\"         │", TEXT),
+        ("      │             └──────────────────┬──────────────┘", ORANGE),
+        ("      │                                │", DIM),
+        ("      │             ┌──────────────────▼──────────────┐", ORANGE),
+        ("      │             │ zmq_dipole_loop()               │", ORANGE),
+        ("      │             │ • receive geometry              │", TEXT),
+        ("      │             │ • compute_dipoles()             │", TEXT),
+        ("      │             │ • write_gaussian_format()       │", TEXT),
+        ("      │             └──────────────────┬──────────────┘", ORANGE),
+        ("      │                                │", DIM),
+        ("      │             ┌──────────────────▼──────────────┐", ORANGE),
+        ("      │             │ parse_ml_results()              │", ORANGE),
+        ("      │             └──────────────────┬──────────────┘", ORANGE),
+        ("      │                                │", DIM),
+        ("      └────────────────────────────────┘", DIM),
+        ("      │", DIM),
+        ("┌─────▼─────────────────────────────────┐", ACCENT),
+        ("│ load_all_results()                    │", ACCENT),
+        ("│ comparison_results/**/results.json    │", TEXT),
+        ("└─────┬─────────────────────────────────┘", ACCENT),
+        ("      │", DIM),
+        ("┌─────▼─────────────────────────────────┐", ACCENT),
+        ("│ find_dft_baseline()                   │", ACCENT),
+        ("│ auto-detect b3lyp_6-31Gdp             │", TEXT),
+        ("└─────┬─────────────────────────────────┘", ACCENT),
+        ("      │", DIM),
+        ("┌─────▼─────────────────────────────────┐", ACCENT),
+        ("│ eigenvector_mode_matching()           │", ACCENT),
+        ("│ dot_product(modes_dft, modes_ml)      │", TEXT),
+        ("└─────┬─────────────────────────────────┘", ACCENT),
+        ("      │", DIM),
+        ("┌─────▼─────────────────────────────────┐", ACCENT),
+        ("│ calculate_metrics()                   │", ACCENT),
+        ("│ MAE, RMSE, R², regression             │", TEXT),
+        ("└─────┬─────────────────────────────────┘", ACCENT),
+        ("      ├─────────────────┬─────────────────┐", DIM),
+        ("      │                 │                 │", DIM),
+        ("┌─────▼──────┐  ┌───────▼──────┐  ┌──────▼─────────┐", ACCENT),
+        ("│ plot_      │  │ kde_         │  │ generate_html_ │", ACCENT),
+        ("│ regression │  │ broadening() │  │ report()       │", ACCENT),
+        ("└────────────┘  └──────────────┘  └────┬───────────┘", ACCENT),
+        ("                                       │", DIM),
+        ("                          [{molecule}_spectral_analysis.html]", GREEN),
+    ]
+
+    for i, (line, color) in enumerate(lines):
+        if i > 0:
+            tf.add_paragraph()
+        p = tf.paragraphs[i]
+        p.text = line
+        p.font.size = Pt(8)
+        p.font.name = FONT
+        p.font.color.rgb = color
+        p.space_after = Pt(0)
+        p.line_spacing = 1.0
+
+
+def create_grid_modules_workflow(prs):
+    """Grid-based layout showing modules side-by-side."""
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    slide.background.fill.solid()
+    slide.background.fill.fore_color.rgb = BG
+
+    # Title
+    title_box = slide.shapes.add_textbox(Inches(0.5), Inches(0.3), Inches(9), Inches(0.5))
+    tf = title_box.text_frame
+    tf.text = "$ cat workflow_grid.txt"
+    p = tf.paragraphs[0]
+    p.font.size = Pt(22)
+    p.font.name = FONT
+    p.font.color.rgb = ACCENT
+    p.font.bold = True
+
+    # Flowchart
+    flow_box = slide.shapes.add_textbox(Inches(0.2), Inches(0.9), Inches(9.6), Inches(6.4))
+    tf = flow_box.text_frame
+
+    lines = [
+        ("[molecule.xyz] ─────────────────────────────────────────────────────────────┐", GREEN),
+        ("      │                                                                      │", DIM),
+        ("┌─────▼────────────────┐     ┌────────────────────┐     ┌─────────────────▼┐", ACCENT),
+        ("│ GEOMETRY OPTIMIZER   │     │ DFT BASELINE       │     │ ML FREQ CALC     │", ACCENT),
+        ("│ ───────────────────  │     │ ─────────────────  │     │ ───────────────  │", TEXT),
+        ("│ • load_geometry()    │     │ • gaussian_run()   │     │ • load_mace()    │", TEXT),
+        ("│ • mace_omol.opt()    │────▶│ • parse_gaussian() │     │ • load_dipole()  │", TEXT),
+        ("│ • save_optimized()   │     │ • extract_freqs()  │     │ • setup_zmq()    │", TEXT),
+        ("└──────────────────────┘     └────────┬───────────┘     └─────┬────────────┘", ACCENT),
+        ("                                      │                       │", DIM),
+        ("                                      │     ┌─────────────────▼────────────┐", ORANGE),
+        ("                                      │     │ ZMQ BRIDGE                   │", ORANGE),
+        ("                                      │     │ ──────────────────────────   │", TEXT),
+        ("                                      │     │ ┌─────────┐  ┌────────────┐ │", ORANGE),
+        ("                                      │     │ │ Main    │  │ Helper     │ │", ORANGE),
+        ("                                      │     │ │ Process │◀▶│ Script     │ │", ORANGE),
+        ("                                      │     │ └────┬────┘  └──────┬─────┘ │", ORANGE),
+        ("                                      │     │      │              │       │", DIM),
+        ("                                      │     │      ▼              ▼       │", DIM),
+        ("                                      │     │ ┌───────────────────────┐  │", ORANGE),
+        ("                                      │     │ │ Gaussian Freq Calc    │  │", ORANGE),
+        ("                                      │     │ └───────────────────────┘  │", ORANGE),
+        ("                                      │     └──────────────┬───────────────┘", ORANGE),
+        ("                                      │                    │", DIM),
+        ("                                      │     ┌──────────────▼────────────┐", ORANGE),
+        ("                                      │     │ parse_ml_results()        │", ORANGE),
+        ("                                      │     └──────────────┬────────────┘", ORANGE),
+        ("                                      │                    │", DIM),
+        ("                                      └────────────────────┘", DIM),
+        ("                                      │", DIM),
+        ("┌─────────────────────────────────────▼──────────────────────────────────────┐", ACCENT),
+        ("│ ANALYSIS & COMPARISON                                                       │", ACCENT),
+        ("│ ──────────────────────────────────────────────────────────────────────────  │", TEXT),
+        ("│  ┌──────────────┐  ┌───────────────┐  ┌──────────┐  ┌──────────────────┐  │", ACCENT),
+        ("│  │ load_all()   │─▶│ find_dft_     │─▶│ mode_    │─▶│ calc_metrics()   │  │", ACCENT),
+        ("│  │              │  │ baseline()    │  │ matching │  │ (MAE/RMSE/R²)    │  │", TEXT),
+        ("│  └──────────────┘  └───────────────┘  └──────────┘  └─────┬────────────┘  │", ACCENT),
+        ("│                                                            │               │", DIM),
+        ("│  ┌──────────────┐  ┌───────────────┐  ┌────────────────────▼───────────┐  │", ACCENT),
+        ("│  │ plot_        │  │ kde_          │  │ generate_html_report()         │  │", ACCENT),
+        ("│  │ regression() │  │ broadening()  │  │ (interactive, publication)     │  │", TEXT),
+        ("│  └──────────────┘  └───────────────┘  └────────────────────────────────┘  │", ACCENT),
+        ("└─────────────────────────────────────────────┬───────────────────────────────┘", ACCENT),
+        ("                                              │", DIM),
+        ("                                   [{molecule}_spectral_analysis.html]", GREEN),
+    ]
+
+    for i, (line, color) in enumerate(lines):
+        if i > 0:
+            tf.add_paragraph()
+        p = tf.paragraphs[i]
+        p.text = line
+        p.font.size = Pt(8)
+        p.font.name = FONT
+        p.font.color.rgb = color
+        p.space_after = Pt(0)
+        p.line_spacing = 1.0
+
+
 def main():
     """Generate detailed workflow test slides."""
     prs = Presentation()
@@ -525,11 +711,17 @@ def main():
     create_dim_only_workflow(prs)
     print("  ✓ DIM-only monochrome version (full width)")
 
+    create_modular_boxes_workflow(prs)
+    print("  ✓ Modular boxes (function-level detail)")
+
+    create_grid_modules_workflow(prs)
+    print("  ✓ Grid modules (side-by-side layout)")
+
     # Save presentation
     output_path = "../test_detailed_workflow.pptx"
     prs.save(output_path)
     print(f"\n✓ Test presentation created: {output_path}")
-    print(f"  → 6 slides with detailed workflow variations")
+    print(f"  → 8 slides with detailed workflow variations")
     print(f"  → Shows inputs, outputs, branches, and ZMQ details")
     print(f"  → Terminal Dark styling")
 
