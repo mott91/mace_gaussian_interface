@@ -95,106 +95,29 @@ def create_side_by_side_zmq_diagram(prs):
     p.font.color.rgb = ACCENT
     p.font.bold = True
 
-    # Main Process box (left, blue)
-    main_box = slide.shapes.add_textbox(Inches(0.8), Inches(1.2), Inches(3.2), Inches(2))
-    tf = main_box.text_frame
-    main_lines = [
-        "┌─────────────────────┐",
-        "│  Main Process       │",
-        "│  (Python)           │",
-        "│                     │",
-        "│  • ZMQ server       │",
-        "│  • ML dipole calc   │",
-        "└─────────────────────┘",
-    ]
-    for i, line in enumerate(main_lines):
-        if i > 0:
-            tf.add_paragraph()
-        p = tf.paragraphs[i]
-        p.text = line
-        p.font.size = Pt(11)
-        p.font.name = FONT
-        p.font.color.rgb = ACCENT
-        p.space_after = Pt(1)
-        p.line_spacing = 1.0
+    # Diagram box
+    diagram_box = slide.shapes.add_textbox(Inches(0.5), Inches(1.3), Inches(9), Inches(5.5))
+    tf = diagram_box.text_frame
 
-    # Gaussian box (right, green)
-    gaussian_box = slide.shapes.add_textbox(Inches(5.8), Inches(1.2), Inches(3.2), Inches(2))
-    tf = gaussian_box.text_frame
-    gaussian_lines = [
-        "┌─────────────────────┐",
-        "│  Gaussian 16        │",
-        "│  (Fortran)          │",
-        "│                     │",
-        "│  • Freq calculation │",
-        "│  • Calls external   │",
-        "└─────────────────────┘",
-    ]
-    for i, line in enumerate(gaussian_lines):
-        if i > 0:
-            tf.add_paragraph()
-        p = tf.paragraphs[i]
-        p.text = line
-        p.font.size = Pt(11)
-        p.font.name = FONT
-        p.font.color.rgb = GREEN
-        p.space_after = Pt(1)
-        p.line_spacing = 1.0
-
-    # ZMQ arrow
-    zmq_arrow = slide.shapes.add_textbox(Inches(4), Inches(2), Inches(1.8), Inches(0.4))
-    tf = zmq_arrow.text_frame
-    tf.text = "◀──ZMQ──▶"
-    p = tf.paragraphs[0]
-    p.font.size = Pt(11)
-    p.font.name = FONT
-    p.font.color.rgb = DIM
-    p.alignment = PP_ALIGN.CENTER
-
-    # Helper box (bottom, orange)
-    helper_box = slide.shapes.add_textbox(Inches(3), Inches(3.8), Inches(4.2), Inches(1.6))
-    tf = helper_box.text_frame
-    helper_lines = [
-        "┌─────────────────────────────┐",
-        "│  Helper (gm_helper.py)      │",
-        "│  • Bridge between processes │",
-        "│  • Sends file paths         │",
-        "│  • Waits for completion     │",
-        "└─────────────────────────────┘",
-    ]
-    for i, line in enumerate(helper_lines):
-        if i > 0:
-            tf.add_paragraph()
-        p = tf.paragraphs[i]
-        p.text = line
-        p.font.size = Pt(11)
-        p.font.name = FONT
-        p.font.color.rgb = ORANGE
-        p.space_after = Pt(1)
-        p.line_spacing = 1.0
-
-    # Connection arrows
-    arrows_box = slide.shapes.add_textbox(Inches(1.5), Inches(3.3), Inches(6.5), Inches(0.6))
-    tf = arrows_box.text_frame
-    arrow_lines = [
-        "    ▲                       │",
-        "    └───────────────────────┘",
-    ]
-    for i, line in enumerate(arrow_lines):
-        if i > 0:
-            tf.add_paragraph()
-        p = tf.paragraphs[i]
-        p.text = line
-        p.font.size = Pt(11)
-        p.font.name = FONT
-        p.font.color.rgb = DIM
-        p.space_after = Pt(1)
-        p.line_spacing = 1.0
-
-    # Flow description
-    flow_box = slide.shapes.add_textbox(Inches(0.8), Inches(5.6), Inches(8), Inches(1.5))
-    tf = flow_box.text_frame
-    flow_lines = [
+    diagram_lines = [
+        ("┌─────────────────────┐        ┌─────────────────────┐", DIM),
+        ("│  Main Process       │◀──────▶│  Gaussian 16        │", DIM),
+        ("│  (Python)           │  ZMQ   │  (Fortran)          │", DIM),
+        ("│                     │        │                     │", DIM),
+        ("│  • ZMQ server       │        │  • Freq calculation │", DIM),
+        ("│  • ML dipole calc   │        │  • Calls external   │", DIM),
+        ("└─────────────────────┘        └─────────────────────┘", DIM),
+        ("         ▲                                 │", DIM),
+        ("         │                                 │", DIM),
+        ("         │         ZMQ socket              │", DIM),
+        ("         │                                 ▼", DIM),
+        ("         │          ┌─────────────────────────────┐", DIM),
+        ("         └──────────│  Helper (gm_helper.py)      │", DIM),
+        ("                    │  • Bridge between processes │", DIM),
+        ("                    │  • Sends file paths         │", DIM),
+        ("                    │  • Waits for completion     │", DIM),
+        ("                    └─────────────────────────────┘", DIM),
+        ("", TEXT),
         ("Flow:", ACCENT),
         ("  1. Main launches Gaussian with External directive", TEXT),
         ("  2. Gaussian calls helper when dipoles needed", TEXT),
@@ -202,7 +125,8 @@ def create_side_by_side_zmq_diagram(prs):
         ("  4. Main calculates dipoles, writes output", TEXT),
         ("  5. Helper returns to Gaussian", TEXT),
     ]
-    for i, (line, color) in enumerate(flow_lines):
+
+    for i, (line, color) in enumerate(diagram_lines):
         if i > 0:
             tf.add_paragraph()
         p = tf.paragraphs[i]
