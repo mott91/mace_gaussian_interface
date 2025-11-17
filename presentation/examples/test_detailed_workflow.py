@@ -612,7 +612,7 @@ def create_grid_modules_workflow(prs):
     slide.background.fill.fore_color.rgb = BG
 
     # Title
-    title_box = slide.shapes.add_textbox(Inches(0.5), Inches(0.3), Inches(9), Inches(0.5))
+    title_box = slide.shapes.add_textbox(Inches(0.4), Inches(0.3), Inches(9.2), Inches(0.5))
     tf = title_box.text_frame
     tf.text = "$ cat workflow_grid.txt"
     p = tf.paragraphs[0]
@@ -621,56 +621,45 @@ def create_grid_modules_workflow(prs):
     p.font.color.rgb = ACCENT
     p.font.bold = True
 
-    # Flowchart
-    flow_box = slide.shapes.add_textbox(Inches(0.2), Inches(0.9), Inches(9.6), Inches(6.4))
+    # Flowchart - use even more horizontal space
+    flow_box = slide.shapes.add_textbox(Inches(0.1), Inches(0.9), Inches(9.8), Inches(6.4))
     tf = flow_box.text_frame
 
     lines = [
-        ("[molecule.xyz] ─────────────────────────────────────────────────────────────┐", GREEN),
-        ("      │                                                                      │", DIM),
-        ("┌─────▼────────────────┐     ┌────────────────────┐     ┌─────────────────▼┐", ACCENT),
-        ("│ GEOMETRY OPTIMIZER   │     │ DFT BASELINE       │     │ ML FREQ CALC     │", ACCENT),
-        ("│ ───────────────────  │     │ ─────────────────  │     │ ───────────────  │", TEXT),
-        ("│ • load_geometry()    │     │ • gaussian_run()   │     │ • load_mace()    │", TEXT),
-        ("│ • mace_omol.opt()    │────▶│ • parse_gaussian() │     │ • load_dipole()  │", TEXT),
-        ("│ • save_optimized()   │     │ • extract_freqs()  │     │ • setup_zmq()    │", TEXT),
-        ("└──────────────────────┘     └────────┬───────────┘     └─────┬────────────┘", ACCENT),
-        ("                                      │                       │", DIM),
-        ("                                      │     ┌─────────────────▼────────────┐", ORANGE),
-        ("                                      │     │ ZMQ BRIDGE                   │", ORANGE),
-        ("                                      │     │ ──────────────────────────   │", TEXT),
-        ("                                      │     │ ┌─────────┐  ┌────────────┐ │", ORANGE),
-        ("                                      │     │ │ Main    │  │ Helper     │ │", ORANGE),
-        ("                                      │     │ │ Process │◀▶│ Script     │ │", ORANGE),
-        ("                                      │     │ └────┬────┘  └──────┬─────┘ │", ORANGE),
-        ("                                      │     │      │              │       │", DIM),
-        ("                                      │     │      ▼              ▼       │", DIM),
-        ("                                      │     │ ┌───────────────────────┐  │", ORANGE),
-        ("                                      │     │ │ Gaussian Freq Calc    │  │", ORANGE),
-        ("                                      │     │ └───────────────────────┘  │", ORANGE),
-        ("                                      │     └──────────────┬───────────────┘", ORANGE),
-        ("                                      │                    │", DIM),
-        ("                                      │     ┌──────────────▼────────────┐", ORANGE),
-        ("                                      │     │ parse_ml_results()        │", ORANGE),
-        ("                                      │     └──────────────┬────────────┘", ORANGE),
-        ("                                      │                    │", DIM),
-        ("                                      └────────────────────┘", DIM),
-        ("                                      │", DIM),
-        ("┌─────────────────────────────────────▼──────────────────────────────────────┐", ACCENT),
-        ("│ ANALYSIS & COMPARISON                                                       │", ACCENT),
-        ("│ ──────────────────────────────────────────────────────────────────────────  │", TEXT),
-        ("│  ┌──────────────┐  ┌───────────────┐  ┌──────────┐  ┌──────────────────┐  │", ACCENT),
-        ("│  │ load_all()   │─▶│ find_dft_     │─▶│ mode_    │─▶│ calc_metrics()   │  │", ACCENT),
-        ("│  │              │  │ baseline()    │  │ matching │  │ (MAE/RMSE/R²)    │  │", TEXT),
-        ("│  └──────────────┘  └───────────────┘  └──────────┘  └─────┬────────────┘  │", ACCENT),
-        ("│                                                            │               │", DIM),
-        ("│  ┌──────────────┐  ┌───────────────┐  ┌────────────────────▼───────────┐  │", ACCENT),
-        ("│  │ plot_        │  │ kde_          │  │ generate_html_report()         │  │", ACCENT),
-        ("│  │ regression() │  │ broadening()  │  │ (interactive, publication)     │  │", TEXT),
-        ("│  └──────────────┘  └───────────────┘  └────────────────────────────────┘  │", ACCENT),
-        ("└─────────────────────────────────────────────┬───────────────────────────────┘", ACCENT),
-        ("                                              │", DIM),
-        ("                                   [{molecule}_spectral_analysis.html]", GREEN),
+        ("[molecule.xyz] ───────────────────────────────────────────────────────────────────────────┐", GREEN),
+        ("      │                                                                                    │", DIM),
+        ("┌─────▼─────────────────────┐     ┌──────────────────────────────┐     ┌─────────────────▼──────────────┐", ACCENT),
+        ("│ GEOMETRY OPTIMIZER        │     │ DFT BASELINE                 │     │ ML FREQ CALC                   │", ACCENT),
+        ("│ ────────────────────────  │     │ ───────────────────────────  │     │ ──────────────────────────────  │", TEXT),
+        ("│ • load_geometry()         │     │    ╭─────────────────╮       │     │ • load_mace_calculator()       │", TEXT),
+        ("│ • mace_omol.optimize()    │────▶│    │ Built-in opt    │       │     │   (MACE-MP/MACE-OMOL)          │", TEXT),
+        ("│ • save_optimized()        │     │    │ B3LYP/6-31G(d,p)│       │     │ • get_dipole_calculator()      │", TEXT),
+        ("│                           │     │    ╰────────┬────────╯       │     │   (Espaloma/MACE-ML/xTB)       │", TEXT),
+        ("│                           │     │             ▼                │     │ • setup_zmq_server()           │", TEXT),
+        ("│                           │     │ • gaussian_freq()            │     │ • launch_gaussian()            │", TEXT),
+        ("│                           │     │ • parse_gaussian()           │     │ • zmq_dipole_loop()            │", TEXT),
+        ("│                           │     │ • extract_frequencies()      │     │   (via ZMQ bridge - see slide) │", TEXT),
+        ("└───────────────────────────┘     └──────────────┬───────────────┘     └─────────────────┬──────────────┘", ACCENT),
+        ("                                                 │                                       │", DIM),
+        ("                                                 └───────────────────┬───────────────────┘", DIM),
+        ("                                                                     │", DIM),
+        ("┌────────────────────────────────────────────────▼────────────────────────────────────────────────────────┐", ACCENT),
+        ("│ ANALYSIS & COMPARISON                                                                                    │", ACCENT),
+        ("│ ───────────────────────────────────────────────────────────────────────────────────────────────────────  │", TEXT),
+        ("│  ┌──────────────────┐  ┌───────────────────┐  ┌─────────────────┐  ┌───────────────────────────────┐  │", ACCENT),
+        ("│  │ load_all_        │─▶│ find_dft_         │─▶│ eigenvector_    │─▶│ calculate_metrics()           │  │", ACCENT),
+        ("│  │ results()        │  │ baseline()        │  │ mode_matching() │  │ • MAE (cm⁻¹)                  │  │", TEXT),
+        ("│  │                  │  │                   │  │                 │  │ • RMSE (cm⁻¹)                 │  │", TEXT),
+        ("│  │                  │  │                   │  │                 │  │ • R² (coeff. of determination)│  │", TEXT),
+        ("│  └──────────────────┘  └───────────────────┘  └─────────────────┘  └──────────┬────────────────────┘  │", ACCENT),
+        ("│                                                                                 │                       │", DIM),
+        ("│  ┌──────────────────┐  ┌───────────────────┐  ┌─────────────────────────────▼─────────────────────┐  │", ACCENT),
+        ("│  │ plot_regression()│  │ kde_broadening()  │  │ generate_html_report()                            │  │", ACCENT),
+        ("│  │ (ML vs DFT)      │  │ (FWHM=8.0 cm⁻¹)   │  │ (interactive plots, publication-ready)            │  │", TEXT),
+        ("│  └──────────────────┘  └───────────────────┘  └───────────────────────────────────────────────────┘  │", ACCENT),
+        ("└────────────────────────────────────────────────────┬─────────────────────────────────────────────────┘", ACCENT),
+        ("                                                     │", DIM),
+        ("                                          [{molecule}_spectral_analysis.html]", GREEN),
     ]
 
     for i, (line, color) in enumerate(lines):
