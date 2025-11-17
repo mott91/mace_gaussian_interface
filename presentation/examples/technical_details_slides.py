@@ -31,65 +31,40 @@ def create_dipole_calculation_slide(prs):
     slide.background.fill.fore_color.rgb = BG
 
     # Title
-    title_box = slide.shapes.add_textbox(Inches(0.5), Inches(0.3), Inches(9), Inches(0.5))
+    title_box = slide.shapes.add_textbox(Inches(0.5), Inches(0.4), Inches(9), Inches(0.5))
     tf = title_box.text_frame
-    tf.text = "$ cat dipole_calculation_methods.txt"
+    tf.text = "$ cat dipole_methods.md"
     p = tf.paragraphs[0]
-    p.font.size = Pt(24)
+    p.font.size = Pt(28)
     p.font.name = FONT
     p.font.color.rgb = ACCENT
     p.font.bold = True
 
     # Content
-    content_box = slide.shapes.add_textbox(Inches(0.5), Inches(1.0), Inches(9), Inches(6.0))
+    content_box = slide.shapes.add_textbox(Inches(0.8), Inches(1.2), Inches(8.4), Inches(4.8))
     tf = content_box.text_frame
-    tf.word_wrap = False
 
     lines = [
-        ("DIPOLE MOMENT CALCULATION METHODS", ACCENT),
-        ("═════════════════════════════════════════════════════════════════════════", DIM),
+        ("# MACE-ML (Direct Prediction)", ACCENT),
         ("", TEXT),
-        ("1. MACE-ML (Custom Dipole-Enabled MACE)", ORANGE),
-        ("   ─────────────────────────────────────", DIM),
-        ("   Model: DipolePolarizabilityMACE", TEXT),
-        ("   Path:  ~/mace_gaussian/dipole_model/model_1.model", DIM),
+        ("  Input → E(3)-equivariant NN → μ = (μx, μy, μz)", DIM),
         ("", TEXT),
-        ("   Architecture:", TEXT),
-        ("   ┌──────────────────────────────────────────────────────────────┐", ACCENT),
-        ("   │  Input: Atomic coordinates (x, y, z) + atomic numbers       │", TEXT),
-        ("   │         ↓                                                    │", DIM),
-        ("   │  E(3)-equivariant message passing layers                    │", TEXT),
-        ("   │         ↓                                                    │", DIM),
-        ("   │  Output: μ = (μx, μy, μz)  [Debye]                          │", GREEN),
-        ("   │          Direct prediction of molecular dipole moment        │", TEXT),
-        ("   └──────────────────────────────────────────────────────────────┘", ACCENT),
-        ("", TEXT),
-        ("   Advantages: Fast (~0.1s per geometry), physically consistent", TEXT),
-        ("   Limitations: Requires custom-trained model", DIM),
+        ("  → Direct dipole prediction", TEXT),
+        ("  → Fast (~0.1s per geometry)", TEXT),
+        ("  → Requires custom model", TEXT),
         ("", TEXT),
         ("", TEXT),
-        ("2. ESPALOMA (Charge-Based Approach)", ORANGE),
-        ("   ──────────────────────────────────", DIM),
-        ("   Method: Atomic partial charges from graph neural network", TEXT),
+        ("# Espaloma (Charge-Based)", ACCENT),
         ("", TEXT),
-        ("   Algorithm:", TEXT),
-        ("   ┌──────────────────────────────────────────────────────────────┐", ACCENT),
-        ("   │  1. Predict partial charges: q₁, q₂, ..., qₙ               │", TEXT),
-        ("   │                                                              │", TEXT),
-        ("   │  2. Calculate dipole moment:                                │", TEXT),
-        ("   │                        n                                     │", TEXT),
-        ("   │     μ = Σ qᵢ · rᵢ     (vector sum)                          │", GREEN),
-        ("   │        i=1                                                   │", TEXT),
-        ("   │                                                              │", TEXT),
-        ("   │     where: qᵢ = partial charge on atom i                    │", DIM),
-        ("   │            rᵢ = position vector of atom i                   │", DIM),
-        ("   └──────────────────────────────────────────────────────────────┘", ACCENT),
+        ("  Predict charges → μ = Σ qᵢ·rᵢ", DIM),
         ("", TEXT),
-        ("   Advantages: Widely available, interpretable (charge-based)", TEXT),
-        ("   Limitations: Indirect approach, charge assignment ambiguity", DIM),
+        ("  → ML partial charges (q₁, q₂, ..., qₙ)", TEXT),
+        ("  → Sum over atomic positions", TEXT),
+        ("  → Widely available, interpretable", TEXT),
         ("", TEXT),
         ("", TEXT),
-        ("FALLBACK HIERARCHY: MACE-ML → Espaloma → xTB → Geometry-based", PURPLE),
+        ("# Fallback Chain", ACCENT),
+        ("  MACE-ML → Espaloma → xTB → Geometry", DIM),
     ]
 
     for i, (line, color) in enumerate(lines):
@@ -97,10 +72,10 @@ def create_dipole_calculation_slide(prs):
             tf.add_paragraph()
         p = tf.paragraphs[i]
         p.text = line
-        p.font.size = Pt(9)
+        p.font.size = Pt(14)
         p.font.name = FONT
         p.font.color.rgb = color
-        p.space_after = Pt(0)
+        p.space_after = Pt(6)
         p.line_spacing = 1.0
 
 
@@ -111,69 +86,40 @@ def create_eigenvector_matching_slide(prs):
     slide.background.fill.fore_color.rgb = BG
 
     # Title
-    title_box = slide.shapes.add_textbox(Inches(0.5), Inches(0.3), Inches(9), Inches(0.5))
+    title_box = slide.shapes.add_textbox(Inches(0.5), Inches(0.4), Inches(9), Inches(0.5))
     tf = title_box.text_frame
-    tf.text = "$ cat eigenvector_mode_matching.txt"
+    tf.text = "$ cat mode_matching.md"
     p = tf.paragraphs[0]
-    p.font.size = Pt(24)
+    p.font.size = Pt(28)
     p.font.name = FONT
     p.font.color.rgb = ACCENT
     p.font.bold = True
 
     # Content
-    content_box = slide.shapes.add_textbox(Inches(0.5), Inches(1.0), Inches(9), Inches(6.0))
+    content_box = slide.shapes.add_textbox(Inches(0.8), Inches(1.2), Inches(8.4), Inches(4.8))
     tf = content_box.text_frame
-    tf.word_wrap = False
 
     lines = [
-        ("EIGENVECTOR MODE MATCHING ALGORITHM", ACCENT),
-        ("═════════════════════════════════════════════════════════════════════════", DIM),
+        ("# Problem: Frequency Order Mismatch", ACCENT),
         ("", TEXT),
-        ("PROBLEM: Frequency Ordering Mismatch", ORANGE),
-        ("─────────────────────────────────────", DIM),
+        ("  DFT:  [500, 1200, 1500, 2900, 3100] cm⁻¹", DIM),
+        ("  ML:   [498, 3095, 1205, 2895, 1498] cm⁻¹", DIM),
         ("", TEXT),
-        ("DFT and ML calculations produce vibrational frequencies in different orders:", TEXT),
-        ("", TEXT),
-        ("  DFT Frequencies:  [500, 1200, 1500, 2900, 3100, 3200] cm⁻¹", GREEN),
-        ("  ML Frequencies:   [498, 3195, 1205, 2895, 1498, 3098] cm⁻¹", ORANGE),
-        ("                     ↑    ↑     ↑     ↑     ↑     ↑", DIM),
-        ("  Cannot directly compare by index!", DIM),
+        ("  → Cannot compare by index", TEXT),
         ("", TEXT),
         ("", TEXT),
-        ("SOLUTION: Eigenvector Dot Product Matching", ACCENT),
-        ("───────────────────────────────────────────", DIM),
+        ("# Solution: Eigenvector Dot Product", ACCENT),
         ("", TEXT),
-        ("Each vibrational mode has an eigenvector describing atomic displacements:", TEXT),
+        ("  similarity = |v_ML · v_DFT|", DIM),
         ("", TEXT),
-        ("┌────────────────────────────────────────────────────────────────────────┐", ACCENT),
-        ("│  For each ML mode i:                                                   │", TEXT),
-        ("│                                                                         │", TEXT),
-        ("│    1. Calculate dot product with all DFT modes:                        │", TEXT),
-        ("│                                                                         │", TEXT),
-        ("│       similarity[j] = |v_ML[i] · v_DFT[j]|                             │", GREEN),
-        ("│                                                                         │", TEXT),
-        ("│       where v_ML[i], v_DFT[j] are normalized eigenvectors              │", DIM),
-        ("│                                                                         │", TEXT),
-        ("│    2. Find best match:                                                 │", TEXT),
-        ("│                                                                         │", TEXT),
-        ("│       matched_mode[i] = argmax similarity[j]                           │", GREEN),
-        ("│                              j                                          │", TEXT),
-        ("│                                                                         │", TEXT),
-        ("│    3. If similarity > threshold (0.8):                                 │", TEXT),
-        ("│       → Match confirmed, compare frequencies                           │", TEXT),
-        ("│       Else:                                                            │", TEXT),
-        ("│       → Mode not found in DFT calculation                              │", TEXT),
-        ("└────────────────────────────────────────────────────────────────────────┘", ACCENT),
+        ("  → Compare atomic displacement patterns", TEXT),
+        ("  → Find best match (threshold > 0.8)", TEXT),
+        ("  → Robust to frequency ordering", TEXT),
         ("", TEXT),
         ("", TEXT),
-        ("EXAMPLE MATCHING:", ORANGE),
-        ("", TEXT),
-        ("  ML Mode 1 (498 cm⁻¹)  → DFT Mode 1 (500 cm⁻¹)   [dot product: 0.996]", TEXT),
-        ("  ML Mode 2 (3195 cm⁻¹) → DFT Mode 6 (3200 cm⁻¹)  [dot product: 0.989]", TEXT),
-        ("  ML Mode 3 (1205 cm⁻¹) → DFT Mode 2 (1200 cm⁻¹)  [dot product: 0.993]", TEXT),
-        ("  ...", DIM),
-        ("", TEXT),
-        ("Implementation: gaussian_parser.py, analyze_spectra.py", PURPLE),
+        ("# Example", ACCENT),
+        ("  ML 498 cm⁻¹ → DFT 500 cm⁻¹  [0.996]", DIM),
+        ("  ML 3095 cm⁻¹ → DFT 3100 cm⁻¹ [0.989]", DIM),
     ]
 
     for i, (line, color) in enumerate(lines):
@@ -181,10 +127,10 @@ def create_eigenvector_matching_slide(prs):
             tf.add_paragraph()
         p = tf.paragraphs[i]
         p.text = line
-        p.font.size = Pt(9)
+        p.font.size = Pt(14)
         p.font.name = FONT
         p.font.color.rgb = color
-        p.space_after = Pt(0)
+        p.space_after = Pt(6)
         p.line_spacing = 1.0
 
 
@@ -195,87 +141,43 @@ def create_parsing_slide(prs):
     slide.background.fill.fore_color.rgb = BG
 
     # Title
-    title_box = slide.shapes.add_textbox(Inches(0.5), Inches(0.3), Inches(9), Inches(0.5))
+    title_box = slide.shapes.add_textbox(Inches(0.5), Inches(0.4), Inches(9), Inches(0.5))
     tf = title_box.text_frame
-    tf.text = "$ cat output_file_parsing.txt"
+    tf.text = "$ ls -la parsing/"
     p = tf.paragraphs[0]
-    p.font.size = Pt(24)
+    p.font.size = Pt(28)
     p.font.name = FONT
     p.font.color.rgb = ACCENT
     p.font.bold = True
 
     # Content
-    content_box = slide.shapes.add_textbox(Inches(0.5), Inches(1.0), Inches(9), Inches(6.0))
+    content_box = slide.shapes.add_textbox(Inches(0.8), Inches(1.2), Inches(8.4), Inches(4.8))
     tf = content_box.text_frame
-    tf.word_wrap = False
 
     lines = [
-        ("OUTPUT FILE PARSING REQUIREMENTS", ACCENT),
-        ("═════════════════════════════════════════════════════════════════════════", DIM),
+        ("# Gaussian .log Files (2-10 MB)", ACCENT),
         ("", TEXT),
-        ("MULTIPLE FILE FORMATS TO PARSE:", ORANGE),
+        ("  → Harmonic frequencies", TEXT),
+        ("  → Anharmonic frequencies", TEXT),
+        ("  → Overtones & combination bands", TEXT),
+        ("  → IR intensities", TEXT),
+        ("  → Eigenvectors (3N-6 modes)", TEXT),
         ("", TEXT),
-        ("1. GAUSSIAN OUTPUT FILES (.log)", ACCENT),
-        ("   ─────────────────────────────", DIM),
-        ("   Path: comparison_results/{molecule}/wb97xd/{molecule}_freq_anharm.log", TEXT),
-        ("   Size: ~2-10 MB (text), 10,000-50,000 lines", DIM),
-        ("", TEXT),
-        ("   Parsing Targets:", TEXT),
-        ("   ┌──────────────────────────────────────────────────────────────────┐", ACCENT),
-        ("   │ • Harmonic frequencies:                                          │", TEXT),
-        ("   │   Pattern: 'Frequencies --  500.00  1200.00  1500.00'           │", DIM),
-        ("   │                                                                  │", TEXT),
-        ("   │ • Anharmonic frequencies:                                        │", TEXT),
-        ("   │   Pattern: 'Fundamental Bands (cm-1)'                            │", DIM),
-        ("   │                                                                  │", TEXT),
-        ("   │ • Overtones and combination bands:                               │", TEXT),
-        ("   │   Pattern: '2(1)' or '1(1) + 2(1)'                               │", DIM),
-        ("   │                                                                  │", TEXT),
-        ("   │ • IR intensities:                                                │", TEXT),
-        ("   │   Pattern: 'IR Inten    --   25.00   50.00  100.00'             │", DIM),
-        ("   │                                                                  │", TEXT),
-        ("   │ • Normal mode eigenvectors:                                      │", TEXT),
-        ("   │   3N-6 modes × N atoms × 3 coordinates                           │", DIM),
-        ("   │   Pattern: 'Atom  AN      X      Y      Z'                       │", DIM),
-        ("   └──────────────────────────────────────────────────────────────────┘", ACCENT),
-        ("", TEXT),
-        ("   Challenges:", ORANGE),
-        ("   • Multi-column format (3 modes per block)", TEXT),
-        ("   • Scattered data across file (search 1000s of lines)", TEXT),
-        ("   • Anharmonic section sometimes missing (wb97xd issues)", TEXT),
+        ("  Challenges:", DIM),
+        ("  • Multi-column format (3 modes/block)", TEXT),
+        ("  • 10,000-50,000 lines to search", TEXT),
+        ("  • Regex pattern matching required", TEXT),
         ("", TEXT),
         ("", TEXT),
-        ("2. JSON RESULTS FILES (ML calculations)", ACCENT),
-        ("   ──────────────────────────────────────", DIM),
-        ("   Paths: comparison_results/{molecule}/{energy}_{dipole}/results.json", TEXT),
-        ("   Examples:", DIM),
-        ("     • mace_mp_espaloma/results.json", DIM),
-        ("     • mace_omol_mace_ml/results.json", DIM),
+        ("# JSON Results (ML)", ACCENT),
         ("", TEXT),
-        ("   Structure:", TEXT),
-        ("   ┌──────────────────────────────────────────────────────────────────┐", ACCENT),
-        ("   │ {                                                                │", TEXT),
-        ("   │   \"calculator_type\": \"ml\",                                      │", DIM),
-        ("   │   \"energy_calculator\": \"mace_mp\",                               │", DIM),
-        ("   │   \"dipole_calculator\": \"espaloma\",                              │", DIM),
-        ("   │   \"frequencies\": {                                               │", DIM),
-        ("   │     \"harmonic\": [500.0, 1200.0, 1500.0, ...],                   │", GREEN),
-        ("   │     \"anharmonic\": [498.0, 1195.0, 1497.0, ...]                  │", GREEN),
-        ("   │   },                                                             │", DIM),
-        ("   │   \"ir_intensities\": {                                            │", DIM),
-        ("   │     \"harmonic\": [25.0, 50.0, 100.0, ...],                       │", GREEN),
-        ("   │     \"anharmonic\": [26.0, 51.0, 102.0, ...]                      │", GREEN),
-        ("   │   },                                                             │", DIM),
-        ("   │   \"eigenvectors\": [[...], [...], ...],                          │", DIM),
-        ("   │   \"runtime_s\": 45.2                                             │", DIM),
-        ("   │ }                                                                │", TEXT),
-        ("   └──────────────────────────────────────────────────────────────────┘", ACCENT),
+        ("  {", DIM),
+        ("    \"frequencies\": [...],", DIM),
+        ("    \"ir_intensities\": [...],", DIM),
+        ("    \"eigenvectors\": [[...]]", DIM),
+        ("  }", DIM),
         ("", TEXT),
-        ("", TEXT),
-        ("PARSER IMPLEMENTATION:", PURPLE),
-        ("  • gaussian_parser.py: Regex-based Gaussian log parsing", TEXT),
-        ("  • results_manager.py: JSON loading and validation", TEXT),
-        ("  • comparison_workflow.py: Aggregates all results for analysis", TEXT),
+        ("  → Structured, easy to parse", TEXT),
     ]
 
     for i, (line, color) in enumerate(lines):
@@ -283,10 +185,10 @@ def create_parsing_slide(prs):
             tf.add_paragraph()
         p = tf.paragraphs[i]
         p.text = line
-        p.font.size = Pt(8)
+        p.font.size = Pt(14)
         p.font.name = FONT
         p.font.color.rgb = color
-        p.space_after = Pt(0)
+        p.space_after = Pt(6)
         p.line_spacing = 1.0
 
 
