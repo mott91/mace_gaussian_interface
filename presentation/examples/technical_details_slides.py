@@ -6,6 +6,7 @@ Covers:
 1. Dipole calculation methods (MACE-ML and Espaloma)
 2. Eigenvector mode matching algorithm
 3. Output file parsing requirements
+4. Workflow management and automation
 """
 
 from pptx import Presentation
@@ -19,7 +20,6 @@ ACCENT = RGBColor(88, 166, 255)  # #58A6FF - blue accent
 DIM = RGBColor(139, 148, 158)    # #8B949E - dimmed text
 GREEN = RGBColor(87, 171, 90)    # #57AB5A - success/input
 ORANGE = RGBColor(219, 109, 40)  # #DB6D28 - warning/highlight
-PURPLE = RGBColor(188, 140, 255) # #BC8CFF - special
 
 FONT = "Consolas"
 
@@ -192,6 +192,67 @@ def create_parsing_slide(prs):
         p.line_spacing = 1.0
 
 
+def create_workflow_management_slide(prs):
+    """Slide explaining workflow management and automation."""
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    slide.background.fill.solid()
+    slide.background.fill.fore_color.rgb = BG
+
+    # Title
+    title_box = slide.shapes.add_textbox(Inches(0.5), Inches(0.4), Inches(9), Inches(0.5))
+    tf = title_box.text_frame
+    tf.text = "$ cat workflow_automation.md"
+    p = tf.paragraphs[0]
+    p.font.size = Pt(28)
+    p.font.name = FONT
+    p.font.color.rgb = ACCENT
+    p.font.bold = True
+
+    # Content
+    content_box = slide.shapes.add_textbox(Inches(0.8), Inches(1.2), Inches(8.4), Inches(4.8))
+    tf = content_box.text_frame
+
+    lines = [
+        ("# Automatic Directory Structure", ACCENT),
+        ("", TEXT),
+        ("  comparison_results/", DIM),
+        ("    └─ {molecule}/", DIM),
+        ("       ├─ geometry_opt/", DIM),
+        ("       ├─ wb97xd/", DIM),
+        ("       └─ {energy}_{dipole}/", DIM),
+        ("", TEXT),
+        ("  → Created on-the-fly", TEXT),
+        ("  → Organized by calculator combination", TEXT),
+        ("", TEXT),
+        ("", TEXT),
+        ("# Smart File Detection", ACCENT),
+        ("", TEXT),
+        ("  → Auto-detect existing calculations", TEXT),
+        ("  → Skip completed steps", TEXT),
+        ("  → Resume from interruption", TEXT),
+        ("  → Find DFT baseline automatically", TEXT),
+        ("", TEXT),
+        ("", TEXT),
+        ("# Results Aggregation", ACCENT),
+        ("", TEXT),
+        ("  → Load all JSON results", TEXT),
+        ("  → Parse all .log files", TEXT),
+        ("  → Match modes across methods", TEXT),
+        ("  → Generate unified HTML report", TEXT),
+    ]
+
+    for i, (line, color) in enumerate(lines):
+        if i > 0:
+            tf.add_paragraph()
+        p = tf.paragraphs[i]
+        p.text = line
+        p.font.size = Pt(14)
+        p.font.name = FONT
+        p.font.color.rgb = color
+        p.space_after = Pt(6)
+        p.line_spacing = 1.0
+
+
 def main():
     """Generate technical details presentation."""
     prs = Presentation()
@@ -209,11 +270,14 @@ def main():
     create_parsing_slide(prs)
     print("  ✓ Output file parsing requirements")
 
+    create_workflow_management_slide(prs)
+    print("  ✓ Workflow management and automation")
+
     # Save presentation
     output_path = "../technical_details.pptx"
     prs.save(output_path)
     print(f"\n✓ Technical details presentation created: {output_path}")
-    print(f"  → 3 slides covering implementation details")
+    print(f"  → 4 slides covering implementation details")
     print(f"  → Terminal Dark styling")
 
 
