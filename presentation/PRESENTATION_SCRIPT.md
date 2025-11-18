@@ -15,11 +15,13 @@ The core idea is simple: what if we could use fast machine learning models to re
 
 So let me start with the problem. If you've ever run DFT frequency calculations, you know they're painfully slow. We're talking minutes to hours per molecule. For a single water molecule, you might wait 5 minutes. For anything larger, you're looking at hours or even days. This makes high-throughput screening basically impossible.
 
-The bottleneck is calculating the Hessian—the matrix of energy second derivatives—and dipole derivatives. For IR intensities, you need to know how the dipole moment changes as atoms move. In DFT, this requires recalculating the dipole at many displaced geometries, which is extremely expensive.
+The bottleneck is calculating the Hessian—the matrix of energy second derivatives—and dipole derivatives. In DFT, both of these require expensive calculations at many displaced geometries.
 
-Our solution is a hybrid approach. We use machine learning for three things: MACE calculates energies and forces, which are fast and accurate. Then we use ML dipole calculators—either our custom MACE-dipole model or Espaloma—to predict dipole moments. Critically, we calculate dipole derivatives using finite differences with these ML dipoles, then inject those derivatives into Gaussian through a ZMQ bridge. Gaussian still calculates the Hessian with DFT, but uses our ML dipole derivatives for IR intensities.
+Our solution is a hybrid approach that uses machine learning for the expensive parts. MACE calculates energies, forces, and the Hessian using automatic differentiation—this is fast because MACE can compute second derivatives analytically rather than numerically. We also use ML dipole calculators—either our custom MACE-dipole model or Espaloma—to predict dipole moments and derivatives. All of these ML quantities get injected into Gaussian through a ZMQ bridge.
 
-This hybrid approach gives us potentially 10 to 100 times speedup compared to pure DFT, while maintaining DFT-level accuracy for frequencies. The speedup comes from avoiding expensive DFT dipole calculations at displaced geometries.
+So what does Gaussian actually do? Gaussian receives the ML-calculated Hessian and dipole derivatives and uses them to perform anharmonic frequency analysis—calculating overtones, combination bands, and anharmonic corrections. This is where Gaussian's quantum chemistry expertise really shines.
+
+This hybrid approach gives us potentially 10 to 100 times speedup compared to pure DFT. The speedup comes from MACE's fast Hessian calculation via automatic differentiation, and from avoiding expensive DFT dipole calculations.
 
 ---
 
@@ -29,11 +31,13 @@ Here's how the system works end-to-end.
 
 Starting at the top, we take a molecule XYZ file and run geometry optimization using MACE-OMOL. This is fast—usually under a minute.
 
-Then the workflow splits into two parallel paths. On the left, we have the DFT baseline calculation. This uses B3LYP with a 6-31G(d,p) basis set. It does its own built-in geometry optimization, then calculates the full Hessian with DFT to get frequencies, and calculates dipole derivatives with DFT for IR intensities. This gives us our ground truth reference—everything is pure quantum chemistry.
+Then the workflow splits into two parallel paths. On the left, we have the DFT baseline calculation. This uses B3LYP with a 6-31G(d,p) basis set and runs pure Gaussian—no machine learning at all. Gaussian does its own geometry optimization, calculates the Hessian with DFT, calculates dipole derivatives with DFT, and performs anharmonic analysis. This gives us our ground truth reference—everything is pure quantum chemistry.
 
-On the right side is where the innovation happens—the ML frequency calculation path. Here's exactly what happens: We set up a ZMQ server in Python that waits for geometry requests from Gaussian. When Gaussian launches and needs dipole derivatives, it calls an external helper script through the ZMQ bridge. Our Python code receives the molecular geometry, uses ML to calculate the dipole moment at that geometry—either with MACE-dipole or Espaloma—and sends it back in Gaussian's expected format. Gaussian collects dipoles at all the displaced geometries it needs, calculates the dipole derivatives itself using finite differences, and then combines those ML dipole derivatives with its DFT Hessian to produce frequencies and IR intensities.
+On the right side is where the innovation happens—the ML frequency calculation path. Here's exactly how the ZMQ bridge works: We set up a ZMQ server in Python that waits for requests from Gaussian. When Gaussian launches with the "external" keyword, it calls our Python helper script through the ZMQ bridge.
 
-So to be clear: Gaussian still calculates the Hessian with DFT—that gives us accurate frequencies. We only replace the dipole calculations with ML, which gives us the speedup without sacrificing frequency accuracy.
+For each request, our Python code receives the molecular geometry from Gaussian, then calculates four things with machine learning: energy with MACE, forces with MACE, the Hessian matrix with MACE using automatic differentiation, and dipole moments with our ML dipole calculator—either MACE-dipole or Espaloma. We also calculate dipole derivatives using finite differences. All of these ML-calculated quantities get packaged and sent back to Gaussian in its expected format.
+
+Gaussian receives this data and uses it to perform anharmonic frequency analysis—calculating overtones, combination bands, and anharmonic corrections. So Gaussian isn't recalculating anything; it's using the ML Hessian and dipoles we provided to do the higher-level spectroscopic analysis.
 
 Both paths converge at the analysis stage. Here we load all the results, automatically find the DFT baseline, match vibrational modes using eigenvector similarity—which I'll explain in a moment—broaden the spectra, calculate statistical metrics, and plot regressions. Finally, everything gets packaged into an HTML report.
 
@@ -55,7 +59,7 @@ MACE-Dipole uses an E(3)-equivariant neural network. E(3)-equivariant means the 
 
 Espaloma takes a charge-based approach. It uses a graph neural network to predict partial charges for each atom, then we calculate the dipole as the sum of charge times position for all atoms. It's widely available and interpretable since you see actual charges.
 
-Now here's an important detail: for both methods, we still need dipole DERIVATIVES—how the dipole changes when atoms move. We calculate these using central finite differences. We displace each atom slightly forward and backward, calculate the dipole at each displaced geometry using our ML model, and approximate the derivative as the difference divided by twice the displacement. Central differences are more accurate than forward differences. This is why we need the ZMQ loop—Gaussian requests dipoles at many displaced geometries, and we calculate them all with ML.
+Now here's an important detail: for both methods, we need dipole DERIVATIVES—how the dipole changes when atoms move—for IR intensities. We calculate these in Python using central finite differences. We displace each atom slightly forward and backward, calculate the dipole at each displaced geometry using our ML model, and approximate the derivative as the difference divided by twice the displacement. Central differences are more accurate than forward differences. Once calculated, these dipole derivatives get sent to Gaussian along with the Hessian.
 
 ---
 
