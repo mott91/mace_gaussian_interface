@@ -11,27 +11,31 @@ The core idea is simple: what if we could use fast machine learning models to re
 
 ---
 
-## Slide 2: Motivation [1 minute]
+## Slide 2: Motivation [1.5 minutes]
 
 So let me start with the problem. If you've ever run DFT frequency calculations, you know they're painfully slow. We're talking minutes to hours per molecule. For a single water molecule, you might wait 5 minutes. For anything larger, you're looking at hours or even days. This makes high-throughput screening basically impossible.
 
-Our solution is a hybrid approach. Instead of doing everything with DFT, we use machine learning to calculate dipole derivatives—the most expensive part—and inject those into Gaussian through a ZMQ bridge. This gives us potentially 10 to 100 times speedup compared to pure DFT.
+The bottleneck is calculating the Hessian—the matrix of energy second derivatives—and dipole derivatives. For IR intensities, you need to know how the dipole moment changes as atoms move. In DFT, this requires recalculating the dipole at many displaced geometries, which is extremely expensive.
 
-The impact? We can now run rapid IR spectral predictions on hundreds or thousands of molecules, which was simply not feasible before, while maintaining DFT-level accuracy.
+Our solution is a hybrid approach. We use machine learning for three things: MACE calculates energies and forces, which are fast and accurate. Then we use ML dipole calculators—either our custom MACE-dipole model or Espaloma—to predict dipole moments. Critically, we calculate dipole derivatives using finite differences with these ML dipoles, then inject those derivatives into Gaussian through a ZMQ bridge. Gaussian still calculates the Hessian with DFT, but uses our ML dipole derivatives for IR intensities.
+
+This hybrid approach gives us potentially 10 to 100 times speedup compared to pure DFT, while maintaining DFT-level accuracy for frequencies. The speedup comes from avoiding expensive DFT dipole calculations at displaced geometries.
 
 ---
 
-## Slide 3: System Architecture [1.5 minutes]
+## Slide 3: System Architecture [2 minutes]
 
 Here's how the system works end-to-end.
 
 Starting at the top, we take a molecule XYZ file and run geometry optimization using MACE-OMOL. This is fast—usually under a minute.
 
-Then the workflow splits into two parallel paths. On the left, we have the DFT baseline calculation. This uses B3LYP with a 6-31G(d,p) basis set, and importantly, it does its own built-in geometry optimization, then calculates frequencies and dipoles entirely with Gaussian. This gives us our ground truth reference.
+Then the workflow splits into two parallel paths. On the left, we have the DFT baseline calculation. This uses B3LYP with a 6-31G(d,p) basis set. It does its own built-in geometry optimization, then calculates the full Hessian with DFT to get frequencies, and calculates dipole derivatives with DFT for IR intensities. This gives us our ground truth reference—everything is pure quantum chemistry.
 
-On the right side is where the magic happens—the ML frequency calculation path. We load MACE calculators for energies and our custom dipole calculators, set up a ZMQ server, launch Gaussian, and enter a dipole loop where we feed machine learning predictions into the quantum chemistry calculation in real-time.
+On the right side is where the innovation happens—the ML frequency calculation path. Here's exactly what happens: We set up a ZMQ server in Python that waits for geometry requests from Gaussian. When Gaussian launches and needs dipole derivatives, it calls an external helper script through the ZMQ bridge. Our Python code receives the molecular geometry, uses ML to calculate the dipole moment at that geometry—either with MACE-dipole or Espaloma—and sends it back in Gaussian's expected format. Gaussian collects dipoles at all the displaced geometries it needs, calculates the dipole derivatives itself using finite differences, and then combines those ML dipole derivatives with its DFT Hessian to produce frequencies and IR intensities.
 
-Both paths converge at the analysis stage at the bottom. Here we load all the results, find the DFT baseline automatically, match vibrational modes using eigenvector similarity, broaden the spectra, calculate statistical metrics, and plot regressions. Finally, everything gets packaged into an HTML report.
+So to be clear: Gaussian still calculates the Hessian with DFT—that gives us accurate frequencies. We only replace the dipole calculations with ML, which gives us the speedup without sacrificing frequency accuracy.
+
+Both paths converge at the analysis stage. Here we load all the results, automatically find the DFT baseline, match vibrational modes using eigenvector similarity—which I'll explain in a moment—broaden the spectra, calculate statistical metrics, and plot regressions. Finally, everything gets packaged into an HTML report.
 
 ---
 
@@ -43,13 +47,15 @@ The implementation uses a factory pattern with automatic availability checks. If
 
 ---
 
-## Slide 5: Dipole Methods [1 minute]
+## Slide 5: Dipole Methods [1.5 minutes]
 
-Let me quickly explain how these two dipole calculation methods work.
+Let me explain how these two dipole calculation methods work, because the details matter.
 
-MACE-Dipole uses an E(3)-equivariant neural network that directly predicts the dipole moment vector. The input is atomic coordinates and atomic numbers, it processes them through equivariant message passing layers, and outputs mu-x, mu-y, mu-z. It's fast—about 0.1 seconds per geometry—but requires a custom-trained model.
+MACE-Dipole uses an E(3)-equivariant neural network. E(3)-equivariant means the model respects rotational and translational symmetry—if you rotate the molecule, the predicted dipole vector rotates exactly the same way. This is built into the architecture through equivariant message passing layers, which are basically graph neural networks where the node features transform correctly under rotations. The input is atomic coordinates and numbers, it processes them through these layers, and directly outputs the dipole vector: mu-x, mu-y, mu-z. It's fast—about 0.1 seconds per geometry—and physically consistent, but requires a custom-trained model.
 
-Espaloma takes a different, charge-based approach. It first predicts partial charges q1, q2, through qn for each atom, then calculates the dipole moment as the sum of charge times position for each atom. It's widely available and interpretable since you can see the actual charges, but it's an indirect method that depends on how you assign those charges.
+Espaloma takes a charge-based approach. It uses a graph neural network to predict partial charges for each atom, then we calculate the dipole as the sum of charge times position for all atoms. It's widely available and interpretable since you see actual charges.
+
+Now here's an important detail: for both methods, we still need dipole DERIVATIVES—how the dipole changes when atoms move. We calculate these using central finite differences. We displace each atom slightly forward and backward, calculate the dipole at each displaced geometry using our ML model, and approximate the derivative as the difference divided by twice the displacement. Central differences are more accurate than forward differences. This is why we need the ZMQ loop—Gaussian requests dipoles at many displaced geometries, and we calculate them all with ML.
 
 ---
 
@@ -75,15 +81,19 @@ In contrast, our ML calculations output clean JSON with frequencies, intensities
 
 ---
 
-## Slide 8: Mode Matching [1 minute]
+## Slide 8: Mode Matching [1.5 minutes]
 
 Now here's a subtle but critical problem: frequency order mismatch.
 
 When you run DFT, you might get frequencies like 500, 1200, 1500, 2900, 3100 wavenumbers. Run the same molecule with ML and you get 498, 3095, 1205, 2895, 1498—completely different order! You can't just compare mode 1 to mode 1 by index.
 
-The solution is eigenvector dot product matching. Each vibrational mode has an eigenvector that describes how atoms move. We calculate the similarity between ML and DFT eigenvectors using the absolute value of their dot product. This lets us compare atomic displacement patterns, find the best match for each mode, and it's robust to the frequency ordering.
+The solution is eigenvector dot product matching. Let me explain the math behind why this works. Each vibrational mode has an eigenvector—a 3N-dimensional vector where N is the number of atoms. This vector describes exactly how each atom moves in that vibration: x, y, z displacements for atom 1, then atom 2, and so on.
 
-For example, ML mode at 498 matches DFT mode at 500 with a similarity of 0.996. ML mode at 3095 matches DFT mode at 3100 with 0.989 similarity. Very high confidence matches.
+If two modes represent the same physical vibration—like a symmetric stretch—their eigenvectors should point in the same direction in this 3N-dimensional space. The dot product of two normalized vectors equals the cosine of the angle between them. If they're parallel, the angle is zero, cosine is one, dot product is one. If they're orthogonal—completely different motions—the angle is 90 degrees, cosine is zero, dot product is zero.
+
+We use the absolute value because eigenvectors can be defined with opposite signs but still represent the same motion—it's just a phase convention. So we calculate the absolute dot product between each ML eigenvector and all DFT eigenvectors, find the maximum similarity, and if it's above our threshold—typically 0.8—we call it a match.
+
+For example, ML mode at 498 matches DFT mode at 500 with a similarity of 0.996—almost perfectly parallel vectors, so definitely the same vibration. ML mode at 3095 matches DFT mode at 3100 with 0.989 similarity. These high values give us confidence we've matched the right modes.
 
 ---
 
