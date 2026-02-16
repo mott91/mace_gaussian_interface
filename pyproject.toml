@@ -34,16 +34,13 @@ dependencies = [
     "matplotlib>=3.5.0",
 ]
 
-#[project.optional-dependencies]
-#xtb = ["xtb-python>=22.1.0"]
+[dependency-groups]
 dev = [
     "pytest>=7.0.0",
-    "black>=22.0.0", 
-    "isort>=5.10.0",
-    "flake8>=4.0.0",
-    "mypy>=0.950",
+    "pytest-cov>=4.0",
+    "ruff>=0.9.0",
+    "ty>=0.0.1a1",
 ]
-#all = ["mace-gaussian-interface[xtb,dev]"]
 
 [project.scripts]
 gm-main = "gm_main:main"
@@ -57,15 +54,47 @@ Issues = "https://github.com/yourusername/mace-gaussian-interface/issues"
 [tool.hatch.build.targets.wheel]
 packages = ["."]
 
-[tool.black]
+[tool.ruff]
 line-length = 100
-target-version = ['py39']
+target-version = "py39"
 
-[tool.isort]
-profile = "black"
-line_length = 100
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP"]
 
-[tool.mypy]
-python_version = "3.9"
-warn_return_any = true
-warn_unused_configs = true
+[tool.ruff.lint.isort]
+known-first-party = ["mace_calculators", "gm_main", "gaussian_parser", "analyze_spectra", "comparison_workflow", "mode_matching", "fchk_parser"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "gpu: marks tests that require CUDA GPU",
+    "gaussian: marks tests that require Gaussian 16 (g16/formchk)",
+    "slow: marks tests that take >30 seconds",
+]
+addopts = [
+    "--strict-markers",
+    "-ra",
+]
+
+[tool.coverage.run]
+source = [
+    "gaussian_parser",
+    "fchk_parser",
+    "mode_matching",
+    "analyze_spectra",
+    "comparison_workflow",
+    "results_manager",
+    "mace_calculators",
+    "gm_main",
+    "cli",
+    "dft_baseline",
+]
+omit = [
+    "tests/*",
+    "mace_dipole_pkg/*",
+    "mace_ML_pkg/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true
