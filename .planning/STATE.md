@@ -30,7 +30,7 @@ Progress: [█░░░░░░░░░] 10%
 | 01 | 4 | 22 min | 5.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (9 min), 01-02 (?), 01-03 (?), 01-04 (2 min)
+- Last 5 plans: 01-01 (9 min), 01-02 (2 min), 01-03 (?), 01-04 (2 min)
 - Trend: Fast execution on well-scoped plans
 
 *Updated after each plan completion*
