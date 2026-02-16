@@ -35,11 +35,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Test markers allow separating unit tests (run in CI) from integration tests (require GPU/Gaussian)
   4. Acetic acid parser bug is captured in a test that documents expected vs actual behavior
   5. Coverage report shows which code paths are tested vs untested
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
+- [ ] 01-01-PLAN.md — Test infrastructure: pytest config, fixtures, conftest.py, .gitignore updates, uv.lock
+- [ ] 01-02-PLAN.md — Gaussian log parser tests (harmonic, anharmonic, overtones, combination bands, acoh bug)
+- [ ] 01-03-PLAN.md — FCHK parser and mode matching tests
+- [ ] 01-04-PLAN.md — Reference output regression tests and coverage verification
 
 ### Phase 2: Error Handling & Input Validation
 **Goal**: Add defensive programming that makes failures explicit and catches problems before multi-hour calculations
@@ -167,7 +169,7 @@ Plans:
 **Requirements**: DOC-01, DOC-02, DOC-03, DOC-04, DOC-05
 **Success Criteria** (what must be TRUE):
   1. README includes step-by-step installation (including custom MACE packages)
-  2. Quickstart guide (clone → install → run water → view results) is tested and works
+  2. Quickstart guide (clone -> install -> run water -> view results) is tested and works
   3. Worked example with expected output is committed to repo
   4. CLI help text is complete and accurate for all commands
   5. Method description suitable for thesis methods section is available
@@ -180,11 +182,11 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Testing Infrastructure & Characterization | 0/TBD | Not started | - |
+| 1. Testing Infrastructure & Characterization | 0/4 | Planning complete | - |
 | 2. Error Handling & Input Validation | 0/TBD | Not started | - |
 | 3. Extract Utilities & Conventions | 0/TBD | Not started | - |
 | 4. Extract Calculator Classes | 0/TBD | Not started | - |
