@@ -30,7 +30,7 @@ Progress: [█░░░░░░░░░] 10%
 | 01 | 4 | 22 min | 5.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (9 min), 01-02 (2 min), 01-03 (?), 01-04 (2 min)
+- Last 5 plans: 01-01 (9 min), 01-02 (2 min), 01-03 (4 min), 01-04 (2 min)
 - Trend: Fast execution on well-scoped plans
 
 *Updated after each plan completion*
@@ -47,6 +47,8 @@ Recent decisions affecting current work:
 - Use quality model profile for GSD agents (important project, want thorough analysis and planning)
 - Reproducibility over pip-installability (thesis needs clone-and-reproduce, not package distribution yet)
 - [Phase 01]: Moved dev dependencies from orphaned [project] key to [dependency-groups] section for proper uv lockfile inclusion
+- [Phase 01-03]: Vib-E2 section has 14 values per mode (freq + thermodynamic properties), not just frequencies; test first N entries
+- [Phase 01-03]: Import only pure numerical functions from mode_matching to avoid formchk dependency in tests
 - [Phase 01-04]: Used range-based frequency assertions (not exact values) for regression test robustness
 - [Phase 01-04]: CH4 harmonic has 4 entries (collapsed degenerate modes), not 9
 
@@ -68,5 +70,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-16 (plan execution)
-Stopped at: Completed 01-04-PLAN.md (Phase 01 complete)
+Stopped at: Completed 01-03-PLAN.md (backfill; Phase 01 already complete)
 Resume file: None
