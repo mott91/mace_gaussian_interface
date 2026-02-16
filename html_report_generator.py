@@ -393,13 +393,18 @@ class HTMLReportGenerator:
         if not combined_spectrum.exists() or not combined_regression.exists():
             return ""
 
+        # Encode images as base64
+        spectrum_img = self.encode_image(combined_spectrum)
+        regression_img = self.encode_image(combined_regression)
+
         # Build extended spectrum section if it exists
         extended_section = ""
         if combined_spectrum_extended.exists():
-            extended_section = """
+            extended_img = self.encode_image(combined_spectrum_extended)
+            extended_section = f"""
             <h3>Extended IR Spectrum (400-8000 cm⁻¹, includes overtones)</h3>
             <div class="plot-container">
-                <img src="plots/spectrum_combined_extended.png" alt="Extended spectrum with overtones" style="width: 100%; max-width: 1400px;">
+                <img src="{extended_img}" alt="Extended spectrum with overtones" style="width: 100%; max-width: 1400px;">
             </div>
             <p style="color: #666; font-size: 0.9em; margin-bottom: 30px;">
                 Extended frequency range shows fundamental modes, overtones, and combination bands.
@@ -415,14 +420,14 @@ class HTMLReportGenerator:
 
             <h3>Combined IR Spectrum (Fundamentals)</h3>
             <div class="plot-container">
-                <img src="plots/spectrum_combined.png" alt="Combined spectrum comparison" style="width: 100%; max-width: 1200px;">
+                <img src="{spectrum_img}" alt="Combined spectrum comparison" style="width: 100%; max-width: 1200px;">
             </div>
 
             {extended_section}
 
             <h3>Combined Regression Analysis</h3>
             <div class="plot-container">
-                <img src="plots/regression_combined.png" alt="Combined regression analysis" style="width: 100%; max-width: 1200px;">
+                <img src="{regression_img}" alt="Combined regression analysis" style="width: 100%; max-width: 1200px;">
             </div>
 
             <p style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-left: 4px solid #667eea; border-radius: 4px;">
@@ -498,10 +503,11 @@ class HTMLReportGenerator:
         heatmap_section = ""
         if mode_overlap_files:
             heatmap_file = mode_overlap_files[0]
+            heatmap_img = self.encode_image(heatmap_file)
             heatmap_section = f"""
             <h3>Mode Overlap Matrix</h3>
             <div class="plot-container">
-                <img src="plots/{heatmap_file.name}" alt="Mode overlap heatmap" style="width: 100%; max-width: 900px;">
+                <img src="{heatmap_img}" alt="Mode overlap heatmap" style="width: 100%; max-width: 900px;">
             </div>
             <p style="color: #666; font-size: 0.9em; margin-bottom: 20px;">
                 Heatmap shows the eigenvector overlap (dot product) between vibrational modes.
@@ -592,12 +598,12 @@ class HTMLReportGenerator:
 
             <h3>Spectral Comparison</h3>
             <div class="plot-container">
-                <img src="plots/{comparison['spectrum_plot']}" alt="Spectrum comparison">
+                <img src="{self.encode_image(self.plots_dir / comparison['spectrum_plot'])}" alt="Spectrum comparison">
             </div>
 
             <h3>Regression Analysis</h3>
             <div class="plot-container">
-                <img src="plots/{comparison['regression_plot']}" alt="Regression plot">
+                <img src="{self.encode_image(self.plots_dir / comparison['regression_plot'])}" alt="Regression plot">
             </div>
 
             <h3>Detailed Frequency Comparison</h3>

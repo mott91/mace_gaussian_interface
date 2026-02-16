@@ -324,7 +324,7 @@ def run_dft_baseline_calculation(
         print(f"  \u2192 Created input: {gjf_file}")
         
         # Run Gaussian calculation
-        success, log_file = run_gaussian_dft(gjf_file, timeout=7200)  # 2 hour timeout
+        success, log_file = run_gaussian_dft(gjf_file, timeout=None)  # No timeout - run as long as needed
         
         if not success:
             print(f"  \u2717 Calculation failed")
