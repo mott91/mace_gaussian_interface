@@ -69,10 +69,11 @@ Plans:
   2. Input validation functions exist in utils/validation.py and are reused consistently
   3. ResultsManager is extracted to utils/results.py
   4. Code conventions are documented (naming, error handling, units) and followed
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: TBD
+- [ ] 03-01-PLAN.md — Create utils/ package with units.py, move exceptions.py and validation.py, update all imports
+- [ ] 03-02-PLAN.md — Move ResultsManager to utils/results.py, add unit tests, document conventions
 
 ### Phase 4: Extract Calculator Classes
 **Goal**: Move calculator implementations from gm_main.py into dedicated calculators/ package
@@ -189,7 +190,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 |-------|----------------|--------|-----------|
 | 1. Testing Infrastructure & Characterization | 0/4 | Planning complete | - |
 | 2. Error Handling & Input Validation | 0/3 | Planning complete | - |
-| 3. Extract Utilities & Conventions | 0/TBD | Not started | - |
+| 3. Extract Utilities & Conventions | 0/2 | Planning complete | - |
 | 4. Extract Calculator Classes | 0/TBD | Not started | - |
 | 5. Replace MACE Module Monkey-Patching | 0/TBD | Not started | - |
 | 6. Extract Gaussian I/O & ZMQ Server | 0/TBD | Not started | - |
