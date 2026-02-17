@@ -6,6 +6,8 @@ TEST-08 (acoh bug documentation).
 """
 
 import pytest
+
+from exceptions import GaussianParseError
 from gaussian_parser import GaussianLogParser
 
 
@@ -276,3 +278,88 @@ class TestEdgeCases:
         parser = GaussianLogParser(acoh_ml_log)
         result = parser.parse_anharmonic_frequencies()
         assert len(result) == 18  # 8 atoms -> 3*8-6 = 18 modes
+
+
+# --- Parser error handling tests (Phase 2) ---
+
+
+MINIMAL_HARMONIC_LOG = """\
+ Frequencies --   1595.1234  3657.0567  3755.9876
+ IR Inten    --     75.1234   2.5678    44.3210
+"""
+
+EMPTY_LOG = """\
+Gaussian 16 output
+Normal termination of Gaussian 16.
+"""
+
+
+class TestParserErrorHandling:
+    """Tests for GaussianParseError behavior in parser methods."""
+
+    def test_harmonic_raises_on_empty_log(self, tmp_path):
+        """parse_harmonic_frequencies() raises GaussianParseError when no frequencies found."""
+        log_file = tmp_path / "empty.log"
+        log_file.write_text(EMPTY_LOG)
+
+        parser = GaussianLogParser(str(log_file))
+        with pytest.raises(GaussianParseError, match="No harmonic frequencies found"):
+            parser.parse_harmonic_frequencies()
+
+    def test_anharmonic_default_returns_empty(self, tmp_path):
+        """parse_anharmonic_frequencies() (default strict=False) returns empty list
+        when no Fundamental Bands section exists."""
+        log_file = tmp_path / "harmonic_only.log"
+        log_file.write_text(MINIMAL_HARMONIC_LOG)
+
+        parser = GaussianLogParser(str(log_file))
+        result = parser.parse_anharmonic_frequencies()
+        assert result == []
+
+    def test_anharmonic_strict_raises(self, tmp_path):
+        """parse_anharmonic_frequencies(strict=True) raises GaussianParseError
+        when no Fundamental Bands section exists."""
+        log_file = tmp_path / "harmonic_only.log"
+        log_file.write_text(MINIMAL_HARMONIC_LOG)
+
+        parser = GaussianLogParser(str(log_file))
+        with pytest.raises(GaussianParseError, match="No Fundamental Bands"):
+            parser.parse_anharmonic_frequencies(strict=True)
+
+    def test_overtones_default_returns_empty(self, tmp_path):
+        """parse_overtones() (default strict=False) returns empty list
+        when no Overtones section exists."""
+        log_file = tmp_path / "harmonic_only.log"
+        log_file.write_text(MINIMAL_HARMONIC_LOG)
+
+        parser = GaussianLogParser(str(log_file))
+        result = parser.parse_overtones()
+        assert result == []
+
+    def test_overtones_strict_raises(self, tmp_path):
+        """parse_overtones(strict=True) raises GaussianParseError."""
+        log_file = tmp_path / "harmonic_only.log"
+        log_file.write_text(MINIMAL_HARMONIC_LOG)
+
+        parser = GaussianLogParser(str(log_file))
+        with pytest.raises(GaussianParseError, match="No Overtones section"):
+            parser.parse_overtones(strict=True)
+
+    def test_combination_bands_default_returns_empty(self, tmp_path):
+        """parse_combination_bands() (default strict=False) returns empty list
+        when no Combination Bands section exists."""
+        log_file = tmp_path / "harmonic_only.log"
+        log_file.write_text(MINIMAL_HARMONIC_LOG)
+
+        parser = GaussianLogParser(str(log_file))
+        result = parser.parse_combination_bands()
+        assert result == []
+
+    def test_combination_bands_strict_raises(self, tmp_path):
+        """parse_combination_bands(strict=True) raises GaussianParseError."""
+        log_file = tmp_path / "harmonic_only.log"
+        log_file.write_text(MINIMAL_HARMONIC_LOG)
+
+        parser = GaussianLogParser(str(log_file))
+        with pytest.raises(GaussianParseError, match="No Combination Bands"):
+            parser.parse_combination_bands(strict=True)

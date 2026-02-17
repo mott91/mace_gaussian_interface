@@ -230,3 +230,103 @@ def test_gpu_placeholder():
 def test_gaussian_placeholder():
     """Placeholder Gaussian test -- verifies marker infrastructure works."""
     pytest.skip("No Gaussian test implemented yet -- marker infrastructure verification only")
+
+
+# ---------------------------------------------------------------------------
+# Results manager version metadata tests (Phase 2)
+# ---------------------------------------------------------------------------
+
+
+class TestResultsManagerMetadata:
+    """Verify that ResultsManager embeds version_info in saved JSON."""
+
+    def test_frequency_results_contain_version_info(self, tmp_path):
+        """save_frequency_results() writes version_info to results.json."""
+        from results_manager import ResultsManager
+
+        mgr = ResultsManager(base_output_dir=str(tmp_path))
+        mgr.save_frequency_results(
+            molecule_name="test_mol",
+            energy_calculator="mace_mp",
+            dipole_calculator="espaloma",
+            calculator_type="ml",
+            frequencies_data={
+                "harmonic": [{"freq_cm": 1000.0, "ir_intensity": 10.0}],
+                "anharmonic": [],
+                "overtones": [],
+                "combination_bands": [],
+            },
+            energy=0.0,
+            dipole=None,
+            runtime=1.0,
+        )
+
+        results_path = tmp_path / "test_mol" / "mace_mp_espaloma" / "results.json"
+        assert results_path.exists()
+
+        data = json.loads(results_path.read_text())
+        assert "version_info" in data
+        assert "tool_version" in data["version_info"]
+        assert "python_version" in data["version_info"]
+        assert "platform" in data["version_info"]
+
+    def test_frequency_results_contain_calculation_parameters(self, tmp_path):
+        """save_frequency_results() writes calculation_parameters to results.json."""
+        from results_manager import ResultsManager
+
+        mgr = ResultsManager(base_output_dir=str(tmp_path))
+        params = {"basis": "6-31G(d,p)", "method": "B3LYP"}
+        mgr.save_frequency_results(
+            molecule_name="test_mol",
+            energy_calculator="dft",
+            dipole_calculator="dft",
+            calculator_type="dft",
+            frequencies_data={
+                "harmonic": [],
+                "anharmonic": [],
+                "overtones": [],
+                "combination_bands": [],
+            },
+            energy=0.0,
+            dipole=None,
+            runtime=1.0,
+            calculation_parameters=params,
+        )
+
+        results_path = tmp_path / "test_mol" / "dft" / "results.json"
+        data = json.loads(results_path.read_text())
+        assert data["calculation_parameters"] == params
+
+    def test_optimization_results_contain_version_info(self, tmp_path):
+        """save_optimization_results() writes version_info to results.json."""
+        import numpy as np
+        from ase import Atoms
+
+        from results_manager import ResultsManager
+
+        # Create real ASE Atoms objects (mock fails ase.io.write)
+        atoms = Atoms(
+            "OH2",
+            positions=np.array([[0.0, 0.0, 0.1173], [0.0, 0.7572, -0.4692], [0.0, -0.7572, -0.4692]]),
+        )
+
+        mgr = ResultsManager(base_output_dir=str(tmp_path))
+        mgr.save_optimization_results(
+            molecule_name="test_mol",
+            initial_atoms=atoms,
+            final_atoms=atoms,
+            calculator_name="mace_mp",
+            initial_energy=-76.0,
+            final_energy=-76.1,
+            converged=True,
+            num_steps=42,
+            runtime=5.0,
+        )
+
+        results_path = tmp_path / "test_mol" / "geometry_opt" / "results.json"
+        assert results_path.exists()
+
+        data = json.loads(results_path.read_text())
+        assert "version_info" in data
+        assert "tool_version" in data["version_info"]
+        assert data["num_steps"] == 42

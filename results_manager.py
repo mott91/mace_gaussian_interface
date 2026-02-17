@@ -5,20 +5,19 @@ Handles directory structure, file naming, and JSON metadata writing
 for comparison framework. Now includes overtones and combination bands.
 """
 
-import os
 import json
-import shutil
-from datetime import datetime
-from pathlib import Path
-from typing import Dict, Any, Optional
 import logging
+import os
+import shutil
+from pathlib import Path
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
 
 class ResultsManager:
     """Manages output organization and metadata for molecular calculations."""
-    
+
     def __init__(self, base_output_dir: str = "comparison_results"):
         """
         Initialize ResultsManager.
@@ -30,7 +29,7 @@ class ResultsManager:
         """
         self.base_output_dir = Path(base_output_dir)
         self.base_output_dir.mkdir(exist_ok=True)
-        
+
     def create_molecule_directory(self, molecule_name: str) -> Path:
         """
         Create directory for a specific molecule.
@@ -48,7 +47,7 @@ class ResultsManager:
         mol_dir = self.base_output_dir / molecule_name
         mol_dir.mkdir(exist_ok=True)
         return mol_dir
-        
+
     def create_optimization_directory(self, molecule_name: str) -> Path:
         """
         Create directory for geometry optimization results.
@@ -67,9 +66,9 @@ class ResultsManager:
         opt_dir = mol_dir / "geometry_opt"
         opt_dir.mkdir(exist_ok=True)
         return opt_dir
-        
+
     def create_frequency_directory(
-        self, 
+        self,
         molecule_name: str,
         energy_calculator: str,
         dipole_calculator: str,
@@ -77,7 +76,7 @@ class ResultsManager:
     ) -> Path:
         """Create directory for frequency calculation results."""
         mol_dir = self.create_molecule_directory(molecule_name)
-    
+
         # Create directory name - avoid duplication for DFT
         if energy_calculator == dipole_calculator:
             # For DFT where both calculators are the same
@@ -85,12 +84,12 @@ class ResultsManager:
         else:
             # For ML where they're different
             dir_name = f"{energy_calculator}_{dipole_calculator}"
-        
+
         freq_dir = mol_dir / dir_name
         freq_dir.mkdir(exist_ok=True)
-    
+
         return freq_dir
-        
+
     def save_optimization_results(
         self,
         molecule_name: str,
@@ -128,13 +127,21 @@ class ResultsManager:
             Runtime in seconds
         """
         from ase.io import write
-        
+
         opt_dir = self.create_optimization_directory(molecule_name)
-        
+
         # Save geometries
         write(str(opt_dir / "initial.xyz"), initial_atoms)
         write(str(opt_dir / "optimized.xyz"), final_atoms)
-        
+
+        # Collect version metadata
+        try:
+            from validation import collect_version_metadata
+
+            version_info = collect_version_metadata()
+        except ImportError:
+            version_info = {}
+
         # Create metadata
         metadata = {
             "molecule": molecule_name,
@@ -147,16 +154,17 @@ class ResultsManager:
             "files": {
                 "initial_geometry": "initial.xyz",
                 "optimized_geometry": "optimized.xyz"
-            }
+            },
+            "version_info": version_info,
         }
-        
+
         # Save JSON
         json_path = opt_dir / "results.json"
         with open(json_path, 'w') as f:
             json.dump(metadata, f, indent=2)
-            
+
         logger.info(f"\u2713 Saved optimization results to {opt_dir}")
-        
+
     def save_frequency_results(
         self,
         molecule_name: str,
@@ -169,7 +177,8 @@ class ResultsManager:
         runtime: float,
         gaussian_log: Optional[str] = None,
         gaussian_gjf: Optional[str] = None,
-        timestamp: Optional[str] = None
+        timestamp: Optional[str] = None,
+        calculation_parameters: Optional[Dict[str, Any]] = None,
     ):
         """
         Save frequency calculation results with overtones and combination bands.
@@ -202,7 +211,7 @@ class ResultsManager:
         freq_dir = self.create_frequency_directory(
             molecule_name, energy_calculator, dipole_calculator, timestamp
         )
-        
+
         # Copy Gaussian files if provided (skip if source and destination are the same)
         files = {}
         if gaussian_log and os.path.exists(gaussian_log):
@@ -211,14 +220,22 @@ class ResultsManager:
             if os.path.abspath(gaussian_log) != os.path.abspath(dest_log):
                 shutil.copy2(gaussian_log, dest_log)
             files["gaussian_log"] = "gaussian_freq.log"
-            
+
         if gaussian_gjf and os.path.exists(gaussian_gjf):
             dest_gjf = freq_dir / "gaussian_freq.gjf"
             # Only copy if source and destination are different files
             if os.path.abspath(gaussian_gjf) != os.path.abspath(dest_gjf):
                 shutil.copy2(gaussian_gjf, dest_gjf)
             files["gaussian_input"] = "gaussian_freq.gjf"
-        
+
+        # Collect version metadata
+        try:
+            from validation import collect_version_metadata
+
+            version_info = collect_version_metadata()
+        except ImportError:
+            version_info = {}
+
         # Create metadata
         metadata = {
             "molecule": molecule_name,
@@ -230,16 +247,18 @@ class ResultsManager:
             "energy_eV": float(energy),
             "dipole": dipole,
             "runtime_s": float(runtime),
-            "files": files
+            "files": files,
+            "version_info": version_info,
+            "calculation_parameters": calculation_parameters if calculation_parameters else {},
         }
-        
+
         # Save JSON
         json_path = freq_dir / "results.json"
         with open(json_path, 'w') as f:
             json.dump(metadata, f, indent=2)
-            
+
         logger.info(f"\u2713 Saved frequency results to {freq_dir}")
-        
+
     def load_optimization_results(self, molecule_name: str) -> Dict[str, Any]:
         """
         Load optimization results from JSON.
@@ -256,13 +275,13 @@ class ResultsManager:
         """
         opt_dir = self.base_output_dir / molecule_name / "geometry_opt"
         json_path = opt_dir / "results.json"
-        
+
         if not json_path.exists():
             raise FileNotFoundError(f"No optimization results found for {molecule_name}")
-            
-        with open(json_path, 'r') as f:
+
+        with open(json_path) as f:
             return json.load(f)
-            
+
     def get_optimized_geometry_path(self, molecule_name: str) -> Path:
         """
         Get path to optimized geometry file.
