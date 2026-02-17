@@ -83,10 +83,11 @@ Plans:
   1. DipoleCalculator base class and implementations (espaloma, mace_ml, xtb) exist in calculators/ package
   2. Calculator factory pattern is cleanly separated and tested
   3. Full pipeline still runs on water molecule using all 4 model combinations
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 04-01: TBD
+- [ ] 04-01-PLAN.md — Extract calculator hierarchy into calculators/ package, update gm_main.py imports
+- [ ] 04-02-PLAN.md — Unit tests for calculator interface, factory pattern, and config constants
 
 ### Phase 5: Replace MACE Module Monkey-Patching
 **Goal**: Replace sys.modules manipulation with safe lazy import isolation pattern
@@ -191,7 +192,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 1. Testing Infrastructure & Characterization | 0/4 | Planning complete | - |
 | 2. Error Handling & Input Validation | 0/3 | Planning complete | - |
 | 3. Extract Utilities & Conventions | 0/2 | Planning complete | - |
-| 4. Extract Calculator Classes | 0/TBD | Not started | - |
+| 4. Extract Calculator Classes | 0/2 | Planning complete | - |
 | 5. Replace MACE Module Monkey-Patching | 0/TBD | Not started | - |
 | 6. Extract Gaussian I/O & ZMQ Server | 0/TBD | Not started | - |
 | 7. Extract Workflow Orchestrator | 0/TBD | Not started | - |
