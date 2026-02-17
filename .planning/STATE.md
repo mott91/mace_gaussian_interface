@@ -74,5 +74,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-17 (plan execution)
-Stopped at: Completed 02-02-PLAN.md
+Stopped at: Completed 02-01-PLAN.md (backfill: tests added for exception hierarchy and validation)
 Resume file: None
