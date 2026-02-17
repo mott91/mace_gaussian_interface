@@ -1,5 +1,7 @@
 """Factory for managing different dipole calculators."""
 
+from __future__ import annotations
+
 import logging
 
 from calculators.base import DipoleCalculatorBase

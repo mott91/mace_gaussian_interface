@@ -3,6 +3,8 @@
 # module load mace-torch-dftd/14Jul2025
 # module load gv
 
+from __future__ import annotations
+
 import warnings
 
 warnings.filterwarnings("ignore")
