@@ -15,7 +15,7 @@ from typing import Dict, Optional
 from ase import Atoms
 
 from gaussian_parser import parse_gaussian_log
-from results_manager import ResultsManager
+from utils.results import ResultsManager
 from utils.units import HARTREE_TO_EV
 
 logger = logging.getLogger(__name__)
@@ -41,53 +41,51 @@ def sanitize_calculator_name(method: str, basis: str) -> str:
         Filesystem-safe name
     """
     # Remove special characters from basis set name
-    basis_clean = basis.replace('(', '').replace(')', '').replace(',', '').replace(' ', '')
+    basis_clean = basis.replace("(", "").replace(")", "").replace(",", "").replace(" ", "")
     return f"{method}_{basis_clean}"
 
 
 # DFT methods for baseline calculations
 # Using B3LYP/6-31G(d,p) - standard for frequency calculations
 DFT_BASELINES = {
-    'mace_omol': {
-        'method': 'b3lyp',
-        'basis': '6-31G(d,p)',
-        'description': 'B3LYP/6-31G(d,p)',
-        'extra_keywords': ''
+    "mace_omol": {
+        "method": "b3lyp",
+        "basis": "6-31G(d,p)",
+        "description": "B3LYP/6-31G(d,p)",
+        "extra_keywords": "",
     },
-    'mace_off': {
-        'method': 'b3lyp',
-        'basis': '6-31G(d,p)',
-        'description': 'B3LYP/6-31G(d,p)',
-        'extra_keywords': ''
+    "mace_off": {
+        "method": "b3lyp",
+        "basis": "6-31G(d,p)",
+        "description": "B3LYP/6-31G(d,p)",
+        "extra_keywords": "",
     },
-    'mace_mp': {
-        'method': 'b3lyp',
-        'basis': '6-31G(d,p)',
-        'description': 'B3LYP/6-31G(d,p)',
-        'extra_keywords': ''
-    }
+    "mace_mp": {
+        "method": "b3lyp",
+        "basis": "6-31G(d,p)",
+        "description": "B3LYP/6-31G(d,p)",
+        "extra_keywords": "",
+    },
 }
 
 # Alternative baselines (e.g., functionals the NNPs were originally trained on)
 # Note: These require specific Gaussian versions and may not be widely available
 ALTERNATIVE_BASELINES = {
-    'mace_omol_original': {
-        'method': 'wb97mv',  # Requires G16 Rev. C.01+
-        'basis': 'def2tzvp',
-        'description': 'wB97M-V/def2-TZVP (MACE-OMOL original - requires newer Gaussian)',
-        'extra_keywords': ''
+    "mace_omol_original": {
+        "method": "wb97mv",  # Requires G16 Rev. C.01+
+        "basis": "def2tzvp",
+        "description": "wB97M-V/def2-TZVP (MACE-OMOL original - requires newer Gaussian)",
+        "extra_keywords": "",
     },
 }
 
 
 def check_baseline_exists(
-    results_mgr: ResultsManager,
-    molecule_name: str,
-    baseline_name: str
+    results_mgr: ResultsManager, molecule_name: str, baseline_name: str
 ) -> bool:
     """
     Check if a DFT baseline calculation already exists.
-    
+
     Parameters
     ----------
     results_mgr : ResultsManager
@@ -96,15 +94,15 @@ def check_baseline_exists(
         Name of the molecule
     baseline_name : str
         Name of the baseline (e.g., 'mace_omol', 'mace_off', 'mace_mp')
-        
+
     Returns
     -------
     bool
         True if results exist and are valid, False otherwise
     """
     config = DFT_BASELINES[baseline_name]
-    method = config['method']
-    basis = config['basis']
+    method = config["method"]
+    basis = config["basis"]
     calculator_name = sanitize_calculator_name(method, basis)
 
     # Check if directory exists (DFT uses same calculator for energy and dipole)
@@ -136,11 +134,11 @@ def create_gaussian_dft_input(
     charge: int = 0,
     multiplicity: int = 1,
     title: str = "DFT baseline calculation",
-    extra_keywords: str = ""
+    extra_keywords: str = "",
 ) -> None:
     """
     Create Gaussian input file for pure DFT calculation.
-    
+
     Parameters
     ----------
     atoms : ase.Atoms
@@ -171,7 +169,7 @@ def create_gaussian_dft_input(
     # Link0 commands
     link0 = f"%chk={filename[:-4]}.chk\n%mem=4GB\n%NProcShared=4"
 
-    with open(filename, 'w', encoding='utf-8') as f:
+    with open(filename, "w", encoding="utf-8") as f:
         f.write(f"{link0}\n")
         f.write(f"{route}\n\n")
         f.write(f"{title}\n\n")
@@ -181,20 +179,17 @@ def create_gaussian_dft_input(
         f.write("\n")
 
 
-def run_gaussian_dft(
-    gjf_file: str,
-    timeout: Optional[int] = None
-) -> tuple[bool, str]:
+def run_gaussian_dft(gjf_file: str, timeout: Optional[int] = None) -> tuple[bool, str]:
     """
     Run Gaussian calculation and wait for completion.
-    
+
     Parameters
     ----------
     gjf_file : str
         Path to Gaussian input file
     timeout : int, optional
         Timeout in seconds (None = no timeout)
-        
+
     Returns
     -------
     success : bool
@@ -202,17 +197,13 @@ def run_gaussian_dft(
     log_file : str
         Path to the log file
     """
-    log_file = gjf_file.replace('.gjf', '.log')
+    log_file = gjf_file.replace(".gjf", ".log")
 
     try:
         print("  \u2192 Launching Gaussian calculation...")
 
         # Run Gaussian (g16 executable)
-        proc = subprocess.Popen(
-            ['g16', gjf_file],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
+        proc = subprocess.Popen(["g16", gjf_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         # Wait for completion
         try:
@@ -235,7 +226,7 @@ def run_gaussian_dft(
         # Check for normal termination
         with open(log_file) as f:
             content = f.read()
-            if 'Normal termination' not in content:
+            if "Normal termination" not in content:
                 logger.error("Gaussian calculation did not terminate normally")
                 return False, log_file
 
@@ -254,11 +245,11 @@ def run_dft_baseline_calculation(
     results_mgr: ResultsManager,
     charge: int = 0,
     multiplicity: int = 1,
-    skip_if_exists: bool = True
+    skip_if_exists: bool = True,
 ) -> bool:
     """
     Run a DFT baseline calculation.
-    
+
     Parameters
     ----------
     atoms : ase.Atoms
@@ -275,7 +266,7 @@ def run_dft_baseline_calculation(
         Spin multiplicity
     skip_if_exists : bool
         If True, skip calculation if results already exist
-        
+
     Returns
     -------
     bool
@@ -286,10 +277,10 @@ def run_dft_baseline_calculation(
         return False
 
     config = DFT_BASELINES[baseline_name]
-    method = config['method']
-    basis = config['basis']
-    description = config['description']
-    extra_keywords = config.get('extra_keywords', '')
+    method = config["method"]
+    basis = config["basis"]
+    description = config["description"]
+    extra_keywords = config.get("extra_keywords", "")
     calculator_name = sanitize_calculator_name(method, basis)
 
     # Check if already exists
@@ -320,13 +311,15 @@ def run_dft_baseline_calculation(
             charge,
             multiplicity,
             title=f"DFT baseline: {description}",
-            extra_keywords=extra_keywords
+            extra_keywords=extra_keywords,
         )
 
         print(f"  \u2192 Created input: {gjf_file}")
 
         # Run Gaussian calculation
-        success, log_file = run_gaussian_dft(gjf_file, timeout=None)  # No timeout - run as long as needed
+        success, log_file = run_gaussian_dft(
+            gjf_file, timeout=None
+        )  # No timeout - run as long as needed
 
         if not success:
             print("  \u2717 Calculation failed")
@@ -336,9 +329,13 @@ def run_dft_baseline_calculation(
             if Path(log_file).exists():
                 with open(log_file) as f:
                     log_content = f.read()
-                    if 'Unrecognized' in log_content or 'Unknown' in log_content:
-                        print(f"  \u26a0 Possible issue: Functional '{method}' may not be available in your Gaussian version")
-                        print("    Check DFT_BASELINES in dft_baseline.py and ensure the functional is supported")
+                    if "Unrecognized" in log_content or "Unknown" in log_content:
+                        print(
+                            f"  \u26a0 Possible issue: Functional '{method}' may not be available in your Gaussian version"
+                        )
+                        print(
+                            "    Check DFT_BASELINES in dft_baseline.py and ensure the functional is supported"
+                        )
 
             return False
 
@@ -353,7 +350,7 @@ def run_dft_baseline_calculation(
             return False
 
         # Convert energy from Hartree to eV
-        energy_hartree = parsed_data.get('final_energy_hartree')
+        energy_hartree = parsed_data.get("final_energy_hartree")
         if energy_hartree is not None:
             energy_ev = energy_hartree * HARTREE_TO_EV
         else:
@@ -361,7 +358,7 @@ def run_dft_baseline_calculation(
             return False
 
         # Move Gaussian files to output directory
-        chk_file = gjf_file.replace('.gjf', '.chk')
+        chk_file = gjf_file.replace(".gjf", ".chk")
 
         # Final paths in output directory
         final_gjf = freq_dir / "gaussian_dft.gjf"
@@ -378,6 +375,7 @@ def run_dft_baseline_calculation(
             # Automatically convert to .fchk for mode matching
             try:
                 from fchk_parser import convert_chk_to_fchk
+
                 final_fchk = freq_dir / "gaussian_dft.fchk"
                 logger.info("Converting .chk to .fchk for mode matching...")
                 convert_chk_to_fchk(str(final_chk), str(final_fchk))
@@ -393,17 +391,17 @@ def run_dft_baseline_calculation(
             dipole_calculator=calculator_name,
             calculator_type="dft",
             frequencies_data={
-                'harmonic': parsed_data.get('harmonic', []),
-                'anharmonic': parsed_data.get('anharmonic', []),
-                'overtones': parsed_data.get('overtones', []),
-                'combination_bands': parsed_data.get('combination_bands', [])
+                "harmonic": parsed_data.get("harmonic", []),
+                "anharmonic": parsed_data.get("anharmonic", []),
+                "overtones": parsed_data.get("overtones", []),
+                "combination_bands": parsed_data.get("combination_bands", []),
             },
             energy=energy_ev,
-            dipole=parsed_data.get('dipole_moment'),
+            dipole=parsed_data.get("dipole_moment"),
             runtime=runtime,
             gaussian_log=str(final_log),
             gaussian_gjf=str(final_gjf),
-            timestamp=timestamp
+            timestamp=timestamp,
         )
 
         print(f"  \u2713 Completed in {runtime:.1f} seconds")
@@ -414,6 +412,7 @@ def run_dft_baseline_calculation(
     except Exception as e:
         logger.error(f"DFT baseline calculation failed: {e}")
         import traceback
+
         logger.error(traceback.format_exc())
         print(f"  \u2717 FAILED: {e}")
         print("=" * 60 + "\n")
@@ -426,11 +425,11 @@ def run_all_dft_baselines(
     results_mgr: ResultsManager,
     charge: int = 0,
     multiplicity: int = 1,
-    skip_if_exists: bool = True
+    skip_if_exists: bool = True,
 ) -> Dict[str, bool]:
     """
     Run all DFT baseline calculations.
-    
+
     Parameters
     ----------
     atoms : ase.Atoms
@@ -445,7 +444,7 @@ def run_all_dft_baselines(
         Spin multiplicity
     skip_if_exists : bool
         If True, skip calculations if results already exist
-        
+
     Returns
     -------
     dict
@@ -461,13 +460,7 @@ def run_all_dft_baselines(
 
     for baseline_name in DFT_BASELINES.keys():
         success = run_dft_baseline_calculation(
-            atoms,
-            molecule_name,
-            baseline_name,
-            results_mgr,
-            charge,
-            multiplicity,
-            skip_if_exists
+            atoms, molecule_name, baseline_name, results_mgr, charge, multiplicity, skip_if_exists
         )
         results[baseline_name] = success
 

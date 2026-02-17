@@ -7,6 +7,7 @@ from utils.exceptions import (
     MaceGaussianError,
     PrerequisiteError,
 )
+from utils.results import ResultsManager
 from utils.units import (
     ANGSTROM_TO_BOHR,
     BOHR_TO_ANGSTROM,
@@ -19,6 +20,7 @@ from utils.units import (
 )
 
 __all__ = [
+    "ResultsManager",
     "ANGSTROM_TO_BOHR",
     "BOHR_TO_ANGSTROM",
     "CUDANotAvailableWarning",

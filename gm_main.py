@@ -8,7 +8,8 @@ import warnings
 warnings.filterwarnings("ignore")
 try:
     from rdkit import RDLogger
-    RDLogger.DisableLog('rdApp.*')
+
+    RDLogger.DisableLog("rdApp.*")
 except ImportError:
     pass
 import logging
@@ -31,24 +32,23 @@ from ase.optimize import LBFGS
 from charge_analysis import ChargeAnalyzer
 from gaussian_parser import parse_gaussian_log
 from mace_calculators import MACEDipoleCalculator
-from results_manager import ResultsManager
+from utils.results import ResultsManager
 from utils.units import BOHR_TO_ANGSTROM, HARTREE_TO_EV
 
 # Set up logging
 logging.basicConfig(
     level=logging.INFO,  # Changed from INFO
-    format="%(asctime)s - %(levelname)s - %(message)s"
+    format="%(asctime)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
 # Suppress Warnings
-warnings.filterwarnings(
-    "ignore", message=".*weights_only=False.*", category=FutureWarning
-)
+warnings.filterwarnings("ignore", message=".*weights_only=False.*", category=FutureWarning)
 os.environ["PYTHONWARNINGS"] = "ignore::FutureWarning"
 
 try:
     from charge_analysis import ChargeAnalyzer
+
     CHARGE_ANALYSIS_AVAILABLE = True
 except ImportError:
     logger.warning("Charge analysis module not available")
@@ -97,18 +97,14 @@ class DipoleCalculatorBase(ABC):
         pass
 
     @abstractmethod
-    def calculate_dipole(
-        self, atoms, **kwargs
-    ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+    def calculate_dipole(self, atoms, **kwargs) -> Tuple[np.ndarray, Optional[np.ndarray]]:
         """
         Calculate dipole moment and partial charges
         Returns: (dipole_vector, partial_charges)
         """
         pass
 
-    def calculate_dipole_derivatives(
-        self, atoms, displacement=0.01, **kwargs
-    ) -> np.ndarray:
+    def calculate_dipole_derivatives(self, atoms, displacement=0.01, **kwargs) -> np.ndarray:
         """Calculate dipole derivatives numerically"""
         natoms = len(atoms)
         dipole_derivatives = np.zeros((3 * natoms, 3))
@@ -247,9 +243,7 @@ class MACEMLDipoleCalculator(DipoleCalculatorBase):
 
     def __init__(self, model_path=None):
         # Use provided path, or fall back to configured default
-        self.model_path = (
-            model_path if model_path is not None else DEFAULT_MACE_DIPOLE_MODEL
-        )
+        self.model_path = model_path if model_path is not None else DEFAULT_MACE_DIPOLE_MODEL
         self.mace_calc = None
 
         super().__init__("mace_ml")
@@ -258,15 +252,11 @@ class MACEMLDipoleCalculator(DipoleCalculatorBase):
         try:
             # Check if model file exists
             if not Path(self.model_path).exists():
-                raise FileNotFoundError(
-                    f"MACE dipole model not found at: {self.model_path}"
-                )
+                raise FileNotFoundError(f"MACE dipole model not found at: {self.model_path}")
 
             self.mace_calc = MACEDipoleCalculator(self.model_path)
             self.available = True
-            logger.info(
-                f"\u2713 MACE ML dipole calculator available (model: {self.model_path})"
-            )
+            logger.info(f"\u2713 MACE ML dipole calculator available (model: {self.model_path})")
         except (ImportError, FileNotFoundError) as e:
             self.available = False
             logger.warning(f"\u2717 MACE ML dipole calculator failed: {e}")
@@ -456,6 +446,7 @@ def calculate_energy_and_forces(atoms, calculator) -> Tuple[float, np.ndarray]:
     except Exception as e:
         logger.error(f"Energy/forces calculation failed: {e}")
         import traceback
+
         logger.error(f"Full traceback:\n{traceback.format_exc()}")
         raise
 
@@ -475,6 +466,7 @@ def calculate_hessian(atoms, calculator, natoms: int) -> Optional[np.ndarray]:
     except Exception as e:
         logger.error(f"Hessian calculation failed: {e}")
         import traceback
+
         logger.error(f"Full traceback:\n{traceback.format_exc()}")
         return None
 
@@ -512,9 +504,7 @@ def calculate_dipole_properties(
         # Calculate dipole derivatives for IR intensities
         if calculate_derivatives and deriv >= 1:
             logger.info("Calculating dipole derivatives for IR intensities...")
-            dipole_derivatives = dipole_calc.calculate_dipole_derivatives(
-                atoms, displacement=0.005
-            )
+            dipole_derivatives = dipole_calc.calculate_dipole_derivatives(atoms, displacement=0.005)
         else:
             dipole_derivatives = np.zeros((3 * natoms, 3))
 
@@ -698,17 +688,13 @@ def calculator(nnp):
     if nnp == "mace_mp":
         from mace.calculators import mace_mp
 
-        calc = mace_mp(
-            model="large", device="cuda", default_dtype="float64", dispersion=False
-        )
+        calc = mace_mp(model="large", device="cuda", default_dtype="float64", dispersion=False)
         return calc
 
     if nnp == "mace_off":
         from mace.calculators import mace_off
 
-        calc = mace_off(
-            model="large", device="cuda", default_dtype="float64", dispersion=False
-        )
+        calc = mace_off(model="large", device="cuda", default_dtype="float64", dispersion=False)
         return calc
 
     # *** NEW: MACE-OMOL-0 support with charge and spin embeddings ***
@@ -723,12 +709,14 @@ def calculator(nnp):
         )
         return calc
 
+
 # Charge Analyzer
 
-def analyze_molecular_charges(atoms, output_dir='charge_analysis'):
+
+def analyze_molecular_charges(atoms, output_dir="charge_analysis"):
     """
     Perform comprehensive charge analysis and visualization.
-    
+
     Parameters
     ----------
     atoms : ase.Atoms
@@ -748,30 +736,31 @@ def analyze_molecular_charges(atoms, output_dir='charge_analysis'):
 
     try:
         logger.info("")
-        logger.info("="*70)
+        logger.info("=" * 70)
         logger.info("DETAILED CHARGE ANALYSIS")
-        logger.info("="*70)
+        logger.info("=" * 70)
 
         # Create analyzer and run all analyses
         analyzer = ChargeAnalyzer(atoms, charges)
         analyzer.analyze_all(groups=None, save_plots=True, output_dir=output_dir)
 
-        logger.info("="*70)
+        logger.info("=" * 70)
         logger.info("")
         return analyzer
     except Exception as e:
         logger.error(f"Charge analysis failed: {e}")
         return None
 
+
 def setup_output_directory(base_name: str) -> str:
     """
     Create organized output directory structure.
-    
+
     Parameters
     ----------
     base_name : str
         Base name for the calculation (e.g., 'acoh')
-    
+
     Returns
     -------
     str
@@ -790,15 +779,13 @@ def setup_output_directory(base_name: str) -> str:
 
     return output_dir
 
+
 def run_geometry_optimization(
-    atoms,
-    molecule_name: str,
-    results_mgr: ResultsManager,
-    calculator_name: str = "mace_omol"
+    atoms, molecule_name: str, results_mgr: ResultsManager, calculator_name: str = "mace_omol"
 ):
     """
     Run geometry optimization and save results.
-    
+
     Parameters
     ----------
     atoms : ase.Atoms
@@ -809,7 +796,7 @@ def run_geometry_optimization(
         Results manager instance
     calculator_name : str
         Name of calculator to use for optimization
-        
+
     Returns
     -------
     ase.Atoms
@@ -844,7 +831,7 @@ def run_geometry_optimization(
         final_energy=final_energy,
         converged=True,  # geometry_optimisation returns when converged
         num_steps=num_steps,
-        runtime=runtime
+        runtime=runtime,
     )
 
     print(f"Runtime: {runtime:.1f} seconds")
@@ -860,11 +847,11 @@ def run_frequency_calculation(
     dipole_calculator_name: str,
     results_mgr: ResultsManager,
     charge: int = 0,
-    multiplicity: int = 1
+    multiplicity: int = 1,
 ):
     """
     Run frequency calculation with specified calculators.
-    
+
     Parameters
     ----------
     atoms : ase.Atoms
@@ -881,7 +868,7 @@ def run_frequency_calculation(
         Molecular charge
     multiplicity : int
         Spin multiplicity
-        
+
     Returns
     -------
     bool
@@ -934,7 +921,7 @@ def run_frequency_calculation(
                     proc.kill()
                     proc.wait()
                     raise TimeoutError(
-                        f"Gaussian calculation timed out after {elapsed/3600:.1f} hours. "
+                        f"Gaussian calculation timed out after {elapsed / 3600:.1f} hours. "
                         f"Increase timeout via GAUSSIAN_TIMEOUT_SECONDS env var "
                         f"(current: {GAUSSIAN_TIMEOUT_SECONDS}s)."
                     )
@@ -949,7 +936,7 @@ def run_frequency_calculation(
                         msg,
                         calc,
                         dipole_method=dipole_calculator_name,
-                        calculate_derivatives=True
+                        calculate_derivatives=True,
                     )
                     socket.send_string("ready")
 
@@ -961,8 +948,8 @@ def run_frequency_calculation(
         runtime = time.time() - start_time
 
         # Now move the files to the frequency directory
-        log_temp = gjf_temp.replace('.gjf', '.log')
-        chk_temp = gjf_temp.replace('.gjf', '.chk')
+        log_temp = gjf_temp.replace(".gjf", ".log")
+        chk_temp = gjf_temp.replace(".gjf", ".chk")
 
         gjf_final = str(freq_dir / "gaussian_freq.gjf")
         log_final = str(freq_dir / "gaussian_freq.log")
@@ -979,7 +966,8 @@ def run_frequency_calculation(
             # Automatically convert to .fchk for mode matching
             try:
                 from fchk_parser import convert_chk_to_fchk
-                fchk_final = chk_final.replace('.chk', '.fchk')
+
+                fchk_final = chk_final.replace(".chk", ".fchk")
                 logger.info("Converting .chk to .fchk for mode matching...")
                 convert_chk_to_fchk(chk_final, fchk_final)
                 logger.info(f"✓ Created {fchk_final}")
@@ -995,17 +983,17 @@ def run_frequency_calculation(
                 parsed_data = parse_gaussian_log(log_final)
 
                 # Convert energy from Hartree to eV if available
-                if parsed_data.get('final_energy_hartree'):
-                    final_energy = parsed_data['final_energy_hartree'] * HARTREE_TO_EV
+                if parsed_data.get("final_energy_hartree"):
+                    final_energy = parsed_data["final_energy_hartree"] * HARTREE_TO_EV
                 else:
                     final_energy = mol.get_potential_energy()
 
             except Exception as e:
                 logger.error(f"Failed to parse Gaussian log: {e}")
-                parsed_data = {'harmonic': [], 'anharmonic': []}
+                parsed_data = {"harmonic": [], "anharmonic": []}
                 final_energy = mol.get_potential_energy()
         else:
-            parsed_data = {'harmonic': [], 'anharmonic': []}
+            parsed_data = {"harmonic": [], "anharmonic": []}
             final_energy = mol.get_potential_energy()
 
         results_mgr.save_frequency_results(
@@ -1014,18 +1002,17 @@ def run_frequency_calculation(
             dipole_calculator=dipole_calculator_name,
             calculator_type="ml",
             frequencies_data={
-                'harmonic': parsed_data.get('harmonic', []),
-                'anharmonic': parsed_data.get('anharmonic', []),
-                'overtones': parsed_data.get('overtones', []),
-                'combination_bands': parsed_data.get('combination_bands', [])
+                "harmonic": parsed_data.get("harmonic", []),
+                "anharmonic": parsed_data.get("anharmonic", []),
+                "overtones": parsed_data.get("overtones", []),
+                "combination_bands": parsed_data.get("combination_bands", []),
             },
-
             energy=final_energy,
-            dipole=parsed_data.get('dipole_moment'),
+            dipole=parsed_data.get("dipole_moment"),
             runtime=runtime,
             gaussian_log=log_final if os.path.exists(log_final) else None,
             gaussian_gjf=gjf_final if os.path.exists(gjf_final) else None,
-            timestamp=timestamp
+            timestamp=timestamp,
         )
 
         print(f"  ✓ Completed in {runtime:.1f} seconds")
@@ -1036,10 +1023,12 @@ def run_frequency_calculation(
     except Exception as e:
         logger.error(f"Frequency calculation failed: {e}")
         import traceback
+
         logger.error(traceback.format_exc())
         print("  ✗ FAILED")
         print("=" * 60 + "\n")
         return False
+
 
 ####################################################################
 ##                   SCRIPT EXECUTION STARTS HERE                 ##
@@ -1051,6 +1040,7 @@ def run_frequency_calculation(
 ####################################################################
 ##                   DIAGNOSTIC FUNCTION                          ##
 ####################################################################
+
 
 def print_diagnostics():
     """Print diagnostic information about available calculators."""
@@ -1068,6 +1058,7 @@ def print_diagnostics():
 ##                   MAIN WORKFLOW FUNCTION                       ##
 ####################################################################
 
+
 def run_workflow(
     input_file: str,
     optimization_calculator: str = "mace_omol",
@@ -1075,11 +1066,11 @@ def run_workflow(
     dipole_calculators: list = None,
     force_optimization: bool = False,
     include_dft_baselines: bool = True,
-    base_output_dir: str = "comparison_results"
+    base_output_dir: str = "comparison_results",
 ):
     """
     Run the complete MACE-Gaussian comparison workflow.
-    
+
     Parameters
     ----------
     input_file : str
@@ -1096,7 +1087,7 @@ def run_workflow(
         If True, run DFT baseline calculations (default: True)
     base_output_dir : str
         Base directory for results (default: 'comparison_results')
-        
+
     Returns
     -------
     dict
@@ -1149,6 +1140,7 @@ def run_workflow(
         json_file = opt_dir / "results.json"
         if json_file.exists():
             import json
+
             with open(json_file) as f:
                 opt_metadata = json.load(f)
             # Note: charge/spin might not be in old metadata, use defaults
@@ -1178,14 +1170,12 @@ def run_workflow(
 
         try:
             optimized_mol = run_geometry_optimization(
-                mol,
-                molecule_name,
-                results_mgr,
-                optimization_calculator
+                mol, molecule_name, results_mgr, optimization_calculator
             )
         except Exception as e:
             logger.error(f"Geometry optimization failed: {e}")
             import traceback
+
             logger.error(traceback.format_exc())
             raise
 
@@ -1200,12 +1190,7 @@ def run_workflow(
     dft_results = {}
     if include_dft_baselines:
         dft_results = run_all_dft_baselines(
-            optimized_mol,
-            molecule_name,
-            results_mgr,
-            charge,
-            multiplicity,
-            skip_if_exists=True
+            optimized_mol, molecule_name, results_mgr, charge, multiplicity, skip_if_exists=True
         )
 
     # ========================================================================
@@ -1230,13 +1215,9 @@ def run_workflow(
                 dipole_calc,
                 results_mgr,
                 charge,
-                multiplicity
+                multiplicity,
             )
-            ml_results.append({
-                'energy': energy_calc,
-                'dipole': dipole_calc,
-                'success': success
-            })
+            ml_results.append({"energy": energy_calc, "dipole": dipole_calc, "success": success})
 
     # ========================================================================
     # SUMMARY
@@ -1254,22 +1235,22 @@ def run_workflow(
 
     # ML calculations summary
     print("\nML Calculations:")
-    successful_ml = sum(1 for r in ml_results if r['success'])
+    successful_ml = sum(1 for r in ml_results if r["success"])
     total_ml = len(ml_results)
 
     print(f"Completed: {successful_ml}/{total_ml}")
 
     for r in ml_results:
-        status = "✓" if r['success'] else "✗"
+        status = "✓" if r["success"] else "✗"
         print(f"  {status} {r['energy']} + {r['dipole']}")
 
     print(f"\nResults saved to: {base_output_dir}/{molecule_name}/")
     print("=" * 60)
 
     return {
-        'dft_baselines': dft_results,
-        'ml_calculations': ml_results,
-        'molecule_name': molecule_name
+        "dft_baselines": dft_results,
+        "ml_calculations": ml_results,
+        "molecule_name": molecule_name,
     }
 
 

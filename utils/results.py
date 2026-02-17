@@ -21,7 +21,7 @@ class ResultsManager:
     def __init__(self, base_output_dir: str = "comparison_results"):
         """
         Initialize ResultsManager.
-        
+
         Parameters
         ----------
         base_output_dir : str
@@ -33,12 +33,12 @@ class ResultsManager:
     def create_molecule_directory(self, molecule_name: str) -> Path:
         """
         Create directory for a specific molecule.
-        
+
         Parameters
         ----------
         molecule_name : str
             Name of the molecule (e.g., 'acoh', 'water')
-            
+
         Returns
         -------
         Path
@@ -51,12 +51,12 @@ class ResultsManager:
     def create_optimization_directory(self, molecule_name: str) -> Path:
         """
         Create directory for geometry optimization results.
-        
+
         Parameters
         ----------
         molecule_name : str
             Name of the molecule
-            
+
         Returns
         -------
         Path
@@ -72,7 +72,7 @@ class ResultsManager:
         molecule_name: str,
         energy_calculator: str,
         dipole_calculator: str,
-        timestamp: Optional[str] = None
+        timestamp: Optional[str] = None,
     ) -> Path:
         """Create directory for frequency calculation results."""
         mol_dir = self.create_molecule_directory(molecule_name)
@@ -100,11 +100,11 @@ class ResultsManager:
         final_energy: float,
         converged: bool,
         num_steps: int,
-        runtime: float
+        runtime: float,
     ):
         """
         Save geometry optimization results.
-        
+
         Parameters
         ----------
         molecule_name : str
@@ -151,16 +151,13 @@ class ResultsManager:
             "converged": converged,
             "num_steps": num_steps,
             "runtime_s": float(runtime),
-            "files": {
-                "initial_geometry": "initial.xyz",
-                "optimized_geometry": "optimized.xyz"
-            },
+            "files": {"initial_geometry": "initial.xyz", "optimized_geometry": "optimized.xyz"},
             "version_info": version_info,
         }
 
         # Save JSON
         json_path = opt_dir / "results.json"
-        with open(json_path, 'w') as f:
+        with open(json_path, "w") as f:
             json.dump(metadata, f, indent=2)
 
         logger.info(f"\u2713 Saved optimization results to {opt_dir}")
@@ -182,7 +179,7 @@ class ResultsManager:
     ):
         """
         Save frequency calculation results with overtones and combination bands.
-        
+
         Parameters
         ----------
         molecule_name : str
@@ -254,7 +251,7 @@ class ResultsManager:
 
         # Save JSON
         json_path = freq_dir / "results.json"
-        with open(json_path, 'w') as f:
+        with open(json_path, "w") as f:
             json.dump(metadata, f, indent=2)
 
         logger.info(f"\u2713 Saved frequency results to {freq_dir}")
@@ -262,12 +259,12 @@ class ResultsManager:
     def load_optimization_results(self, molecule_name: str) -> Dict[str, Any]:
         """
         Load optimization results from JSON.
-        
+
         Parameters
         ----------
         molecule_name : str
             Name of the molecule
-            
+
         Returns
         -------
         dict
@@ -285,12 +282,12 @@ class ResultsManager:
     def get_optimized_geometry_path(self, molecule_name: str) -> Path:
         """
         Get path to optimized geometry file.
-        
+
         Parameters
         ----------
         molecule_name : str
             Name of the molecule
-            
+
         Returns
         -------
         Path
