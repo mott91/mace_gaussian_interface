@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-16)
 ## Current Position
 
 Phase: 2 of 10 (Error Handling & Input Validation)
-Plan: 2 of 3 in current phase
-Status: In Progress
-Last activity: 2026-02-17 — Completed 02-02: parser error hardening and results metadata
+Plan: 3 of 3 in current phase
+Status: Phase 02 Complete
+Last activity: 2026-02-17 — Completed 02-03: CLI validation integration, subprocess timeout, version fix
 
 Progress: [██░░░░░░░░] 20%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 5.0 min
-- Total execution time: 0.50 hours
+- Total plans completed: 7
+- Average duration: 4.9 min
+- Total execution time: 0.57 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01 | 4 | 22 min | 5.5 min |
-| 02 | 2 | 8 min | 4.0 min |
+| 02 | 3 | 13 min | 4.3 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-02 (2 min), 01-03 (4 min), 01-04 (2 min), 02-01 (4 min), 02-02 (4 min)
+- Last 5 plans: 01-03 (4 min), 01-04 (2 min), 02-01 (4 min), 02-02 (4 min), 02-03 (5 min)
 - Trend: Consistent fast execution on well-scoped plans
 
 *Updated after each plan completion*
@@ -55,6 +55,8 @@ Recent decisions affecting current work:
 - [Phase 02-02]: Created exceptions.py and validation.py inline as Plan 01 prerequisites (Rule 3 blocking)
 - [Phase 02-02]: Used lazy import (try/except ImportError) for validation module in results_manager
 - [Phase 02-02]: Default strict=False preserves backward compatibility for anharmonic-type parsers
+- [Phase 02-03]: Timeout tests gracefully handle gm_main import failures (heavy deps like DGL/espaloma)
+- [Phase 02-03]: Validation only on run command, not list/diagnose/compare/export
 
 ### Pending Todos
 
@@ -73,6 +75,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-17 (plan execution)
-Stopped at: Completed 02-01-PLAN.md (backfill: tests added for exception hierarchy and validation)
+Last session: 2026-02-17 (phase execution)
+Stopped at: Completed Phase 02 — all 3 plans executed
 Resume file: None
