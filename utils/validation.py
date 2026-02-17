@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from exceptions import InputValidationError, PrerequisiteError
+from utils.exceptions import InputValidationError, PrerequisiteError
 
 logger = logging.getLogger(__name__)
 
