@@ -70,12 +70,14 @@ DEFAULT_HELPER_SCRIPT = os.getenv(
     str(Path(__file__).parent / "gm_helper.py"),  # Use relative path by default
 )
 
-# Validate paths on startup
-if not Path(DEFAULT_HELPER_SCRIPT).exists():
-    logger.warning(f"Helper script not found at: {DEFAULT_HELPER_SCRIPT}")
-    logger.warning("Set MACE_HELPER_SCRIPT_PATH environment variable if needed")
+# Path validation is now handled by validation.py at runtime
 
 # Note: MACE dipole model is checked when MACEMLDipoleCalculator is instantiated
+
+# Gaussian subprocess timeout (seconds)
+# Default: 24 hours for ML-assisted calculations
+# Override: Set GAUSSIAN_TIMEOUT_SECONDS environment variable
+GAUSSIAN_TIMEOUT_SECONDS = int(os.getenv("GAUSSIAN_TIMEOUT_SECONDS", "86400"))
 
 # ============================================================================
 # MODULAR DIPOLE CALCULATION SYSTEM
@@ -930,8 +932,20 @@ def run_frequency_calculation(
         
         # ZMQ server for external interface
         counter = 0
+        calc_start_time = time.time()
         with zmq_server(".ipc_file") as socket:
             while not is_calc_finished(proc, socket):
+                # Check timeout
+                elapsed = time.time() - calc_start_time
+                if elapsed > GAUSSIAN_TIMEOUT_SECONDS:
+                    proc.kill()
+                    proc.wait()
+                    raise TimeoutError(
+                        f"Gaussian calculation timed out after {elapsed/3600:.1f} hours. "
+                        f"Increase timeout via GAUSSIAN_TIMEOUT_SECONDS env var "
+                        f"(current: {GAUSSIAN_TIMEOUT_SECONDS}s)."
+                    )
+
                 logger.info(f"Calculation step {counter}")
                 counter += 1
                 msg = socket.recv_string()
@@ -1097,7 +1111,11 @@ def run_workflow(
         Summary of results with success status for each calculation
     """
     from dft_baseline import run_all_dft_baselines
-    
+    from validation import detect_device
+
+    # Detect and log compute device
+    device = detect_device()
+
     # Set defaults
     if energy_calculators is None:
         energy_calculators = ["mace_mp", "mace_omol"]

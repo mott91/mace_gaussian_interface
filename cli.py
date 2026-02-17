@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 @click.group()
-@click.version_option(version="1.0.0", prog_name="MACE-Gaussian Comparison Framework")
+@click.version_option(version="0.2.0", prog_name="MACE-Gaussian Comparison Framework")
 def cli():
     """MACE-Gaussian comparison framework for molecular calculations."""
     pass
@@ -84,16 +84,46 @@ def run(input_file, optimization_calculator, energy_calculators, dipole_calculat
     energy_calc_list = [c.strip() for c in energy_calculators.split(',')]
     dipole_calc_list = [c.strip() for c in dipole_calculators.split(',')]
     
-    # Validate input file
     input_path = Path(input_file)
-    if not input_path.suffix == '.xyz':
-        click.echo(f"Warning: Input file should be .xyz format, got {input_path.suffix}", err=True)
-    
-    click.echo(f"Starting workflow for: {input_file}")
+
+    # Validate prerequisites before expensive imports
+    from exceptions import InputValidationError, PrerequisiteError
+    from validation import (
+        detect_device,
+        validate_all_prerequisites,
+        validate_xyz_file,
+    )
+
+    # 1. Validate input file
+    try:
+        xyz_info = validate_xyz_file(str(input_path))
+        click.echo(f"Input: {xyz_info['n_atoms']} atoms ({', '.join(set(xyz_info['symbols']))})")
+    except InputValidationError as e:
+        click.echo(f"Error: {e}", err=True)
+        sys.exit(1)
+
+    # 2. Validate prerequisites
+    try:
+        validate_all_prerequisites(
+            check_gaussian=True,
+            check_formchk_tool=True,
+            dipole_model_path=None,  # Checked later by calculators
+            helper_script_path=None,  # Checked later by gm_main
+        )
+        click.echo("Prerequisites OK: g16 found")
+    except PrerequisiteError as e:
+        click.echo(f"Error: {e}", err=True)
+        sys.exit(1)
+
+    # 3. Detect compute device
+    device = detect_device()
+    click.echo(f"Device: {device}")
+
+    click.echo(f"\nStarting workflow for: {input_file}")
     click.echo(f"Energy calculators: {energy_calc_list}")
     click.echo(f"Dipole calculators: {dipole_calc_list}")
     click.echo("")
-    
+
     try:
         results = run_workflow(
             input_file=str(input_path),
