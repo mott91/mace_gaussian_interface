@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-02-16)
 
 ## Current Position
 
-Phase: 4 of 10 (Extract Calculator Classes)
-Plan: 1 of 2 in current phase
-Status: Executing Phase 04
-Last activity: 2026-02-17 — Completed 04-01: Extract dipole calculator hierarchy into calculators/ package
+Phase: 4 of 10 (Extract Calculator Classes) -- COMPLETE
+Plan: 2 of 2 in current phase
+Status: Phase 04 complete, ready for Phase 05
+Last activity: 2026-02-17 — Completed 04-02: Calculator unit tests with mocked dependencies
 
 Progress: [████░░░░░░] 40%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
-- Average duration: 4.6 min
-- Total execution time: 0.77 hours
+- Total plans completed: 11
+- Average duration: 4.5 min
+- Total execution time: 0.82 hours
 
 **By Phase:**
 
@@ -30,10 +30,10 @@ Progress: [████░░░░░░] 40%
 | 01 | 4 | 22 min | 5.5 min |
 | 02 | 3 | 13 min | 4.3 min |
 | 03 | 2 | 9 min | 4.5 min |
-| 04 | 1 | 4 min | 4.0 min |
+| 04 | 2 | 7 min | 3.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-02 (4 min), 02-03 (5 min), 03-01 (6 min), 03-02 (3 min), 04-01 (4 min)
+- Last 5 plans: 02-03 (5 min), 03-01 (6 min), 03-02 (3 min), 04-01 (4 min), 04-02 (3 min)
 - Trend: Consistent fast execution on well-scoped plans
 
 *Updated after each plan completion*
@@ -65,6 +65,8 @@ Recent decisions affecting current work:
 - [Phase 03-02]: Corrected angstrom_to_bohr test expected value to match CODATA 2018 derived inverse
 - [Phase 04-01]: Lazy import of MACEDipoleCalculator inside _check_availability to avoid module-level side effects
 - [Phase 04-01]: Modernized type annotations (tuple/dict) in new calculator files for Python 3.12
+- [Phase 04-02]: Pre-mock heavy deps via sys.modules before importing calculators package to avoid DGL/espaloma/xtb side effects in tests
+- [Phase 04-02]: Added from __future__ import annotations to calculators/base.py, factory.py, gm_main.py for Python 3.8 compatibility
 
 ### Pending Todos
 
@@ -84,5 +86,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-17 (phase execution)
-Stopped at: Completed 04-01-PLAN.md
+Stopped at: Completed 04-02-PLAN.md (Phase 04 complete)
 Resume file: None
