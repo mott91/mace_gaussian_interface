@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-16)
 
 **Core value:** Reliable, reproducible IR spectral predictions using ML potentials that can be validated against DFT reference data.
-**Current focus:** Phase 3 Complete - Ready for Phase 4
+**Current focus:** Phase 4 - Extract Calculator Classes (in progress)
 
 ## Current Position
 
-Phase: 3 of 10 (Extract Utilities & Conventions) -- COMPLETE
-Plan: 2 of 2 in current phase (all complete)
-Status: Phase 03 Complete
-Last activity: 2026-02-17 — Completed 03-02: ResultsManager migration, unit tests, conventions
+Phase: 4 of 10 (Extract Calculator Classes)
+Plan: 1 of 2 in current phase
+Status: Executing Phase 04
+Last activity: 2026-02-17 — Completed 04-01: Extract dipole calculator hierarchy into calculators/ package
 
-Progress: [████░░░░░░] 35%
+Progress: [████░░░░░░] 40%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
-- Average duration: 4.7 min
-- Total execution time: 0.72 hours
+- Total plans completed: 10
+- Average duration: 4.6 min
+- Total execution time: 0.77 hours
 
 **By Phase:**
 
@@ -30,9 +30,10 @@ Progress: [████░░░░░░] 35%
 | 01 | 4 | 22 min | 5.5 min |
 | 02 | 3 | 13 min | 4.3 min |
 | 03 | 2 | 9 min | 4.5 min |
+| 04 | 1 | 4 min | 4.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (4 min), 02-02 (4 min), 02-03 (5 min), 03-01 (6 min), 03-02 (3 min)
+- Last 5 plans: 02-02 (4 min), 02-03 (5 min), 03-01 (6 min), 03-02 (3 min), 04-01 (4 min)
 - Trend: Consistent fast execution on well-scoped plans
 
 *Updated after each plan completion*
@@ -62,6 +63,8 @@ Recent decisions affecting current work:
 - [Phase 03-01]: Preserved original numerical behavior when replacing misnamed constants (ANGSTROM_TO_BOHR=0.529 -> BOHR_TO_ANGSTROM)
 - [Phase 03-01]: No compatibility shims -- clean break with direct import updates across codebase
 - [Phase 03-02]: Corrected angstrom_to_bohr test expected value to match CODATA 2018 derived inverse
+- [Phase 04-01]: Lazy import of MACEDipoleCalculator inside _check_availability to avoid module-level side effects
+- [Phase 04-01]: Modernized type annotations (tuple/dict) in new calculator files for Python 3.12
 
 ### Pending Todos
 
@@ -81,5 +84,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-17 (phase execution)
-Stopped at: Completed 03-02-PLAN.md (Phase 03 complete)
+Stopped at: Completed 04-01-PLAN.md
 Resume file: None
