@@ -136,7 +136,7 @@ class ResultsManager:
 
         # Collect version metadata
         try:
-            from validation import collect_version_metadata
+            from utils.validation import collect_version_metadata
 
             version_info = collect_version_metadata()
         except ImportError:
@@ -230,7 +230,7 @@ class ResultsManager:
 
         # Collect version metadata
         try:
-            from validation import collect_version_metadata
+            from utils.validation import collect_version_metadata
 
             version_info = collect_version_metadata()
         except ImportError:

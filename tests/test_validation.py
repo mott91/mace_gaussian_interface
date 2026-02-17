@@ -11,8 +11,8 @@ from unittest.mock import patch
 
 import pytest
 
-from exceptions import InputValidationError, PrerequisiteError
-from validation import (
+from utils.exceptions import InputValidationError, PrerequisiteError
+from utils.validation import (
     check_dipole_model,
     check_formchk_available,
     check_gaussian_available,
@@ -52,14 +52,14 @@ def water_xyz(tmp_path: Path) -> Path:
 class TestCheckGaussianAvailable:
     """Tests for check_gaussian_available."""
 
-    @patch("validation.shutil.which", return_value="/usr/bin/g16")
+    @patch("utils.validation.shutil.which", return_value="/usr/bin/g16")
     def test_found(self, mock_which):
         """Returns path when g16 is on PATH."""
         result = check_gaussian_available()
         assert result == "/usr/bin/g16"
         mock_which.assert_called_once_with("g16")
 
-    @patch("validation.shutil.which", return_value=None)
+    @patch("utils.validation.shutil.which", return_value=None)
     def test_not_found(self, mock_which):
         """Raises PrerequisiteError with 'g16' in message when missing."""
         with pytest.raises(PrerequisiteError, match="g16"):
@@ -74,13 +74,13 @@ class TestCheckGaussianAvailable:
 class TestCheckFormchkAvailable:
     """Tests for check_formchk_available."""
 
-    @patch("validation.shutil.which", return_value="/usr/bin/formchk")
+    @patch("utils.validation.shutil.which", return_value="/usr/bin/formchk")
     def test_found(self, mock_which):
         """Returns path when formchk is on PATH."""
         assert check_formchk_available() == "/usr/bin/formchk"
         mock_which.assert_called_once_with("formchk")
 
-    @patch("validation.shutil.which", return_value=None)
+    @patch("utils.validation.shutil.which", return_value=None)
     def test_not_found(self, mock_which):
         """Raises PrerequisiteError when formchk is missing."""
         with pytest.raises(PrerequisiteError, match="formchk"):
@@ -176,7 +176,7 @@ class TestValidateXyzFile:
 class TestValidateAllPrerequisites:
     """Tests for validate_all_prerequisites."""
 
-    @patch("validation.shutil.which", return_value="/usr/bin/g16")
+    @patch("utils.validation.shutil.which", return_value="/usr/bin/g16")
     def test_all_pass(self, mock_which, tmp_path: Path):
         """Returns summary dict when all checks pass."""
         # Create temp files for model and script
@@ -198,7 +198,7 @@ class TestValidateAllPrerequisites:
         assert "g16_path" in result
         assert "formchk_path" in result
 
-    @patch("validation.shutil.which", return_value=None)
+    @patch("utils.validation.shutil.which", return_value=None)
     def test_raises_on_first_failure(self, mock_which):
         """Raises PrerequisiteError on first failing check (g16 missing)."""
         with pytest.raises(PrerequisiteError, match="g16"):

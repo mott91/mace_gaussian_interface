@@ -5,16 +5,18 @@ Runs pure Gaussian DFT calculations (no external interface) as baselines
 for comparison with ML-enhanced calculations.
 """
 
-import subprocess
-import time
 import logging
 import shutil
+import subprocess
+import time
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict, Optional
+
 from ase import Atoms
 
 from gaussian_parser import parse_gaussian_log
 from results_manager import ResultsManager
+from utils.units import HARTREE_TO_EV
 
 logger = logging.getLogger(__name__)
 
@@ -108,20 +110,20 @@ def check_baseline_exists(
     # Check if directory exists (DFT uses same calculator for energy and dipole)
     mol_dir = results_mgr.create_molecule_directory(molecule_name)
     freq_dir = mol_dir / calculator_name
-    
+
     if not freq_dir.exists():
         return False
-    
+
     # Check if results.json exists and is valid
     json_file = freq_dir / "results.json"
     if not json_file.exists():
         return False
-    
+
     # Basic validation - check if log file exists
     log_file = freq_dir / "gaussian_freq.log"
     if not log_file.exists():
         return False
-    
+
     logger.info(f"\u2713 DFT baseline {calculator_name} already exists for {molecule_name}")
     return True
 
@@ -160,15 +162,15 @@ def create_gaussian_dft_input(
     """
     symbols = atoms.get_chemical_symbols()
     positions = atoms.get_positions()  # Angstrom
-    
+
     # Construct route card - pure DFT with geometry optimization, no external interface
     route = f"# opt freq(anharm) {method}/{basis}"
     if extra_keywords:
         route += f" {extra_keywords}"
-    
+
     # Link0 commands
     link0 = f"%chk={filename[:-4]}.chk\n%mem=4GB\n%NProcShared=4"
-    
+
     with open(filename, 'w', encoding='utf-8') as f:
         f.write(f"{link0}\n")
         f.write(f"{route}\n\n")
@@ -201,17 +203,17 @@ def run_gaussian_dft(
         Path to the log file
     """
     log_file = gjf_file.replace('.gjf', '.log')
-    
+
     try:
-        print(f"  \u2192 Launching Gaussian calculation...")
-        
+        print("  \u2192 Launching Gaussian calculation...")
+
         # Run Gaussian (g16 executable)
         proc = subprocess.Popen(
             ['g16', gjf_file],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
-        
+
         # Wait for completion
         try:
             proc.wait(timeout=timeout)
@@ -219,27 +221,27 @@ def run_gaussian_dft(
             proc.kill()
             logger.error(f"Gaussian calculation timed out after {timeout}s")
             return False, log_file
-        
+
         # Check return code
         if proc.returncode != 0:
             logger.error(f"Gaussian exited with error code {proc.returncode}")
             return False, log_file
-        
+
         # Check if log file was created
         if not Path(log_file).exists():
             logger.error("Gaussian log file was not created")
             return False, log_file
-        
+
         # Check for normal termination
-        with open(log_file, 'r') as f:
+        with open(log_file) as f:
             content = f.read()
             if 'Normal termination' not in content:
                 logger.error("Gaussian calculation did not terminate normally")
                 return False, log_file
-        
-        print(f"  \u2713 Gaussian calculation completed successfully")
+
+        print("  \u2713 Gaussian calculation completed successfully")
         return True, log_file
-        
+
     except Exception as e:
         logger.error(f"Error running Gaussian: {e}")
         return False, log_file
@@ -282,7 +284,7 @@ def run_dft_baseline_calculation(
     if baseline_name not in DFT_BASELINES:
         logger.error(f"Unknown baseline: {baseline_name}")
         return False
-    
+
     config = DFT_BASELINES[baseline_name]
     method = config['method']
     basis = config['basis']
@@ -294,20 +296,20 @@ def run_dft_baseline_calculation(
     if skip_if_exists and check_baseline_exists(results_mgr, molecule_name, baseline_name):
         print(f"  \u2192 Skipping {calculator_name} (already exists)")
         return True
-    
+
     print("=" * 60)
     print(f"DFT BASELINE: {description}")
     print("=" * 60)
-    
+
     timestamp = time.strftime("%Y%m%d_%H%M%S")
     start_time = time.time()
-    
+
     try:
         # Create frequency directory
         freq_dir = results_mgr.create_frequency_directory(
             molecule_name, calculator_name, calculator_name, timestamp
         )
-        
+
         # Generate Gaussian input file
         gjf_file = f"dft_{baseline_name}_{timestamp}.gjf"
         create_gaussian_dft_input(
@@ -320,53 +322,52 @@ def run_dft_baseline_calculation(
             title=f"DFT baseline: {description}",
             extra_keywords=extra_keywords
         )
-        
+
         print(f"  \u2192 Created input: {gjf_file}")
-        
+
         # Run Gaussian calculation
         success, log_file = run_gaussian_dft(gjf_file, timeout=None)  # No timeout - run as long as needed
-        
+
         if not success:
-            print(f"  \u2717 Calculation failed")
+            print("  \u2717 Calculation failed")
             print(f"  \u2192 Check log file: {log_file}")
-            
+
             # Check if it's a functional recognition issue
             if Path(log_file).exists():
-                with open(log_file, 'r') as f:
+                with open(log_file) as f:
                     log_content = f.read()
                     if 'Unrecognized' in log_content or 'Unknown' in log_content:
                         print(f"  \u26a0 Possible issue: Functional '{method}' may not be available in your Gaussian version")
-                        print(f"    Check DFT_BASELINES in dft_baseline.py and ensure the functional is supported")
-            
+                        print("    Check DFT_BASELINES in dft_baseline.py and ensure the functional is supported")
+
             return False
-        
+
         runtime = time.time() - start_time
-        
+
         # Parse results
-        print(f"  \u2192 Parsing results...")
+        print("  \u2192 Parsing results...")
         try:
             parsed_data = parse_gaussian_log(log_file)
         except Exception as e:
             logger.error(f"Failed to parse log file: {e}")
             return False
-        
+
         # Convert energy from Hartree to eV
-        HARTREE_TO_EV = 27.211386246
         energy_hartree = parsed_data.get('final_energy_hartree')
         if energy_hartree is not None:
             energy_ev = energy_hartree * HARTREE_TO_EV
         else:
             logger.error("Could not extract energy from log file")
             return False
-        
+
         # Move Gaussian files to output directory
         chk_file = gjf_file.replace('.gjf', '.chk')
-        
+
         # Final paths in output directory
-        final_gjf = freq_dir / f"gaussian_dft.gjf"
-        final_log = freq_dir / f"gaussian_dft.log"
-        final_chk = freq_dir / f"gaussian_dft.chk"
-        
+        final_gjf = freq_dir / "gaussian_dft.gjf"
+        final_log = freq_dir / "gaussian_dft.log"
+        final_chk = freq_dir / "gaussian_dft.chk"
+
         # Move/copy files
         if Path(gjf_file).exists():
             shutil.move(gjf_file, final_gjf)
@@ -404,12 +405,12 @@ def run_dft_baseline_calculation(
             gaussian_gjf=str(final_gjf),
             timestamp=timestamp
         )
-        
+
         print(f"  \u2713 Completed in {runtime:.1f} seconds")
         print("=" * 60 + "\n")
-        
+
         return True
-        
+
     except Exception as e:
         logger.error(f"DFT baseline calculation failed: {e}")
         import traceback
@@ -451,13 +452,13 @@ def run_all_dft_baselines(
         Dictionary mapping baseline names to success status
     """
     results = {}
-    
+
     print("\n" + "=" * 60)
     print("DFT BASELINE CALCULATIONS")
     print("=" * 60)
     print(f"Methods: {list(DFT_BASELINES.keys())}")
     print("=" * 60 + "\n")
-    
+
     for baseline_name in DFT_BASELINES.keys():
         success = run_dft_baseline_calculation(
             atoms,
@@ -469,5 +470,5 @@ def run_all_dft_baselines(
             skip_if_exists
         )
         results[baseline_name] = success
-    
+
     return results

@@ -7,7 +7,7 @@ TEST-08 (acoh bug documentation).
 
 import pytest
 
-from exceptions import GaussianParseError
+from utils.exceptions import GaussianParseError
 from gaussian_parser import GaussianLogParser
 
 

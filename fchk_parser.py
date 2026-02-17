@@ -11,12 +11,15 @@ Parses Gaussian formatted checkpoint files to extract:
 The .fchk format is much cleaner than parsing .log files.
 """
 
+import logging
 import re
 import subprocess
-import numpy as np
 from pathlib import Path
-from typing import Tuple, Dict, Optional
-import logging
+from typing import Optional, Tuple
+
+import numpy as np
+
+from utils.units import BOHR_TO_ANGSTROM
 
 logger = logging.getLogger(__name__)
 
@@ -163,7 +166,7 @@ def extract_modes_from_fchk(fchk_file: str, force_harmonic: bool = False) -> Tup
     if not fchk_path.exists():
         raise FileNotFoundError(f"Formatted checkpoint file not found: {fchk_file}")
 
-    with open(fchk_file, 'r') as f:
+    with open(fchk_file) as f:
         content = f.read()
 
     # Extract number of atoms
@@ -185,7 +188,6 @@ def extract_modes_from_fchk(fchk_file: str, force_harmonic: bool = False) -> Tup
         raise ValueError(f"Expected {n_atoms * 3} coordinates, got {len(coords_bohr)}")
 
     # Convert Bohr to Angstroms
-    BOHR_TO_ANGSTROM = 0.529177210903
     coords = coords_bohr * BOHR_TO_ANGSTROM
     coords = coords.reshape(n_atoms, 3)
 
@@ -214,7 +216,7 @@ def extract_modes_from_fchk(fchk_file: str, force_harmonic: bool = False) -> Tup
 
         try:
             vib_modes = parse_fchk_section(content, 'Anharmonic Vib-Modes', 'R')
-            logger.info(f"Using anharmonic vibrational modes")
+            logger.info("Using anharmonic vibrational modes")
         except ValueError:
             logger.debug("No anharmonic modes found, using harmonic")
     else:
@@ -232,7 +234,7 @@ def extract_modes_from_fchk(fchk_file: str, force_harmonic: bool = False) -> Tup
     if vib_modes is None:
         try:
             vib_modes = parse_fchk_section(content, 'Vib-Modes', 'R')
-            logger.info(f"Using harmonic vibrational modes")
+            logger.info("Using harmonic vibrational modes")
         except ValueError:
             raise ValueError("Could not find 'Vib-Modes' or 'Anharmonic Vib-Modes' section in .fchk file")
 
@@ -281,7 +283,7 @@ def get_fchk_from_chk(chk_file: str) -> str:
             return str(fchk_path)
 
     # Convert .chk to .fchk
-    logger.info(f"Converting .chk to .fchk")
+    logger.info("Converting .chk to .fchk")
     return convert_chk_to_fchk(str(chk_path))
 
 
@@ -309,11 +311,11 @@ if __name__ == "__main__":
     modes, frequencies, coords, masses, n_atoms = extract_modes_from_fchk(fchk_file)
 
     print(f"\n{'='*60}")
-    print(f"FCHK FILE SUMMARY")
+    print("FCHK FILE SUMMARY")
     print(f"{'='*60}")
     print(f"Number of atoms: {n_atoms}")
     print(f"Number of modes: {modes.shape[0]}")
-    print(f"\nFirst 10 frequencies (cm^-1):")
+    print("\nFirst 10 frequencies (cm^-1):")
     for i, freq in enumerate(frequencies[:10]):
         print(f"  Mode {i+1:3d}: {freq:10.2f} cm^-1")
     print(f"{'='*60}")

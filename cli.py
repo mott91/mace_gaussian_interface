@@ -8,11 +8,12 @@ Usage:
     python cli.py diagnose
 """
 
-import sys
-import click
-from pathlib import Path
 import json
 import logging
+import sys
+from pathlib import Path
+
+import click
 
 # Configure logging
 logging.basicConfig(
@@ -79,16 +80,16 @@ def run(input_file, optimization_calculator, energy_calculators, dipole_calculat
         click.echo(f"Error: Could not import gm_main.py: {e}", err=True)
         click.echo("Make sure gm_main.py is in the same directory as cli.py", err=True)
         sys.exit(1)
-    
+
     # Parse calculator lists
     energy_calc_list = [c.strip() for c in energy_calculators.split(',')]
     dipole_calc_list = [c.strip() for c in dipole_calculators.split(',')]
-    
+
     input_path = Path(input_file)
 
     # Validate prerequisites before expensive imports
-    from exceptions import InputValidationError, PrerequisiteError
-    from validation import (
+    from utils.exceptions import InputValidationError, PrerequisiteError
+    from utils.validation import (
         detect_device,
         validate_all_prerequisites,
         validate_xyz_file,
@@ -134,24 +135,24 @@ def run(input_file, optimization_calculator, energy_calculators, dipole_calculat
             include_dft_baselines=not skip_dft_baseline,
             base_output_dir=output_dir
         )
-        
+
         # Print final summary
         click.echo("\n" + "=" * 60)
         click.echo("WORKFLOW COMPLETED SUCCESSFULLY")
         click.echo("=" * 60)
-        
+
         if results['dft_baselines']:
             dft_success = sum(1 for v in results['dft_baselines'].values() if v)
             dft_total = len(results['dft_baselines'])
             click.echo(f"DFT baselines: {dft_success}/{dft_total} successful")
-        
+
         ml_success = sum(1 for r in results['ml_calculations'] if r['success'])
         ml_total = len(results['ml_calculations'])
         click.echo(f"ML calculations: {ml_success}/{ml_total} successful")
-        
+
         click.echo(f"\nResults directory: {output_dir}/{results['molecule_name']}/")
         click.echo("=" * 60)
-        
+
     except Exception as e:
         click.echo(f"\nError: Workflow failed: {e}", err=True)
         logger.exception("Workflow failed with exception")
@@ -178,87 +179,87 @@ def list(molecule, output_dir):
         python cli.py list water
     """
     results_dir = Path(output_dir)
-    
+
     if not results_dir.exists():
         click.echo(f"Results directory not found: {results_dir}", err=True)
         sys.exit(1)
-    
+
     if molecule:
         # Show detailed results for specific molecule
         mol_dir = results_dir / molecule
         if not mol_dir.exists():
             click.echo(f"No results found for molecule: {molecule}", err=True)
             sys.exit(1)
-        
+
         click.echo(f"\n{'='*60}")
         click.echo(f"Results for: {molecule}")
         click.echo(f"{'='*60}\n")
-        
+
         # Check for optimization
         opt_dir = mol_dir / "geometry_opt"
         if opt_dir.exists():
             click.echo("\u2713 Geometry optimization")
             opt_json = opt_dir / "results.json"
             if opt_json.exists():
-                with open(opt_json, 'r') as f:
+                with open(opt_json) as f:
                     opt_data = json.load(f)
                 click.echo(f"  Calculator: {opt_data.get('calculator', 'N/A')}")
                 click.echo(f"  Energy: {opt_data.get('final_energy_eV', 'N/A'):.6f} eV")
                 click.echo(f"  Runtime: {opt_data.get('runtime_s', 'N/A'):.1f} s")
-        
+
         # List all frequency calculations
         click.echo("\nFrequency calculations:")
         freq_dirs = [d for d in mol_dir.iterdir() if d.is_dir() and d.name != "geometry_opt"]
-        
+
         if not freq_dirs:
             click.echo("  No frequency calculations found")
         else:
             for freq_dir in sorted(freq_dirs):
                 json_file = freq_dir / "results.json"
                 if json_file.exists():
-                    with open(json_file, 'r') as f:
+                    with open(json_file) as f:
                         data = json.load(f)
-                    
+
                     calc_type = data.get('calculator_type', 'unknown')
                     energy_calc = data.get('energy_calculator', 'N/A')
                     dipole_calc = data.get('dipole_calculator', 'N/A')
-                    
+
                     click.echo(f"\n  {freq_dir.name}:")
                     click.echo(f"    Type: {calc_type}")
                     click.echo(f"    Energy: {energy_calc}")
                     click.echo(f"    Dipole: {dipole_calc}")
                     click.echo(f"    Energy: {data.get('energy_eV', 'N/A'):.6f} eV")
                     click.echo(f"    Runtime: {data.get('runtime_s', 'N/A'):.1f} s")
-                    
+
                     n_harmonic = len(data.get('frequencies', {}).get('harmonic', []))
                     n_anharmonic = len(data.get('frequencies', {}).get('anharmonic', []))
                     click.echo(f"    Frequencies: {n_harmonic} harmonic, {n_anharmonic} anharmonic")
-        
+
         click.echo(f"\n{'='*60}\n")
-        
+
     else:
         # List all molecules
         molecules = [d.name for d in results_dir.iterdir() if d.is_dir()]
-        
+
         if not molecules:
             click.echo(f"No results found in {results_dir}")
             return
-        
+
         click.echo(f"\nAvailable molecules ({len(molecules)}):")
         for mol in sorted(molecules):
             mol_dir = results_dir / mol
-            
+
             # Count calculations
-            freq_dirs = [d for d in mol_dir.iterdir() 
+            freq_dirs = [d for d in mol_dir.iterdir()
                         if d.is_dir() and d.name != "geometry_opt"]
             n_calcs = len(freq_dirs)
-            
+
             has_opt = (mol_dir / "geometry_opt").exists()
             opt_status = "\u2713" if has_opt else "\u2717"
-            
+
             click.echo(f"  {opt_status} {mol:20s} - {n_calcs} calculations")
-        
-        click.echo(f"\nUse 'python cli.py list <molecule>' for detailed information")
+
+        click.echo("\nUse 'python cli.py list <molecule>' for detailed information")
 
 
 @cli.command()
@@ -331,7 +332,7 @@ def export(molecule, format, output, results_dir):
     """
     if output is None:
         output = f"{molecule}_results.{format}"
-    
+
     click.echo(f"\n{'='*60}")
     click.echo("EXPORT COMMAND - COMING SOON")
     click.echo(f"{'='*60}\n")

@@ -5,7 +5,7 @@ Verifies class relationships, inheritance chains, and message preservation.
 
 import pytest
 
-from exceptions import (
+from utils.exceptions import (
     CUDANotAvailableWarning,
     GaussianParseError,
     InputValidationError,
