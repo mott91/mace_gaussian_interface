@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-16)
 
 **Core value:** Reliable, reproducible IR spectral predictions using ML potentials that can be validated against DFT reference data.
-**Current focus:** Phase 2 - Error Handling & Input Validation
+**Current focus:** Phase 3 - Extract Utilities & Conventions
 
 ## Current Position
 
-Phase: 2 of 10 (Error Handling & Input Validation)
-Plan: 3 of 3 in current phase
-Status: Phase 02 Complete
-Last activity: 2026-02-17 — Completed 02-03: CLI validation integration, subprocess timeout, version fix
+Phase: 3 of 10 (Extract Utilities & Conventions)
+Plan: 1 of 2 in current phase
+Status: Plan 03-01 Complete
+Last activity: 2026-02-17 — Completed 03-01: Create utils package with units, exceptions, validation
 
-Progress: [██░░░░░░░░] 20%
+Progress: [███░░░░░░░] 30%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
+- Total plans completed: 8
 - Average duration: 4.9 min
-- Total execution time: 0.57 hours
+- Total execution time: 0.67 hours
 
 **By Phase:**
 
@@ -29,9 +29,10 @@ Progress: [██░░░░░░░░] 20%
 |-------|-------|-------|----------|
 | 01 | 4 | 22 min | 5.5 min |
 | 02 | 3 | 13 min | 4.3 min |
+| 03 | 1 | 6 min | 6.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-03 (4 min), 01-04 (2 min), 02-01 (4 min), 02-02 (4 min), 02-03 (5 min)
+- Last 5 plans: 01-04 (2 min), 02-01 (4 min), 02-02 (4 min), 02-03 (5 min), 03-01 (6 min)
 - Trend: Consistent fast execution on well-scoped plans
 
 *Updated after each plan completion*
@@ -57,6 +58,9 @@ Recent decisions affecting current work:
 - [Phase 02-02]: Default strict=False preserves backward compatibility for anharmonic-type parsers
 - [Phase 02-03]: Timeout tests gracefully handle gm_main import failures (heavy deps like DGL/espaloma)
 - [Phase 02-03]: Validation only on run command, not list/diagnose/compare/export
+- [Phase 03-01]: Used CODATA 2018 full precision constants (0.529177210903, 27.211386245988)
+- [Phase 03-01]: Preserved original numerical behavior when replacing misnamed constants (ANGSTROM_TO_BOHR=0.529 -> BOHR_TO_ANGSTROM)
+- [Phase 03-01]: No compatibility shims -- clean break with direct import updates across codebase
 
 ### Pending Todos
 
@@ -76,5 +80,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-17 (phase execution)
-Stopped at: Completed Phase 02 — all 3 plans executed
+Stopped at: Completed 03-01-PLAN.md
 Resume file: None
