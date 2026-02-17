@@ -18,10 +18,9 @@ import shutil
 import subprocess
 import sys
 import time
-from abc import ABC, abstractmethod
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Dict, Optional, Tuple
+from typing import Optional
 
 import numpy as np
 import zmq
@@ -29,9 +28,9 @@ from ase.data import chemical_symbols
 from ase.io import read
 from ase.optimize import LBFGS
 
+from calculators import dipole_factory
 from charge_analysis import ChargeAnalyzer
 from gaussian_parser import parse_gaussian_log
-from mace_calculators import MACEDipoleCalculator
 from utils.results import ResultsManager
 from utils.units import BOHR_TO_ANGSTROM, HARTREE_TO_EV
 
@@ -59,11 +58,6 @@ except ImportError:
 # ============================================================================
 
 # Default paths - can be overridden by environment variables
-DEFAULT_MACE_DIPOLE_MODEL = os.getenv(
-    "MACE_DIPOLE_MODEL_PATH",
-    str(Path.home() / "mace_gaussian" / "dipole_model" / "model_1.model"),
-)
-
 DEFAULT_HELPER_SCRIPT = os.getenv(
     "MACE_HELPER_SCRIPT_PATH",
     str(Path(__file__).parent / "gm_helper.py"),  # Use relative path by default
@@ -77,245 +71,6 @@ DEFAULT_HELPER_SCRIPT = os.getenv(
 # Default: 24 hours for ML-assisted calculations
 # Override: Set GAUSSIAN_TIMEOUT_SECONDS environment variable
 GAUSSIAN_TIMEOUT_SECONDS = int(os.getenv("GAUSSIAN_TIMEOUT_SECONDS", "86400"))
-
-# ============================================================================
-# MODULAR DIPOLE CALCULATION SYSTEM
-# ============================================================================
-
-
-class DipoleCalculatorBase(ABC):
-    """Abstract base class for dipole calculators"""
-
-    def __init__(self, name: str):
-        self.name = name
-        self.available = None
-        self._check_availability()
-
-    @abstractmethod
-    def _check_availability(self) -> bool:
-        """Check if this calculator is available"""
-        pass
-
-    @abstractmethod
-    def calculate_dipole(self, atoms, **kwargs) -> Tuple[np.ndarray, Optional[np.ndarray]]:
-        """
-        Calculate dipole moment and partial charges
-        Returns: (dipole_vector, partial_charges)
-        """
-        pass
-
-    def calculate_dipole_derivatives(self, atoms, displacement=0.01, **kwargs) -> np.ndarray:
-        """Calculate dipole derivatives numerically"""
-        natoms = len(atoms)
-        dipole_derivatives = np.zeros((3 * natoms, 3))
-        base_positions = atoms.get_positions().copy()
-
-        try:
-            for i in range(natoms):
-                for j in range(3):  # x, y, z directions
-                    # Positive displacement
-                    pos_disp = base_positions.copy()
-                    pos_disp[i, j] += displacement
-                    atoms_temp = atoms.copy()
-                    atoms_temp.set_positions(pos_disp)
-                    dipole_pos, _ = self.calculate_dipole(atoms_temp, **kwargs)
-
-                    # Negative displacement
-                    pos_disp[i, j] -= 2 * displacement
-                    atoms_temp.set_positions(pos_disp)
-                    dipole_neg, _ = self.calculate_dipole(atoms_temp, **kwargs)
-
-                    # Central difference derivative
-                    dipole_deriv = (dipole_pos - dipole_neg) / (2 * displacement)
-                    dipole_derivatives[3 * i + j, :] = dipole_deriv
-
-        except Exception as e:
-            logger.warning(f"Dipole derivative calculation failed: {e}")
-
-        finally:
-            # Restore original positions
-            atoms.set_positions(base_positions)
-
-        return dipole_derivatives
-
-
-class EspalomaDipoleCalculator(DipoleCalculatorBase):
-    """Espaloma-charge based dipole calculator"""
-
-    def __init__(self):
-        super().__init__("espaloma")
-
-    def _check_availability(self):
-        try:
-            import espaloma_charge
-            from rdkit import Chem
-
-            # Test basic functionality
-            test_mol = Chem.MolFromSmiles("N")
-            test_charges = espaloma_charge.charge(test_mol)
-
-            self.available = True
-            logger.info("\u2713 Espaloma-charge dipole calculator available and tested")
-        except ImportError as e:
-            self.available = False
-            logger.warning(f"\u2717 Espaloma-charge dipole calculator failed: {e}")
-
-    def calculate_dipole(self, atoms, **kwargs):
-        """Calculate dipole using espaloma partial charges"""
-        import espaloma_charge
-        import torch
-        from rdkit import Chem
-        from rdkit.Chem import rdDetermineBonds
-
-        # Create RDKit molecule from ASE atoms
-        mol = Chem.RWMol()
-        for symbol in atoms.get_chemical_symbols():
-            atom = Chem.Atom(symbol)
-            mol.AddAtom(atom)
-
-        # Set coordinates
-        conf = Chem.Conformer(len(atoms))
-        positions = atoms.get_positions()
-        for i, pos in enumerate(positions):
-            conf.SetAtomPosition(i, (float(pos[0]), float(pos[1]), float(pos[2])))
-        mol.AddConformer(conf)
-
-        # Determine bonds
-        rdDetermineBonds.DetermineBonds(mol, charge=0)
-
-        # Patch espaloma to use float32
-        # Temporarily set torch default dtype to float32
-        original_dtype = torch.get_default_dtype()
-        torch.set_default_dtype(torch.float32)
-
-        try:
-            # Get partial charges from espaloma
-            charges = espaloma_charge.charge(mol)
-        finally:
-            # Restore original dtype
-            torch.set_default_dtype(original_dtype)
-
-        # Calculate dipole moment: μ = Σ q_i * r_i
-        dipole = np.dot(charges, positions)
-
-        # Convert from e*Angstrom to e*Bohr (Gaussian units)
-        dipole = dipole / BOHR_TO_ANGSTROM
-
-        logger.debug(f"Espaloma dipole: {dipole}, charges sum: {np.sum(charges):.6f}")
-        return dipole, charges
-
-
-class XTBDipoleCalculator(DipoleCalculatorBase):
-    """xTB-based dipole calculator"""
-
-    def __init__(self):
-        super().__init__("xtb")
-
-    def _check_availability(self):
-        try:
-            from xtb.ase.calculator import XTB
-
-            self.available = True
-            logger.info("\u2713 xTB dipole calculator available")
-        except ImportError as e:
-            self.available = False
-            logger.warning(f"\u2717 xTB dipole calculator failed: {e}")
-
-    def calculate_dipole(self, atoms, **kwargs):
-        """Calculate dipole using xTB"""
-        from xtb.ase.calculator import XTB
-
-        atoms_copy = atoms.copy()
-        atoms_copy.calc = XTB(method="GFN2-xTB")
-
-        # Get dipole moment (in e*Bohr from xTB)
-        dipole_moment = atoms_copy.get_dipole_moment()
-
-        # Get partial charges
-        partial_charges = atoms_copy.calc.get_charges(atoms_copy)
-
-        logger.debug(f"xTB dipole: {dipole_moment}")
-        return dipole_moment, partial_charges
-
-
-class MACEMLDipoleCalculator(DipoleCalculatorBase):
-    """MACE ML-based dipole calculator"""
-
-    def __init__(self, model_path=None):
-        # Use provided path, or fall back to configured default
-        self.model_path = model_path if model_path is not None else DEFAULT_MACE_DIPOLE_MODEL
-        self.mace_calc = None
-
-        super().__init__("mace_ml")
-
-    def _check_availability(self):
-        try:
-            # Check if model file exists
-            if not Path(self.model_path).exists():
-                raise FileNotFoundError(f"MACE dipole model not found at: {self.model_path}")
-
-            self.mace_calc = MACEDipoleCalculator(self.model_path)
-            self.available = True
-            logger.info(f"\u2713 MACE ML dipole calculator available (model: {self.model_path})")
-        except (ImportError, FileNotFoundError) as e:
-            self.available = False
-            logger.warning(f"\u2717 MACE ML dipole calculator failed: {e}")
-
-    def calculate_dipole(self, atoms, **kwargs):
-        if not self.available:
-            raise RuntimeError("MACE ML dipole calculator not available")
-        return self.mace_calc.calculate_dipole(atoms, **kwargs)
-
-
-class DipoleCalculatorFactory:
-    """Factory for managing different dipole calculators"""
-
-    def __init__(self):
-        self.calculators = {}
-        self.preferred_order = ["mace_ml", "espaloma", "xtb"]
-        self._register_calculators()
-
-    def _register_calculators(self):
-        """Register all available calculators"""
-        calculators = [
-            EspalomaDipoleCalculator(),
-            XTBDipoleCalculator(),
-            MACEMLDipoleCalculator(),
-        ]
-
-        for calc in calculators:
-            self.calculators[calc.name] = calc
-
-    def get_calculator(self, method: str = "auto") -> DipoleCalculatorBase:
-        """Get dipole calculator by name or auto-select best available"""
-
-        if method == "auto":
-            # Return first available calculator in preferred order
-            for method_name in self.preferred_order:
-                calc = self.calculators.get(method_name)
-                if calc and calc.available:
-                    logger.info(f"Auto-selected dipole calculator: {method_name}")
-                    return calc
-
-            raise RuntimeError("No dipole calculators available")
-
-        calc = self.calculators.get(method)
-        if not calc:
-            raise ValueError(f"Unknown dipole calculator: {method}")
-
-        if not calc.available:
-            raise RuntimeError(f"Dipole calculator '{method}' not available")
-
-        return calc
-
-    def list_available(self) -> Dict[str, bool]:
-        """List all calculators and their availability"""
-        return {name: calc.available for name, calc in self.calculators.items()}
-
-
-# Global dipole calculator factory
-dipole_factory = DipoleCalculatorFactory()
-
 
 # ============================================================================
 # ORIGINAL HELPER FUNCTIONS (Enhanced)
@@ -374,7 +129,7 @@ def is_calc_finished(proc, socket):
 # ============================================================================
 
 
-def parse_gaussian_input(infile: str) -> Tuple[int, int, int, int, np.ndarray, list]:
+def parse_gaussian_input(infile: str) -> tuple[int, int, int, int, np.ndarray, list]:
     """
     Parse Gaussian external calculation input file.
 
@@ -435,7 +190,7 @@ def update_molecule_geometry(atoms, coordinates: np.ndarray, charge: int, spin: 
     atoms.info["spin"] = float(spin)
 
 
-def calculate_energy_and_forces(atoms, calculator) -> Tuple[float, np.ndarray]:
+def calculate_energy_and_forces(atoms, calculator) -> tuple[float, np.ndarray]:
     """
     Calculate energy and forces using the attached calculator.
     """
@@ -473,7 +228,7 @@ def calculate_hessian(atoms, calculator, natoms: int) -> Optional[np.ndarray]:
 
 def calculate_dipole_properties(
     atoms, dipole_calc, deriv: int, calculate_derivatives: bool
-) -> Tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]:
+) -> tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]:
     """
     Calculate dipole moment and optionally its derivatives.
 
