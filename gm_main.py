@@ -690,10 +690,13 @@ def geometry_optimisation(mol, fmax=0.000001):
 
     opt.run(fmax=fmax, steps=10000)
 
+    num_steps = opt.get_number_of_steps()
+    print(f"Optimization steps: {num_steps}")
+
     ef = mol.get_potential_energy()
     print("Final Energy: ", ef, "eV")
 
-    return mol
+    return mol, num_steps
 
 
 def calculator(nnp):
@@ -830,7 +833,7 @@ def run_geometry_optimization(
     start_time = time.time()
     
     # Run optimization
-    optimized_atoms = geometry_optimisation(atoms)
+    optimized_atoms, num_steps = geometry_optimisation(atoms)
     
     # Get final energy
     final_energy = optimized_atoms.get_potential_energy()
@@ -845,7 +848,7 @@ def run_geometry_optimization(
         initial_energy=initial_energy,
         final_energy=final_energy,
         converged=True,  # geometry_optimisation returns when converged
-        num_steps=0,  # TODO: track this if needed
+        num_steps=num_steps,
         runtime=runtime
     )
     
