@@ -98,11 +98,11 @@ Plans:
   2. calculators/mace_loader.py provides safe loading mechanism tested in isolation
   3. CUDA device placement is handled correctly across MACE variants
   4. Full pipeline runs on water without cleanup_mace_modules() calls
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 05-01: TBD
-- [ ] 05-02: TBD
+- [ ] 05-01-PLAN.md — Create safe mace_loader.py with pickle_module remapping, update mace_ml.py import, add tests
+- [ ] 05-02-PLAN.md — Delete mace_calculators.py, clean up all references (CLAUDE.md, pyproject.toml, test mocks)
 
 ### Phase 6: Extract Gaussian I/O & ZMQ Server
 **Goal**: Modularize Gaussian integration into focused components in gaussian/ package
@@ -193,7 +193,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 2. Error Handling & Input Validation | 0/3 | Planning complete | - |
 | 3. Extract Utilities & Conventions | 0/2 | Planning complete | - |
 | 4. Extract Calculator Classes | 0/2 | Planning complete | - |
-| 5. Replace MACE Module Monkey-Patching | 0/TBD | Not started | - |
+| 5. Replace MACE Module Monkey-Patching | 0/2 | Planning complete | - |
 | 6. Extract Gaussian I/O & ZMQ Server | 0/TBD | Not started | - |
 | 7. Extract Workflow Orchestrator | 0/TBD | Not started | - |
 | 8. Package Structure & Reorganization | 0/TBD | Not started | - |
