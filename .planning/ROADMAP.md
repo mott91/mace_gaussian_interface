@@ -114,11 +114,14 @@ Plans:
   3. ZMQ server is a context manager in gaussian/zmq_server.py with proper socket cleanup
   4. Gaussian subprocess runner in gaussian/runner.py handles timeouts
   5. Full pipeline still runs with modular Gaussian integration
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- [ ] 06-01: TBD
-- [ ] 06-02: TBD
+- [ ] 06-01-PLAN.md — Add GaussianRunError/GaussianTimeoutError exceptions, create gaussian/io.py
+- [ ] 06-02-PLAN.md — Create gaussian/parser.py and gaussian/fchk.py (move top-level parser files)
+- [ ] 06-03-PLAN.md — Create gaussian/zmq_server.py with GaussianZMQServer class (LINGER=0 fix)
+- [ ] 06-04-PLAN.md — Create gaussian/runner.py with run_gaussian_with_zmq (SIGKILL timeout)
+- [ ] 06-05-PLAN.md — Wire everything: gaussian/__init__.py, update all callers, delete old files
 
 ### Phase 7: Extract Workflow Orchestrator
 **Goal**: Create thin workflow.py that sequences pipeline phases by calling modular components
@@ -194,7 +197,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 3. Extract Utilities & Conventions | 0/2 | Planning complete | - |
 | 4. Extract Calculator Classes | 0/2 | Planning complete | - |
 | 5. Replace MACE Module Monkey-Patching | 0/2 | Complete    | 2026-02-19 |
-| 6. Extract Gaussian I/O & ZMQ Server | 0/TBD | Not started | - |
+| 6. Extract Gaussian I/O & ZMQ Server | 0/5 | Planning complete | - |
 | 7. Extract Workflow Orchestrator | 0/TBD | Not started | - |
 | 8. Package Structure & Reorganization | 0/TBD | Not started | - |
 | 9. CI/CD & Distribution Prep | 0/TBD | Not started | - |
