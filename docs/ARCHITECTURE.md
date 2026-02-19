@@ -15,7 +15,7 @@ Two separate MACE installations coexist:
 - `mace_ML_pkg/mace/` - Standard MACE-torch (energy/forces)
 - `mace_dipole_pkg/mace_dipole_core/` - Custom fork with dipole moments
 
-`mace_calculators.py` handles switching via `load_standard_mace_calculator()` / `load_dipole_mace_calculator()` with `fake_module_from_real()` module monkey-patching. Must invalidate caches between switches.
+`calculators/mace_loader.py` handles loading the dipole model via `torch.load(pickle_module=...)` class remapping, which remaps `mace.modules.models` class paths to `mace_dipole_core.modules.models` during deserialization. No `sys.modules` mutation or cache invalidation is needed.
 
 ## ZMQ Bridge for Gaussian (`gm_helper.py`)
 

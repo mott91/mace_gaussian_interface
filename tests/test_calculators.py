@@ -6,7 +6,7 @@ All tests mock heavy dependencies (espaloma, xtb, MACE models) so they
 run without GPU or ML packages installed.
 
 Strategy: We pre-populate sys.modules with mocks for all heavy dependencies
-(espaloma_charge, rdkit, xtb, mace_calculators) BEFORE importing the
+(espaloma_charge, rdkit, xtb, mace_dipole_core) BEFORE importing the
 calculators package, so that _check_availability() calls don't trigger
 real imports.
 """
@@ -29,7 +29,11 @@ _heavy_deps = [
     "xtb",
     "xtb.ase",
     "xtb.ase.calculator",
-    "mace_calculators",
+    "mace_dipole_core",
+    "mace_dipole_core.modules",
+    "mace_dipole_core.modules.models",
+    "mace_dipole_core.calculators",
+    "mace_dipole_core.calculators.mace",
 ]
 
 for dep in _heavy_deps:

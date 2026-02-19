@@ -40,7 +40,7 @@ Input (.xyz) → Geometry Optimization (MACE) → Frequency Calc (Gaussian + ML 
 
 ## Critical Gotchas
 
-**Module monkey-patching**: The system swaps between standard MACE and dipole-enabled MACE via `mace_calculators.py`. Always call `cleanup_mace_modules()` in finally blocks after dipole calculations, or standard MACE imports will break.
+**MACE dipole model loading**: The dipole model was saved with `mace.modules.models` class paths but requires `mace_dipole_core` classes at runtime. `calculators/mace_loader.py` handles this via `torch.load(pickle_module=...)` class remapping. No `sys.modules` cleanup is needed.
 
 **Gaussian requires absolute paths**: Never use relative paths in `.gjf` files for external scripts. The helper script path is set via `MACE_HELPER_SCRIPT_PATH` env var.
 

@@ -62,7 +62,7 @@ target-version = "py39"
 select = ["E", "F", "W", "I", "UP"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["mace_calculators", "gm_main", "gaussian_parser", "analyze_spectra", "comparison_workflow", "mode_matching", "fchk_parser", "utils"]
+known-first-party = ["calculators", "gm_main", "gaussian_parser", "analyze_spectra", "comparison_workflow", "mode_matching", "fchk_parser", "utils"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -83,7 +83,7 @@ source = [
     "mode_matching",
     "analyze_spectra",
     "comparison_workflow",
-    "mace_calculators",
+    "calculators",
     "gm_main",
     "cli",
     "dft_baseline",
