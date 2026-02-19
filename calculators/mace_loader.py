@@ -1,4 +1,4 @@
-"""Safe MACE dipole model loading without sys.modules monkey-patching.
+"""Safe MACE dipole model loading via pickle_module class remapping.
 
 The dipole model file (dipole_model/model_1.model) was saved with the class path
 ``mace.modules.models.AtomicDielectricMACE``, but the correct implementation lives
@@ -6,13 +6,11 @@ in the local dipole fork at ``mace_dipole_core.modules.models``.  The standard
 mace-torch package defines its own incompatible ``AtomicDielectricMACE`` class, so
 simply importing at that path would load the wrong ``forward()`` logic.
 
-Previous approach: swap ``sys.modules["mace.modules.models"]`` with a shallow copy
-of the dipole fork module before every ``torch.load``, then clean up afterwards.
-
-New approach: use ``torch.load(pickle_module=...)`` to intercept class resolution
+This module uses ``torch.load(pickle_module=...)`` to intercept class resolution
 *only* during deserialization.  A custom ``Unpickler.find_class`` redirects lookups
 for ``mace.modules.models.*`` to ``mace_dipole_core.modules.models.*``.  No global
-state is mutated, no cleanup is needed, and standard MACE imports are unaffected.
+state is mutated, no module-cache cleanup is needed, and standard MACE imports are
+unaffected.
 """
 
 from __future__ import annotations
@@ -136,9 +134,8 @@ class MACEDipoleCalculator:
     """Wrapper for MACE dipole calculator with safe loading.
 
     Provides lazy initialization -- the underlying ASE calculator is not
-    created until the first ``calculate_dipole`` call.  No
-    ``cleanup_mace_modules()`` is needed because the safe loader does not
-    mutate ``sys.modules``.
+    created until the first ``calculate_dipole`` call.  No module-cache
+    cleanup is needed because the safe loader does not mutate global state.
     """
 
     def __init__(self, model_path: str, device: str = "cuda") -> None:

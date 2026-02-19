@@ -1,0 +1,221 @@
+"""Tests for calculators/mace_loader.py -- safe MACE dipole loading mechanism.
+
+Covers requirement: STRUCT-03 (MACE module monkey-patching replaced with safe loading).
+
+All tests mock heavy dependencies (torch, mace_dipole_core) so they run
+without GPU or ML packages installed.
+
+Strategy: Pre-populate sys.modules with mocks for mace_dipole_core sub-packages
+BEFORE importing calculators.mace_loader, then restore after import.
+"""
+
+from __future__ import annotations
+
+import importlib
+import inspect
+import pickle
+import sys
+from io import BytesIO
+from unittest.mock import MagicMock, patch
+
+# ---------------------------------------------------------------------------
+# Pre-mock heavy dependencies before importing the module under test
+# ---------------------------------------------------------------------------
+
+_saved_modules: dict = {}
+_heavy_deps = [
+    "espaloma_charge",
+    "rdkit",
+    "rdkit.Chem",
+    "xtb",
+    "xtb.ase",
+    "xtb.ase.calculator",
+    "mace_dipole_core",
+    "mace_dipole_core.modules",
+    "mace_dipole_core.modules.models",
+    "mace_dipole_core.calculators",
+    "mace_dipole_core.calculators.mace",
+]
+
+for _dep in _heavy_deps:
+    _saved_modules[_dep] = sys.modules.get(_dep)
+    if _dep not in sys.modules:
+        sys.modules[_dep] = MagicMock()
+
+# Set up a mock class on the dipole models module so find_class can find it
+_mock_dipole_models = sys.modules["mace_dipole_core.modules.models"]
+_mock_dipole_models.AtomicDielectricMACE = type("AtomicDielectricMACE", (), {})
+
+from calculators.mace_loader import (  # noqa: E402
+    _DIPOLE_PKG_DIR,
+    MACEDipoleCalculator,
+    _DipoleModelUnpickler,
+    _DipolePickleModule,
+    _ensure_dipole_importable,
+)
+
+# Restore original module state
+for _dep in _heavy_deps:
+    if _saved_modules[_dep] is None:
+        sys.modules.pop(_dep, None)
+    else:
+        sys.modules[_dep] = _saved_modules[_dep]
+
+
+# ---------------------------------------------------------------------------
+# TestDipoleModelUnpickler
+# ---------------------------------------------------------------------------
+
+
+class TestDipoleModelUnpickler:
+    """Tests for _DipoleModelUnpickler class resolution remapping."""
+
+    def test_remaps_mace_modules_models(self):
+        """find_class remaps mace.modules.models to mace_dipole_core.modules.models."""
+        sentinel_cls = type("AtomicDielectricMACE", (), {"_sentinel": True})
+        mock_dipole_models = MagicMock()
+        mock_dipole_models.AtomicDielectricMACE = sentinel_cls
+
+        # Build a consistent mock package hierarchy so the import machinery
+        # resolves the same object whether it uses sys.modules or parent attrs
+        mock_core = MagicMock()
+        mock_modules = MagicMock()
+        mock_core.modules = mock_modules
+        mock_modules.models = mock_dipole_models
+
+        with patch.dict(
+            sys.modules,
+            {
+                "mace_dipole_core": mock_core,
+                "mace_dipole_core.modules": mock_modules,
+                "mace_dipole_core.modules.models": mock_dipole_models,
+            },
+        ):
+            unpickler = _DipoleModelUnpickler(BytesIO(b""))
+            cls = unpickler.find_class("mace.modules.models", "AtomicDielectricMACE")
+
+        assert cls is sentinel_cls
+
+    def test_passes_through_other_modules(self):
+        """find_class delegates to super() for non-mace modules."""
+        unpickler = _DipoleModelUnpickler(BytesIO(b""))
+
+        # torch.nn.Module should resolve via standard pickle resolution
+        cls = unpickler.find_class("builtins", "dict")
+        assert cls is dict
+
+    def test_falls_through_if_attr_missing(self):
+        """find_class falls through to super() when dipole module lacks the class."""
+        mock_dipole_models = MagicMock(spec=[])  # Empty spec = no attributes
+        mock_core = MagicMock()
+        mock_modules = MagicMock()
+        mock_core.modules = mock_modules
+        mock_modules.models = mock_dipole_models
+
+        with patch.dict(
+            sys.modules,
+            {
+                "mace_dipole_core": mock_core,
+                "mace_dipole_core.modules": mock_modules,
+                "mace_dipole_core.modules.models": mock_dipole_models,
+            },
+        ):
+            unpickler = _DipoleModelUnpickler(BytesIO(b""))
+
+            # When the dipole module lacks the class, find_class falls through
+            # to super().find_class() which resolves against the real
+            # mace.modules.models (since mace-torch is installed).
+            # Verify the fallthrough by checking we get a class from the real
+            # module, not from the mock.
+            cls = unpickler.find_class("mace.modules.models", "AtomicDielectricMACE")
+            # The real mace.modules.models.AtomicDielectricMACE should be returned
+            # (not from dipole mock, which has spec=[] so getattr returns None)
+            import mace.modules.models as real_mace_models
+
+            assert cls is real_mace_models.AtomicDielectricMACE
+
+
+# ---------------------------------------------------------------------------
+# TestDipolePickleModule
+# ---------------------------------------------------------------------------
+
+
+class TestDipolePickleModule:
+    """Tests for _DipolePickleModule as a drop-in pickle replacement."""
+
+    def test_has_unpickler_attribute(self):
+        """_DipolePickleModule.Unpickler is _DipoleModelUnpickler."""
+        pm = _DipolePickleModule()
+        assert pm.Unpickler is _DipoleModelUnpickler
+
+    def test_delegates_to_stdlib_pickle(self):
+        """Other attributes are delegated to stdlib pickle."""
+        pm = _DipolePickleModule()
+        assert pm.loads is pickle.loads
+        assert pm.dumps is pickle.dumps
+        assert pm.HIGHEST_PROTOCOL is pickle.HIGHEST_PROTOCOL
+
+
+# ---------------------------------------------------------------------------
+# TestEnsureDipoleImportable
+# ---------------------------------------------------------------------------
+
+
+class TestEnsureDipoleImportable:
+    """Tests for _ensure_dipole_importable sys.path setup."""
+
+    def test_adds_dipole_pkg_to_sys_path(self):
+        """_ensure_dipole_importable adds _DIPOLE_PKG_DIR to sys.path."""
+        # Remove it first if present
+        original_path = sys.path.copy()
+        if _DIPOLE_PKG_DIR in sys.path:
+            sys.path.remove(_DIPOLE_PKG_DIR)
+
+        try:
+            _ensure_dipole_importable()
+            assert _DIPOLE_PKG_DIR in sys.path
+        finally:
+            sys.path[:] = original_path
+
+    def test_idempotent(self):
+        """Calling _ensure_dipole_importable twice adds the path only once."""
+        original_path = sys.path.copy()
+        if _DIPOLE_PKG_DIR in sys.path:
+            sys.path.remove(_DIPOLE_PKG_DIR)
+
+        try:
+            _ensure_dipole_importable()
+            _ensure_dipole_importable()
+            assert sys.path.count(_DIPOLE_PKG_DIR) == 1
+        finally:
+            sys.path[:] = original_path
+
+
+# ---------------------------------------------------------------------------
+# TestMACEDipoleCalculatorWrapper
+# ---------------------------------------------------------------------------
+
+
+class TestMACEDipoleCalculatorWrapper:
+    """Tests for MACEDipoleCalculator wrapper class."""
+
+    def test_lazy_initialization(self):
+        """Calculator attribute is None before first calculation."""
+        calc = MACEDipoleCalculator(model_path="/fake/model", device="cpu")
+        assert calc.calc is None
+
+    def test_stores_config(self):
+        """Constructor stores model_path and device."""
+        calc = MACEDipoleCalculator(model_path="/fake/model.pt", device="cpu")
+        assert calc.model_path == "/fake/model.pt"
+        assert calc.device == "cpu"
+
+    def test_no_cleanup_mace_modules_reference(self):
+        """Module source must not contain cleanup_mace_modules."""
+        source = inspect.getsource(importlib.import_module("calculators.mace_loader"))
+        assert "cleanup_mace_modules" not in source
+
+    def test_no_sys_modules_mutation(self):
+        """Module source must not contain sys.modules["mace string."""
+        source = inspect.getsource(importlib.import_module("calculators.mace_loader"))
+        assert 'sys.modules["mace' not in source

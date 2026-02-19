@@ -27,7 +27,7 @@ class MACEMLDipoleCalculator(DipoleCalculatorBase):
 
     def _check_availability(self):
         try:
-            from mace_calculators import MACEDipoleCalculator
+            from calculators.mace_loader import MACEDipoleCalculator
 
             # Check if model file exists
             if not Path(self.model_path).exists():
