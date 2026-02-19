@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-16)
 
 **Core value:** Reliable, reproducible IR spectral predictions using ML potentials that can be validated against DFT reference data.
-**Current focus:** Phase 4 - Extract Calculator Classes (in progress)
+**Current focus:** Phase 5 - Replace MACE Module Monkey-Patching (in progress)
 
 ## Current Position
 
-Phase: 4 of 10 (Extract Calculator Classes) -- COMPLETE
-Plan: 2 of 2 in current phase
-Status: Phase 04 complete, ready for Phase 05
-Last activity: 2026-02-17 — Completed 04-02: Calculator unit tests with mocked dependencies
+Phase: 5 of 10 (Replace MACE Module Monkey-Patching)
+Plan: 1 of 2 in current phase -- COMPLETE
+Status: Plan 05-01 complete, ready for Plan 05-02
+Last activity: 2026-02-19 — Completed 05-01: Safe MACE dipole loading via pickle_module remapping
 
-Progress: [████░░░░░░] 40%
+Progress: [████▌░░░░░] 45%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
-- Average duration: 4.5 min
-- Total execution time: 0.82 hours
+- Total plans completed: 12
+- Average duration: 4.4 min
+- Total execution time: 0.89 hours
 
 **By Phase:**
 
@@ -31,9 +31,10 @@ Progress: [████░░░░░░] 40%
 | 02 | 3 | 13 min | 4.3 min |
 | 03 | 2 | 9 min | 4.5 min |
 | 04 | 2 | 7 min | 3.5 min |
+| 05 | 1 | 4 min | 4.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-03 (5 min), 03-01 (6 min), 03-02 (3 min), 04-01 (4 min), 04-02 (3 min)
+- Last 5 plans: 03-01 (6 min), 03-02 (3 min), 04-01 (4 min), 04-02 (3 min), 05-01 (4 min)
 - Trend: Consistent fast execution on well-scoped plans
 
 *Updated after each plan completion*
@@ -67,6 +68,9 @@ Recent decisions affecting current work:
 - [Phase 04-01]: Modernized type annotations (tuple/dict) in new calculator files for Python 3.12
 - [Phase 04-02]: Pre-mock heavy deps via sys.modules before importing calculators package to avoid DGL/espaloma/xtb side effects in tests
 - [Phase 04-02]: Added from __future__ import annotations to calculators/base.py, factory.py, gm_main.py for Python 3.8 compatibility
+- [Phase 05-01]: Used consistent mock package hierarchy in tests for reliable import resolution with Python's import machinery
+- [Phase 05-01]: Falls-through test verifies real mace.modules.models class returned when dipole module lacks attribute
+- [Phase 05-01]: Docstring avoids literal cleanup/sys.modules strings for source-grep test reliability
 
 ### Pending Todos
 
@@ -78,13 +82,12 @@ None yet.
 - Acetic acid parser bug (commit a4384c4) needs test case to capture expected vs actual behavior
 - Coverage targets should be pragmatic (focus on parsers, mode matching, calculators — not necessarily 100%)
 
-**Phase 5 known complexity:**
-- MACE module loading requires deeper research on importlib.util patterns for isolated loading
-- CUDA initialization state management needs careful handling
-- Rollback strategy needed if lazy imports fail
+**Phase 5 status:**
+- Safe loading mechanism (pickle_module remapping) implemented and tested in 05-01
+- Plan 05-02 still needed: remove mace_calculators.py, update all references, clean up CLAUDE.md
 
 ## Session Continuity
 
-Last session: 2026-02-17 (phase execution)
-Stopped at: Completed 04-02-PLAN.md (Phase 04 complete)
+Last session: 2026-02-19 (phase execution)
+Stopped at: Completed 05-01-PLAN.md
 Resume file: None

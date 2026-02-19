@@ -32,7 +32,7 @@ Requirements for the refactoring milestone. Each maps to roadmap phases.
 
 - [ ] **STRUCT-01**: Utility functions (unit conversions, validation) extracted from gm_main.py into separate modules
 - [ ] **STRUCT-02**: DipoleCalculator classes extracted from gm_main.py into calculators/ package
-- [ ] **STRUCT-03**: MACE module monkey-patching replaced with safe loading pattern (lazy imports or process isolation)
+- [x] **STRUCT-03**: MACE module monkey-patching replaced with safe loading pattern (lazy imports or process isolation)
 - [ ] **STRUCT-04**: Gaussian I/O functions extracted from gm_main.py into gaussian/ package
 - [ ] **STRUCT-05**: ZMQ server context manager extracted into dedicated module
 - [ ] **STRUCT-06**: Workflow orchestration extracted into workflow.py as thin coordinator
@@ -115,7 +115,7 @@ Deferred to future milestone. Tracked but not in current roadmap.
 | ERR-06 | Phase 2 | Pending |
 | STRUCT-01 | Phase 3 | Pending |
 | STRUCT-02 | Phase 4 | Pending |
-| STRUCT-03 | Phase 5 | Pending |
+| STRUCT-03 | Phase 5 | Complete |
 | STRUCT-04 | Phase 6 | Pending |
 | STRUCT-05 | Phase 6 | Pending |
 | STRUCT-06 | Phase 7 | Pending |
