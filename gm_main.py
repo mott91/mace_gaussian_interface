@@ -17,22 +17,25 @@ except ImportError:
 import logging
 import os
 import shutil
-import subprocess
 import sys
 import time
-from contextlib import contextmanager
 from pathlib import Path
 from typing import Optional
 
 import numpy as np
-import zmq
-from ase.data import chemical_symbols
 from ase.io import read
 from ase.optimize import LBFGS
 
 from calculators import dipole_factory
 from charge_analysis import ChargeAnalyzer
-from gaussian_parser import parse_gaussian_log
+from gaussian.fchk import convert_chk_to_fchk
+from gaussian.io import (
+    ase_to_gjf,
+    parse_gaussian_input,
+    write_gaussian_output,
+)
+from gaussian.parser import parse_gaussian_log
+from gaussian.runner import DEFAULT_TIMEOUT_SECONDS, run_gaussian_with_zmq
 from utils.results import ResultsManager
 from utils.units import BOHR_TO_ANGSTROM, HARTREE_TO_EV
 
@@ -59,122 +62,9 @@ except ImportError:
 # CONFIGURATION
 # ============================================================================
 
-# Default paths - can be overridden by environment variables
-DEFAULT_HELPER_SCRIPT = os.getenv(
-    "MACE_HELPER_SCRIPT_PATH",
-    str(Path(__file__).parent / "gm_helper.py"),  # Use relative path by default
-)
-
 # Path validation is now handled by validation.py at runtime
 
 # Note: MACE dipole model is checked when MACEMLDipoleCalculator is instantiated
-
-# Gaussian subprocess timeout (seconds)
-# Default: 24 hours for ML-assisted calculations
-# Override: Set GAUSSIAN_TIMEOUT_SECONDS environment variable
-GAUSSIAN_TIMEOUT_SECONDS = int(os.getenv("GAUSSIAN_TIMEOUT_SECONDS", "86400"))
-
-# ============================================================================
-# ORIGINAL HELPER FUNCTIONS (Enhanced)
-# ============================================================================
-
-
-@contextmanager
-def zmq_server(file):
-    """
-    Creates a context manager with a ZMQ server socket using the IPC transport protocol.
-
-    This version safely removes an existing IPC file before creating a new one,
-    preventing FileExistsError if a previous run left the file behind.
-    """
-    addr = os.path.abspath(file)
-
-    # If an old socket file exists, remove it first
-    if os.path.exists(addr):
-        try:
-            os.remove(addr)
-        except Exception as e:
-            print(f"Warning: could not remove old IPC file {addr}: {e}")
-
-    try:
-        with zmq.Context() as ctx:
-            with ctx.socket(zmq.REP) as socket:
-                # Create a placeholder file to reserve the address
-                with open(addr, "x"):
-                    pass
-                socket.bind(f"ipc://{addr}")
-                yield socket
-    finally:
-        # Clean up socket file when done
-        if os.path.exists(addr):
-            os.remove(addr)
-
-
-def is_calc_finished(proc, socket):
-    """Waits until there is either a new msg (= script 2 was executed), or the g16 process finished"""
-    while True:
-        # poll the socket for messages with timeout 10 ms, returns 0 in case of timeout (= no messages)
-        if socket.poll(timeout=10) != 0:
-            # new msg, not finished
-            return False
-        # poll the running g16 process, if process has exited poll returns return code (int), otherwise None
-        elif proc.poll() is not None:
-            # g16 process exited, finished
-            return True
-        else:
-            # if neither, wait a second and try again
-            time.sleep(1)
-
-
-# ============================================================================
-# GAUSSIAN INPUT/OUTPUT HANDLING (Refactored from run_next_calculation)
-# ============================================================================
-
-
-def parse_gaussian_input(infile: str) -> tuple[int, int, int, int, np.ndarray, list]:
-    """
-    Parse Gaussian external calculation input file.
-
-    Args:
-        infile: Path to Gaussian input file
-
-    Returns:
-        Tuple of (natoms, deriv, charge, spin, coordinates, atomnames)
-        - natoms: Number of atoms
-        - deriv: Derivative level (0=energy, 1=gradient, 2=hessian)
-        - charge: Molecular charge
-        - spin: Spin multiplicity
-        - coordinates: Numpy array of shape (natoms, 3) in Angstroms
-        - atomnames: List of element symbols
-    """
-    with open(infile) as f:
-        lines = f.readlines()
-
-    # Extract system info from header line
-    header = lines[0].split()
-    natoms = int(header[0])
-    deriv = int(header[1])
-    charge = int(header[2])
-    spin = int(header[3])
-
-    # Initialize arrays
-    coordinates = np.zeros((natoms, 3))
-    atomnames = []
-
-    # Parse atomic data (atomic number + coordinates in Bohr)
-    for i, line in enumerate(lines[1 : natoms + 1]):
-        elements = line.split()
-
-        # Convert atomic number to element symbol
-        atomic_num = int(elements[0])
-        atomnames.append(chemical_symbols[atomic_num])
-
-        # Convert coordinates from Bohr to Angstrom
-        coordinates[i] = BOHR_TO_ANGSTROM * np.array(
-            [float(elements[1]), float(elements[2]), float(elements[3])]
-        )
-
-    return natoms, deriv, charge, spin, coordinates, atomnames
 
 
 def update_molecule_geometry(atoms, coordinates: np.ndarray, charge: int, spin: int):
@@ -278,74 +168,6 @@ def calculate_dipole_properties(
         return dipole, dipole_derivatives, None
 
 
-def write_gaussian_output(
-    outfile: str,
-    natoms: int,
-    energy: float,
-    gradient: np.ndarray,
-    dipole: np.ndarray,
-    dipole_derivatives: np.ndarray,
-    hessian: Optional[np.ndarray],
-    deriv: int,
-):
-    """
-    Write results to Gaussian external calculation output file.
-
-    Args:
-        outfile: Path to output file
-        natoms: Number of atoms
-        energy: Energy in eV
-        gradient: Gradient in eV/Angstrom, shape (natoms, 3)
-        dipole: Dipole moment in e*Bohr, shape (3,)
-        dipole_derivatives: Dipole derivatives in e, shape (3*natoms, 3)
-        hessian: Hessian in Hartree/Bohr^2, shape (3*natoms, 3*natoms), or None
-        deriv: Derivative level (0, 1, or 2)
-    """
-    # Convert energy from eV to Hartree
-    energy_hartree = energy / HARTREE_TO_EV
-
-    # Convert gradient from eV/Angstrom to Hartree/Bohr
-    gradient_hartree_bohr = gradient * BOHR_TO_ANGSTROM / HARTREE_TO_EV
-
-    # Polarizability (not implemented, set to zero)
-    polarizability = np.zeros(6)
-
-    with open(outfile, "w") as f:
-        # Write energy and dipole (Fortran format with 'D' exponent)
-        line = f"{energy_hartree:20.12E}{dipole[0]:20.12E}{dipole[1]:20.12E}{dipole[2]:20.12E}"
-        f.write(line.replace("E", "D") + "\n")
-
-        # Write gradient (forces)
-        for i in range(natoms):
-            line = f"{gradient_hartree_bohr[i, 0]:20.12E}{gradient_hartree_bohr[i, 1]:20.12E}{gradient_hartree_bohr[i, 2]:20.12E}"
-            f.write(line.replace("E", "D") + "\n")
-
-        # Write polarizability (2 lines, 3 components each)
-        line = f"{polarizability[0]:20.12E}{polarizability[1]:20.12E}{polarizability[2]:20.12E}"
-        f.write(line.replace("E", "D") + "\n")
-        line = f"{polarizability[3]:20.12E}{polarizability[4]:20.12E}{polarizability[5]:20.12E}"
-        f.write(line.replace("E", "D") + "\n")
-
-        # Write dipole derivatives (3*natoms lines, 3 components each)
-        for i in range(3 * natoms):
-            line = f"{dipole_derivatives[i, 0]:20.12E}{dipole_derivatives[i, 1]:20.12E}{dipole_derivatives[i, 2]:20.12E}"
-            f.write(line.replace("E", "D") + "\n")
-
-        # Write Hessian if second derivatives requested
-        if deriv >= 2 and hessian is not None:
-            count = 0
-            for i in range(3 * natoms):
-                for j in range(i + 1):  # Lower triangle including diagonal
-                    line = f"{hessian[i, j]:20.12E}"
-                    f.write(line.replace("E", "D"))
-                    count += 1
-
-                    if count % 3 == 0:  # Three entries per line
-                        f.write("\n")
-
-            # Ensure file ends with newline
-            if count % 3 != 0:
-                f.write("\n")
 
 
 def run_next_calculation(
@@ -399,30 +221,6 @@ def run_next_calculation(
         outfile, natoms, energy, gradient, dipole, dipole_derivatives, hessian, deriv
     )
 
-
-def ase_to_gjf(
-    atoms,
-    filename="molecule.gjf",
-    route=None,
-    title="Gaussian input generated from ASE",
-    charge=0,
-    multiplicity=1,
-):
-    # Use default route with configured helper script path if none provided
-    if route is None:
-        route = f'# freq (anharm)\n# external="{DEFAULT_HELPER_SCRIPT}"'
-
-    symbols = atoms.get_chemical_symbols()
-    positions = atoms.get_positions()  # Angstrom by ASE convention
-    link0 = f"%chk={filename[:-3]}chk\n%mem=2GB\n%NProcShared=2"
-    with open(filename, "w") as f:
-        f.write(f"{link0}\n")
-        f.write(f"{route}\n\n")
-        f.write(f"{title}\n\n")
-        f.write(f"{charge} {multiplicity}\n")
-        for s, pos in zip(symbols, positions):
-            f.write(f"{s:2s} {pos[0]:14.8f} {pos[1]:14.8f} {pos[2]:14.8f}\n")
-        f.write("\n")  # blank line after coordinates
 
 
 def geometry_optimisation(mol, fmax=0.000001):
@@ -665,42 +463,22 @@ def run_frequency_calculation(
 
         # Run Gaussian calculation
         print("  → Launching Gaussian...")
-        proc = subprocess.Popen(["g16", gjf_temp])
 
-        # ZMQ server for external interface
-        counter = 0
-        calc_start_time = time.time()
-        with zmq_server(".ipc_file") as socket:
-            while not is_calc_finished(proc, socket):
-                # Check timeout
-                elapsed = time.time() - calc_start_time
-                if elapsed > GAUSSIAN_TIMEOUT_SECONDS:
-                    proc.kill()
-                    proc.wait()
-                    raise TimeoutError(
-                        f"Gaussian calculation timed out after {elapsed / 3600:.1f} hours. "
-                        f"Increase timeout via GAUSSIAN_TIMEOUT_SECONDS env var "
-                        f"(current: {GAUSSIAN_TIMEOUT_SECONDS}s)."
-                    )
+        def _on_request(msg: str) -> str:
+            run_next_calculation(
+                mol,
+                msg,
+                calc,
+                dipole_method=dipole_calculator_name,
+                calculate_derivatives=True,
+            )
+            return "ready"
 
-                logger.info(f"Calculation step {counter}")
-                counter += 1
-                msg = socket.recv_string()
-
-                try:
-                    run_next_calculation(
-                        mol,
-                        msg,
-                        calc,
-                        dipole_method=dipole_calculator_name,
-                        calculate_derivatives=True,
-                    )
-                    socket.send_string("ready")
-
-                except Exception as e:
-                    logger.error(f"Calculation step failed: {e}")
-                    socket.send_string("error")
-                    return False
+        run_gaussian_with_zmq(
+            gjf_temp,
+            on_request=_on_request,
+            timeout_seconds=DEFAULT_TIMEOUT_SECONDS,
+        )
 
         runtime = time.time() - start_time
 
@@ -722,8 +500,6 @@ def run_frequency_calculation(
             shutil.move(chk_temp, chk_final)
             # Automatically convert to .fchk for mode matching
             try:
-                from fchk_parser import convert_chk_to_fchk
-
                 fchk_final = chk_final.replace(".chk", ".fchk")
                 logger.info("Converting .chk to .fchk for mode matching...")
                 convert_chk_to_fchk(chk_final, fchk_final)

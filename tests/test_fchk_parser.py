@@ -9,7 +9,7 @@ Requirement: TEST-03
 import numpy as np
 import pytest
 
-from fchk_parser import extract_modes_from_fchk, parse_fchk_section
+from gaussian.fchk import extract_modes_from_fchk, parse_fchk_section
 
 
 class TestExtractModesWater:

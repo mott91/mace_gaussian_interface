@@ -14,7 +14,7 @@ from typing import Dict, Optional
 
 from ase import Atoms
 
-from gaussian_parser import parse_gaussian_log
+from gaussian.parser import parse_gaussian_log
 from utils.results import ResultsManager
 from utils.units import HARTREE_TO_EV
 
@@ -374,7 +374,7 @@ def run_dft_baseline_calculation(
             shutil.move(chk_file, final_chk)
             # Automatically convert to .fchk for mode matching
             try:
-                from fchk_parser import convert_chk_to_fchk
+                from gaussian.fchk import convert_chk_to_fchk
 
                 final_fchk = freq_dir / "gaussian_dft.fchk"
                 logger.info("Converting .chk to .fchk for mode matching...")

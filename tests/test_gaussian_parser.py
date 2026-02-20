@@ -7,9 +7,8 @@ TEST-08 (acoh bug documentation).
 
 import pytest
 
+from gaussian.parser import GaussianLogParser
 from utils.exceptions import GaussianParseError
-from gaussian_parser import GaussianLogParser
-
 
 # --- Expected values (verified against actual parser output from trimmed fixtures) ---
 

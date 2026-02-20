@@ -11,14 +11,14 @@ This handles cases where mode ordering changes between DFT and ML calculations.
 Uses .fchk (formatted checkpoint) files from Gaussian for clean parsing.
 """
 
-import numpy as np
-from pathlib import Path
-from typing import Tuple, List, Dict, Optional
 import logging
-import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
+from pathlib import Path
+from typing import Dict, Optional, Tuple
 
-from fchk_parser import extract_modes_from_fchk, get_fchk_from_chk
+import matplotlib.pyplot as plt
+import numpy as np
+
+from gaussian.fchk import extract_modes_from_fchk, get_fchk_from_chk
 
 logger = logging.getLogger(__name__)
 

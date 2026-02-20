@@ -5,10 +5,10 @@ Batch convert all .chk files to .fchk in comparison_results directory.
 Useful for converting existing calculations that don't have .fchk files yet.
 """
 
-import sys
 import logging
 from pathlib import Path
-from fchk_parser import convert_chk_to_fchk
+
+from gaussian.fchk import convert_chk_to_fchk
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger(__name__)
@@ -82,7 +82,7 @@ def convert_all(base_dir: str = "comparison_results", force: bool = False):
             fail_count += 1
 
     logger.info("="*60)
-    logger.info(f"SUMMARY:")
+    logger.info("SUMMARY:")
     logger.info(f"  Converted: {success_count}")
     logger.info(f"  Skipped:   {skip_count}")
     logger.info(f"  Failed:    {fail_count}")

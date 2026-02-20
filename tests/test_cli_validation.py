@@ -65,7 +65,7 @@ class TestTimeoutConfiguration:
     def test_default_timeout_value(self):
         """Default timeout should be 86400 seconds (24 hours)."""
         try:
-            from gm_main import GAUSSIAN_TIMEOUT_SECONDS
+            from gaussian.runner import DEFAULT_TIMEOUT_SECONDS
         except (ImportError, RuntimeError):
             # gm_main has heavy deps (espaloma/DGL) that may not load in test env
             # Verify the constant definition directly
@@ -74,18 +74,18 @@ class TestTimeoutConfiguration:
             return
 
         expected = int(os.getenv("GAUSSIAN_TIMEOUT_SECONDS", "86400"))
-        assert GAUSSIAN_TIMEOUT_SECONDS == expected
+        assert DEFAULT_TIMEOUT_SECONDS == expected
 
     def test_timeout_is_positive_integer(self):
         """Timeout should be a positive integer."""
         try:
-            from gm_main import GAUSSIAN_TIMEOUT_SECONDS
+            from gaussian.runner import DEFAULT_TIMEOUT_SECONDS
         except (ImportError, RuntimeError):
-            # gm_main has heavy deps; verify env var parsing logic
+            # gaussian.runner may have deps that fail in test env; verify env var parsing logic
             val = int(os.getenv("GAUSSIAN_TIMEOUT_SECONDS", "86400"))
             assert isinstance(val, int)
             assert val > 0
             return
 
-        assert isinstance(GAUSSIAN_TIMEOUT_SECONDS, int)
-        assert GAUSSIAN_TIMEOUT_SECONDS > 0
+        assert isinstance(DEFAULT_TIMEOUT_SECONDS, int)
+        assert DEFAULT_TIMEOUT_SECONDS > 0
