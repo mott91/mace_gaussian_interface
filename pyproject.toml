@@ -62,7 +62,7 @@ target-version = "py39"
 select = ["E", "F", "W", "I", "UP"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["calculators", "gm_main", "gaussian_parser", "analyze_spectra", "comparison_workflow", "mode_matching", "fchk_parser", "utils"]
+known-first-party = ["calculators", "gm_main", "gaussian", "analyze_spectra", "comparison_workflow", "mode_matching", "utils"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -78,8 +78,7 @@ addopts = [
 
 [tool.coverage.run]
 source = [
-    "gaussian_parser",
-    "fchk_parser",
+    "gaussian",
     "mode_matching",
     "analyze_spectra",
     "comparison_workflow",
