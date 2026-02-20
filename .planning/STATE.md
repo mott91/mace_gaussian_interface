@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-16)
 
 **Core value:** Reliable, reproducible IR spectral predictions using ML potentials that can be validated against DFT reference data.
-**Current focus:** Phase 5 - Replace MACE Module Monkey-Patching (COMPLETE)
+**Current focus:** Phase 6 - Extract Gaussian I/O and ZMQ Server
 
 ## Current Position
 
-Phase: 5 of 10 (Replace MACE Module Monkey-Patching)
-Plan: 2 of 2 in current phase -- COMPLETE
-Status: Phase 05 complete, ready for Phase 06
-Last activity: 2026-02-19 — Completed 05-02: Delete mace_calculators.py and clean up all references
+Phase: 6 of 10 (Extract Gaussian I/O and ZMQ Server)
+Plan: 1 of 5 in current phase -- COMPLETE
+Status: Phase 06-01 complete, ready for Phase 06-02
+Last activity: 2026-02-20 — Completed 06-01: Create gaussian/ package with I/O functions and exceptions
 
-Progress: [█████░░░░░] 50%
+Progress: [██████░░░░] 55%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13
-- Average duration: 4.2 min
-- Total execution time: 0.92 hours
+- Total plans completed: 14
+- Average duration: 4.1 min
+- Total execution time: 0.95 hours
 
 **By Phase:**
 
@@ -32,9 +32,10 @@ Progress: [█████░░░░░] 50%
 | 03 | 2 | 9 min | 4.5 min |
 | 04 | 2 | 7 min | 3.5 min |
 | 05 | 2 | 6 min | 3.0 min |
+| 06 | 1 | 2 min | 2.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-02 (3 min), 04-01 (4 min), 04-02 (3 min), 05-01 (4 min), 05-02 (2 min)
+- Last 5 plans: 04-01 (4 min), 04-02 (3 min), 05-01 (4 min), 05-02 (2 min), 06-01 (2 min)
 - Trend: Consistent fast execution on well-scoped plans
 
 *Updated after each plan completion*
@@ -72,6 +73,9 @@ Recent decisions affecting current work:
 - [Phase 05-01]: Falls-through test verifies real mace.modules.models class returned when dipole module lacks attribute
 - [Phase 05-01]: Docstring avoids literal cleanup/sys.modules strings for source-grep test reliability
 - [Phase 05-02]: Replaced mace_calculators mock with full mace_dipole_core hierarchy in test pre-mock list
+- [Phase 06-01]: DEFAULT_HELPER_SCRIPT in gaussian/io.py uses Path(__file__).parent.parent to reach project root (one level up from gaussian/)
+- [Phase 06-01]: gm_main.py callers not updated in plan 06-01 - import wiring deferred to plan 06-05 to minimize per-plan diff scope
+- [Phase 06-01]: gaussian/__init__.py stays sparse stub until all submodules exist in later plans
 
 ### Pending Todos
 
@@ -87,8 +91,12 @@ None yet.
 - Safe loading mechanism (pickle_module remapping) implemented and tested in 05-01
 - Legacy mace_calculators.py deleted, all references cleaned up in 05-02
 
+**Phase 6 in progress:**
+- 06-01 complete: gaussian/ package foundation (exceptions, io.py)
+- 06-02 next: ZMQ server extraction into gaussian/zmq_server.py
+
 ## Session Continuity
 
-Last session: 2026-02-19 (phase execution)
-Stopped at: Completed 05-02-PLAN.md (Phase 05 complete)
+Last session: 2026-02-20 (phase execution)
+Stopped at: Completed 06-01-PLAN.md
 Resume file: None

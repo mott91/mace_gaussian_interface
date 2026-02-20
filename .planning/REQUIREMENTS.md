@@ -26,14 +26,14 @@ Requirements for the refactoring milestone. Each maps to roadmap phases.
 - [ ] **ERR-03**: CUDA availability checked at startup with clear warning on CPU fallback
 - [ ] **ERR-04**: Environment variables (MACE_DIPOLE_MODEL_PATH, MACE_HELPER_SCRIPT_PATH) validated at startup
 - [ ] **ERR-05**: Input .xyz file validated for basic sanity (exists, parseable, reasonable atom count)
-- [ ] **ERR-06**: Subprocess timeout added to Gaussian process to prevent indefinite hangs
+- [x] **ERR-06**: Subprocess timeout added to Gaussian process to prevent indefinite hangs
 
 ### Code Structure
 
 - [ ] **STRUCT-01**: Utility functions (unit conversions, validation) extracted from gm_main.py into separate modules
 - [ ] **STRUCT-02**: DipoleCalculator classes extracted from gm_main.py into calculators/ package
 - [x] **STRUCT-03**: MACE module monkey-patching replaced with safe loading pattern (lazy imports or process isolation)
-- [ ] **STRUCT-04**: Gaussian I/O functions extracted from gm_main.py into gaussian/ package
+- [x] **STRUCT-04**: Gaussian I/O functions extracted from gm_main.py into gaussian/ package
 - [ ] **STRUCT-05**: ZMQ server context manager extracted into dedicated module
 - [ ] **STRUCT-06**: Workflow orchestration extracted into workflow.py as thin coordinator
 - [ ] **STRUCT-07**: ZMQ socket cleanup race condition fixed (proper LINGER settings)
@@ -112,11 +112,11 @@ Deferred to future milestone. Tracked but not in current roadmap.
 | ERR-03 | Phase 2 | Pending |
 | ERR-04 | Phase 2 | Pending |
 | ERR-05 | Phase 2 | Pending |
-| ERR-06 | Phase 2 | Pending |
+| ERR-06 | Phase 2 | Complete |
 | STRUCT-01 | Phase 3 | Pending |
 | STRUCT-02 | Phase 4 | Pending |
 | STRUCT-03 | Phase 5 | Complete |
-| STRUCT-04 | Phase 6 | Pending |
+| STRUCT-04 | Phase 6 | Complete |
 | STRUCT-05 | Phase 6 | Pending |
 | STRUCT-06 | Phase 7 | Pending |
 | STRUCT-07 | Phase 6 | Pending |
