@@ -197,7 +197,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 3. Extract Utilities & Conventions | 0/2 | Planning complete | - |
 | 4. Extract Calculator Classes | 0/2 | Planning complete | - |
 | 5. Replace MACE Module Monkey-Patching | 0/2 | Complete    | 2026-02-19 |
-| 6. Extract Gaussian I/O & ZMQ Server | 0/5 | Planning complete | - |
+| 6. Extract Gaussian I/O & ZMQ Server | 3/5 | In Progress|  |
 | 7. Extract Workflow Orchestrator | 0/TBD | Not started | - |
 | 8. Package Structure & Reorganization | 0/TBD | Not started | - |
 | 9. CI/CD & Distribution Prep | 0/TBD | Not started | - |

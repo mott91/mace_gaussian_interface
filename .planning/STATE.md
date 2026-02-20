@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-16)
 ## Current Position
 
 Phase: 6 of 10 (Extract Gaussian I/O and ZMQ Server)
-Plan: 2 of 5 in current phase -- COMPLETE
-Status: Phase 06-02 complete, ready for Phase 06-03
-Last activity: 2026-02-20 — Completed 06-02: Relocate gaussian_parser.py and fchk_parser.py into gaussian/ package
+Plan: 3 of 5 in current phase -- COMPLETE
+Status: Phase 06-03 complete, ready for Phase 06-04
+Last activity: 2026-02-20 — Completed 06-03: Create gaussian/zmq_server.py with GaussianZMQServer class
 
-Progress: [██████░░░░] 57%
+Progress: [██████░░░░] 59%
 
 ## Performance Metrics
 
@@ -32,10 +32,10 @@ Progress: [██████░░░░] 57%
 | 03 | 2 | 9 min | 4.5 min |
 | 04 | 2 | 7 min | 3.5 min |
 | 05 | 2 | 6 min | 3.0 min |
-| 06 | 2 | 6 min | 3.0 min |
+| 06 | 3 | 9 min | 3.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 04-02 (3 min), 05-01 (4 min), 05-02 (2 min), 06-01 (2 min), 06-02 (4 min)
+- Last 5 plans: 05-01 (4 min), 05-02 (2 min), 06-01 (2 min), 06-02 (4 min), 06-03 (3 min)
 - Trend: Consistent fast execution on well-scoped plans
 
 *Updated after each plan completion*
@@ -77,6 +77,9 @@ Recent decisions affecting current work:
 - [Phase 06-01]: gm_main.py callers not updated in plan 06-01 - import wiring deferred to plan 06-05 to minimize per-plan diff scope
 - [Phase 06-01]: gaussian/__init__.py stays sparse stub until all submodules exist in later plans
 - [Phase 06-02]: No behavioral changes — gaussian/parser.py and gaussian/fchk.py are verbatim copies with added docstrings; originals preserved until plan 05 cleans up callers
+- [Phase 06-03]: LINGER=0 applied after socket() and before bind() to prevent socket.close() blocking forever on Gaussian crash (STRUCT-07)
+- [Phase 06-03]: No open() placeholder file creation in __enter__ — socket.bind() creates IPC file itself; original zmq_server() had this bug
+- [Phase 06-03]: __exit__ returns False (not suppress); nested try/finally ensures cleanup even if socket.close() raises
 
 ### Pending Todos
 
@@ -95,10 +98,11 @@ None yet.
 **Phase 6 in progress:**
 - 06-01 complete: gaussian/ package foundation (exceptions, io.py)
 - 06-02 complete: gaussian/parser.py and gaussian/fchk.py created (verbatim copies)
-- 06-03 next: ZMQ server extraction into gaussian/zmq_server.py
+- 06-03 complete: gaussian/zmq_server.py with GaussianZMQServer class (LINGER=0 fix, no placeholder)
+- 06-04 next: next plan in phase
 
 ## Session Continuity
 
 Last session: 2026-02-20 (phase execution)
-Stopped at: Completed 06-02-PLAN.md
+Stopped at: Completed 06-03-PLAN.md
 Resume file: None
