@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-16)
 
 **Core value:** Reliable, reproducible IR spectral predictions using ML potentials that can be validated against DFT reference data.
-**Current focus:** Phase 6 - Extract Gaussian I/O and ZMQ Server
+**Current focus:** Phase 7 - next phase
 
 ## Current Position
 
-Phase: 6 of 10 (Extract Gaussian I/O and ZMQ Server)
-Plan: 4 of 5 in current phase -- COMPLETE
-Status: Phase 06-04 complete, ready for Phase 06-05
-Last activity: 2026-02-20 — Completed 06-04: Create gaussian/runner.py with run_gaussian_with_zmq
+Phase: 6 of 10 (Extract Gaussian I/O and ZMQ Server) -- COMPLETE
+Plan: 5 of 5 in current phase -- COMPLETE
+Status: Phase 06 complete, all 5 plans done
+Last activity: 2026-02-20 — Completed 06-05: Final wiring - all callers use gaussian.* imports, gaussian_parser.py and fchk_parser.py deleted
 
-Progress: [███████░░░] 63%
+Progress: [████████░░] 70%
 
 ## Performance Metrics
 
@@ -32,14 +32,15 @@ Progress: [███████░░░] 63%
 | 03 | 2 | 9 min | 4.5 min |
 | 04 | 2 | 7 min | 3.5 min |
 | 05 | 2 | 6 min | 3.0 min |
-| 06 | 4 | 11 min | 2.8 min |
+| 06 | 5 | 15 min | 3.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 05-02 (2 min), 06-01 (2 min), 06-02 (4 min), 06-03 (3 min), 06-04 (2 min)
+- Last 5 plans: 06-01 (2 min), 06-02 (4 min), 06-03 (3 min), 06-04 (2 min), 06-05 (4 min)
 - Trend: Consistent fast execution on well-scoped plans
 
 *Updated after each plan completion*
 | Phase 06 P04 | 2 | 1 tasks | 1 files |
+| Phase 06 P05 | 4 | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -84,6 +85,8 @@ Recent decisions affecting current work:
 - [Phase 06-04]: stdout=PIPE and stderr=PIPE always captured so both GaussianTimeoutError and GaussianRunError include full Gaussian output for diagnostics
 - [Phase 06-04]: proc.kill() (SIGKILL) on timeout, not proc.terminate() (SIGTERM) — Gaussian ignores SIGTERM
 - [Phase 06-04]: runner imports only from gaussian.zmq_server and utils.exceptions — clean dependency boundary, no gaussian.io or gaussian.parser
+- [Phase 06]: ruff auto-fix removed unused ase.data.chemical_symbols from gm_main.py after parse_gaussian_input moved to gaussian.io
+- [Phase 06]: test_cli_validation.py GAUSSIAN_TIMEOUT_SECONDS replaced with DEFAULT_TIMEOUT_SECONDS from gaussian.runner throughout
 
 ### Pending Todos
 
@@ -99,15 +102,15 @@ None yet.
 - Safe loading mechanism (pickle_module remapping) implemented and tested in 05-01
 - Legacy mace_calculators.py deleted, all references cleaned up in 05-02
 
-**Phase 6 in progress:**
+**Phase 6 status:** COMPLETE
 - 06-01 complete: gaussian/ package foundation (exceptions, io.py)
 - 06-02 complete: gaussian/parser.py and gaussian/fchk.py created (verbatim copies)
 - 06-03 complete: gaussian/zmq_server.py with GaussianZMQServer class (LINGER=0 fix, no placeholder)
 - 06-04 complete: gaussian/runner.py with run_gaussian_with_zmq (SIGKILL timeout, stdout/stderr capture)
-- 06-05 next: wire gm_main.py callers to gaussian.runner
+- 06-05 complete: Final wiring - all callers use gaussian.* imports, gaussian_parser.py/fchk_parser.py deleted, gaussian/ is single authoritative source
 
 ## Session Continuity
 
 Last session: 2026-02-20 (phase execution)
-Stopped at: Completed 06-04-PLAN.md
+Stopped at: Completed 06-05-PLAN.md
 Resume file: None
