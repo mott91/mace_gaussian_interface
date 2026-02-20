@@ -49,3 +49,20 @@ class CUDANotAvailableWarning(UserWarning):
     GPU acceleration but torch.cuda.is_available() returns False.
     The system will fall back to CPU.
     """
+
+
+class GaussianRunError(MaceGaussianError):
+    """Gaussian subprocess exited with non-zero return code.
+
+    Raised by gaussian.runner when g16 exits with an error.
+    Callers can catch this to handle Gaussian-specific failures.
+    stdout and stderr are captured in the exception message.
+    """
+
+
+class GaussianTimeoutError(MaceGaussianError):
+    """Gaussian subprocess exceeded the configured timeout.
+
+    Raised by gaussian.runner when elapsed time > timeout_seconds.
+    The Gaussian process is hard-killed (SIGKILL) before this is raised.
+    """
