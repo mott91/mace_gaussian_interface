@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-16)
 ## Current Position
 
 Phase: 6 of 10 (Extract Gaussian I/O and ZMQ Server)
-Plan: 1 of 5 in current phase -- COMPLETE
-Status: Phase 06-01 complete, ready for Phase 06-02
-Last activity: 2026-02-20 — Completed 06-01: Create gaussian/ package with I/O functions and exceptions
+Plan: 2 of 5 in current phase -- COMPLETE
+Status: Phase 06-02 complete, ready for Phase 06-03
+Last activity: 2026-02-20 — Completed 06-02: Relocate gaussian_parser.py and fchk_parser.py into gaussian/ package
 
-Progress: [██████░░░░] 55%
+Progress: [██████░░░░] 57%
 
 ## Performance Metrics
 
@@ -32,10 +32,10 @@ Progress: [██████░░░░] 55%
 | 03 | 2 | 9 min | 4.5 min |
 | 04 | 2 | 7 min | 3.5 min |
 | 05 | 2 | 6 min | 3.0 min |
-| 06 | 1 | 2 min | 2.0 min |
+| 06 | 2 | 6 min | 3.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 04-01 (4 min), 04-02 (3 min), 05-01 (4 min), 05-02 (2 min), 06-01 (2 min)
+- Last 5 plans: 04-02 (3 min), 05-01 (4 min), 05-02 (2 min), 06-01 (2 min), 06-02 (4 min)
 - Trend: Consistent fast execution on well-scoped plans
 
 *Updated after each plan completion*
@@ -76,6 +76,7 @@ Recent decisions affecting current work:
 - [Phase 06-01]: DEFAULT_HELPER_SCRIPT in gaussian/io.py uses Path(__file__).parent.parent to reach project root (one level up from gaussian/)
 - [Phase 06-01]: gm_main.py callers not updated in plan 06-01 - import wiring deferred to plan 06-05 to minimize per-plan diff scope
 - [Phase 06-01]: gaussian/__init__.py stays sparse stub until all submodules exist in later plans
+- [Phase 06-02]: No behavioral changes — gaussian/parser.py and gaussian/fchk.py are verbatim copies with added docstrings; originals preserved until plan 05 cleans up callers
 
 ### Pending Todos
 
@@ -93,10 +94,11 @@ None yet.
 
 **Phase 6 in progress:**
 - 06-01 complete: gaussian/ package foundation (exceptions, io.py)
-- 06-02 next: ZMQ server extraction into gaussian/zmq_server.py
+- 06-02 complete: gaussian/parser.py and gaussian/fchk.py created (verbatim copies)
+- 06-03 next: ZMQ server extraction into gaussian/zmq_server.py
 
 ## Session Continuity
 
 Last session: 2026-02-20 (phase execution)
-Stopped at: Completed 06-01-PLAN.md
+Stopped at: Completed 06-02-PLAN.md
 Resume file: None
