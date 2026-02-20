@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-16)
 ## Current Position
 
 Phase: 6 of 10 (Extract Gaussian I/O and ZMQ Server)
-Plan: 3 of 5 in current phase -- COMPLETE
-Status: Phase 06-03 complete, ready for Phase 06-04
-Last activity: 2026-02-20 — Completed 06-03: Create gaussian/zmq_server.py with GaussianZMQServer class
+Plan: 4 of 5 in current phase -- COMPLETE
+Status: Phase 06-04 complete, ready for Phase 06-05
+Last activity: 2026-02-20 — Completed 06-04: Create gaussian/runner.py with run_gaussian_with_zmq
 
-Progress: [██████░░░░] 59%
+Progress: [███████░░░] 63%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14
-- Average duration: 4.1 min
-- Total execution time: 0.95 hours
+- Total plans completed: 15
+- Average duration: 3.9 min
+- Total execution time: 0.97 hours
 
 **By Phase:**
 
@@ -32,13 +32,14 @@ Progress: [██████░░░░] 59%
 | 03 | 2 | 9 min | 4.5 min |
 | 04 | 2 | 7 min | 3.5 min |
 | 05 | 2 | 6 min | 3.0 min |
-| 06 | 3 | 9 min | 3.0 min |
+| 06 | 4 | 11 min | 2.8 min |
 
 **Recent Trend:**
-- Last 5 plans: 05-01 (4 min), 05-02 (2 min), 06-01 (2 min), 06-02 (4 min), 06-03 (3 min)
+- Last 5 plans: 05-02 (2 min), 06-01 (2 min), 06-02 (4 min), 06-03 (3 min), 06-04 (2 min)
 - Trend: Consistent fast execution on well-scoped plans
 
 *Updated after each plan completion*
+| Phase 06 P04 | 2 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -80,6 +81,9 @@ Recent decisions affecting current work:
 - [Phase 06-03]: LINGER=0 applied after socket() and before bind() to prevent socket.close() blocking forever on Gaussian crash (STRUCT-07)
 - [Phase 06-03]: No open() placeholder file creation in __enter__ — socket.bind() creates IPC file itself; original zmq_server() had this bug
 - [Phase 06-03]: __exit__ returns False (not suppress); nested try/finally ensures cleanup even if socket.close() raises
+- [Phase 06-04]: stdout=PIPE and stderr=PIPE always captured so both GaussianTimeoutError and GaussianRunError include full Gaussian output for diagnostics
+- [Phase 06-04]: proc.kill() (SIGKILL) on timeout, not proc.terminate() (SIGTERM) — Gaussian ignores SIGTERM
+- [Phase 06-04]: runner imports only from gaussian.zmq_server and utils.exceptions — clean dependency boundary, no gaussian.io or gaussian.parser
 
 ### Pending Todos
 
@@ -99,10 +103,11 @@ None yet.
 - 06-01 complete: gaussian/ package foundation (exceptions, io.py)
 - 06-02 complete: gaussian/parser.py and gaussian/fchk.py created (verbatim copies)
 - 06-03 complete: gaussian/zmq_server.py with GaussianZMQServer class (LINGER=0 fix, no placeholder)
-- 06-04 next: next plan in phase
+- 06-04 complete: gaussian/runner.py with run_gaussian_with_zmq (SIGKILL timeout, stdout/stderr capture)
+- 06-05 next: wire gm_main.py callers to gaussian.runner
 
 ## Session Continuity
 
 Last session: 2026-02-20 (phase execution)
-Stopped at: Completed 06-03-PLAN.md
+Stopped at: Completed 06-04-PLAN.md
 Resume file: None
