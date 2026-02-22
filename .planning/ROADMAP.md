@@ -132,10 +132,11 @@ Plans:
   2. gm_main.py is deprecated or removed
   3. CLI delegates to workflow.py functions
   4. Full pipeline runs with new orchestrator on water and CH4
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 07-01: TBD
+- [ ] 07-01-PLAN.md — Create workflow.py with all extracted pipeline functions and stage functions
+- [ ] 07-02-PLAN.md — Update cli.py to use workflow imports, inline print_diagnostics, delete gm_main.py
 
 ### Phase 8: Package Structure & Reorganization
 **Goal**: Reorganize entire codebase into proper mace_gaussian/ package with clean imports
