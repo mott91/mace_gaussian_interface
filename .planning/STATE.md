@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-16)
 ## Current Position
 
 Phase: 8 of 10 (Package Structure Reorganization)
-Plan: 1 of 3 in current phase -- COMPLETE
-Status: Phase 08 in progress, plan 01 done
-Last activity: 2026-02-24 — Completed 08-01: mace_gaussian/ package created via git mv, all internal imports converted to relative dot-notation
+Plan: 2 of 3 in current phase -- COMPLETE
+Status: Phase 08 in progress, plans 01 and 02 done
+Last activity: 2026-02-25 — Completed 08-02: all root files moved into mace_gaussian/, analysis/ subpackage created, root shims rewritten
 
-Progress: [████████░░] 77%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
@@ -46,6 +46,7 @@ Progress: [████████░░] 77%
 | Phase 07 P01 | 3 | 1 tasks | 1 files |
 | Phase 07 P02 | 5 | 2 tasks | 3 files |
 | Phase 08 P01 | 2 | 2 tasks | 13 files |
+| Phase 08 P02 | 4 | 2 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -101,6 +102,10 @@ Recent decisions affecting current work:
 - [Phase 08-01]: workflow.run_pipeline import commented out in mace_gaussian/__init__.py — workflow.py not yet inside package (Plan 02 activates it)
 - [Phase 08-01]: ruff --select I,F401 --fix applied to auto-sort 2 import blocks after manual relative import conversion (espaloma.py, runner.py)
 - [Phase 08-01]: mace_loader.py lazy import inside _check_availability converted to from .mace_loader — same lazy semantics, now relative
+- [Phase 08-02]: cli.py uses absolute mace_gaussian.* imports (not relative) — entry boundary, must work standalone
+- [Phase 08-02]: gm_helper.py uses only stdlib + zmq — runs as standalone subprocess invoked by Gaussian, relative imports would fail
+- [Phase 08-02]: run_analysis_main() and run_analysis_harmonic_main() added to analysis_workflow.py — shims delegate to package
+- [Phase 08-02]: comparison_workflow.py renamed to analysis_workflow.py during git mv to match its orchestrator role
 
 ### Pending Todos
 
@@ -129,9 +134,10 @@ None yet.
 
 **Phase 8 status:** IN PROGRESS
 - 08-01 complete: mace_gaussian/ package created via git mv (17 renames, history preserved), all internal imports converted to relative dot-notation — STRUCT-08 satisfied
+- 08-02 complete: all root files moved into mace_gaussian/, analysis/ subpackage created, root shims rewritten as 3-line delegators, run_pipeline re-export activated — STRUCT-08, STRUCT-10 satisfied
 
 ## Session Continuity
 
-Last session: 2026-02-24 (phase execution)
-Stopped at: Completed 08-01-PLAN.md
+Last session: 2026-02-25 (phase execution)
+Stopped at: Completed 08-02-PLAN.md
 Resume file: None
