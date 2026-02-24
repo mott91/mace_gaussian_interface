@@ -15,8 +15,8 @@ from typing import Dict, List, Optional, Tuple
 
 import pandas as pd
 
-from analyze_spectra import SpectrumAnalyzer, SpectrumData
-from mode_matching import (
+from .analyze_spectra import SpectrumAnalyzer, SpectrumData
+from .mode_matching import (
     create_alignment_matrix,
     extract_mode_data_from_checkpoint,
     match_modes,
@@ -747,7 +747,7 @@ class ComparisonWorkflow:
         analysis_results : dict
             Results from run_full_analysis()
         """
-        from html_report_generator import HTMLReportGenerator
+        from .html_report_generator import HTMLReportGenerator
 
         generator = HTMLReportGenerator(
             molecule_name=self.molecule_name,
@@ -831,13 +831,124 @@ def analyze_molecule_harmonic(molecule_name: str,
     )
 
 
-if __name__ == "__main__":
+def run_analysis_main() -> None:
+    """Entry point for anharmonic IR spectral analysis (run_analysis.py shim target)."""
     import sys
 
     if len(sys.argv) < 2:
-        print("Usage: python comparison_workflow.py <molecule_name>")
-        print("Example: python comparison_workflow.py water")
+        print("=" * 60)
+        print("IR SPECTRAL ANALYSIS FRAMEWORK")
+        print("=" * 60)
+        print("\nUsage:")
+        print("  python run_analysis.py <molecule_name>")
+        print("\nExample:")
+        print("  python run_analysis.py acoh")
+        print("\nThis will:")
+        print("  1. Find DFT anharmonic baseline")
+        print("  2. Find all ML calculation results")
+        print("  3. Generate comparison plots")
+        print("  4. Calculate statistical metrics")
+        print("  5. Create HTML report")
+        print("\n" + "=" * 60)
         sys.exit(1)
 
     molecule_name = sys.argv[1]
-    analyze_molecule(molecule_name)
+
+    print("\n" + "=" * 60)
+    print(f"ANALYZING: {molecule_name.upper()}")
+    print("=" * 60 + "\n")
+
+    try:
+        results = analyze_molecule(molecule_name)
+
+        print("\n" + "=" * 60)
+        print("SUCCESS!")
+        print("=" * 60)
+        print(f"\nResults directory: {results['output_dir']}")
+        print(f"HTML Report: {results['output_dir']}/report.html")
+        print("\nOpen the HTML report in your browser to view the analysis!")
+        print("=" * 60 + "\n")
+
+    except FileNotFoundError as e:
+        print("\n" + "=" * 60)
+        print("ERROR: Files not found")
+        print("=" * 60)
+        print(f"\n{e}")
+        print("\nMake sure you have:")
+        print(f"  - comparison_results/{molecule_name}/freq_anharm/results.json (DFT baseline)")
+        print(f"  - comparison_results/{molecule_name}/<calculator>/results.json (ML results)")
+        print("=" * 60 + "\n")
+        sys.exit(1)
+
+    except Exception as e:
+        print("\n" + "=" * 60)
+        print("ERROR: Analysis failed")
+        print("=" * 60)
+        print(f"\n{e}")
+        print("\nCheck the logs above for details.")
+        print("=" * 60 + "\n")
+        sys.exit(1)
+
+
+def run_analysis_harmonic_main() -> None:
+    """Entry point for harmonic IR spectral analysis (run_analysis_harmonic.py shim target)."""
+    import sys
+
+    if len(sys.argv) < 2:
+        print("=" * 60)
+        print("HARMONIC-ONLY IR SPECTRAL ANALYSIS")
+        print("=" * 60)
+        print("\nUsage:")
+        print("  python run_analysis_harmonic.py <molecule_name>")
+        print("\nExample:")
+        print("  python run_analysis_harmonic.py water")
+        print("\nThis will:")
+        print("  1. Analyze ONLY harmonic fundamental frequencies")
+        print("  2. Use eigenvector dot product mode matching")
+        print("  3. Generate comparison plots (fundamentals only)")
+        print("  4. Create HTML report")
+        print("  5. Save to analysis_results_harmonic/")
+        print("\nNote: Overtones and combinations are excluded")
+        print("=" * 60)
+        sys.exit(1)
+
+    molecule_name = sys.argv[1]
+
+    print("\n" + "=" * 60)
+    print(f"HARMONIC ANALYSIS: {molecule_name.upper()}")
+    print("=" * 60 + "\n")
+
+    try:
+        results = analyze_molecule_harmonic(molecule_name)
+
+        print("\n" + "=" * 60)
+        print("SUCCESS!")
+        print("=" * 60)
+        print(f"\nResults directory: {results['output_dir']}")
+        print(f"HTML Report: {results['output_dir']}/report.html")
+        print("\nOpen the HTML report in your browser to view the analysis!")
+        print("=" * 60 + "\n")
+
+    except FileNotFoundError as e:
+        print("\n" + "=" * 60)
+        print("ERROR: Files not found")
+        print("=" * 60)
+        print(f"\n{e}")
+        print("\nMake sure you have:")
+        print(f"  - comparison_results/{molecule_name}/<dft>/results.json (DFT baseline)")
+        print(f"  - comparison_results/{molecule_name}/<calculator>/results.json (ML results)")
+        print("=" * 60 + "\n")
+        sys.exit(1)
+
+    except Exception as e:
+        print("\n" + "=" * 60)
+        print("ERROR: Analysis failed")
+        print("=" * 60)
+        print(f"\n{e}")
+        print("\nCheck the logs above for details.")
+        print("=" * 60 + "\n")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    run_analysis_main()

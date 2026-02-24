@@ -81,7 +81,7 @@ def run(
         python cli.py run water.xyz --skip-dft-baseline
         python cli.py run water.xyz --energy-calculators mace_mp --dipole-calculators espaloma
     """
-    from workflow import run_pipeline
+    from mace_gaussian.workflow import run_pipeline
 
     # Parse calculator lists
     energy_calc_list = [c.strip() for c in energy_calculators.split(",")]
@@ -90,8 +90,8 @@ def run(
     input_path = Path(input_file)
 
     # Validate prerequisites before expensive imports
-    from utils.exceptions import InputValidationError, PrerequisiteError
-    from utils.validation import (
+    from mace_gaussian.utils.exceptions import InputValidationError, PrerequisiteError
+    from mace_gaussian.utils.validation import (
         detect_device,
         validate_all_prerequisites,
         validate_xyz_file,
@@ -361,7 +361,7 @@ def diagnose():
     Example:
         python cli.py diagnose
     """
-    from calculators import dipole_factory
+    from mace_gaussian.calculators import dipole_factory
 
     click.echo("=" * 60)
     click.echo("DIAGNOSTIC MODE")

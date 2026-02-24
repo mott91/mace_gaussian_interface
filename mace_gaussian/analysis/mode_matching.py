@@ -18,7 +18,7 @@ from typing import Dict, Optional, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
 
-from gaussian.fchk import extract_modes_from_fchk, get_fchk_from_chk
+from ..gaussian.fchk import extract_modes_from_fchk, get_fchk_from_chk
 
 logger = logging.getLogger(__name__)
 

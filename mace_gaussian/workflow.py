@@ -31,13 +31,13 @@ import numpy as np
 from ase.io import read
 from ase.optimize import LBFGS
 
-from calculators import dipole_factory
-from gaussian.fchk import convert_chk_to_fchk
-from gaussian.io import ase_to_gjf, parse_gaussian_input, write_gaussian_output
-from gaussian.parser import parse_gaussian_log
-from gaussian.runner import DEFAULT_TIMEOUT_SECONDS, run_gaussian_with_zmq
-from utils.results import ResultsManager
-from utils.units import BOHR_TO_ANGSTROM, HARTREE_TO_EV
+from .calculators import dipole_factory
+from .gaussian.fchk import convert_chk_to_fchk
+from .gaussian.io import ase_to_gjf, parse_gaussian_input, write_gaussian_output
+from .gaussian.parser import parse_gaussian_log
+from .gaussian.runner import DEFAULT_TIMEOUT_SECONDS, run_gaussian_with_zmq
+from .utils.results import ResultsManager
+from .utils.units import BOHR_TO_ANGSTROM, HARTREE_TO_EV
 
 warnings.filterwarnings("ignore", message=".*weights_only=False.*", category=FutureWarning)
 os.environ["PYTHONWARNINGS"] = "ignore::FutureWarning"
@@ -485,7 +485,7 @@ def run_dft_baselines(
     The dft_baseline import is lazy (inside this function body) to avoid
     heavy DGL/espaloma imports at module load time.
     """
-    from dft_baseline import run_all_dft_baselines
+    from .dft_baseline import run_all_dft_baselines
 
     return run_all_dft_baselines(
         optimized_atoms, molecule_name, results_mgr, charge, multiplicity, skip_if_exists=True
@@ -572,7 +572,7 @@ def run_pipeline(
     dict
         Summary of results with success status for each calculation
     """
-    from utils.validation import detect_device
+    from .utils.validation import detect_device
 
     # Detect and log compute device
     detect_device()
