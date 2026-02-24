@@ -15,11 +15,15 @@ from pathlib import Path
 
 import click
 
+try:
+    from rdkit import RDLogger
+
+    RDLogger.DisableLog("rdApp.*")
+except ImportError:
+    pass
+
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -31,59 +35,57 @@ def cli():
 
 
 @cli.command()
-@click.argument('input_file', type=click.Path(exists=True))
+@click.argument("input_file", type=click.Path(exists=True))
 @click.option(
-    '--optimization-calculator',
-    default='mace_omol',
-    type=click.Choice(['mace_omol', 'mace_off', 'mace_mp']),
-    help='Calculator for geometry optimization (default: mace_omol)'
+    "--optimization-calculator",
+    default="mace_omol",
+    type=click.Choice(["mace_omol", "mace_off", "mace_mp"]),
+    help="Calculator for geometry optimization (default: mace_omol)",
 )
 @click.option(
-    '--energy-calculators',
-    default='mace_mp,mace_omol',
-    help='Comma-separated list of energy calculators (default: mace_mp,mace_omol)'
+    "--energy-calculators",
+    default="mace_mp,mace_omol",
+    help="Comma-separated list of energy calculators (default: mace_mp,mace_omol)",
 )
 @click.option(
-    '--dipole-calculators',
-    default='espaloma,mace_ml',
-    help='Comma-separated list of dipole calculators (default: espaloma,mace_ml)'
+    "--dipole-calculators",
+    default="espaloma,mace_ml",
+    help="Comma-separated list of dipole calculators (default: espaloma,mace_ml)",
 )
 @click.option(
-    '--force-optimization',
+    "--force-optimization",
     is_flag=True,
-    help='Force re-optimization even if optimized geometry exists'
+    help="Force re-optimization even if optimized geometry exists",
 )
+@click.option("--skip-dft-baseline", is_flag=True, help="Skip DFT baseline calculations")
 @click.option(
-    '--skip-dft-baseline',
-    is_flag=True,
-    help='Skip DFT baseline calculations'
-)
-@click.option(
-    '--output-dir',
-    default='comparison_results',
+    "--output-dir",
+    default="comparison_results",
     type=click.Path(),
-    help='Output directory for results (default: comparison_results)'
+    help="Output directory for results (default: comparison_results)",
 )
-def run(input_file, optimization_calculator, energy_calculators, dipole_calculators,
-        force_optimization, skip_dft_baseline, output_dir):
+def run(
+    input_file,
+    optimization_calculator,
+    energy_calculators,
+    dipole_calculators,
+    force_optimization,
+    skip_dft_baseline,
+    output_dir,
+):
     """
     Run complete calculation workflow on INPUT_FILE.
-    
+
     Example:
         python cli.py run water.xyz
         python cli.py run water.xyz --skip-dft-baseline
         python cli.py run water.xyz --energy-calculators mace_mp --dipole-calculators espaloma
     """
-    try:
-        from gm_main import run_workflow
-    except ImportError as e:
-        click.echo(f"Error: Could not import gm_main.py: {e}", err=True)
-        click.echo("Make sure gm_main.py is in the same directory as cli.py", err=True)
-        sys.exit(1)
+    from workflow import run_pipeline
 
     # Parse calculator lists
-    energy_calc_list = [c.strip() for c in energy_calculators.split(',')]
-    dipole_calc_list = [c.strip() for c in dipole_calculators.split(',')]
+    energy_calc_list = [c.strip() for c in energy_calculators.split(",")]
+    dipole_calc_list = [c.strip() for c in dipole_calculators.split(",")]
 
     input_path = Path(input_file)
 
@@ -109,7 +111,7 @@ def run(input_file, optimization_calculator, energy_calculators, dipole_calculat
             check_gaussian=True,
             check_formchk_tool=True,
             dipole_model_path=None,  # Checked later by calculators
-            helper_script_path=None,  # Checked later by gm_main
+            helper_script_path=None,  # Checked later by workflow
         )
         click.echo("Prerequisites OK: g16 found")
     except PrerequisiteError as e:
@@ -126,14 +128,14 @@ def run(input_file, optimization_calculator, energy_calculators, dipole_calculat
     click.echo("")
 
     try:
-        results = run_workflow(
+        results = run_pipeline(
             input_file=str(input_path),
             optimization_calculator=optimization_calculator,
             energy_calculators=energy_calc_list,
             dipole_calculators=dipole_calc_list,
             force_optimization=force_optimization,
             include_dft_baselines=not skip_dft_baseline,
-            base_output_dir=output_dir
+            base_output_dir=output_dir,
         )
 
         # Print final summary
@@ -141,13 +143,13 @@ def run(input_file, optimization_calculator, energy_calculators, dipole_calculat
         click.echo("WORKFLOW COMPLETED SUCCESSFULLY")
         click.echo("=" * 60)
 
-        if results['dft_baselines']:
-            dft_success = sum(1 for v in results['dft_baselines'].values() if v)
-            dft_total = len(results['dft_baselines'])
+        if results["dft_baselines"]:
+            dft_success = sum(1 for v in results["dft_baselines"].values() if v)
+            dft_total = len(results["dft_baselines"])
             click.echo(f"DFT baselines: {dft_success}/{dft_total} successful")
 
-        ml_success = sum(1 for r in results['ml_calculations'] if r['success'])
-        ml_total = len(results['ml_calculations'])
+        ml_success = sum(1 for r in results["ml_calculations"] if r["success"])
+        ml_total = len(results["ml_calculations"])
         click.echo(f"ML calculations: {ml_success}/{ml_total} successful")
 
         click.echo(f"\nResults directory: {output_dir}/{results['molecule_name']}/")
@@ -160,20 +162,20 @@ def run(input_file, optimization_calculator, energy_calculators, dipole_calculat
 
 
 @cli.command()
-@click.argument('molecule', required=False)
+@click.argument("molecule", required=False)
 @click.option(
-    '--output-dir',
-    default='comparison_results',
+    "--output-dir",
+    default="comparison_results",
     type=click.Path(),
-    help='Results directory to search (default: comparison_results)'
+    help="Results directory to search (default: comparison_results)",
 )
 def list(molecule, output_dir):
     """
     List available calculation results.
-    
+
     If MOLECULE is specified, show detailed results for that molecule.
     Otherwise, list all available molecules.
-    
+
     Example:
         python cli.py list
         python cli.py list water
@@ -191,9 +193,9 @@ def list(molecule, output_dir):
             click.echo(f"No results found for molecule: {molecule}", err=True)
             sys.exit(1)
 
-        click.echo(f"\n{'='*60}")
+        click.echo(f"\n{'=' * 60}")
         click.echo(f"Results for: {molecule}")
-        click.echo(f"{'='*60}\n")
+        click.echo(f"{'=' * 60}\n")
 
         # Check for optimization
         opt_dir = mol_dir / "geometry_opt"
@@ -220,9 +222,9 @@ def list(molecule, output_dir):
                     with open(json_file) as f:
                         data = json.load(f)
 
-                    calc_type = data.get('calculator_type', 'unknown')
-                    energy_calc = data.get('energy_calculator', 'N/A')
-                    dipole_calc = data.get('dipole_calculator', 'N/A')
+                    calc_type = data.get("calculator_type", "unknown")
+                    energy_calc = data.get("energy_calculator", "N/A")
+                    dipole_calc = data.get("dipole_calculator", "N/A")
 
                     click.echo(f"\n  {freq_dir.name}:")
                     click.echo(f"    Type: {calc_type}")
@@ -231,11 +233,11 @@ def list(molecule, output_dir):
                     click.echo(f"    Energy: {data.get('energy_eV', 'N/A'):.6f} eV")
                     click.echo(f"    Runtime: {data.get('runtime_s', 'N/A'):.1f} s")
 
-                    n_harmonic = len(data.get('frequencies', {}).get('harmonic', []))
-                    n_anharmonic = len(data.get('frequencies', {}).get('anharmonic', []))
+                    n_harmonic = len(data.get("frequencies", {}).get("harmonic", []))
+                    n_anharmonic = len(data.get("frequencies", {}).get("anharmonic", []))
                     click.echo(f"    Frequencies: {n_harmonic} harmonic, {n_anharmonic} anharmonic")
 
-        click.echo(f"\n{'='*60}\n")
+        click.echo(f"\n{'=' * 60}\n")
 
     else:
         # List all molecules
@@ -250,8 +252,7 @@ def list(molecule, output_dir):
             mol_dir = results_dir / mol
 
             # Count calculations
-            freq_dirs = [d for d in mol_dir.iterdir()
-                        if d.is_dir() and d.name != "geometry_opt"]
+            freq_dirs = [d for d in mol_dir.iterdir() if d.is_dir() and d.name != "geometry_opt"]
             n_calcs = len(freq_dirs)
 
             has_opt = (mol_dir / "geometry_opt").exists()
@@ -263,31 +264,31 @@ def list(molecule, output_dir):
 
 
 @cli.command()
-@click.argument('molecule')
+@click.argument("molecule")
 @click.option(
-    '--output-dir',
-    default='comparison_results',
+    "--output-dir",
+    default="comparison_results",
     type=click.Path(),
-    help='Results directory (default: comparison_results)'
+    help="Results directory (default: comparison_results)",
 )
 def compare(molecule, output_dir):
     """
     Compare calculation results for MOLECULE.
-    
+
     [PLACEHOLDER - Coming soon]
-    
+
     This will generate comparison tables and plots for:
     - Energy comparisons
-    - Frequency comparisons  
+    - Frequency comparisons
     - Runtime analysis
     - Accuracy metrics
-    
+
     Example:
         python cli.py compare water
     """
-    click.echo(f"\n{'='*60}")
+    click.echo(f"\n{'=' * 60}")
     click.echo("COMPARE COMMAND - COMING SOON")
-    click.echo(f"{'='*60}\n")
+    click.echo(f"{'=' * 60}\n")
     click.echo(f"This command will compare results for: {molecule}")
     click.echo(f"Results directory: {output_dir}")
     click.echo("\nPlanned features:")
@@ -296,36 +297,34 @@ def compare(molecule, output_dir):
     click.echo("  - Runtime analysis")
     click.echo("  - Visualization plots")
     click.echo("\nTo implement this feature, add analysis code to a new module.")
-    click.echo(f"{'='*60}\n")
+    click.echo(f"{'=' * 60}\n")
 
 
 @cli.command()
-@click.argument('molecule')
+@click.argument("molecule")
 @click.option(
-    '--format',
-    type=click.Choice(['csv', 'json', 'xlsx']),
-    default='csv',
-    help='Export format (default: csv)'
+    "--format",
+    type=click.Choice(["csv", "json", "xlsx"]),
+    default="csv",
+    help="Export format (default: csv)",
 )
 @click.option(
-    '--output',
-    type=click.Path(),
-    help='Output file path (default: <molecule>_results.<format>)'
+    "--output", type=click.Path(), help="Output file path (default: <molecule>_results.<format>)"
 )
 @click.option(
-    '--results-dir',
-    default='comparison_results',
+    "--results-dir",
+    default="comparison_results",
     type=click.Path(),
-    help='Results directory (default: comparison_results)'
+    help="Results directory (default: comparison_results)",
 )
 def export(molecule, format, output, results_dir):
     """
     Export results for MOLECULE to specified format.
-    
+
     [PLACEHOLDER - Coming soon]
-    
+
     Exports all calculation results to a single file for further analysis.
-    
+
     Example:
         python cli.py export water --format csv
         python cli.py export water --format xlsx --output water_analysis.xlsx
@@ -333,9 +332,9 @@ def export(molecule, format, output, results_dir):
     if output is None:
         output = f"{molecule}_results.{format}"
 
-    click.echo(f"\n{'='*60}")
+    click.echo(f"\n{'=' * 60}")
     click.echo("EXPORT COMMAND - COMING SOON")
-    click.echo(f"{'='*60}\n")
+    click.echo(f"{'=' * 60}\n")
     click.echo(f"Molecule: {molecule}")
     click.echo(f"Format: {format}")
     click.echo(f"Output: {output}")
@@ -346,29 +345,33 @@ def export(molecule, format, output, results_dir):
     click.echo("  - Export metadata (runtimes, parameters)")
     click.echo("  - JSON export for programmatic access")
     click.echo("\nTo implement this feature, add export code to a new module.")
-    click.echo(f"{'='*60}\n")
+    click.echo(f"{'=' * 60}\n")
 
 
 @cli.command()
 def diagnose():
     """
     Run diagnostic checks for available calculators and dependencies.
-    
+
     Checks:
         - Available dipole calculators
         - Python environment
         - Required packages
-    
+
     Example:
         python cli.py diagnose
     """
-    try:
-        from gm_main import print_diagnostics
-        print_diagnostics()
-    except ImportError as e:
-        click.echo(f"Error: Could not import gm_main.py: {e}", err=True)
-        sys.exit(1)
+    from calculators import dipole_factory
+
+    click.echo("=" * 60)
+    click.echo("DIAGNOSTIC MODE")
+    click.echo("=" * 60)
+    click.echo("\nAvailable dipole calculators:")
+    for name, available in dipole_factory.list_available().items():
+        status = "OK" if available else "UNAVAILABLE"
+        click.echo(f"  {status}: {name}")
+    click.echo("\n" + "=" * 60)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli()
