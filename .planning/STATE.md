@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-16)
 
 **Core value:** Reliable, reproducible IR spectral predictions using ML potentials that can be validated against DFT reference data.
-**Current focus:** Phase 7 - Extract Workflow Orchestrator
+**Current focus:** Phase 8 - Package Structure Reorganization
 
 ## Current Position
 
-Phase: 7 of 10 (Extract Workflow Orchestrator)
-Plan: 2 of 4 in current phase -- COMPLETE
-Status: Phase 07 in progress, plan 02 done
-Last activity: 2026-02-24 — Completed 07-02: cli.py rewired to workflow.run_pipeline(), gm_main.py deleted, STRUCT-06 satisfied
+Phase: 8 of 10 (Package Structure Reorganization)
+Plan: 1 of 3 in current phase -- COMPLETE
+Status: Phase 08 in progress, plan 01 done
+Last activity: 2026-02-24 — Completed 08-01: mace_gaussian/ package created via git mv, all internal imports converted to relative dot-notation
 
-Progress: [████████░░] 74%
+Progress: [████████░░] 77%
 
 ## Performance Metrics
 
@@ -33,10 +33,11 @@ Progress: [████████░░] 74%
 | 04 | 2 | 7 min | 3.5 min |
 | 05 | 2 | 6 min | 3.0 min |
 | 06 | 5 | 15 min | 3.0 min |
-| 07 | 1+ | 3 min | 3.0 min |
+| 07 | 2 | 8 min | 4.0 min |
+| 08 | 1+ | 2 min | 2.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 06-02 (4 min), 06-03 (3 min), 06-04 (2 min), 06-05 (4 min), 07-01 (3 min)
+- Last 5 plans: 06-04 (2 min), 06-05 (4 min), 07-01 (3 min), 07-02 (5 min), 08-01 (2 min)
 - Trend: Consistent fast execution on well-scoped plans
 
 *Updated after each plan completion*
@@ -44,6 +45,7 @@ Progress: [████████░░] 74%
 | Phase 06 P05 | 4 | 2 tasks | 12 files |
 | Phase 07 P01 | 3 | 1 tasks | 1 files |
 | Phase 07 P02 | 5 | 2 tasks | 3 files |
+| Phase 08 P01 | 2 | 2 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -96,6 +98,9 @@ Recent decisions affecting current work:
 - [Phase 07-01]: Dead code excluded: setup_output_directory (no callers), analyze_molecular_charges (not in pipeline path), print_diagnostics (CLI concern)
 - [Phase 07-02]: No try/except around 'from workflow import run_pipeline' — workflow.py internal imports don't have heavy-dep failure risk unlike gm_main
 - [Phase 07-02]: testingStuff/test_refactoring.py gm_main import left as-is — legacy scratch, acceptable dead reference per plan spec
+- [Phase 08-01]: workflow.run_pipeline import commented out in mace_gaussian/__init__.py — workflow.py not yet inside package (Plan 02 activates it)
+- [Phase 08-01]: ruff --select I,F401 --fix applied to auto-sort 2 import blocks after manual relative import conversion (espaloma.py, runner.py)
+- [Phase 08-01]: mace_loader.py lazy import inside _check_availability converted to from .mace_loader — same lazy semantics, now relative
 
 ### Pending Todos
 
@@ -118,12 +123,15 @@ None yet.
 - 06-04 complete: gaussian/runner.py with run_gaussian_with_zmq (SIGKILL timeout, stdout/stderr capture)
 - 06-05 complete: Final wiring - all callers use gaussian.* imports, gaussian_parser.py/fchk_parser.py deleted, gaussian/ is single authoritative source
 
-**Phase 7 status:** IN PROGRESS
+**Phase 7 status:** COMPLETE
 - 07-01 complete: workflow.py created with run_pipeline() + stage functions extracted from gm_main.py (718 lines, ruff clean)
 - 07-02 complete: cli.py rewired to workflow.run_pipeline(), print_diagnostics inlined using dipole_factory, gm_main.py deleted — STRUCT-06 fully satisfied
+
+**Phase 8 status:** IN PROGRESS
+- 08-01 complete: mace_gaussian/ package created via git mv (17 renames, history preserved), all internal imports converted to relative dot-notation — STRUCT-08 satisfied
 
 ## Session Continuity
 
 Last session: 2026-02-24 (phase execution)
-Stopped at: Completed 07-02-PLAN.md
+Stopped at: Completed 08-01-PLAN.md
 Resume file: None

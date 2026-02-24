@@ -37,7 +37,7 @@ Requirements for the refactoring milestone. Each maps to roadmap phases.
 - [x] **STRUCT-05**: ZMQ server context manager extracted into dedicated module
 - [x] **STRUCT-06**: Workflow orchestration extracted into workflow.py as thin coordinator
 - [x] **STRUCT-07**: ZMQ socket cleanup race condition fixed (proper LINGER settings)
-- [ ] **STRUCT-08**: Project reorganized into mace_gaussian/ package with proper __init__.py
+- [x] **STRUCT-08**: Project reorganized into mace_gaussian/ package with proper __init__.py
 - [ ] **STRUCT-09**: CLI entry point aligned in pyproject.toml with package structure
 - [ ] **STRUCT-10**: Analysis modules reorganized into analysis/ subpackage
 
@@ -120,7 +120,7 @@ Deferred to future milestone. Tracked but not in current roadmap.
 | STRUCT-05 | Phase 6 | Complete |
 | STRUCT-06 | Phase 7 | Complete |
 | STRUCT-07 | Phase 6 | Complete |
-| STRUCT-08 | Phase 8 | Pending |
+| STRUCT-08 | Phase 8 | Complete |
 | STRUCT-09 | Phase 8 | Pending |
 | STRUCT-10 | Phase 8 | Pending |
 | REPR-01 | Phase 2 | Pending |
