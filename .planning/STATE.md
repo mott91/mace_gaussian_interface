@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-16)
 
 **Core value:** Reliable, reproducible IR spectral predictions using ML potentials that can be validated against DFT reference data.
-**Current focus:** Phase 7 - next phase
+**Current focus:** Phase 7 - Extract Workflow Orchestrator
 
 ## Current Position
 
-Phase: 6 of 10 (Extract Gaussian I/O and ZMQ Server) -- COMPLETE
-Plan: 5 of 5 in current phase -- COMPLETE
-Status: Phase 06 complete, all 5 plans done
-Last activity: 2026-02-20 — Completed 06-05: Final wiring - all callers use gaussian.* imports, gaussian_parser.py and fchk_parser.py deleted
+Phase: 7 of 10 (Extract Workflow Orchestrator)
+Plan: 1 of 4 in current phase -- COMPLETE
+Status: Phase 07 in progress, plan 01 done
+Last activity: 2026-02-24 — Completed 07-01: workflow.py created with run_pipeline() and stage functions extracted from gm_main.py
 
-Progress: [████████░░] 70%
+Progress: [████████░░] 72%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 15
+- Total plans completed: 16
 - Average duration: 3.9 min
 - Total execution time: 0.97 hours
 
@@ -33,14 +33,16 @@ Progress: [████████░░] 70%
 | 04 | 2 | 7 min | 3.5 min |
 | 05 | 2 | 6 min | 3.0 min |
 | 06 | 5 | 15 min | 3.0 min |
+| 07 | 1+ | 3 min | 3.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 06-01 (2 min), 06-02 (4 min), 06-03 (3 min), 06-04 (2 min), 06-05 (4 min)
+- Last 5 plans: 06-02 (4 min), 06-03 (3 min), 06-04 (2 min), 06-05 (4 min), 07-01 (3 min)
 - Trend: Consistent fast execution on well-scoped plans
 
 *Updated after each plan completion*
 | Phase 06 P04 | 2 | 1 tasks | 1 files |
 | Phase 06 P05 | 4 | 2 tasks | 12 files |
+| Phase 07 P01 | 3 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -87,6 +89,10 @@ Recent decisions affecting current work:
 - [Phase 06-04]: runner imports only from gaussian.zmq_server and utils.exceptions — clean dependency boundary, no gaussian.io or gaussian.parser
 - [Phase 06]: ruff auto-fix removed unused ase.data.chemical_symbols from gm_main.py after parse_gaussian_input moved to gaussian.io
 - [Phase 06]: test_cli_validation.py GAUSSIAN_TIMEOUT_SECONDS replaced with DEFAULT_TIMEOUT_SECONDS from gaussian.runner throughout
+- [Phase 07-01]: Optional[np.ndarray] replaced with np.ndarray | None (modern Python type syntax, ruff UP045)
+- [Phase 07-01]: detect_device() called for side effect (logging) without storing return value
+- [Phase 07-01]: dft_baseline lazy import stays inside run_dft_baselines() body — prevents DGL/espaloma side effects at module load
+- [Phase 07-01]: Dead code excluded: setup_output_directory (no callers), analyze_molecular_charges (not in pipeline path), print_diagnostics (CLI concern)
 
 ### Pending Todos
 
@@ -109,8 +115,11 @@ None yet.
 - 06-04 complete: gaussian/runner.py with run_gaussian_with_zmq (SIGKILL timeout, stdout/stderr capture)
 - 06-05 complete: Final wiring - all callers use gaussian.* imports, gaussian_parser.py/fchk_parser.py deleted, gaussian/ is single authoritative source
 
+**Phase 7 status:** IN PROGRESS
+- 07-01 complete: workflow.py created with run_pipeline() + stage functions extracted from gm_main.py (718 lines, ruff clean)
+
 ## Session Continuity
 
-Last session: 2026-02-20 (phase execution)
-Stopped at: Completed 06-05-PLAN.md
+Last session: 2026-02-24 (phase execution)
+Stopped at: Completed 07-01-PLAN.md
 Resume file: None

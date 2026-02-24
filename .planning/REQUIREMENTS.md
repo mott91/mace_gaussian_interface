@@ -35,7 +35,7 @@ Requirements for the refactoring milestone. Each maps to roadmap phases.
 - [x] **STRUCT-03**: MACE module monkey-patching replaced with safe loading pattern (lazy imports or process isolation)
 - [x] **STRUCT-04**: Gaussian I/O functions extracted from gm_main.py into gaussian/ package
 - [x] **STRUCT-05**: ZMQ server context manager extracted into dedicated module
-- [ ] **STRUCT-06**: Workflow orchestration extracted into workflow.py as thin coordinator
+- [x] **STRUCT-06**: Workflow orchestration extracted into workflow.py as thin coordinator
 - [x] **STRUCT-07**: ZMQ socket cleanup race condition fixed (proper LINGER settings)
 - [ ] **STRUCT-08**: Project reorganized into mace_gaussian/ package with proper __init__.py
 - [ ] **STRUCT-09**: CLI entry point aligned in pyproject.toml with package structure
@@ -118,7 +118,7 @@ Deferred to future milestone. Tracked but not in current roadmap.
 | STRUCT-03 | Phase 5 | Complete |
 | STRUCT-04 | Phase 6 | Complete |
 | STRUCT-05 | Phase 6 | Complete |
-| STRUCT-06 | Phase 7 | Pending |
+| STRUCT-06 | Phase 7 | Complete |
 | STRUCT-07 | Phase 6 | Complete |
 | STRUCT-08 | Phase 8 | Pending |
 | STRUCT-09 | Phase 8 | Pending |
