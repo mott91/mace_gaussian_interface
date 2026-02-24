@@ -50,7 +50,7 @@ class TestCliDiagnoseNoValidation:
     def test_diagnose_runs_independently(self):
         """Diagnose should not trigger prerequisite validation."""
         runner = CliRunner()
-        # Diagnose will try to import gm_main which has heavy deps;
+        # Diagnose imports dipole_factory which has heavy deps;
         # mock the actual diagnostics function
         with patch("cli.sys") as _:
             # Just verify the command structure works
@@ -67,7 +67,7 @@ class TestTimeoutConfiguration:
         try:
             from gaussian.runner import DEFAULT_TIMEOUT_SECONDS
         except (ImportError, RuntimeError):
-            # gm_main has heavy deps (espaloma/DGL) that may not load in test env
+            # gaussian.runner may have deps that fail in test env
             # Verify the constant definition directly
             expected = int(os.getenv("GAUSSIAN_TIMEOUT_SECONDS", "86400"))
             assert expected == 86400
