@@ -148,11 +148,12 @@ Plans:
   3. CLI entry point in pyproject.toml aligns with package structure
   4. All imports are relative within package, absolute from outside
   5. Full pipeline runs from installed package location
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 08-01: TBD
-- [ ] 08-02: TBD
+- [ ] 08-01-PLAN.md — Create mace_gaussian/ package, move calculators/ gaussian/ utils/ subpackages, convert internal imports to relative
+- [ ] 08-02-PLAN.md — Move flat root files + create analysis/ subpackage, update imports, rewrite root shims, move scripts
+- [ ] 08-03-PLAN.md — Update pyproject.toml (entry points, packages, isort, coverage), update test imports, uv sync, verify full suite
 
 ### Phase 9: CI/CD & Distribution Prep
 **Goal**: Automate testing, linting, and prepare infrastructure for distribution to other researchers
