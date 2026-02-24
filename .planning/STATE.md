@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-16)
 ## Current Position
 
 Phase: 7 of 10 (Extract Workflow Orchestrator)
-Plan: 1 of 4 in current phase -- COMPLETE
-Status: Phase 07 in progress, plan 01 done
-Last activity: 2026-02-24 — Completed 07-01: workflow.py created with run_pipeline() and stage functions extracted from gm_main.py
+Plan: 2 of 4 in current phase -- COMPLETE
+Status: Phase 07 in progress, plan 02 done
+Last activity: 2026-02-24 — Completed 07-02: cli.py rewired to workflow.run_pipeline(), gm_main.py deleted, STRUCT-06 satisfied
 
-Progress: [████████░░] 72%
+Progress: [████████░░] 74%
 
 ## Performance Metrics
 
@@ -43,6 +43,7 @@ Progress: [████████░░] 72%
 | Phase 06 P04 | 2 | 1 tasks | 1 files |
 | Phase 06 P05 | 4 | 2 tasks | 12 files |
 | Phase 07 P01 | 3 | 1 tasks | 1 files |
+| Phase 07 P02 | 5 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -93,6 +94,8 @@ Recent decisions affecting current work:
 - [Phase 07-01]: detect_device() called for side effect (logging) without storing return value
 - [Phase 07-01]: dft_baseline lazy import stays inside run_dft_baselines() body — prevents DGL/espaloma side effects at module load
 - [Phase 07-01]: Dead code excluded: setup_output_directory (no callers), analyze_molecular_charges (not in pipeline path), print_diagnostics (CLI concern)
+- [Phase 07-02]: No try/except around 'from workflow import run_pipeline' — workflow.py internal imports don't have heavy-dep failure risk unlike gm_main
+- [Phase 07-02]: testingStuff/test_refactoring.py gm_main import left as-is — legacy scratch, acceptable dead reference per plan spec
 
 ### Pending Todos
 
@@ -117,9 +120,10 @@ None yet.
 
 **Phase 7 status:** IN PROGRESS
 - 07-01 complete: workflow.py created with run_pipeline() + stage functions extracted from gm_main.py (718 lines, ruff clean)
+- 07-02 complete: cli.py rewired to workflow.run_pipeline(), print_diagnostics inlined using dipole_factory, gm_main.py deleted — STRUCT-06 fully satisfied
 
 ## Session Continuity
 
 Last session: 2026-02-24 (phase execution)
-Stopped at: Completed 07-01-PLAN.md
+Stopped at: Completed 07-02-PLAN.md
 Resume file: None
