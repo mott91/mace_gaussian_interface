@@ -22,7 +22,7 @@ from typing import Optional, Tuple
 
 import numpy as np
 
-from utils.units import BOHR_TO_ANGSTROM
+from ..utils.units import BOHR_TO_ANGSTROM
 
 logger = logging.getLogger(__name__)
 

@@ -4,7 +4,7 @@ import logging
 import os
 from pathlib import Path
 
-from calculators.base import DipoleCalculatorBase
+from .base import DipoleCalculatorBase
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ class MACEMLDipoleCalculator(DipoleCalculatorBase):
 
     def _check_availability(self):
         try:
-            from calculators.mace_loader import MACEDipoleCalculator
+            from .mace_loader import MACEDipoleCalculator
 
             # Check if model file exists
             if not Path(self.model_path).exists():

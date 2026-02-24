@@ -11,8 +11,8 @@ import os
 import subprocess
 import time
 
-from gaussian.zmq_server import GaussianZMQServer, is_calc_finished
-from utils.exceptions import GaussianRunError, GaussianTimeoutError
+from ..utils.exceptions import GaussianRunError, GaussianTimeoutError
+from .zmq_server import GaussianZMQServer, is_calc_finished
 
 logger = logging.getLogger(__name__)
 

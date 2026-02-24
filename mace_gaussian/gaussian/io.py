@@ -9,7 +9,7 @@ from typing import Optional
 import numpy as np
 from ase.data import chemical_symbols
 
-from utils.units import BOHR_TO_ANGSTROM, HARTREE_TO_EV
+from ..utils.units import BOHR_TO_ANGSTROM, HARTREE_TO_EV
 
 # Default paths - can be overridden by environment variables
 DEFAULT_HELPER_SCRIPT = os.getenv(

@@ -2,7 +2,7 @@
 
 import logging
 
-from calculators.base import DipoleCalculatorBase
+from .base import DipoleCalculatorBase
 
 logger = logging.getLogger(__name__)
 

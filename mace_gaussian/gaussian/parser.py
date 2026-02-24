@@ -10,7 +10,7 @@ import re
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from utils.exceptions import GaussianParseError
+from ..utils.exceptions import GaussianParseError
 
 logger = logging.getLogger(__name__)
 

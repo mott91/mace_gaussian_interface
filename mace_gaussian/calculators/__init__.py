@@ -1,10 +1,10 @@
 """Dipole calculator package for MACE-Gaussian interface."""
 
-from calculators.base import DipoleCalculatorBase
-from calculators.espaloma import EspalomaDipoleCalculator
-from calculators.factory import DipoleCalculatorFactory, dipole_factory
-from calculators.mace_ml import MACEMLDipoleCalculator
-from calculators.xtb import XTBDipoleCalculator
+from .base import DipoleCalculatorBase
+from .espaloma import EspalomaDipoleCalculator
+from .factory import DipoleCalculatorFactory, dipole_factory
+from .mace_ml import MACEMLDipoleCalculator
+from .xtb import XTBDipoleCalculator
 
 __all__ = [
     "DipoleCalculatorBase",

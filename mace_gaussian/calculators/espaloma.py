@@ -4,8 +4,8 @@ import logging
 
 import numpy as np
 
-from calculators.base import DipoleCalculatorBase
-from utils.units import BOHR_TO_ANGSTROM
+from ..utils.units import BOHR_TO_ANGSTROM
+from .base import DipoleCalculatorBase
 
 logger = logging.getLogger(__name__)
 

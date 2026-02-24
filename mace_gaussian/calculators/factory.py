@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import logging
 
-from calculators.base import DipoleCalculatorBase
-from calculators.espaloma import EspalomaDipoleCalculator
-from calculators.mace_ml import MACEMLDipoleCalculator
-from calculators.xtb import XTBDipoleCalculator
+from .base import DipoleCalculatorBase
+from .espaloma import EspalomaDipoleCalculator
+from .mace_ml import MACEMLDipoleCalculator
+from .xtb import XTBDipoleCalculator
 
 logger = logging.getLogger(__name__)
 

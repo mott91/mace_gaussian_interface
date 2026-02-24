@@ -1,14 +1,14 @@
 """Utility package for MACE-Gaussian interface."""
 
-from utils.exceptions import (
+from .exceptions import (
     CUDANotAvailableWarning,
     GaussianParseError,
     InputValidationError,
     MaceGaussianError,
     PrerequisiteError,
 )
-from utils.results import ResultsManager
-from utils.units import (
+from .results import ResultsManager
+from .units import (
     ANGSTROM_TO_BOHR,
     BOHR_TO_ANGSTROM,
     EV_TO_HARTREE,
