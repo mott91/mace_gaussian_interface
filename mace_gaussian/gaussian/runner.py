@@ -7,9 +7,9 @@ stdout/stderr for diagnostics, and raises typed exceptions on failure.
 from __future__ import annotations
 
 import logging
+import os
 import subprocess
 import time
-import os
 
 from gaussian.zmq_server import GaussianZMQServer, is_calc_finished
 from utils.exceptions import GaussianRunError, GaussianTimeoutError
