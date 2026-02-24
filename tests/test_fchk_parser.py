@@ -9,7 +9,7 @@ Requirement: TEST-03
 import numpy as np
 import pytest
 
-from gaussian.fchk import extract_modes_from_fchk, parse_fchk_section
+from mace_gaussian.gaussian.fchk import extract_modes_from_fchk, parse_fchk_section
 
 
 class TestExtractModesWater:
@@ -68,9 +68,7 @@ class TestModeNormalization:
 
         for i in range(modes.shape[0]):
             norm = np.linalg.norm(modes[i].flatten())
-            assert norm == pytest.approx(
-                1.0, abs=0.01
-            ), f"Mode {i} norm is {norm}, expected ~1.0"
+            assert norm == pytest.approx(1.0, abs=0.01), f"Mode {i} norm is {norm}, expected ~1.0"
 
 
 class TestParseFchkSection:
@@ -118,12 +116,8 @@ class TestForceHarmonicFlag:
 
     def test_force_harmonic_flag(self, water_dft_fchk):
         """force_harmonic=True and False both succeed; if anharmonic data exists, results differ."""
-        modes_h, freqs_h, _, _, n_h = extract_modes_from_fchk(
-            water_dft_fchk, force_harmonic=True
-        )
-        modes_d, freqs_d, _, _, n_d = extract_modes_from_fchk(
-            water_dft_fchk, force_harmonic=False
-        )
+        modes_h, freqs_h, _, _, n_h = extract_modes_from_fchk(water_dft_fchk, force_harmonic=True)
+        modes_d, freqs_d, _, _, n_d = extract_modes_from_fchk(water_dft_fchk, force_harmonic=False)
 
         # Both calls must succeed
         assert n_h == 3
@@ -149,9 +143,9 @@ class TestCoordinateConversion:
         oh_distance = np.linalg.norm(coords[0] - coords[1])
 
         # O-H bond in water is ~0.96 A (DFT-optimized geometry may vary slightly)
-        assert oh_distance == pytest.approx(
-            0.96, abs=0.1
-        ), f"O-H distance {oh_distance:.4f} A should be ~0.96 A (not Bohr)"
+        assert oh_distance == pytest.approx(0.96, abs=0.1), (
+            f"O-H distance {oh_distance:.4f} A should be ~0.96 A (not Bohr)"
+        )
 
         # Sanity check: Bohr distances would be ~1.8, so must be < 1.2
         assert oh_distance < 1.2, "Distance looks like Bohr, not Angstrom"

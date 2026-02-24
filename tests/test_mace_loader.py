@@ -46,7 +46,7 @@ for _dep in _heavy_deps:
 _mock_dipole_models = sys.modules["mace_dipole_core.modules.models"]
 _mock_dipole_models.AtomicDielectricMACE = type("AtomicDielectricMACE", (), {})
 
-from calculators.mace_loader import (  # noqa: E402
+from mace_gaussian.calculators.mace_loader import (  # noqa: E402
     _DIPOLE_PKG_DIR,
     MACEDipoleCalculator,
     _DipoleModelUnpickler,
@@ -212,10 +212,10 @@ class TestMACEDipoleCalculatorWrapper:
 
     def test_no_cleanup_mace_modules_reference(self):
         """Module source must not contain cleanup_mace_modules."""
-        source = inspect.getsource(importlib.import_module("calculators.mace_loader"))
+        source = inspect.getsource(importlib.import_module("mace_gaussian.calculators.mace_loader"))
         assert "cleanup_mace_modules" not in source
 
     def test_no_sys_modules_mutation(self):
         """Module source must not contain sys.modules["mace string."""
-        source = inspect.getsource(importlib.import_module("calculators.mace_loader"))
+        source = inspect.getsource(importlib.import_module("mace_gaussian.calculators.mace_loader"))
         assert 'sys.modules["mace' not in source

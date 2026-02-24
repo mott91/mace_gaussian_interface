@@ -5,7 +5,7 @@ Verifies CODATA 2018 values and roundtrip conversion accuracy.
 
 import pytest
 
-from utils.units import (
+from mace_gaussian.utils.units import (
     ANGSTROM_TO_BOHR,
     BOHR_TO_ANGSTROM,
     EV_TO_HARTREE,

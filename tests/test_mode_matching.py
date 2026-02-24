@@ -11,7 +11,7 @@ Requirement: TEST-04
 import numpy as np
 import pytest
 
-from mode_matching import (
+from mace_gaussian.analysis.mode_matching import (
     compute_mode_overlap,
     compute_reduced_masses,
     create_alignment_matrix,
@@ -163,7 +163,7 @@ class TestRealFchkModeMatching:
 
     def test_real_fchk_mode_overlap_self_match(self, water_dft_fchk):
         """Water DFT modes matched against themselves give overlap > 0.99 for all 3 modes."""
-        from gaussian.fchk import extract_modes_from_fchk
+        from mace_gaussian.gaussian.fchk import extract_modes_from_fchk
 
         modes, _, _, _, _ = extract_modes_from_fchk(water_dft_fchk, force_harmonic=True)
 
@@ -177,7 +177,7 @@ class TestRealFchkModeMatching:
 
     def test_real_fchk_dft_vs_ml_overlap(self, water_dft_fchk, water_ml_fchk):
         """Water DFT vs ML modes: at least 2 of 3 modes should have overlap > 0.5."""
-        from gaussian.fchk import extract_modes_from_fchk
+        from mace_gaussian.gaussian.fchk import extract_modes_from_fchk
 
         modes_dft, _, _, _, _ = extract_modes_from_fchk(water_dft_fchk, force_harmonic=True)
         modes_ml, _, _, _, _ = extract_modes_from_fchk(water_ml_fchk, force_harmonic=True)

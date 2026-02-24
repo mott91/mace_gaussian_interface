@@ -10,7 +10,7 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -136,7 +136,7 @@ class ResultsManager:
 
         # Collect version metadata
         try:
-            from utils.validation import collect_version_metadata
+            from mace_gaussian.utils.validation import collect_version_metadata
 
             version_info = collect_version_metadata()
         except ImportError:
@@ -168,14 +168,14 @@ class ResultsManager:
         energy_calculator: str,
         dipole_calculator: str,
         calculator_type: str,
-        frequencies_data: Dict[str, Any],
+        frequencies_data: dict[str, Any],
         energy: float,
-        dipole: Optional[Dict[str, Any]],
+        dipole: Optional[dict[str, Any]],
         runtime: float,
         gaussian_log: Optional[str] = None,
         gaussian_gjf: Optional[str] = None,
         timestamp: Optional[str] = None,
-        calculation_parameters: Optional[Dict[str, Any]] = None,
+        calculation_parameters: Optional[dict[str, Any]] = None,
     ):
         """
         Save frequency calculation results with overtones and combination bands.
@@ -227,7 +227,7 @@ class ResultsManager:
 
         # Collect version metadata
         try:
-            from utils.validation import collect_version_metadata
+            from mace_gaussian.utils.validation import collect_version_metadata
 
             version_info = collect_version_metadata()
         except ImportError:
@@ -256,7 +256,7 @@ class ResultsManager:
 
         logger.info(f"\u2713 Saved frequency results to {freq_dir}")
 
-    def load_optimization_results(self, molecule_name: str) -> Dict[str, Any]:
+    def load_optimization_results(self, molecule_name: str) -> dict[str, Any]:
         """
         Load optimization results from JSON.
 

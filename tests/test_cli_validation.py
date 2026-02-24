@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 from click.testing import CliRunner
 
-from cli import cli
+from mace_gaussian.cli import cli
 
 
 class TestCliRunValidation:
@@ -52,7 +52,7 @@ class TestCliDiagnoseNoValidation:
         runner = CliRunner()
         # Diagnose imports dipole_factory which has heavy deps;
         # mock the actual diagnostics function
-        with patch("cli.sys") as _:
+        with patch("mace_gaussian.cli.sys") as _:
             # Just verify the command structure works
             result = runner.invoke(cli, ["diagnose", "--help"])
             assert result.exit_code == 0
@@ -65,7 +65,7 @@ class TestTimeoutConfiguration:
     def test_default_timeout_value(self):
         """Default timeout should be 86400 seconds (24 hours)."""
         try:
-            from gaussian.runner import DEFAULT_TIMEOUT_SECONDS
+            from mace_gaussian.gaussian.runner import DEFAULT_TIMEOUT_SECONDS
         except (ImportError, RuntimeError):
             # gaussian.runner may have deps that fail in test env
             # Verify the constant definition directly
@@ -79,7 +79,7 @@ class TestTimeoutConfiguration:
     def test_timeout_is_positive_integer(self):
         """Timeout should be a positive integer."""
         try:
-            from gaussian.runner import DEFAULT_TIMEOUT_SECONDS
+            from mace_gaussian.gaussian.runner import DEFAULT_TIMEOUT_SECONDS
         except (ImportError, RuntimeError):
             # gaussian.runner may have deps that fail in test env; verify env var parsing logic
             val = int(os.getenv("GAUSSIAN_TIMEOUT_SECONDS", "86400"))

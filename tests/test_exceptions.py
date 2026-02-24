@@ -5,7 +5,7 @@ Verifies class relationships, inheritance chains, and message preservation.
 
 import pytest
 
-from utils.exceptions import (
+from mace_gaussian.utils.exceptions import (
     CUDANotAvailableWarning,
     GaussianParseError,
     InputValidationError,

@@ -42,10 +42,10 @@ for dep in _heavy_deps:
         sys.modules[dep] = MagicMock()
 
 # Now import calculators - the _check_availability calls will hit our mocks
-from calculators.base import DipoleCalculatorBase  # noqa: E402
-from calculators.espaloma import EspalomaDipoleCalculator  # noqa: E402
-from calculators.mace_ml import MACEMLDipoleCalculator  # noqa: E402
-from calculators.xtb import XTBDipoleCalculator  # noqa: E402
+from mace_gaussian.calculators.base import DipoleCalculatorBase  # noqa: E402
+from mace_gaussian.calculators.espaloma import EspalomaDipoleCalculator  # noqa: E402
+from mace_gaussian.calculators.mace_ml import MACEMLDipoleCalculator  # noqa: E402
+from mace_gaussian.calculators.xtb import XTBDipoleCalculator  # noqa: E402
 
 # Restore original module state for heavy deps
 for dep in _heavy_deps:
@@ -114,15 +114,19 @@ class TestDipoleCalculatorFactory:
 
     def _make_factory(self, espaloma_avail=True, xtb_avail=True, mace_ml_avail=True):
         """Create a factory with mocked calculators."""
-        from calculators.factory import DipoleCalculatorFactory
+        from mace_gaussian.calculators.factory import DipoleCalculatorFactory
 
         mock_esp = _make_mock_calculator("espaloma", espaloma_avail)
         mock_xtb = _make_mock_calculator("xtb", xtb_avail)
         mock_mace = _make_mock_calculator("mace_ml", mace_ml_avail)
 
-        p1 = patch("calculators.factory.EspalomaDipoleCalculator", return_value=mock_esp)
-        p2 = patch("calculators.factory.XTBDipoleCalculator", return_value=mock_xtb)
-        p3 = patch("calculators.factory.MACEMLDipoleCalculator", return_value=mock_mace)
+        p1 = patch(
+            "mace_gaussian.calculators.factory.EspalomaDipoleCalculator", return_value=mock_esp
+        )
+        p2 = patch("mace_gaussian.calculators.factory.XTBDipoleCalculator", return_value=mock_xtb)
+        p3 = patch(
+            "mace_gaussian.calculators.factory.MACEMLDipoleCalculator", return_value=mock_mace
+        )
         with p1, p2, p3:
             factory = DipoleCalculatorFactory()
 
@@ -192,14 +196,14 @@ class TestDefaultMaceDipoleModel:
     """Tests for DEFAULT_MACE_DIPOLE_MODEL configuration constant."""
 
     def test_importable(self):
-        """DEFAULT_MACE_DIPOLE_MODEL can be imported from calculators.mace_ml."""
-        from calculators.mace_ml import DEFAULT_MACE_DIPOLE_MODEL
+        """DEFAULT_MACE_DIPOLE_MODEL can be imported from mace_gaussian.calculators.mace_ml."""
+        from mace_gaussian.calculators.mace_ml import DEFAULT_MACE_DIPOLE_MODEL
 
         assert isinstance(DEFAULT_MACE_DIPOLE_MODEL, str)
 
     def test_path_suffix(self):
         """Default model path ends with the expected suffix."""
-        from calculators.mace_ml import DEFAULT_MACE_DIPOLE_MODEL
+        from mace_gaussian.calculators.mace_ml import DEFAULT_MACE_DIPOLE_MODEL
 
         assert DEFAULT_MACE_DIPOLE_MODEL.endswith("dipole_model/model_1.model")
 
@@ -207,7 +211,7 @@ class TestDefaultMaceDipoleModel:
         """MACE_DIPOLE_MODEL_PATH env var overrides the default path."""
         import importlib
 
-        import calculators.mace_ml as mace_ml_mod
+        import mace_gaussian.calculators.mace_ml as mace_ml_mod
 
         custom_path = "/tmp/custom_model.model"
         with patch.dict("os.environ", {"MACE_DIPOLE_MODEL_PATH": custom_path}):

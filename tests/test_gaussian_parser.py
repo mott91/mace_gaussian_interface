@@ -7,8 +7,8 @@ TEST-08 (acoh bug documentation).
 
 import pytest
 
-from gaussian.parser import GaussianLogParser
-from utils.exceptions import GaussianParseError
+from mace_gaussian.gaussian.parser import GaussianLogParser
+from mace_gaussian.utils.exceptions import GaussianParseError
 
 # --- Expected values (verified against actual parser output from trimmed fixtures) ---
 
@@ -177,9 +177,7 @@ class TestParseOvertones:
             assert actual["mode"] == expected["mode"]
             assert actual["overtone_level"] == expected["overtone_level"]
             assert actual["freq_harmonic"] == pytest.approx(expected["freq_harmonic"], abs=0.01)
-            assert actual["freq_anharmonic"] == pytest.approx(
-                expected["freq_anharmonic"], abs=0.01
-            )
+            assert actual["freq_anharmonic"] == pytest.approx(expected["freq_anharmonic"], abs=0.01)
             assert actual["ir_intensity"] == pytest.approx(expected["ir_intensity"], abs=0.001)
 
     def test_overtone_keys_present(self, water_dft_log):
@@ -187,7 +185,13 @@ class TestParseOvertones:
         parser = GaussianLogParser(water_dft_log)
         result = parser.parse_overtones()
 
-        required_keys = {"mode", "overtone_level", "freq_harmonic", "freq_anharmonic", "ir_intensity"}
+        required_keys = {
+            "mode",
+            "overtone_level",
+            "freq_harmonic",
+            "freq_anharmonic",
+            "ir_intensity",
+        }
         for entry in result:
             assert required_keys.issubset(entry.keys())
 
