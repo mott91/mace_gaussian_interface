@@ -122,7 +122,7 @@ class SpectrumAnalyzer:
         """
         import re
 
-        from mode_matching import extract_mode_data_from_checkpoint
+        from .mode_matching import extract_mode_data_from_checkpoint
 
         fchk_path = Path(fchk_path)
 
