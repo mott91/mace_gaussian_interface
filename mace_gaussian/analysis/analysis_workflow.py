@@ -8,15 +8,20 @@ Changes:
 """
 
 import json
-import numpy as np
-from pathlib import Path
-from typing import Dict, List, Tuple, Optional
-import pandas as pd
-from datetime import datetime
 import logging
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
-from analyze_spectra import SpectrumAnalyzer, SpectrumData, ComparisonMetrics
-from mode_matching import extract_mode_data_from_checkpoint, match_modes, create_alignment_matrix, plot_mode_overlap_heatmap
+import pandas as pd
+
+from analyze_spectra import SpectrumAnalyzer, SpectrumData
+from mode_matching import (
+    create_alignment_matrix,
+    extract_mode_data_from_checkpoint,
+    match_modes,
+    plot_mode_overlap_heatmap,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -24,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 class ComparisonWorkflow:
     """Orchestrates full comparison analysis workflow"""
-    
+
     def __init__(self,
                  molecule_name: str,
                  base_results_dir: str = "comparison_results",
@@ -71,7 +76,7 @@ class ComparisonWorkflow:
 
         mode_str = "harmonic" if use_harmonic else "anharmonic"
         logger.info(f"Initialized workflow for {molecule_name} ({mode_str} mode)")
-    
+
     def find_dft_baseline(self, prefer_b3lyp: bool = True) -> Optional[Path]:
         """
         Find DFT anharmonic baseline results
@@ -97,7 +102,7 @@ class ComparisonWorkflow:
                 json_path = item / "results.json"
                 if json_path.exists():
                     try:
-                        with open(json_path, 'r') as f:
+                        with open(json_path) as f:
                             data = json.load(f)
                             if data.get('calculator_type') == 'dft':
                                 dft_results.append((item.name, json_path))
@@ -141,7 +146,7 @@ class ComparisonWorkflow:
         best_path = max(dft_results, key=lambda x: x[1].stat().st_mtime)[1]
         logger.info(f"Found DFT baseline: {best_path}")
         return best_path
-    
+
     def find_ml_results(self) -> List[Tuple[str, Path]]:
         """
         Find all ML calculation results
@@ -152,14 +157,14 @@ class ComparisonWorkflow:
             List of ML calculator combinations and their result paths
         """
         ml_results = []
-        
+
         # Scan molecule directory for ML results
         for item in self.molecule_dir.iterdir():
             if item.is_dir() and item.name != "geometry_opt":
                 json_path = item / "results.json"
                 if json_path.exists():
                     try:
-                        with open(json_path, 'r') as f:
+                        with open(json_path) as f:
                             data = json.load(f)
                             # Check if it's an ML calculation
                             if data.get('calculator_type') == 'ml':
@@ -169,7 +174,7 @@ class ComparisonWorkflow:
                     except (json.JSONDecodeError, KeyError) as e:
                         logger.warning(f"Error reading {json_path}: {e}")
                         continue
-        
+
         return ml_results
 
     def _select_best_fchk(self, candidates: List[Path]) -> Optional[Path]:
@@ -293,7 +298,7 @@ class ComparisonWorkflow:
         df = df.sort_values('DFT_Frequency_cm').reset_index(drop=True)
 
         return df
-    
+
     def extract_mode_mapping(self, ml_path: Path, dft_path: Path) -> Optional[Tuple[Dict[int, int], Dict[int, float]]]:
         """
         Extract mode mapping between ML and DFT calculations using eigenvector matching.
@@ -325,7 +330,7 @@ class ComparisonWorkflow:
             dft_fchk = self._select_best_fchk(dft_fchk_candidates)
 
             if not ml_fchk or not dft_fchk:
-                logger.warning(f"  No .fchk files found for mode matching")
+                logger.warning("  No .fchk files found for mode matching")
                 return None
 
             logger.debug(f"  Using ML .fchk: {ml_fchk.name}")
@@ -402,12 +407,12 @@ class ComparisonWorkflow:
             dft_fchk = self._select_best_fchk(list(dft_dir.glob("*.fchk")))
 
             if not ml_fchk or not dft_fchk:
-                logger.error(f"  Missing .fchk files for harmonic analysis")
+                logger.error("  Missing .fchk files for harmonic analysis")
                 logger.error(f"  ML .fchk: {ml_fchk}")
                 logger.error(f"  DFT .fchk: {dft_fchk}")
                 raise FileNotFoundError("Harmonic analysis requires .fchk files")
 
-            logger.info(f"  Using .fchk-based extraction for harmonic analysis")
+            logger.info("  Using .fchk-based extraction for harmonic analysis")
             logger.info(f"    ML .fchk: {ml_fchk.name}")
             logger.info(f"    DFT .fchk: {dft_fchk.name}")
 
@@ -438,7 +443,7 @@ class ComparisonWorkflow:
 
         # Calculate metrics with mode mapping
         metrics = self.analyzer.calculate_metrics(ml_spectrum, dft_spectrum, mode_mapping=mode_mapping)
-        
+
         # Create plots - SAVE AS PNG NOT PDF!
         spectrum_plot_path = self.plots_dir / f"spectrum_{ml_name}.png"
         regression_plot_path = self.plots_dir / f"regression_{ml_name}.png"
@@ -460,15 +465,15 @@ class ComparisonWorkflow:
         comparison_df = self.create_comparison_table(
             dft_spectrum, ml_spectrum, ml_name, mode_mapping=mode_mapping, mode_overlaps=mode_overlaps
         )
-        
+
         table_path = self.data_dir / f"comparison_{ml_name}.csv"
         comparison_df.to_csv(table_path, index=False, float_format='%.4f')
-        
+
         # Get runtime info
         ml_runtime = ml_results.get('runtime_s', 0)
         dft_runtime = dft_results.get('runtime_s', 0)
         speedup = dft_runtime / ml_runtime if ml_runtime > 0 else 0
-        
+
         return {
             'name': ml_name,
             'metrics': metrics,
@@ -485,7 +490,7 @@ class ComparisonWorkflow:
             'dft_spectrum': dft_spectrum,
             'mode_mapping': mode_mapping  # Store mode mapping for combined plots
         }
-    
+
     def create_combined_plots(self, comparisons: List[Dict], dft_spectrum: SpectrumData):
         """
         Create combined plots with all ML methods vs DFT
@@ -499,7 +504,7 @@ class ComparisonWorkflow:
         """
         if not comparisons:
             return
-        
+
         # Create combined spectrum plot (400-4000 cm⁻¹)
         combined_spectrum_path = self.plots_dir / "spectrum_combined.png"
         self.analyzer.plot_combined_spectra(
@@ -531,7 +536,7 @@ class ComparisonWorkflow:
             save_path=str(combined_regression_path),
             mode_mappings=[c.get('mode_mapping') for c in comparisons]  # Pass mode mappings
         )
-        
+
         logger.info("Created combined plots")
 
     def generate_mode_overlap_heatmaps(self, ml_results: List[Tuple[str, Path]], dft_path: Path):
@@ -622,7 +627,7 @@ class ComparisonWorkflow:
         logger.info("=" * 60)
         logger.info(f"STARTING ANALYSIS FOR {self.molecule_name.upper()}")
         logger.info("=" * 60)
-        
+
         # Find DFT baseline (prefer B3LYP)
         dft_path = self.find_dft_baseline(prefer_b3lyp=True)
         if dft_path is None:
@@ -632,7 +637,7 @@ class ComparisonWorkflow:
             logger.error(f"Searched in: {self.molecule_dir}")
             logger.error("Could not find any directory with calculator_type='dft' in results.json")
             logger.error("=" * 60)
-            
+
             # Return empty result instead of raising exception
             return {
                 'molecule': self.molecule_name,
@@ -640,7 +645,7 @@ class ComparisonWorkflow:
                 'output_dir': self.output_dir,
                 'error': 'No DFT baseline found'
             }
-        
+
         # Find all ML results
         ml_results = self.find_ml_results()
         if not ml_results:
@@ -650,14 +655,14 @@ class ComparisonWorkflow:
             logger.warning(f"Searched in: {self.molecule_dir}")
             logger.warning("No directories with calculator_type='ml' found.")
             logger.warning("=" * 60)
-            
+
             return {
                 'molecule': self.molecule_name,
                 'comparisons': [],
                 'output_dir': self.output_dir,
                 'error': 'No ML results found'
             }
-        
+
         logger.info(f"Found DFT baseline: {dft_path.parent.name}")
         logger.info(f"Found {len(ml_results)} ML calculations to compare")
 
@@ -677,7 +682,7 @@ class ComparisonWorkflow:
                 dft_results, include_overtones=True, include_combinations=True,
                 use_harmonic=False
             )
-        
+
         # Run comparisons
         comparisons = []
         for ml_name, ml_path in ml_results:
@@ -690,7 +695,7 @@ class ComparisonWorkflow:
                 logger.error(f"  [FAIL] {ml_name} failed: {e}")
                 import traceback
                 traceback.print_exc()
-        
+
         # Create combined plots
         self.create_combined_plots(comparisons, dft_spectrum)
 
@@ -717,22 +722,22 @@ class ComparisonWorkflow:
                     for c in comparisons
                 ]
             }
-            
+
             with open(self.data_dir / "metrics_summary.json", 'w') as f:
                 json.dump(metrics_summary, f, indent=2)
-        
+
         logger.info("=" * 60)
         logger.info("ANALYSIS COMPLETE")
         logger.info(f"Results saved to: {self.output_dir}")
         logger.info("=" * 60)
-        
+
         return {
             'molecule': self.molecule_name,
             'comparisons': comparisons,
             'output_dir': self.output_dir,
             'has_combined_plots': True
         }
-    
+
     def generate_html_report(self, analysis_results: Dict):
         """
         Generate comprehensive HTML report
@@ -743,14 +748,14 @@ class ComparisonWorkflow:
             Results from run_full_analysis()
         """
         from html_report_generator import HTMLReportGenerator
-        
+
         generator = HTMLReportGenerator(
             molecule_name=self.molecule_name,
             output_dir=self.output_dir
         )
-        
+
         generator.generate_report(analysis_results)
-        
+
         # Only show success message if we have comparisons
         if analysis_results.get('comparisons'):
             logger.info(f"HTML report generated: {self.output_dir}/report.html")
@@ -828,11 +833,11 @@ def analyze_molecule_harmonic(molecule_name: str,
 
 if __name__ == "__main__":
     import sys
-    
+
     if len(sys.argv) < 2:
         print("Usage: python comparison_workflow.py <molecule_name>")
         print("Example: python comparison_workflow.py water")
         sys.exit(1)
-    
+
     molecule_name = sys.argv[1]
     analyze_molecule(molecule_name)

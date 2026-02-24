@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 
-import zmq
 import os
-from contextlib import contextmanager
 import sys
+from contextlib import contextmanager
+
+import zmq
 
 
 @contextmanager

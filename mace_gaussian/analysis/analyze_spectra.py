@@ -10,14 +10,15 @@ Analyzes ML vs DFT frequency calculations with:
 """
 
 import json
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from pathlib import Path
-from typing import Dict, List, Tuple, Optional
-from dataclasses import dataclass
-from scipy.stats import linregress
 import logging
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
+from scipy.stats import linregress
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -44,7 +45,7 @@ class SpectrumData:
     intensities: np.ndarray
     labels: List[str]  # e.g., ['fundamental', 'overtone', 'combination']
     mode_ids: List[str]  # Unique mode identifiers for matching (e.g., 'F1', 'O1_2', 'C1_2')
-    
+
 
 @dataclass
 class ComparisonMetrics:
@@ -67,8 +68,8 @@ class ComparisonMetrics:
 
 class SpectrumAnalyzer:
     """Main analyzer for IR spectra comparison"""
-    
-    def __init__(self, 
+
+    def __init__(self,
                  freq_range: Tuple[float, float] = (400, 4000),
                  bandwidth_fwhm: float = 8.0,
                  freq_step: float = 0.5):
@@ -87,16 +88,16 @@ class SpectrumAnalyzer:
         self.freq_range = freq_range
         self.bandwidth_fwhm = bandwidth_fwhm
         self.freq_step = freq_step
-        
+
         # Convert FWHM to Gaussian broadening parameter
         # FWHM = 2 * sqrt(2 * ln(2)) * sigma
         # For our exp(-B * (x - x0)^2), B = 1/(2*sigma^2)
         sigma = bandwidth_fwhm / (2 * np.sqrt(2 * np.log(2)))
         self.broad_param = 1.0 / (2 * sigma**2)
-        
+
         # Create frequency grid
         self.freq_grid = np.arange(freq_range[0], freq_range[1], freq_step)
-        
+
         logger.info(f"Initialized analyzer: {freq_range[0]}-{freq_range[1]} cm^-1, "
                    f"FWHM={bandwidth_fwhm} cm^-1, step={freq_step} cm^-1")
 
@@ -119,9 +120,9 @@ class SpectrumAnalyzer:
         SpectrumData
             Spectrum with all fundamental modes (including degenerates)
         """
-        from pathlib import Path
-        from mode_matching import extract_mode_data_from_checkpoint
         import re
+
+        from mode_matching import extract_mode_data_from_checkpoint
 
         fchk_path = Path(fchk_path)
 
@@ -140,7 +141,7 @@ class SpectrumAnalyzer:
             if log_candidates:
                 log_path = log_candidates[0]
             else:
-                logger.warning(f"No .log file found for IR intensities, using zeros")
+                logger.warning("No .log file found for IR intensities, using zeros")
                 intensities = np.zeros(n_modes)
                 return SpectrumData(
                     frequencies=frequencies[:n_modes],
@@ -152,7 +153,7 @@ class SpectrumAnalyzer:
         log_path = Path(log_path)
 
         # Parse IR intensities from .log file (keeping all degenerates)
-        with open(log_path, 'r') as f:
+        with open(log_path) as f:
             log_content = f.read()
 
         intensities = []
@@ -209,10 +210,10 @@ class SpectrumAnalyzer:
 
     def load_results(self, json_path: str) -> Dict:
         """Load results from JSON file"""
-        with open(json_path, 'r') as f:
+        with open(json_path) as f:
             data = json.load(f)
         return data
-    
+
     def extract_spectrum_data(self, results: Dict,
                              include_overtones: bool = True,
                              include_combinations: bool = True,
@@ -304,7 +305,7 @@ class SpectrumAnalyzer:
             labels=labels,
             mode_ids=mode_ids
         )
-    
+
     def broaden_spectrum(self, spectrum: SpectrumData) -> np.ndarray:
         """
         Apply Gaussian broadening to discrete spectral lines
@@ -320,18 +321,18 @@ class SpectrumAnalyzer:
             Broadened spectrum on frequency grid
         """
         broadened = np.zeros_like(self.freq_grid)
-        
+
         for freq, intensity in zip(spectrum.frequencies, spectrum.intensities):
             # Calculate Gaussian contribution from this line
             # I(v) = I_0 * exp(-B * (v - v_0)^2)
             argument = -self.broad_param * (self.freq_grid - freq)**2
-            
+
             # Avoid numerical underflow
             mask = argument > -50  # exp(-50) ~ 2e-22
             broadened[mask] += intensity * np.exp(argument[mask])
-        
+
         return broadened
-    
+
     def match_by_mode(self, dft_spectrum: SpectrumData,
                      ml_spectrum: SpectrumData,
                      mode_mapping: Optional[Dict[int, int]] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, Dict]:
@@ -440,7 +441,7 @@ class SpectrumAnalyzer:
 
         return (np.array(dft_freq_matched), np.array(ml_freq_matched),
                 np.array(dft_int_matched), np.array(ml_int_matched), match_stats)
-    
+
     def calculate_metrics(self, ml_spectrum: SpectrumData,
                          dft_spectrum: SpectrumData,
                          mode_mapping: Optional[Dict[int, int]] = None) -> ComparisonMetrics:
@@ -511,8 +512,8 @@ class SpectrumAnalyzer:
             num_ml_only=match_stats['ml_only'],
             match_rate=match_stats['match_rate']
         )
-    
-    def plot_spectra_comparison(self, 
+
+    def plot_spectra_comparison(self,
                                ml_spectrum: SpectrumData,
                                dft_spectrum: SpectrumData,
                                ml_name: str,
@@ -540,17 +541,17 @@ class SpectrumAnalyzer:
         # Modern color palette
         DFT_COLOR = '#2E3440'      # Dark charcoal
         ML_COLOR = '#88C0D0'       # Teal
-        
+
         # Single panel for now (stick spectrum commented out)
         fig, ax1 = plt.subplots(1, 1, figsize=(12, 6))
-        
+
         # Broaden spectra
         ml_broadened = self.broaden_spectrum(ml_spectrum)
         dft_broadened = self.broaden_spectrum(dft_spectrum)
-        
+
         # Find global max for consistent normalization
         global_max = max(np.max(dft_broadened), np.max(ml_broadened))
-        
+
         if global_max > 0:
             # Normalize both to the same scale (preserves relative intensities)
             dft_norm = dft_broadened / global_max
@@ -558,7 +559,7 @@ class SpectrumAnalyzer:
         else:
             dft_norm = dft_broadened
             ml_norm = ml_broadened
-        
+
         # Calculate heights for layout
         dft_height = np.max(dft_norm)
         ml_height = np.max(ml_norm)
@@ -589,20 +590,20 @@ class SpectrumAnalyzer:
         ax1.set_xlabel('Wavenumber (cm$^{-1}$)', fontsize=12, fontweight='600')
         ax1.set_xlim(self.freq_range)
         ax1.set_ylim(-0.05, ylim_top)
-        
+
         ax1.legend(loc='upper right', frameon=True, fancybox=True, shadow=True, fontsize=10)
         ax1.spines['top'].set_visible(False)
         ax1.spines['right'].set_visible(False)
-        
+
         # Title with molecule name
         title = f'IR Spectrum Comparison: {ml_name} vs DFT'
         if molecule_name:
             title = f'{molecule_name.upper()} - {title}'
         ax1.set_title(title, fontsize=13, fontweight='bold', pad=15)
-        
+
         # Add horizontal reference lines at baseline
         ax1.axhline(y=0, color='gray', linewidth=0.5, linestyle='-', alpha=0.3)
-        
+
         """
         # Panel B: Stick spectra comparison (overlaid)
         # Normalize intensities
@@ -639,13 +640,13 @@ class SpectrumAnalyzer:
                   frameon=True, fancybox=True, fontsize=9)
         """
         plt.tight_layout()
-        
+
         if save_path:
             fig.savefig(save_path, dpi=300, bbox_inches='tight')
             logger.info(f"Saved spectrum plot to {save_path}")
-        
+
         return fig
-    
+
     def plot_regression(self,
                        ml_spectrum: SpectrumData,
                        dft_spectrum: SpectrumData,
@@ -688,96 +689,96 @@ class SpectrumAnalyzer:
         dft_freq, ml_freq, dft_int, ml_int, _ = self.match_by_mode(
             dft_spectrum, ml_spectrum, mode_mapping=mode_mapping
         )
-        
+
         # Panel A: Frequency correlation
-        ax1.scatter(dft_freq, ml_freq, c=POINT_COLOR, s=80, 
+        ax1.scatter(dft_freq, ml_freq, c=POINT_COLOR, s=80,
                    alpha=0.7, edgecolors='white', linewidth=1.5, zorder=3)
-        
+
         # Perfect agreement line
         axis_min = self.freq_range[0]
         axis_max = self.freq_range[1]
         padding = (axis_max - axis_min) * 0.02
-        
+
         # Perfect agreement line across full range
         ax1.plot([axis_min, axis_max], [axis_min, axis_max],
-                color=PERFECT_COLOR, linewidth=1.5, linestyle='--', 
+                color=PERFECT_COLOR, linewidth=1.5, linestyle='--',
                 alpha=0.5, label='Perfect agreement', zorder=1)
-        
+
                 # Regression line across full range
         if len(dft_freq) > 0:
             freq_for_line = np.array([axis_min, axis_max])
             regression_line = metrics.slope_freq * freq_for_line + metrics.intercept_freq
-            ax1.plot(freq_for_line, regression_line, color=FIT_COLOR, linewidth=2.5, 
+            ax1.plot(freq_for_line, regression_line, color=FIT_COLOR, linewidth=2.5,
                     alpha=0.8, label='Linear fit', zorder=2)
-        
+
         # Set axes to show full frequency range
         ax1.set_xlim(axis_min - padding, axis_max + padding)
         ax1.set_ylim(axis_min - padding, axis_max + padding)
-        
+
         ax1.set_xlabel('DFT Frequency (cm$^{-1}$)', fontsize=12, fontweight='600')
         ax1.set_ylabel('ML Frequency (cm$^{-1}$)', fontsize=12, fontweight='600')
         ax1.set_title('Frequency Correlation', fontsize=12, fontweight='bold', pad=12)
         ax1.legend(loc='lower right', frameon=True, fancybox=True, shadow=True, fontsize=10)
         ax1.spines['top'].set_visible(False)
         ax1.spines['right'].set_visible(False)
-        
+
         # Set equal aspect for better diagonal visualization
         ax1.set_aspect('equal', adjustable='box')
-        
+
         # Add statistics text box - modern style
         textstr = f'$R^2$ = {metrics.r2_freq:.4f}\n'
         textstr += f'MAE = {metrics.mae_freq:.1f} cm$^{{-1}}$\n'
         textstr += f'RMSE = {metrics.rmse_freq:.1f} cm$^{{-1}}$\n'
         textstr += f'Slope = {metrics.slope_freq:.4f}\n'
         textstr += f'$n$ = {metrics.num_peaks}'
-        
-        props = dict(boxstyle='round,pad=0.8', facecolor='white', 
+
+        props = dict(boxstyle='round,pad=0.8', facecolor='white',
                     edgecolor='gray', alpha=0.9, linewidth=1.5)
         ax1.text(0.05, 0.95, textstr, transform=ax1.transAxes,
                 fontsize=10, verticalalignment='top', bbox=props,
                 family='monospace')
-        
+
         # Panel B: Intensity correlation
         if len(dft_int) > 0 and np.max(dft_int) > 0:
             ax2.scatter(dft_int, ml_int, c=POINT_COLOR, s=80,
                        alpha=0.7, edgecolors='white', linewidth=1.5, zorder=3)
             ax2.set_aspect('equal', adjustable='box')
-            
+
             # Perfect agreement line
             lim_min = 0
             lim_max = max(dft_int.max(), ml_int.max()) * 1.05
             ax2.plot([lim_min, lim_max], [lim_min, lim_max],
-                    color=PERFECT_COLOR, linewidth=1.5, linestyle='--', 
+                    color=PERFECT_COLOR, linewidth=1.5, linestyle='--',
                     alpha=0.5, label='Perfect agreement', zorder=1)
-            
+
             ax2.set_xlabel('DFT Intensity (km/mol)', fontsize=12, fontweight='600')
             ax2.set_ylabel('ML Intensity (km/mol)', fontsize=12, fontweight='600')
             ax2.set_title('Intensity Correlation', fontsize=12, fontweight='bold', pad=12)
             ax2.legend(loc='lower right', frameon=True, fancybox=True, shadow=True, fontsize=10)
             ax2.spines['top'].set_visible(False)
             ax2.spines['right'].set_visible(False)
-            
+
             # Add R^2 for intensity
             textstr = f'$R^2$ = {metrics.r2_intensity:.4f}\n'
             textstr += f'MAE = {metrics.mae_intensity:.1f}'
             ax2.text(0.05, 0.95, textstr, transform=ax2.transAxes,
                     fontsize=10, verticalalignment='top', bbox=props,
                     family='monospace')
-        
+
         # Main title
         title = f'Regression Analysis: {ml_name} vs DFT'
         if molecule_name:
             title = f'{molecule_name.upper()} - {title}'
         plt.suptitle(title, fontsize=14, fontweight='bold', y=0.99)
-        
+
         plt.tight_layout()
-        
+
         if save_path:
             fig.savefig(save_path, dpi=300, bbox_inches='tight')
             logger.info(f"Saved regression plot to {save_path}")
-        
+
         return fig
-    
+
     def plot_combined_spectra(self,
                               ml_spectra: List[SpectrumData],
                               ml_names: List[str],
@@ -978,7 +979,6 @@ class SpectrumAnalyzer:
           List of mode mappings, one for each ML method (can be None for individual entries)
       """
       import matplotlib.pyplot as plt
-      import numpy as np
 
       colors = ['#5E81AC', '#81A1C1', '#B48EAD', '#A3BE8C', '#EBCB8B', '#BF616A']
       markers = ['o', 's', '^', 'D', 'v', 'P']
@@ -1102,7 +1102,7 @@ def main():
         bandwidth_fwhm=8.0,
         freq_step=0.5
     )
-    
+
     logger.info("Spectrum analyzer initialized successfully")
     print("\nTo use this analyzer, call the analysis functions with your data paths")
     print("Example: analyzer.load_results('path/to/results.json')")

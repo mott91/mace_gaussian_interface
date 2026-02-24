@@ -6,15 +6,16 @@ tables, and statistics for IR spectral analysis.
 """
 
 import base64
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
+
 import pandas as pd
-from datetime import datetime
 
 
 class HTMLReportGenerator:
     """Generates HTML reports for spectral analysis"""
-    
+
     def __init__(self, molecule_name: str, output_dir: Path):
         """
         Initialize report generator
@@ -30,13 +31,13 @@ class HTMLReportGenerator:
         self.output_dir = Path(output_dir)
         self.plots_dir = self.output_dir / "plots"
         self.data_dir = self.output_dir / "data"
-    
+
     def encode_image(self, image_path: Path) -> str:
         """Encode image to base64 for embedding"""
         with open(image_path, 'rb') as f:
             encoded = base64.b64encode(f.read()).decode()
         return f"data:image/png;base64,{encoded}"
-    
+
     def create_css(self) -> str:
         """Create CSS styling"""
         return """
@@ -315,7 +316,7 @@ class HTMLReportGenerator:
         </style>
         """
 
-    
+
     def create_header(self) -> str:
         """Create HTML header"""
         return f"""
@@ -325,7 +326,7 @@ class HTMLReportGenerator:
             <div class="subtitle">ML vs DFT Comparison</div>
         </header>
         """
-    
+
     def create_navigation(self, comparisons: List[Dict]) -> str:
         """Create navigation menu"""
         nav_items = ['<a href="#overview">Overview</a>', '<a href="#combined">Combined</a>']
@@ -334,7 +335,7 @@ class HTMLReportGenerator:
         nav_items.append('<a href="#summary">Summary</a>')
 
         return f'<nav>{" ".join(nav_items)}</nav>'
-    
+
     def create_mode_overlap_section(self) -> str:
         """Create section with mode overlap heatmaps"""
         # Find all mode overlap heatmap files
@@ -451,12 +452,12 @@ class HTMLReportGenerator:
                 </div>
             </section>
             """
-        
+
         num_comparisons = len(comparisons)
         avg_mae = sum(c['metrics'].mae_freq for c in comparisons) / num_comparisons
         best_r2 = max(c['metrics'].r2_freq for c in comparisons)
         avg_speedup = sum(c['speedup'] for c in comparisons) / num_comparisons
-        
+
         return f"""
         <section id="overview">
             <h2>Overview</h2>
@@ -488,7 +489,7 @@ class HTMLReportGenerator:
             </p>
         </section>
         """
-    
+
     def create_comparison_section(self, comparison: Dict, index: int, dft_method: str = "DFT") -> str:
         """Create detailed comparison section for one ML calculator"""
         m = comparison['metrics']
@@ -614,7 +615,7 @@ class HTMLReportGenerator:
             {table_html}
         </section>
         """
-    
+
     def create_summary_table(self, comparisons: List[Dict]) -> str:
         """Create summary comparison table"""
         # FIXED: Check list length
@@ -627,7 +628,7 @@ class HTMLReportGenerator:
                 </div>
             </section>
             """
-        
+
         rows = []
         for comp in comparisons:
             m = comp['metrics']
@@ -643,7 +644,7 @@ class HTMLReportGenerator:
                 <td>{comp['speedup']:.1f}x</td>
             </tr>
             """)
-        
+
         return f"""
         <section id="summary">
             <h2>Summary Comparison</h2>
@@ -666,7 +667,7 @@ class HTMLReportGenerator:
             </table>
         </section>
         """
-    
+
     def create_footer(self) -> str:
         """Create footer"""
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -676,7 +677,7 @@ class HTMLReportGenerator:
             <p class="timestamp">Report generated: {timestamp}</p>
         </footer>
         """
-    
+
     def generate_report(self, analysis_results: Dict):
         """
         Generate complete HTML report
@@ -687,7 +688,7 @@ class HTMLReportGenerator:
             Results from comparison workflow
         """
         comparisons = analysis_results['comparisons']
-        
+
         html_parts = [
             '<!DOCTYPE html>',
             '<html lang="en">',
@@ -709,7 +710,7 @@ class HTMLReportGenerator:
         # Add comparison sections (now includes mode overlap heatmaps within each section)
         for i, comp in enumerate(comparisons, 1):
             html_parts.append(self.create_comparison_section(comp, i))
-        
+
         # Add summary and footer
         html_parts.extend([
             self.create_summary_table(comparisons),
@@ -719,14 +720,14 @@ class HTMLReportGenerator:
             '</body>',
             '</html>'
         ])
-        
+
         # Write to file
         output_path = self.output_dir / "report.html"
         with open(output_path, 'w') as f:
             f.write('\n'.join(html_parts))
-        
+
         print(f"\n{'='*60}")
-        print(f"HTML REPORT GENERATED")
+        print("HTML REPORT GENERATED")
         print(f"{'='*60}")
         print(f"Location: {output_path}")
         print(f"Open in browser: file://{output_path.absolute()}")

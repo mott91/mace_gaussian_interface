@@ -1,7 +1,7 @@
 from ase import Atoms
 from ase.build import molecule
 from ase.io import write
-import numpy as np
+
 
 def build_n_alkane(n_carbons: int):
     """Build a linear all-trans n-alkane with n carbons."""
