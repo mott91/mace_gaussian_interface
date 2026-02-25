@@ -21,16 +21,16 @@ class TestConstants:
     """Verify physical constants match CODATA 2018 recommended values."""
 
     def test_bohr_to_angstrom_codata_2018(self):
-        assert BOHR_TO_ANGSTROM == pytest.approx(0.529177210903, rel=1e-10)
+        assert pytest.approx(0.529177210903, rel=1e-10) == BOHR_TO_ANGSTROM
 
     def test_angstrom_to_bohr_inverse(self):
-        assert ANGSTROM_TO_BOHR == pytest.approx(1.0 / 0.529177210903, rel=1e-10)
+        assert pytest.approx(1.0 / 0.529177210903, rel=1e-10) == ANGSTROM_TO_BOHR
 
     def test_hartree_to_ev_codata_2018(self):
-        assert HARTREE_TO_EV == pytest.approx(27.211386245988, rel=1e-10)
+        assert pytest.approx(27.211386245988, rel=1e-10) == HARTREE_TO_EV
 
     def test_ev_to_hartree_inverse(self):
-        assert EV_TO_HARTREE == pytest.approx(1.0 / 27.211386245988, rel=1e-10)
+        assert pytest.approx(1.0 / 27.211386245988, rel=1e-10) == EV_TO_HARTREE
 
 
 class TestConversionFunctions:

@@ -33,10 +33,7 @@ def check_gaussian_available() -> str:
     """
     path = shutil.which("g16")
     if path is None:
-        raise PrerequisiteError(
-            "Gaussian 16 (g16) not found on PATH. "
-            "Try: module load gaussian"
-        )
+        raise PrerequisiteError("Gaussian 16 (g16) not found on PATH. Try: module load gaussian")
     return path
 
 
@@ -56,8 +53,7 @@ def check_formchk_available() -> str:
     path = shutil.which("formchk")
     if path is None:
         raise PrerequisiteError(
-            "formchk not found on PATH. "
-            "It is typically installed alongside Gaussian 16."
+            "formchk not found on PATH. It is typically installed alongside Gaussian 16."
         )
     return path
 
@@ -140,18 +136,14 @@ def validate_xyz_file(file_path: str) -> dict:
         raise InputValidationError(f"XYZ file not found: {file_path}")
 
     if p.suffix.lower() != ".xyz":
-        raise InputValidationError(
-            f"Expected .xyz extension, got '{p.suffix}': {file_path}"
-        )
+        raise InputValidationError(f"Expected .xyz extension, got '{p.suffix}': {file_path}")
 
     try:
         from ase.io import read
 
         atoms = read(str(p))
     except Exception as exc:
-        raise InputValidationError(
-            f"Failed to parse XYZ file: {file_path}: {exc}"
-        ) from exc
+        raise InputValidationError(f"Failed to parse XYZ file: {file_path}: {exc}") from exc
 
     n_atoms = len(atoms)
     if n_atoms > 200:

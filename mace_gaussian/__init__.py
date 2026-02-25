@@ -4,4 +4,4 @@ __version__ = "0.2.0"
 
 from .workflow import run_pipeline
 
-__all__ = ["run_pipeline", "__version__"]
+__all__ = ["__version__", "run_pipeline"]

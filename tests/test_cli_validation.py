@@ -74,7 +74,7 @@ class TestTimeoutConfiguration:
             return
 
         expected = int(os.getenv("GAUSSIAN_TIMEOUT_SECONDS", "86400"))
-        assert DEFAULT_TIMEOUT_SECONDS == expected
+        assert expected == DEFAULT_TIMEOUT_SECONDS
 
     def test_timeout_is_positive_integer(self):
         """Timeout should be a positive integer."""

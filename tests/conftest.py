@@ -1,7 +1,8 @@
 """Shared test fixtures and configuration for mace-gaussian test suite."""
 
-import pytest
 from pathlib import Path
+
+import pytest
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 

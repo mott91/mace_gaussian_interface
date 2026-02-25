@@ -205,7 +205,9 @@ class TestDefaultMaceDipoleModel:
         """Default model path ends with the expected suffix."""
         from mace_gaussian.calculators.mace_ml import DEFAULT_MACE_DIPOLE_MODEL
 
-        assert DEFAULT_MACE_DIPOLE_MODEL.endswith("dipole_model/model_1.model")
+        assert DEFAULT_MACE_DIPOLE_MODEL.endswith(
+            "mace4ir_models/pretrained_models/model_1_dipole.model"
+        )
 
     def test_env_var_override(self):
         """MACE_DIPOLE_MODEL_PATH env var overrides the default path."""
@@ -216,7 +218,7 @@ class TestDefaultMaceDipoleModel:
         custom_path = "/tmp/custom_model.model"
         with patch.dict("os.environ", {"MACE_DIPOLE_MODEL_PATH": custom_path}):
             importlib.reload(mace_ml_mod)
-            assert mace_ml_mod.DEFAULT_MACE_DIPOLE_MODEL == custom_path
+            assert custom_path == mace_ml_mod.DEFAULT_MACE_DIPOLE_MODEL
 
         # Reload again to restore original value
         importlib.reload(mace_ml_mod)

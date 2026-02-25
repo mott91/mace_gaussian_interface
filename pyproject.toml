@@ -25,13 +25,14 @@ requires-python = ">=3.9"
 
 dependencies = [
     "numpy>=1.20.0",
-    "pyzmq>=22.0.0", 
+    "pyzmq>=22.0.0",
     "ase>=3.22.0",
     "torch>=1.12.0",
-    "mace-torch>=0.3.14",  # Updated: MACE-OMOL-0 requires >= 0.3.14
+    "mace-torch>=0.3.14", # Updated: MACE-OMOL-0 requires >= 0.3.14
     "rdkit>=2022.03.0",
     "espaloma_charge>=0.0.8",
     "matplotlib>=3.5.0",
+    "seaborn>=0.13.2",
 ]
 
 [dependency-groups]
@@ -58,7 +59,7 @@ line-length = 100
 target-version = "py39"
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I", "UP"]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "PTH", "RUF"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["mace_gaussian"]

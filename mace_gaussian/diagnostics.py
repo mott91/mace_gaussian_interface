@@ -30,11 +30,11 @@ def diagnose_python_environment():
 
     # Test individual imports
     test_imports = [
-        ('numpy', 'np'),
-        ('ase', None),
-        ('rdkit', None),
-        ('rdkit.Chem', 'Chem'),
-        ('espaloma_charge', None),
+        ("numpy", "np"),
+        ("ase", None),
+        ("rdkit", None),
+        ("rdkit.Chem", "Chem"),
+        ("espaloma_charge", None),
     ]
 
     for module_name, alias in test_imports:
@@ -47,12 +47,14 @@ def diagnose_python_environment():
 
             # Get version if available
             try:
-                if module_name == 'rdkit':
+                if module_name == "rdkit":
                     from rdkit import rdBase
+
                     print(f"    Version: {rdBase.rdkitVersion}")
-                elif module_name == 'espaloma_charge':
+                elif module_name == "espaloma_charge":
                     import espaloma_charge
-                    if hasattr(espaloma_charge, '__version__'):
+
+                    if hasattr(espaloma_charge, "__version__"):
                         print(f"    Version: {espaloma_charge.__version__}")
                     else:
                         print(f"    Location: {espaloma_charge.__file__}")
@@ -76,14 +78,17 @@ def test_espaloma_functionality():
     try:
         print("1. Testing espaloma_charge import...")
         import espaloma_charge
+
         print("   \u2713 espaloma_charge imported successfully")
 
         print("2. Testing charge function import...")
         from espaloma_charge import charge
+
         print("   \u2713 charge function imported successfully")
 
         print("3. Testing RDKit import...")
         from rdkit import Chem
+
         print("   \u2713 RDKit imported successfully")
 
         print("4. Testing simple molecule creation...")

@@ -4,6 +4,7 @@ Provides GaussianZMQServer, a context manager that binds a ZMQ REP socket
 for Gaussian's external interface protocol, and is_calc_finished() for
 monitoring calculation completion.
 """
+
 from __future__ import annotations
 
 import logging
@@ -107,6 +108,6 @@ def is_calc_finished(proc: object, socket: zmq.Socket) -> bool:
         if socket.poll(timeout=10) != 0:
             return False  # New message: another ML step requested
         elif proc.poll() is not None:
-            return True   # Process exited: calculation finished or crashed
+            return True  # Process exited: calculation finished or crashed
         else:
             time.sleep(1)

@@ -37,6 +37,6 @@ def run_analysis_harmonic_main(*args, **kwargs):
 __all__ = [
     "analyze_molecule",
     "analyze_molecule_harmonic",
-    "run_analysis_main",
     "run_analysis_harmonic_main",
+    "run_analysis_main",
 ]

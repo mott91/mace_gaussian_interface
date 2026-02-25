@@ -4,6 +4,7 @@ Provides run_gaussian_with_zmq, which launches Gaussian (g16), manages
 the ZMQ callback loop, enforces a hard timeout via SIGKILL, captures
 stdout/stderr for diagnostics, and raises typed exceptions on failure.
 """
+
 from __future__ import annotations
 
 import logging
