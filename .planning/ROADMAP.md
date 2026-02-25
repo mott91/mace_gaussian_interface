@@ -165,11 +165,12 @@ Plans:
   3. Ruff rules include B, SIM, PTH, RUF for better code quality
   4. Install script or documented procedure exists for custom MACE packages
   5. pytest-cov reports coverage in CI for core modules
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 09-01: TBD
-- [ ] 09-02: TBD
+- [ ] 09-01-PLAN.md — Expand ruff rules to B/SIM/PTH/RUF, fix all 83 violations + 12 format files, fix stale test
+- [ ] 09-02-PLAN.md — Create .github/workflows/ci.yml with lint and test jobs
+- [ ] 09-03-PLAN.md — Rewrite README Installation section with explicit 5-step manual procedure
 
 ### Phase 10: Documentation
 **Goal**: Provide complete documentation for installation, usage, and method description
@@ -202,5 +203,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 6. Extract Gaussian I/O & ZMQ Server | 5/5 | Complete   | 2026-02-20 |
 | 7. Extract Workflow Orchestrator | 2/2 | Complete   | 2026-02-24 |
 | 8. Package Structure & Reorganization | 3/3 | Complete   | 2026-02-24 |
-| 9. CI/CD & Distribution Prep | 0/TBD | Not started | - |
+| 9. CI/CD & Distribution Prep | 0/3 | Not started | - |
 | 10. Documentation | 0/TBD | Not started | - |
