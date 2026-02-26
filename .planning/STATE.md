@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-16)
 ## Current Position
 
 Phase: 9 of 10 (CI/CD and Distribution Prep)
-Plan: 2 of 5 in current phase -- COMPLETE
-Status: Phase 09 in progress — 2/5 plans done
-Last activity: 2026-02-26 — Completed 09-02: GitHub Actions CI workflow (.github/workflows/ci.yml) with parallel lint + test jobs
+Plan: 3 of 5 in current phase -- COMPLETE
+Status: Phase 09 in progress — 3/5 plans done
+Last activity: 2026-02-26 — Completed 09-03: README Installation section rewritten with explicit 5-step pip install procedure
 
 Progress: [█████████░] 90%
 
@@ -50,6 +50,7 @@ Progress: [█████████░] 90%
 | Phase 08 P03 | 7 | 2 tasks | 13 files |
 | Phase 09 P01 | 90 | 2 tasks | 23 files |
 | Phase 09 P02 | 5 | 1 tasks | 1 files |
+| Phase 09 P03 | 2 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -119,6 +120,7 @@ Recent decisions affecting current work:
 - [Phase 09-02]: ruff==0.15.1 pinned to match uv.lock for CI reproducibility
 - [Phase 09-02]: lint and test jobs run in parallel (no needs: field) for fastest CI feedback
 - [Phase 09-02]: No --cov-fail-under threshold — coverage is informational only (locked decision)
+- [Phase 09]: Manual pip install steps shown explicitly before mentioning install_mace_packages.sh convenience script
 
 ### Pending Todos
 
@@ -153,5 +155,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-26 (phase execution)
-Stopped at: Completed 09-02-PLAN.md (GitHub Actions CI workflow created)
+Stopped at: Completed 09-03-PLAN.md (README Installation section rewritten with explicit 5-step procedure)
 Resume file: None
