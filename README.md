@@ -82,6 +82,11 @@ The repository includes:
 - `requirements_mace4ir_v2.txt` — Pip package list for reference
 - `install_mace_packages.sh` — Convenience script that runs steps 3 above automatically
 
+## Quickstart
+
+After installation, see [docs/quickstart.md](docs/quickstart.md) for a step-by-step guide
+to running your first calculation and viewing the HTML analysis report.
+
 ## Usage
 
 ### Quick Example
