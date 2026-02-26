@@ -45,7 +45,7 @@ class TestExceptionUsage:
 
     def test_raise_and_catch_by_exception(self):
         """All domain exceptions are catchable as plain Exception."""
-        with pytest.raises(Exception):
+        with pytest.raises(GaussianParseError, match="bad output"):
             raise GaussianParseError("bad output")
 
     def test_message_preserved_prerequisite(self):
@@ -71,4 +71,4 @@ class TestExceptionUsage:
         import warnings
 
         with pytest.warns(CUDANotAvailableWarning, match="no GPU"):
-            warnings.warn("no GPU", CUDANotAvailableWarning)
+            warnings.warn("no GPU", CUDANotAvailableWarning, stacklevel=2)

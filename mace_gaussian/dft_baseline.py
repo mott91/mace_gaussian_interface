@@ -10,7 +10,7 @@ import shutil
 import subprocess
 import time
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 
 from ase import Atoms
 
@@ -169,7 +169,7 @@ def create_gaussian_dft_input(
     # Link0 commands
     link0 = f"%chk={filename[:-4]}.chk\n%mem=4GB\n%NProcShared=4"
 
-    with open(filename, "w", encoding="utf-8") as f:
+    with Path(filename).open("w", encoding="utf-8") as f:
         f.write(f"{link0}\n")
         f.write(f"{route}\n\n")
         f.write(f"{title}\n\n")
@@ -224,7 +224,7 @@ def run_gaussian_dft(gjf_file: str, timeout: Optional[int] = None) -> tuple[bool
             return False, log_file
 
         # Check for normal termination
-        with open(log_file) as f:
+        with Path(log_file).open() as f:
             content = f.read()
             if "Normal termination" not in content:
                 logger.error("Gaussian calculation did not terminate normally")
@@ -327,14 +327,16 @@ def run_dft_baseline_calculation(
 
             # Check if it's a functional recognition issue
             if Path(log_file).exists():
-                with open(log_file) as f:
+                with Path(log_file).open() as f:
                     log_content = f.read()
                     if "Unrecognized" in log_content or "Unknown" in log_content:
                         print(
-                            f"  \u26a0 Possible issue: Functional '{method}' may not be available in your Gaussian version"
+                            f"  \u26a0 Possible issue: Functional '{method}' "
+                            "may not be available in your Gaussian version"
                         )
                         print(
-                            "    Check DFT_BASELINES in dft_baseline.py and ensure the functional is supported"
+                            "    Check DFT_BASELINES in dft_baseline.py "
+                            "and ensure the functional is supported"
                         )
 
             return False
@@ -426,7 +428,7 @@ def run_all_dft_baselines(
     charge: int = 0,
     multiplicity: int = 1,
     skip_if_exists: bool = True,
-) -> Dict[str, bool]:
+) -> dict[str, bool]:
     """
     Run all DFT baseline calculations.
 
@@ -458,7 +460,7 @@ def run_all_dft_baselines(
     print(f"Methods: {list(DFT_BASELINES.keys())}")
     print("=" * 60 + "\n")
 
-    for baseline_name in DFT_BASELINES.keys():
+    for baseline_name in DFT_BASELINES:
         success = run_dft_baseline_calculation(
             atoms, molecule_name, baseline_name, results_mgr, charge, multiplicity, skip_if_exists
         )

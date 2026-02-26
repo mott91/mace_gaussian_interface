@@ -7,9 +7,10 @@ monitoring calculation completion.
 
 from __future__ import annotations
 
+import contextlib
 import logging
-import os
 import time
+from pathlib import Path
 
 import zmq
 
@@ -41,7 +42,7 @@ class GaussianZMQServer:
     """
 
     def __init__(self, ipc_file: str) -> None:
-        self.socket_path: str = os.path.abspath(ipc_file)
+        self.socket_path: Path = Path(ipc_file).resolve()
         self.running: bool = False
         self.socket: zmq.Socket | None = None
         self._ctx: zmq.Context | None = None
@@ -49,9 +50,9 @@ class GaussianZMQServer:
     def __enter__(self) -> GaussianZMQServer:
         # Remove stale IPC file from a previous crash (documented CLAUDE.md gotcha).
         # Do NOT create a placeholder — socket.bind() creates the IPC socket file itself.
-        if os.path.exists(self.socket_path):
+        if self.socket_path.exists():
             try:
-                os.remove(self.socket_path)
+                self.socket_path.unlink()
                 logger.warning("Removed stale IPC file: %s", self.socket_path)
             except OSError as e:
                 logger.warning("Could not remove stale IPC file %s: %s", self.socket_path, e)
@@ -81,11 +82,8 @@ class GaussianZMQServer:
                 if self._ctx is not None:
                     self._ctx.term()
             finally:
-                if os.path.exists(self.socket_path):
-                    try:
-                        os.remove(self.socket_path)
-                    except OSError:
-                        pass
+                with contextlib.suppress(OSError):
+                    self.socket_path.unlink(missing_ok=True)
         return False  # Do not suppress exceptions
 
 

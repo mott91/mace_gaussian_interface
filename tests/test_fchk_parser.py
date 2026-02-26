@@ -49,7 +49,7 @@ class TestExtractModesCH4:
 
     def test_extract_modes_ch4(self, ch4_dft_fchk):
         """CH4 fchk yields 5 atoms, 9 modes (3*5-6), correct shapes."""
-        modes, frequencies, coords, masses, n_atoms = extract_modes_from_fchk(
+        modes, frequencies, _, _, n_atoms = extract_modes_from_fchk(
             ch4_dft_fchk, force_harmonic=True
         )
 
@@ -76,7 +76,7 @@ class TestParseFchkSection:
 
     def test_parse_fchk_section_real(self, water_dft_fchk):
         """Parsing 'Real atomic weights' yields correct masses for water."""
-        with open(water_dft_fchk) as f:
+        with water_dft_fchk.open() as f:
             content = f.read()
 
         masses = parse_fchk_section(content, "Real atomic weights", "R")
@@ -87,7 +87,7 @@ class TestParseFchkSection:
 
     def test_parse_fchk_section_integer(self, water_dft_fchk):
         """Parsing 'Atomic numbers' yields [8, 1, 1] for water (O, H, H)."""
-        with open(water_dft_fchk) as f:
+        with water_dft_fchk.open() as f:
             content = f.read()
 
         atomic_numbers = parse_fchk_section(content, "Atomic numbers", "I")
@@ -95,7 +95,7 @@ class TestParseFchkSection:
 
     def test_parse_fchk_section_missing(self, water_dft_fchk):
         """Requesting a nonexistent section raises ValueError."""
-        with open(water_dft_fchk) as f:
+        with water_dft_fchk.open() as f:
             content = f.read()
 
         with pytest.raises(ValueError, match="not found"):

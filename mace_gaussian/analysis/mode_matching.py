@@ -13,7 +13,7 @@ Uses .fchk (formatted checkpoint) files from Gaussian for clean parsing.
 
 import logging
 from pathlib import Path
-from typing import Dict, Optional, Tuple
+from typing import Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -23,7 +23,9 @@ from ..gaussian.fchk import extract_modes_from_fchk, get_fchk_from_chk
 logger = logging.getLogger(__name__)
 
 
-def extract_mode_data_from_checkpoint(chk_or_fchk_file: str, force_harmonic: bool = False) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, int]:
+def extract_mode_data_from_checkpoint(
+    chk_or_fchk_file: str, force_harmonic: bool = False
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, int]:
     """
     Extract vibrational modes, frequencies, coordinates, and masses from Gaussian checkpoint.
 
@@ -53,15 +55,17 @@ def extract_mode_data_from_checkpoint(chk_or_fchk_file: str, force_harmonic: boo
     file_path = Path(chk_or_fchk_file)
 
     # Convert .chk to .fchk if necessary
-    if file_path.suffix == '.chk':
+    if file_path.suffix == ".chk":
         fchk_file = get_fchk_from_chk(str(file_path))
-    elif file_path.suffix == '.fchk':
+    elif file_path.suffix == ".fchk":
         fchk_file = str(file_path)
     else:
         raise ValueError(f"Expected .chk or .fchk file, got: {file_path.suffix}")
 
     # Extract data from .fchk (force harmonic if requested)
-    modes, frequencies, coords, masses, n_atoms = extract_modes_from_fchk(fchk_file, force_harmonic=force_harmonic)
+    modes, frequencies, coords, masses, n_atoms = extract_modes_from_fchk(
+        fchk_file, force_harmonic=force_harmonic
+    )
 
     logger.info(f"Extracted {modes.shape[0]} modes for {n_atoms} atoms from {fchk_file}")
 
@@ -114,14 +118,14 @@ def normalize_mode(mode: np.ndarray) -> float:
     -------
     norm : float
     """
-    return np.sqrt(np.sum(mode ** 2))
+    return np.sqrt(np.sum(mode**2))
 
 
 def compute_mode_overlap(mode1: np.ndarray, mode2: np.ndarray) -> float:
     """
     Compute normalized scalar product (overlap) between two modes.
 
-    overlap = |mode1 · mode2| / (||mode1|| × ||mode2||)
+    overlap = |mode1 . mode2| / (||mode1|| x ||mode2||)
 
     Returns value between 0 and 1:
     - 1: modes are perfectly aligned (same or opposite direction)
@@ -155,10 +159,8 @@ def compute_mode_overlap(mode1: np.ndarray, mode2: np.ndarray) -> float:
 
 
 def match_modes(
-    modes_calc: np.ndarray,
-    modes_ref: np.ndarray,
-    threshold: float = 0.5
-) -> Dict[int, Tuple[int, float]]:
+    modes_calc: np.ndarray, modes_ref: np.ndarray, threshold: float = 0.5
+) -> dict[int, tuple[int, float]]:
     """
     Match modes between calculation and reference via scalar product.
 
@@ -212,10 +214,7 @@ def match_modes(
     return matches
 
 
-def create_alignment_matrix(
-    modes_calc: np.ndarray,
-    modes_ref: np.ndarray
-) -> np.ndarray:
+def create_alignment_matrix(modes_calc: np.ndarray, modes_ref: np.ndarray) -> np.ndarray:
     """
     Create full alignment matrix showing overlap between all mode pairs.
 
@@ -251,7 +250,7 @@ def plot_mode_overlap_heatmap(
     ref_label: str = "DFT Reference",
     freqs_calc: Optional[np.ndarray] = None,
     freqs_ref: Optional[np.ndarray] = None,
-    matches: Optional[Dict[int, Tuple[int, float]]] = None
+    matches: Optional[dict[int, tuple[int, float]]] = None,
 ) -> None:
     """
     Plot heatmap of mode overlap matrix with elegant pastel styling.
@@ -276,20 +275,21 @@ def plot_mode_overlap_heatmap(
     n_modes_calc, n_modes_ref = alignment_matrix.shape
 
     # Set elegant style with clean background
-    plt.style.use('seaborn-v0_8-whitegrid')
-    fig, ax = plt.subplots(figsize=(10, 8), facecolor='white')
-    ax.set_facecolor('#fafafa')
+    plt.style.use("seaborn-v0_8-whitegrid")
+    _, ax = plt.subplots(figsize=(10, 8), facecolor="white")
+    ax.set_facecolor("#fafafa")
 
     # Create elegant pastel red colormap: ivory -> soft red -> medium red
     from matplotlib.colors import LinearSegmentedColormap
+
     colors = [
-        '#f8f8f5',  # Warm ivory (no overlap)
-        '#fad4d4',  # Soft pastel red (weak overlap)
-        '#f5a5a5',  # Medium pastel red (medium overlap)
-        '#e87d7d'   # Stronger pastel red (strong overlap)
+        "#f8f8f5",  # Warm ivory (no overlap)
+        "#fad4d4",  # Soft pastel red (weak overlap)
+        "#f5a5a5",  # Medium pastel red (medium overlap)
+        "#e87d7d",  # Stronger pastel red (strong overlap)
     ]
     n_bins = 256
-    cmap = LinearSegmentedColormap.from_list('pastel_elegant', colors, N=n_bins)
+    cmap = LinearSegmentedColormap.from_list("pastel_elegant", colors, N=n_bins)
 
     # Create heatmap with subtle styling
     im = ax.imshow(
@@ -297,18 +297,25 @@ def plot_mode_overlap_heatmap(
         cmap=cmap,
         vmin=0,
         vmax=1,
-        aspect='auto',
-        origin='lower',
-        interpolation='nearest'
+        aspect="auto",
+        origin="lower",
+        interpolation="nearest",
     )
 
     # Add elegant colorbar with refined styling
     cbar = plt.colorbar(im, ax=ax, pad=0.02)
-    cbar.ax.tick_params(labelsize=9, length=3, width=0.5, colors='#5a5a5a')
-    cbar.set_label('Mode Overlap', rotation=270, labelpad=18, fontsize=10,
-                   color='#4a4a4a', family='sans-serif', weight='normal')
+    cbar.ax.tick_params(labelsize=9, length=3, width=0.5, colors="#5a5a5a")
+    cbar.set_label(
+        "Mode Overlap",
+        rotation=270,
+        labelpad=18,
+        fontsize=10,
+        color="#4a4a4a",
+        family="sans-serif",
+        weight="normal",
+    )
     cbar.outline.set_linewidth(0.5)
-    cbar.outline.set_edgecolor('#d0d0d0')
+    cbar.outline.set_edgecolor("#d0d0d0")
 
     # Set ticks
     ax.set_xticks(np.arange(n_modes_ref))
@@ -325,30 +332,48 @@ def plot_mode_overlap_heatmap(
     else:
         y_labels = [f"{i}" for i in range(n_modes_calc)]
 
-    ax.set_xticklabels(x_labels, fontsize=8.5, color='#4a4a4a', family='sans-serif')
-    ax.set_yticklabels(y_labels, fontsize=8.5, color='#4a4a4a', family='sans-serif')
+    ax.set_xticklabels(x_labels, fontsize=8.5, color="#4a4a4a", family="sans-serif")
+    ax.set_yticklabels(y_labels, fontsize=8.5, color="#4a4a4a", family="sans-serif")
 
     # Elegant axis labels with proper LaTeX formatting
-    ax.set_xlabel(f'{ref_label} Mode (cm$^{{-1}}$)', fontsize=14, color='#3a3a3a',
-                  family='sans-serif', weight='normal', labelpad=8)
-    ax.set_ylabel(f'{calc_label} Mode (cm$^{{-1}}$)', fontsize=14, color='#3a3a3a',
-                  family='sans-serif', weight='normal', labelpad=8)
-    ax.set_title('Vibrational Mode Overlap Matrix', fontsize=16,
-                 color='#2a2a2a', family='sans-serif', weight='normal', pad=15)
+    ax.set_xlabel(
+        f"{ref_label} Mode (cm$^{{-1}}$)",
+        fontsize=14,
+        color="#3a3a3a",
+        family="sans-serif",
+        weight="normal",
+        labelpad=8,
+    )
+    ax.set_ylabel(
+        f"{calc_label} Mode (cm$^{{-1}}$)",
+        fontsize=14,
+        color="#3a3a3a",
+        family="sans-serif",
+        weight="normal",
+        labelpad=8,
+    )
+    ax.set_title(
+        "Vibrational Mode Overlap Matrix",
+        fontsize=16,
+        color="#2a2a2a",
+        family="sans-serif",
+        weight="normal",
+        pad=15,
+    )
 
     # Subtle tick styling
-    ax.tick_params(axis='both', which='major', length=4, width=0.5, colors='#6a6a6a')
+    ax.tick_params(axis="both", which="major", length=4, width=0.5, colors="#6a6a6a")
 
     # Grid lines removed for cleaner appearance
     ax.grid(False)
 
     # Remove top and right spines for cleaner look
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    ax.spines['left'].set_linewidth(0.5)
-    ax.spines['bottom'].set_linewidth(0.5)
-    ax.spines['left'].set_color('#c0c0c0')
-    ax.spines['bottom'].set_color('#c0c0c0')
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    ax.spines["left"].set_linewidth(0.5)
+    ax.spines["bottom"].set_linewidth(0.5)
+    ax.spines["left"].set_color("#c0c0c0")
+    ax.spines["bottom"].set_color("#c0c0c0")
 
     # Add overlap values as text with refined color logic
     for i in range(n_modes_calc):
@@ -356,32 +381,38 @@ def plot_mode_overlap_heatmap(
             value = alignment_matrix[i, j]
             # Softer text color choices for better readability
             if value > 0.7:
-                text_color = '#2a2a2a'  # Dark gray for high overlap
-                weight = 'semibold'
+                text_color = "#2a2a2a"  # Dark gray for high overlap
+                weight = "semibold"
             elif value > 0.3:
-                text_color = '#4a4a4a'  # Medium gray
-                weight = 'normal'
+                text_color = "#4a4a4a"  # Medium gray
+                weight = "normal"
             else:
-                text_color = '#7a7a7a'  # Light gray for low overlap
-                weight = 'normal'
+                text_color = "#7a7a7a"  # Light gray for low overlap
+                weight = "normal"
 
-            ax.text(j, i, f'{value:.2f}',
-                   ha='center', va='center',
-                   color=text_color, fontsize=7.5,
-                   family='monospace', weight=weight)
+            ax.text(
+                j,
+                i,
+                f"{value:.2f}",
+                ha="center",
+                va="center",
+                color=text_color,
+                fontsize=7.5,
+                family="monospace",
+                weight=weight,
+            )
 
     plt.tight_layout()
 
     if output_file:
-        plt.savefig(output_file, dpi=300, bbox_inches='tight', facecolor='white',
-                    edgecolor='none')
+        plt.savefig(output_file, dpi=300, bbox_inches="tight", facecolor="white", edgecolor="none")
         logger.info(f"Saved mode overlap heatmap to {output_file}")
         print(f"Saved heatmap: {output_file}")
     else:
         plt.show()
 
     plt.close()
-    plt.style.use('default')  # Reset style
+    plt.style.use("default")  # Reset style
 
 
 # Example usage
@@ -391,7 +422,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     if len(sys.argv) < 3:
-        print("Usage: python mode_matching.py <calc.chk or calc.fchk> <ref.chk or ref.fchk> [output.png]")
+        print("Usage: python mode_matching.py <calc.chk/.fchk> <ref.chk/.fchk> [output.png]")
         print("\nOptional: Provide output filename to save heatmap")
         sys.exit(1)
 
@@ -400,10 +431,14 @@ if __name__ == "__main__":
     output_file = sys.argv[3] if len(sys.argv) > 3 else None
 
     print("Extracting modes from calculation...")
-    modes_calc, freqs_calc, coords_calc, masses_calc, n_atoms_calc = extract_mode_data_from_checkpoint(calc_file)
+    modes_calc, freqs_calc, coords_calc, masses_calc, n_atoms_calc = (
+        extract_mode_data_from_checkpoint(calc_file)
+    )
 
     print("Extracting modes from reference...")
-    modes_ref, freqs_ref, coords_ref, masses_ref, n_atoms_ref = extract_mode_data_from_checkpoint(ref_file)
+    modes_ref, freqs_ref, coords_ref, masses_ref, n_atoms_ref = extract_mode_data_from_checkpoint(
+        ref_file
+    )
 
     if n_atoms_calc != n_atoms_ref:
         print(f"ERROR: Different number of atoms ({n_atoms_calc} vs {n_atoms_ref})")
@@ -412,17 +447,17 @@ if __name__ == "__main__":
     print(f"\nMatching {modes_calc.shape[0]} modes...")
     matches = match_modes(modes_calc, modes_ref)
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("MODE MATCHING RESULTS")
-    print("="*60)
+    print("=" * 60)
     print(f"{'Calc Mode':<12} {'Ref Mode':<12} {'Overlap':<12}")
-    print("-"*60)
+    print("-" * 60)
 
     for calc_idx in sorted(matches.keys()):
         ref_idx, overlap = matches[calc_idx]
         print(f"{calc_idx:<12} {ref_idx:<12} {overlap:>11.4f}")
 
-    print("="*60)
+    print("=" * 60)
 
     # Create alignment matrix and plot heatmap
     print("\nCreating overlap heatmap...")
@@ -441,7 +476,7 @@ if __name__ == "__main__":
         ref_label="DFT Reference",
         freqs_calc=freqs_calc,
         freqs_ref=freqs_ref,
-        matches=matches
+        matches=matches,
     )
 
     print(f"\n✓ Heatmap saved to: {output_file}")

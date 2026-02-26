@@ -401,12 +401,12 @@ def run_frequency_calculation(
         chk_final = str(freq_dir / "gaussian_freq.chk")
 
         # Move files (not copy, since they're in different locations)
-        if os.path.exists(gjf_temp):
+        if Path(gjf_temp).exists():
             shutil.move(gjf_temp, gjf_final)
-        if os.path.exists(log_temp):
+        if Path(log_temp).exists():
             shutil.move(log_temp, log_final)
         # Save checkpoint file for mode matching
-        if os.path.exists(chk_temp):
+        if Path(chk_temp).exists():
             shutil.move(chk_temp, chk_final)
             # Automatically convert to .fchk for mode matching
             try:
@@ -420,7 +420,7 @@ def run_frequency_calculation(
 
         # Parse Gaussian log file to extract frequencies
         parsed_data = {}
-        if os.path.exists(log_final):
+        if Path(log_final).exists():
             try:
                 logger.info("Parsing Gaussian log file...")
                 parsed_data = parse_gaussian_log(log_final)
@@ -453,8 +453,8 @@ def run_frequency_calculation(
             energy=final_energy,
             dipole=parsed_data.get("dipole_moment"),
             runtime=runtime,
-            gaussian_log=log_final if os.path.exists(log_final) else None,
-            gaussian_gjf=gjf_final if os.path.exists(gjf_final) else None,
+            gaussian_log=log_final if Path(log_final).exists() else None,
+            gaussian_gjf=gjf_final if Path(gjf_final).exists() else None,
             timestamp=timestamp,
         )
 
@@ -617,7 +617,7 @@ def run_pipeline(
         # Load metadata to get charge and spin
         json_file = opt_dir / "results.json"
         if json_file.exists():
-            with open(json_file) as f:
+            with json_file.open() as f:
                 json.load(f)
             # Note: charge/spin might not be in old metadata, use defaults
             optimized_mol.info["charge"] = 0.0

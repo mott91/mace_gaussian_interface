@@ -1,20 +1,22 @@
 #!/usr/bin/python3
 
-import os
 import sys
 from contextlib import contextmanager
+from pathlib import Path
 
 import zmq
 
 
 @contextmanager
 def zmq_client(file):
-    """Creates a context manager with ZMQ client socket as resource using the IPC transport protocol, used via python with block.
-    file passed as argument must be associated with a ZMQ connection openend by a server.
+    """Creates a context manager with ZMQ client socket as resource using IPC transport.
+
+    The file passed as argument must be associated with a ZMQ connection opened by a server.
+    Used via python with block.
     """
     with zmq.Context() as ctx, ctx.socket(zmq.REQ) as socket:
-        addr = os.path.abspath(file)
-        socket.connect("ipc://%s" % addr)
+        addr = Path(file).resolve()
+        socket.connect(f"ipc://{addr}")
         yield socket
 
 

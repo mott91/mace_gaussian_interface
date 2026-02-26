@@ -203,7 +203,7 @@ def list(molecule, output_dir):
             click.echo("\u2713 Geometry optimization")
             opt_json = opt_dir / "results.json"
             if opt_json.exists():
-                with open(opt_json) as f:
+                with opt_json.open() as f:
                     opt_data = json.load(f)
                 click.echo(f"  Calculator: {opt_data.get('calculator', 'N/A')}")
                 click.echo(f"  Energy: {opt_data.get('final_energy_eV', 'N/A'):.6f} eV")
@@ -219,7 +219,7 @@ def list(molecule, output_dir):
             for freq_dir in sorted(freq_dirs):
                 json_file = freq_dir / "results.json"
                 if json_file.exists():
-                    with open(json_file) as f:
+                    with json_file.open() as f:
                         data = json.load(f)
 
                     calc_type = data.get("calculator_type", "unknown")

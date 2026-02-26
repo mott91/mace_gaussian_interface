@@ -28,7 +28,7 @@ def water_ml_log():
 @pytest.fixture
 def water_dft_fchk():
     """Path to water DFT B3LYP/6-31G(d,p) formatted checkpoint file."""
-    return str(FIXTURES_DIR / "water" / "dft_b3lyp.fchk")
+    return FIXTURES_DIR / "water" / "dft_b3lyp.fchk"
 
 
 @pytest.fixture

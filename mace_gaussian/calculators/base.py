@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Optional
 
 import numpy as np
 
@@ -25,7 +24,7 @@ class DipoleCalculatorBase(ABC):
         pass
 
     @abstractmethod
-    def calculate_dipole(self, atoms, **kwargs) -> tuple[np.ndarray, Optional[np.ndarray]]:
+    def calculate_dipole(self, atoms, **kwargs) -> tuple[np.ndarray, np.ndarray | None]:
         """
         Calculate dipole moment and partial charges
         Returns: (dipole_vector, partial_charges)

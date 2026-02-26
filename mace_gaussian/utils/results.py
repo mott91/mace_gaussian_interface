@@ -7,7 +7,6 @@ for comparison framework. Now includes overtones and combination bands.
 
 import json
 import logging
-import os
 import shutil
 from pathlib import Path
 from typing import Any, Optional
@@ -157,7 +156,7 @@ class ResultsManager:
 
         # Save JSON
         json_path = opt_dir / "results.json"
-        with open(json_path, "w") as f:
+        with json_path.open("w") as f:
             json.dump(metadata, f, indent=2)
 
         logger.info(f"\u2713 Saved optimization results to {opt_dir}")
@@ -211,17 +210,17 @@ class ResultsManager:
 
         # Copy Gaussian files if provided (skip if source and destination are the same)
         files = {}
-        if gaussian_log and os.path.exists(gaussian_log):
+        if gaussian_log and Path(gaussian_log).exists():
             dest_log = freq_dir / "gaussian_freq.log"
             # Only copy if source and destination are different files
-            if os.path.abspath(gaussian_log) != os.path.abspath(dest_log):
+            if Path(gaussian_log).resolve() != dest_log.resolve():
                 shutil.copy2(gaussian_log, dest_log)
             files["gaussian_log"] = "gaussian_freq.log"
 
-        if gaussian_gjf and os.path.exists(gaussian_gjf):
+        if gaussian_gjf and Path(gaussian_gjf).exists():
             dest_gjf = freq_dir / "gaussian_freq.gjf"
             # Only copy if source and destination are different files
-            if os.path.abspath(gaussian_gjf) != os.path.abspath(dest_gjf):
+            if Path(gaussian_gjf).resolve() != dest_gjf.resolve():
                 shutil.copy2(gaussian_gjf, dest_gjf)
             files["gaussian_input"] = "gaussian_freq.gjf"
 
@@ -251,7 +250,7 @@ class ResultsManager:
 
         # Save JSON
         json_path = freq_dir / "results.json"
-        with open(json_path, "w") as f:
+        with json_path.open("w") as f:
             json.dump(metadata, f, indent=2)
 
         logger.info(f"\u2713 Saved frequency results to {freq_dir}")
@@ -276,7 +275,7 @@ class ResultsManager:
         if not json_path.exists():
             raise FileNotFoundError(f"No optimization results found for {molecule_name}")
 
-        with open(json_path) as f:
+        with json_path.open() as f:
             return json.load(f)
 
     def get_optimized_geometry_path(self, molecule_name: str) -> Path:

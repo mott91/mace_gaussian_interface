@@ -77,7 +77,7 @@ def test_espaloma_functionality():
 
     try:
         print("1. Testing espaloma_charge import...")
-        import espaloma_charge
+        import espaloma_charge  # noqa: F401
 
         print("   \u2713 espaloma_charge imported successfully")
 
