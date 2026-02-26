@@ -15,50 +15,72 @@ Interface between MACE machine learning potentials and Gaussian 16 for enhanced 
 
 ### Prerequisites
 
-- **Python 3.10** (required)
+- **Python 3.10** (required — matches the `mace4ir_v2` environment)
 - **Gaussian 16** (must be in PATH as `g16`)
-- **CUDA-capable GPU** (required for ML calculations)
+- **CUDA-capable GPU** (required for ML calculations; CPU fallback is slow)
 - **micromamba or conda** (for environment management)
 
-### Quick Start
+### Step-by-Step Installation
 
-1. **Install micromamba** (if not already installed):
-```bash
-"${SHELL}" <(curl -L micro.mamba.pm/install.sh)
-```
+**1. Clone the repository**
 
-2. **Clone and setup**:
 ```bash
 git clone https://github.com/your-username/mace_gaussian.git
 cd mace_gaussian
-
-# Create environment from exact specification
-micromamba env create -f environment.yml
-
-# Activate environment
-micromamba activate mace4ir_v2
-
-# Install custom MACE packages (critical step!)
-./install_mace_packages.sh
 ```
 
-3. **Verify installation**:
+**2. Create the conda environment**
+
+The repository includes `environment.yml` with the exact package versions used for development.
+
+```bash
+# Install micromamba if needed
+"${SHELL}" <(curl -L micro.mamba.pm/install.sh)
+
+# Create and activate the environment
+micromamba env create -f environment.yml
+micromamba activate mace4ir_v2
+```
+
+**3. Install the custom MACE packages**
+
+This project depends on two local MACE forks included in the repository.
+They must be installed in editable mode so their paths resolve correctly:
+
+```bash
+# Install standard MACE (energy/force calculator)
+pip install -e mace_ML_pkg
+
+# Install MACE with dipole support (dipole derivative calculator)
+pip install -e mace_dipole_pkg
+```
+
+These packages are not on PyPI and must be installed from the local subdirectories.
+
+**4. Install the main package**
+
+```bash
+pip install -e .
+```
+
+This installs the `mace_gaussian` package in editable mode so CLI commands and imports work.
+
+**5. Verify the installation**
+
 ```bash
 python cli.py diagnose
 ```
 
-This checks for Gaussian, CUDA, and available dipole calculators.
-
-**Important:** The `install_mace_packages.sh` step is critical - it installs the dual MACE packages (standard + dipole-enabled) that are required for this project to work.
+This checks for Gaussian 16 (`g16`), `formchk`, CUDA availability, and all dipole calculators.
+A successful install shows green checkmarks for the calculators; Gaussian/CUDA checks may
+show warnings if those are not available on the current machine.
 
 ### Environment Files
 
 The repository includes:
-- `environment.yml` - Complete conda/micromamba environment with exact package versions
-- `requirements_mace4ir_v2.txt` - Pip package list for reference
-- `install_mace_packages.sh` - Script to install custom MACE packages from `mace_ML_pkg/` and `mace_dipole_pkg/`
-
-The `mace4ir_v2` environment is the exact Python environment used for development and testing.
+- `environment.yml` — Complete conda/micromamba environment with exact package versions
+- `requirements_mace4ir_v2.txt` — Pip package list for reference
+- `install_mace_packages.sh` — Convenience script that runs steps 3 above automatically
 
 ## Usage
 
