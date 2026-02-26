@@ -182,11 +182,12 @@ Plans:
   3. Worked example with expected output is committed to repo
   4. CLI help text is complete and accurate for all commands
   5. Method description suitable for thesis methods section is available
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 10-01: TBD
-- [ ] 10-02: TBD
+- [ ] 10-01-PLAN.md — Fix CLI placeholder help text (compare/export) and add quickstart link to README
+- [ ] 10-02-PLAN.md — Create docs/quickstart.md and docs/examples/water/ worked example
+- [ ] 10-03-PLAN.md — Write docs/methods.md thesis methods section
 
 ## Progress
 
@@ -204,4 +205,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 7. Extract Workflow Orchestrator | 2/2 | Complete   | 2026-02-24 |
 | 8. Package Structure & Reorganization | 3/3 | Complete   | 2026-02-24 |
 | 9. CI/CD & Distribution Prep | 3/3 | Complete   | 2026-02-26 |
-| 10. Documentation | 0/TBD | Not started | - |
+| 10. Documentation | 0/3 | Not started | - |
