@@ -80,6 +80,7 @@ def run(
         python cli.py run water.xyz
         python cli.py run water.xyz --skip-dft-baseline
         python cli.py run water.xyz --energy-calculators mace_mp --dipole-calculators espaloma
+        python cli.py run water.xyz --output-dir my_results
     """
     from mace_gaussian.workflow import run_pipeline
 
@@ -275,16 +276,17 @@ def compare(molecule, output_dir):
     """
     Compare calculation results for MOLECULE.
 
-    [PLACEHOLDER - Coming soon]
+    Not yet implemented. To analyze and compare results, use:
 
-    This will generate comparison tables and plots for:
-    - Energy comparisons
-    - Frequency comparisons
-    - Runtime analysis
-    - Accuracy metrics
+        python run_analysis.py <molecule>           (anharmonic: fundamentals, overtones,
+                                                     combinations)
+        python run_analysis_harmonic.py <molecule>  (harmonic: fundamentals with mode matching)
+
+    These scripts generate comparison plots, regression analysis, and an HTML report
+    in the analysis_results/ directory.
 
     Example:
-        python cli.py compare water
+        python cli.py compare water    (not yet implemented)
     """
     click.echo(f"\n{'=' * 60}")
     click.echo("COMPARE COMMAND - COMING SOON")
@@ -321,13 +323,12 @@ def export(molecule, format, output, results_dir):
     """
     Export results for MOLECULE to specified format.
 
-    [PLACEHOLDER - Coming soon]
-
-    Exports all calculation results to a single file for further analysis.
+    Not yet implemented. Calculation results are stored as JSON files under
+    comparison_results/<molecule>/<energy_calc>_<dipole_calc>/results.json.
 
     Example:
-        python cli.py export water --format csv
-        python cli.py export water --format xlsx --output water_analysis.xlsx
+        python cli.py export water --format csv    (not yet implemented)
+        python cli.py export water --format xlsx --output water_analysis.xlsx  (not yet implemented)
     """
     if output is None:
         output = f"{molecule}_results.{format}"
@@ -354,9 +355,10 @@ def diagnose():
     Run diagnostic checks for available calculators and dependencies.
 
     Checks:
-        - Available dipole calculators
-        - Python environment
-        - Required packages
+        - Available dipole calculators (espaloma, mace_ml, xtb)
+        - Gaussian 16 (g16) availability in PATH
+        - formchk availability in PATH
+        - CUDA device availability
 
     Example:
         python cli.py diagnose
