@@ -57,10 +57,10 @@ Requirements for the refactoring milestone. Each maps to roadmap phases.
 
 ### Documentation
 
-- [ ] **DOC-01**: README updated with complete installation steps (including custom MACE packages)
+- [x] **DOC-01**: README updated with complete installation steps (including custom MACE packages)
 - [x] **DOC-02**: Quickstart guide: clone → install → run water → view results
 - [x] **DOC-03**: Worked example with expected output committed to repo
-- [ ] **DOC-04**: CLI help text complete for all commands and options
+- [x] **DOC-04**: CLI help text complete for all commands and options
 - [x] **DOC-05**: Method description suitable for citing in thesis methods section
 
 ## v2 Requirements
@@ -131,10 +131,10 @@ Deferred to future milestone. Tracked but not in current roadmap.
 | CI-02 | Phase 9 | Complete |
 | CI-03 | Phase 9 | Complete |
 | CI-04 | Phase 9 | Complete |
-| DOC-01 | Phase 10 | Pending |
+| DOC-01 | Phase 10 | Complete |
 | DOC-02 | Phase 10 | Complete |
 | DOC-03 | Phase 10 | Complete |
-| DOC-04 | Phase 10 | Pending |
+| DOC-04 | Phase 10 | Complete |
 | DOC-05 | Phase 10 | Complete |
 
 **Coverage:**
