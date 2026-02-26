@@ -50,8 +50,8 @@ Requirements for the refactoring milestone. Each maps to roadmap phases.
 
 ### CI/CD
 
-- [ ] **CI-01**: GitHub Actions workflow runs ruff check and ruff format --check on push
-- [ ] **CI-02**: GitHub Actions workflow runs pytest (unit tests only, no GPU/Gaussian) on push
+- [x] **CI-01**: GitHub Actions workflow runs ruff check and ruff format --check on push
+- [x] **CI-02**: GitHub Actions workflow runs pytest (unit tests only, no GPU/Gaussian) on push
 - [x] **CI-03**: Ruff rules expanded to include B, SIM, PTH, RUF
 - [ ] **CI-04**: Install script or documented procedure for custom MACE packages
 
@@ -127,8 +127,8 @@ Deferred to future milestone. Tracked but not in current roadmap.
 | REPR-02 | Phase 2 | Pending |
 | REPR-03 | Phase 2 | Pending |
 | REPR-04 | Phase 1 | Pending |
-| CI-01 | Phase 9 | Pending |
-| CI-02 | Phase 9 | Pending |
+| CI-01 | Phase 9 | Complete |
+| CI-02 | Phase 9 | Complete |
 | CI-03 | Phase 9 | Complete |
 | CI-04 | Phase 9 | Pending |
 | DOC-01 | Phase 10 | Pending |

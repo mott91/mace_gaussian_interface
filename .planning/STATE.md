@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-16)
 ## Current Position
 
 Phase: 9 of 10 (CI/CD and Distribution Prep)
-Plan: 1 of 5 in current phase -- COMPLETE
-Status: Phase 09 in progress — 1/5 plans done
-Last activity: 2026-02-26 — Completed 09-01: ruff B/SIM/PTH/RUF rules added, all 55 violations fixed, 128 tests green
+Plan: 2 of 5 in current phase -- COMPLETE
+Status: Phase 09 in progress — 2/5 plans done
+Last activity: 2026-02-26 — Completed 09-02: GitHub Actions CI workflow (.github/workflows/ci.yml) with parallel lint + test jobs
 
 Progress: [█████████░] 90%
 
@@ -49,6 +49,7 @@ Progress: [█████████░] 90%
 | Phase 08 P02 | 4 | 2 tasks | 15 files |
 | Phase 08 P03 | 7 | 2 tasks | 13 files |
 | Phase 09 P01 | 90 | 2 tasks | 23 files |
+| Phase 09 P02 | 5 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -114,6 +115,10 @@ Recent decisions affecting current work:
 - [Phase 09-01]: Use # noqa: F401 for intentional import-for-testing in diagnostics.py (not worth removing the test intent)
 - [Phase 09-01]: water_dft_fchk fixture changed to return Path (not str) to enable .open() — all callers accept both str and Path
 - [Phase 09-01]: B017 pytest.raises(Exception) replaced with specific exception type for improved test clarity
+- [Phase 09-02]: pip install -e . --no-deps avoids dgl==2.2.1 Windows-only wheels that block uv sync on ubuntu-latest
+- [Phase 09-02]: ruff==0.15.1 pinned to match uv.lock for CI reproducibility
+- [Phase 09-02]: lint and test jobs run in parallel (no needs: field) for fastest CI feedback
+- [Phase 09-02]: No --cov-fail-under threshold — coverage is informational only (locked decision)
 
 ### Pending Todos
 
@@ -148,5 +153,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-26 (phase execution)
-Stopped at: Completed 09-01-PLAN.md (ruff rules expanded, all violations fixed)
+Stopped at: Completed 09-02-PLAN.md (GitHub Actions CI workflow created)
 Resume file: None
