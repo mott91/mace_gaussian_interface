@@ -330,20 +330,10 @@ def export(molecule, format, output, results_dir):
     if output is None:
         output = f"{molecule}_results.{format}"
 
-    click.echo(f"\n{'=' * 60}")
-    click.echo("EXPORT COMMAND - COMING SOON")
-    click.echo(f"{'=' * 60}\n")
-    click.echo(f"Molecule: {molecule}")
-    click.echo(f"Format: {format}")
-    click.echo(f"Output: {output}")
-    click.echo(f"Results directory: {results_dir}")
-    click.echo("\nPlanned features:")
-    click.echo("  - Export all frequencies to CSV/Excel")
-    click.echo("  - Export energies and dipole moments")
-    click.echo("  - Export metadata (runtimes, parameters)")
-    click.echo("  - JSON export for programmatic access")
-    click.echo("\nTo implement this feature, add export code to a new module.")
-    click.echo(f"{'=' * 60}\n")
+    click.echo(
+        "Not yet implemented. Calculation results are stored as JSON files under\n"
+        f"comparison_results/{molecule}/<energy_calc>_<dipole_calc>/results.json."
+    )
 
 
 @cli.command()
