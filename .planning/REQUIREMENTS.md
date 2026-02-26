@@ -61,7 +61,7 @@ Requirements for the refactoring milestone. Each maps to roadmap phases.
 - [x] **DOC-02**: Quickstart guide: clone → install → run water → view results
 - [x] **DOC-03**: Worked example with expected output committed to repo
 - [ ] **DOC-04**: CLI help text complete for all commands and options
-- [ ] **DOC-05**: Method description suitable for citing in thesis methods section
+- [x] **DOC-05**: Method description suitable for citing in thesis methods section
 
 ## v2 Requirements
 
@@ -135,7 +135,7 @@ Deferred to future milestone. Tracked but not in current roadmap.
 | DOC-02 | Phase 10 | Complete |
 | DOC-03 | Phase 10 | Complete |
 | DOC-04 | Phase 10 | Pending |
-| DOC-05 | Phase 10 | Pending |
+| DOC-05 | Phase 10 | Complete |
 
 **Coverage:**
 - v1 requirements: 38 total

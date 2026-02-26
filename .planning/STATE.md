@@ -52,6 +52,7 @@ Progress: [██████████] 100%
 | Phase 09 P02 | 5 | 1 tasks | 1 files |
 | Phase 09 P03 | 2 | 1 tasks | 1 files |
 | Phase 10 P02 | 2 | 2 tasks | 8 files |
+| Phase 10 P03 | 2 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -122,6 +123,7 @@ Recent decisions affecting current work:
 - [Phase 09-02]: lint and test jobs run in parallel (no needs: field) for fastest CI feedback
 - [Phase 09-02]: No --cov-fail-under threshold — coverage is informational only (locked decision)
 - [Phase 09]: Manual pip install steps shown explicitly before mentioning install_mace_packages.sh convenience script
+- [Phase 10-03]: methods.md written in passive voice past tense throughout — ZMQ injection described as novel software contribution with four paragraphs; placeholder citations in [Author, Year] format for easy journal reformatting
 - [Phase 10-02]: quickstart.md references README#installation rather than duplicating install steps to avoid drift
 - [Phase 10-02]: expected_output/ uses JSON only (no .chk/.fchk/.log) — portable, system-independent, human-readable reference outputs
 - [Phase 10-02]: Plots sourced from anharmonic analysis_results/ to match the quickstart workflow path
@@ -159,5 +161,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-26 (phase execution)
-Stopped at: Completed 10-02-PLAN.md (quickstart.md and docs/examples/water/ with committed JSON + PNG reference)
+Stopped at: Completed 10-03-PLAN.md (docs/methods.md thesis methods section — Phase 10 COMPLETE)
 Resume file: None
