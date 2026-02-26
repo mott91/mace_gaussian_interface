@@ -288,18 +288,15 @@ def compare(molecule, output_dir):
     Example:
         python cli.py compare water    (not yet implemented)
     """
-    click.echo(f"\n{'=' * 60}")
-    click.echo("COMPARE COMMAND - COMING SOON")
-    click.echo(f"{'=' * 60}\n")
-    click.echo(f"This command will compare results for: {molecule}")
-    click.echo(f"Results directory: {output_dir}")
-    click.echo("\nPlanned features:")
-    click.echo("  - Energy comparison table")
-    click.echo("  - Frequency comparison (harmonic vs anharmonic)")
-    click.echo("  - Runtime analysis")
-    click.echo("  - Visualization plots")
-    click.echo("\nTo implement this feature, add analysis code to a new module.")
-    click.echo(f"{'=' * 60}\n")
+    click.echo(
+        "Not yet implemented. To analyze and compare results, use:\n\n"
+        "    python run_analysis.py <molecule>           "
+        "(anharmonic: fundamentals, overtones, combinations)\n"
+        "    python run_analysis_harmonic.py <molecule>  "
+        "(harmonic: fundamentals with mode matching)\n\n"
+        "These scripts generate comparison plots, regression analysis, and an HTML report\n"
+        "in the analysis_results/ directory."
+    )
 
 
 @cli.command()
