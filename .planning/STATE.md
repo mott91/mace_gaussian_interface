@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-16)
 
 **Core value:** Reliable, reproducible IR spectral predictions using ML potentials that can be validated against DFT reference data.
-**Current focus:** Phase 9 - CI/CD and Distribution Prep
+**Current focus:** Phase 10 - Documentation
 
 ## Current Position
 
-Phase: 9 of 10 (CI/CD and Distribution Prep)
-Plan: 3 of 5 in current phase -- COMPLETE
-Status: Phase 09 in progress — 3/5 plans done
-Last activity: 2026-02-26 — Completed 09-03: README Installation section rewritten with explicit 5-step pip install procedure
+Phase: 10 of 10 (Documentation)
+Plan: 3 of 3 in current phase -- COMPLETE
+Status: Phase 10 COMPLETE — 3/3 plans done
+Last activity: 2026-02-26 — Completed 10-03: docs/methods.md thesis methods section (216 lines, 7 sections, passive voice, DOC-05 satisfied)
 
-Progress: [█████████░] 90%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -51,6 +51,7 @@ Progress: [█████████░] 90%
 | Phase 09 P01 | 90 | 2 tasks | 23 files |
 | Phase 09 P02 | 5 | 1 tasks | 1 files |
 | Phase 09 P03 | 2 | 1 tasks | 1 files |
+| Phase 10 P02 | 2 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -121,6 +122,9 @@ Recent decisions affecting current work:
 - [Phase 09-02]: lint and test jobs run in parallel (no needs: field) for fastest CI feedback
 - [Phase 09-02]: No --cov-fail-under threshold — coverage is informational only (locked decision)
 - [Phase 09]: Manual pip install steps shown explicitly before mentioning install_mace_packages.sh convenience script
+- [Phase 10-02]: quickstart.md references README#installation rather than duplicating install steps to avoid drift
+- [Phase 10-02]: expected_output/ uses JSON only (no .chk/.fchk/.log) — portable, system-independent, human-readable reference outputs
+- [Phase 10-02]: Plots sourced from anharmonic analysis_results/ to match the quickstart workflow path
 
 ### Pending Todos
 
@@ -155,5 +159,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-26 (phase execution)
-Stopped at: Completed 09-03-PLAN.md (README Installation section rewritten with explicit 5-step procedure)
+Stopped at: Completed 10-02-PLAN.md (quickstart.md and docs/examples/water/ with committed JSON + PNG reference)
 Resume file: None
