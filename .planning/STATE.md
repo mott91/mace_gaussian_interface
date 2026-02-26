@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-16)
 
 **Core value:** Reliable, reproducible IR spectral predictions using ML potentials that can be validated against DFT reference data.
-**Current focus:** Phase 8 - Package Structure Reorganization
+**Current focus:** Phase 9 - CI/CD and Distribution Prep
 
 ## Current Position
 
-Phase: 8 of 10 (Package Structure Reorganization)
-Plan: 3 of 3 in current phase -- COMPLETE
-Status: Phase 08 COMPLETE — all 3 plans done
-Last activity: 2026-02-25 — Completed 08-03: pyproject.toml wired, all 128 tests green with mace_gaussian.* imports
+Phase: 9 of 10 (CI/CD and Distribution Prep)
+Plan: 1 of 5 in current phase -- COMPLETE
+Status: Phase 09 in progress — 1/5 plans done
+Last activity: 2026-02-26 — Completed 09-01: ruff B/SIM/PTH/RUF rules added, all 55 violations fixed, 128 tests green
 
 Progress: [█████████░] 90%
 
@@ -48,6 +48,7 @@ Progress: [█████████░] 90%
 | Phase 08 P01 | 2 | 2 tasks | 13 files |
 | Phase 08 P02 | 4 | 2 tasks | 15 files |
 | Phase 08 P03 | 7 | 2 tasks | 13 files |
+| Phase 09 P01 | 90 | 2 tasks | 23 files |
 
 ## Accumulated Context
 
@@ -110,6 +111,9 @@ Recent decisions affecting current work:
 - [Phase 08-03]: Lazy wrapper functions in analysis/__init__.py to defer seaborn/pandas import — avoids module-level side effects when importing lightweight submodules like mode_matching
 - [Phase 08-03]: results.py lazy import of collect_version_metadata was silently failing (flat path), fixed to mace_gaussian.utils.validation
 - [Phase 08-03]: click installed separately into venv — uv sync blocked by dgl 2.2.1 having no Linux wheels
+- [Phase 09-01]: Use # noqa: F401 for intentional import-for-testing in diagnostics.py (not worth removing the test intent)
+- [Phase 09-01]: water_dft_fchk fixture changed to return Path (not str) to enable .open() — all callers accept both str and Path
+- [Phase 09-01]: B017 pytest.raises(Exception) replaced with specific exception type for improved test clarity
 
 ### Pending Todos
 
@@ -143,6 +147,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-25 (phase execution)
-Stopped at: Completed 08-03-PLAN.md (Phase 8 complete)
+Last session: 2026-02-26 (phase execution)
+Stopped at: Completed 09-01-PLAN.md (ruff rules expanded, all violations fixed)
 Resume file: None
