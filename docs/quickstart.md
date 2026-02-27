@@ -10,7 +10,7 @@ and viewing the analysis report.
 ## Step 1: Install
 
 Follow the [Installation section in README.md](../README.md#installation) to set up
-the conda environment, install the custom MACE packages, and verify with `python cli.py diagnose`.
+the conda environment, install the custom MACE packages, and verify with `mace-gaussian diagnose`.
 
 ---
 
@@ -20,7 +20,7 @@ The project root contains `water.xyz` as a sample input. Run the ML-only pipelin
 (skipping the DFT baseline to save ~30 minutes):
 
 ```bash
-python cli.py run water.xyz --skip-dft-baseline
+mace-gaussian run water.xyz --skip-dft-baseline
 ```
 
 This runs geometry optimization with MACE-OMOL-0, then anharmonic frequency calculations
@@ -32,7 +32,7 @@ Results are saved to `comparison_results/water/`.
 To also run the DFT baseline for comparison (B3LYP/6-31G(d,p), ~30 additional minutes):
 
 ```bash
-python cli.py run water.xyz
+mace-gaussian run water.xyz
 ```
 
 ---
@@ -40,7 +40,7 @@ python cli.py run water.xyz
 ## Step 3: Check calculation results
 
 ```bash
-python cli.py list water
+mace-gaussian list water
 ```
 
 This shows each ML combination with its harmonic and anharmonic frequency counts,
@@ -108,7 +108,7 @@ See [`docs/examples/water/`](examples/water/) for committed JSON results and plo
 root before restarting: `rm -f .ipc_file`.
 
 **CUDA not available**: The pipeline falls back to CPU (~10x slower). Check with
-`python cli.py diagnose`.
+`mace-gaussian diagnose`.
 
 **Import errors for mace_ml or espaloma**: Ensure both custom packages are installed:
 `pip install -e mace_ML_pkg && pip install -e mace_dipole_pkg`.

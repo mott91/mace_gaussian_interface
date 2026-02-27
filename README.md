@@ -68,7 +68,7 @@ This installs the `mace_gaussian` package in editable mode so CLI commands and i
 **5. Verify the installation**
 
 ```bash
-python cli.py diagnose
+mace-gaussian diagnose
 ```
 
 This checks for Gaussian 16 (`g16`), `formchk`, CUDA availability, and all dipole calculators.
@@ -93,7 +93,7 @@ to running your first calculation and viewing the HTML analysis report.
 
 ```bash
 # Run calculations on a test molecule
-python cli.py run water.xyz
+mace-gaussian run water.xyz
 
 # Generate analysis report
 python run_analysis.py water
@@ -125,13 +125,13 @@ Input XYZ → Geometry Opt (MACE) → ML Frequency Calcs → DFT Baseline → An
 #### 1. Run Calculations
 ```bash
 # Basic run (includes DFT baseline)
-python cli.py run molecule.xyz
+mace-gaussian run molecule.xyz
 
 # Skip DFT baseline (faster, for testing)
-python cli.py run molecule.xyz --skip-dft-baseline
+mace-gaussian run molecule.xyz --skip-dft-baseline
 
 # Customize calculators
-python cli.py run molecule.xyz \
+mace-gaussian run molecule.xyz \
   --energy-calculators mace_mp,mace_omol \
   --dipole-calculators espaloma,mace_ml
 ```
@@ -139,10 +139,10 @@ python cli.py run molecule.xyz \
 #### 2. Check Results
 ```bash
 # List all results
-python cli.py list
+mace-gaussian list
 
 # List specific molecule
-python cli.py list water
+mace-gaussian list water
 ```
 
 #### 3. Generate Analysis Report
