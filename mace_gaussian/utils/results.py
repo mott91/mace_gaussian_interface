@@ -5,6 +5,8 @@ Handles directory structure, file naming, and JSON metadata writing
 for comparison framework. Now includes overtones and combination bands.
 """
 
+from __future__ import annotations
+
 import json
 import logging
 import shutil

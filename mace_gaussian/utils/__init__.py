@@ -3,6 +3,8 @@
 from .exceptions import (
     CUDANotAvailableWarning,
     GaussianParseError,
+    GaussianRunError,
+    GaussianTimeoutError,
     InputValidationError,
     MaceGaussianError,
     PrerequisiteError,
@@ -26,6 +28,8 @@ __all__ = [
     "HARTREE_TO_EV",
     "CUDANotAvailableWarning",
     "GaussianParseError",
+    "GaussianRunError",
+    "GaussianTimeoutError",
     "InputValidationError",
     "MaceGaussianError",
     "PrerequisiteError",
