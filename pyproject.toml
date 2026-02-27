@@ -47,9 +47,9 @@ dev = [
 mace-gaussian = "mace_gaussian.cli:cli"
 
 [project.urls]
-Homepage = "https://github.com/yourusername/mace-gaussian-interface"
-Repository = "https://github.com/yourusername/mace-gaussian-interface.git" 
-Issues = "https://github.com/yourusername/mace-gaussian-interface/issues"
+Homepage = "https://github.com/mott91/mace_gaussian_interface"
+Repository = "https://github.com/mott91/mace_gaussian_interface.git"
+Issues = "https://github.com/mott91/mace_gaussian_interface/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["mace_gaussian"]
