@@ -10,10 +10,11 @@ import logging
 import platform
 import shutil
 import sys
+import warnings
 from pathlib import Path
 from typing import Any
 
-from .exceptions import InputValidationError, PrerequisiteError
+from .exceptions import CUDANotAvailableWarning, InputValidationError, PrerequisiteError
 
 logger = logging.getLogger(__name__)
 
@@ -220,9 +221,19 @@ def detect_device() -> str:
             return "cuda"
         else:
             logger.warning("CUDA not available, falling back to CPU")
+            warnings.warn(
+                "CUDA not available, falling back to CPU",
+                CUDANotAvailableWarning,
+                stacklevel=2,
+            )
             return "cpu"
     except ImportError:
         logger.warning("PyTorch not installed, falling back to CPU")
+        warnings.warn(
+            "PyTorch not installed, falling back to CPU",
+            CUDANotAvailableWarning,
+            stacklevel=2,
+        )
         return "cpu"
 
 

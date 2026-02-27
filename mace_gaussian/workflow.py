@@ -439,6 +439,10 @@ def run_frequency_calculation(
             parsed_data = {"harmonic": [], "anharmonic": []}
             final_energy = mol.get_potential_energy()
 
+        calculation_parameters = {
+            "energy_calculator": energy_calculator_name,
+            "dipole_calculator": dipole_calculator_name,
+        }
         results_mgr.save_frequency_results(
             molecule_name=molecule_name,
             energy_calculator=energy_calculator_name,
@@ -456,6 +460,7 @@ def run_frequency_calculation(
             gaussian_log=log_final if Path(log_final).exists() else None,
             gaussian_gjf=gjf_final if Path(gjf_final).exists() else None,
             timestamp=timestamp,
+            calculation_parameters=calculation_parameters,
         )
 
         print(f"  Completed in {runtime:.1f} seconds")
