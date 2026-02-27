@@ -214,9 +214,10 @@ Plans:
   3. Docs show `mace-gaussian` entry point, not `python cli.py`
   4. All 20 stale REQUIREMENTS.md checkboxes updated to `[x]`
   5. ROADMAP.md progress table accurate for all phases
+**Plans**: 1 plan
 
 Plans:
-- [ ] 12-01-PLAN.md — Fix pyproject.toml URLs; align ruff CI pin; update docs entry point; update stale planning metadata
+- [ ] 12-01-PLAN.md — Fix pyproject.toml URLs (real GitHub coordinates); align CI ruff pin to >=0.9.0; update python cli.py to mace-gaussian in quickstart.md, README.md, and CLAUDE.md
 
 ## Progress
 
