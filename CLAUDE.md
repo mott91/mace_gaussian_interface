@@ -10,19 +10,19 @@ See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for adding calculators, metrics, 
 ```bash
 # Setup
 uv sync && source .venv/bin/activate
-python cli.py diagnose                    # Check environment
+mace-gaussian diagnose                    # Check environment
 
 # Run calculations
-python cli.py run water.xyz               # Full workflow (recommended)
-python cli.py run water.xyz --skip-dft-baseline
-python cli.py run water.xyz --energy-calculators mace_mp --dipole-calculators espaloma
+mace-gaussian run water.xyz               # Full workflow (recommended)
+mace-gaussian run water.xyz --skip-dft-baseline
+mace-gaussian run water.xyz --energy-calculators mace_mp --dipole-calculators espaloma
 
 # Analysis
 python run_analysis.py water              # Anharmonic (overtones + combinations)
 python run_analysis_harmonic.py water     # Harmonic-only (fundamentals, mode matching)
 
 # Results
-python cli.py list                        # List all results
+mace-gaussian list                        # List all results
 python convert_all_chk_files.py           # Batch .chk → .fchk for mode matching
 
 # Code quality
@@ -67,5 +67,5 @@ Input (.xyz) → Geometry Optimization (MACE) → Frequency Calc (Gaussian + ML 
 
 - **Gaussian 16**: Must be in PATH as `g16`
 - **CUDA**: Required for GPU (CPU fallback works but slow)
-- **Dipole model**: `~/mace_gaussian/dipole_model/model_1.model`
+- **Dipole model**: `~/mace_gaussian/mace4ir_models/pretrained_models/model_1_dipole.model` (MACE4IR, 78 elements). Old narrow HCNO model at `dipole_model/model_1.model`. Override with `MACE_DIPOLE_MODEL_PATH`.
 - **MACE-OMOL-0**: Requires mace-torch >= 0.3.14
