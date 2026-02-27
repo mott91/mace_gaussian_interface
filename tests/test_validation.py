@@ -6,6 +6,7 @@ Uses unittest.mock to isolate from real system state (g16 availability, CUDA, et
 from __future__ import annotations
 
 import json
+import warnings
 from pathlib import Path
 from unittest.mock import patch
 
@@ -251,3 +252,108 @@ class TestCollectVersionMetadata:
         # This will raise TypeError if any value is not serializable
         serialized = json.dumps(meta)
         assert isinstance(serialized, str)
+
+
+# ---------------------------------------------------------------------------
+# detect_device warning (ERR-03)
+# ---------------------------------------------------------------------------
+
+
+class TestDetectDeviceWarning:
+    """Tests that detect_device() emits CUDANotAvailableWarning (ERR-03)."""
+
+    def test_emits_warning_when_cuda_unavailable(self):
+        """CUDANotAvailableWarning is issued when CUDA is not available."""
+        from unittest.mock import patch
+
+        from mace_gaussian.utils.exceptions import CUDANotAvailableWarning
+
+        with patch("torch.cuda.is_available", return_value=False):  # noqa: SIM117
+            with warnings.catch_warnings(record=True) as w:
+                warnings.simplefilter("always")
+                result = detect_device()
+                assert result == "cpu"
+                warning_categories = [x.category for x in w]
+                assert CUDANotAvailableWarning in warning_categories
+
+    def test_no_warning_when_cuda_available(self):
+        """No CUDANotAvailableWarning is emitted when CUDA is available."""
+        from unittest.mock import patch
+
+        from mace_gaussian.utils.exceptions import CUDANotAvailableWarning
+
+        with patch("torch.cuda.get_device_name", return_value="RTX 2070"):  # noqa: SIM117
+            with patch("torch.cuda.is_available", return_value=True):
+                with warnings.catch_warnings(record=True) as w:
+                    warnings.simplefilter("always")
+                    result = detect_device()
+                    assert result == "cuda"
+                    cuda_warnings = [
+                        x for x in w if issubclass(x.category, CUDANotAvailableWarning)
+                    ]
+                    assert len(cuda_warnings) == 0
+
+
+# ---------------------------------------------------------------------------
+# cli env var resolution (ERR-04)
+# ---------------------------------------------------------------------------
+
+
+class TestCliEnvVarResolution:
+    """Tests that cli.py resolves env var paths before prerequisite checks (ERR-04)."""
+
+    def test_dipole_model_path_resolved_from_env(self, tmp_path):
+        """validate_all_prerequisites is called with resolved MACE_DIPOLE_MODEL_PATH."""
+        import os
+        from unittest.mock import patch
+
+        from click.testing import CliRunner
+
+        from mace_gaussian.cli import run
+
+        model_file = tmp_path / "model.model"
+        model_file.write_text("dummy")
+        script_file = tmp_path / "helper.py"
+        script_file.write_text("# helper")
+
+        runner = CliRunner()
+        with runner.isolated_filesystem():
+            # Create a dummy xyz file
+            xyz = Path("water.xyz")
+            xyz.write_text("3\nwater\nO 0 0 0\nH 0 1 0\nH 0 0 1\n")
+
+            captured_args = {}
+
+            def mock_validate(**kwargs):
+                captured_args.update(kwargs)
+                # Raise to stop execution early (we only test validate call)
+                from mace_gaussian.utils.exceptions import PrerequisiteError
+
+                raise PrerequisiteError("stop")
+
+            with (
+                patch.dict(
+                    os.environ,
+                    {
+                        "MACE_DIPOLE_MODEL_PATH": str(model_file),
+                        "MACE_HELPER_SCRIPT_PATH": str(script_file),
+                    },
+                ),
+                patch("mace_gaussian.utils.validation.shutil.which", return_value="/usr/bin/g16"),
+                patch(
+                    "mace_gaussian.cli.validate_all_prerequisites",
+                    side_effect=mock_validate,
+                ),
+                patch(
+                    "mace_gaussian.cli.validate_xyz_file",
+                    return_value={"n_atoms": 3, "symbols": ["O", "H", "H"]},
+                ),
+            ):
+                runner.invoke(run, ["water.xyz"])
+
+            assert captured_args.get("dipole_model_path") == str(model_file), (
+                f"Expected resolved path, got: {captured_args.get('dipole_model_path')}"
+            )
+            assert captured_args.get("helper_script_path") == str(script_file), (
+                f"Expected resolved path, got: {captured_args.get('helper_script_path')}"
+            )

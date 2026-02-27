@@ -11,7 +11,7 @@ import json
 import logging
 import shutil
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -73,7 +73,7 @@ class ResultsManager:
         molecule_name: str,
         energy_calculator: str,
         dipole_calculator: str,
-        timestamp: Optional[str] = None,
+        timestamp: str | None = None,
     ) -> Path:
         """Create directory for frequency calculation results."""
         mol_dir = self.create_molecule_directory(molecule_name)
@@ -171,12 +171,12 @@ class ResultsManager:
         calculator_type: str,
         frequencies_data: dict[str, Any],
         energy: float,
-        dipole: Optional[dict[str, Any]],
+        dipole: dict[str, Any] | None,
         runtime: float,
-        gaussian_log: Optional[str] = None,
-        gaussian_gjf: Optional[str] = None,
-        timestamp: Optional[str] = None,
-        calculation_parameters: Optional[dict[str, Any]] = None,
+        gaussian_log: str | None = None,
+        gaussian_gjf: str | None = None,
+        timestamp: str | None = None,
+        calculation_parameters: dict[str, Any] | None = None,
     ):
         """
         Save frequency calculation results with overtones and combination bands.

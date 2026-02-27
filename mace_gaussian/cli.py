@@ -10,10 +10,18 @@ Usage:
 
 import json
 import logging
+import os
 import sys
 from pathlib import Path
 
 import click
+
+from mace_gaussian.utils.exceptions import InputValidationError, PrerequisiteError
+from mace_gaussian.utils.validation import (
+    detect_device,
+    validate_all_prerequisites,
+    validate_xyz_file,
+)
 
 try:
     from rdkit import RDLogger
@@ -90,14 +98,6 @@ def run(
 
     input_path = Path(input_file)
 
-    # Validate prerequisites before expensive imports
-    from mace_gaussian.utils.exceptions import InputValidationError, PrerequisiteError
-    from mace_gaussian.utils.validation import (
-        detect_device,
-        validate_all_prerequisites,
-        validate_xyz_file,
-    )
-
     # 1. Validate input file
     try:
         xyz_info = validate_xyz_file(str(input_path))
@@ -108,11 +108,28 @@ def run(
 
     # 2. Validate prerequisites
     try:
+        # Resolve env var paths — inline defaults match the calculator module defaults
+        # (not imported from calculators to avoid heavy-dep side effects at import time)
+        dipole_model_path = os.getenv(
+            "MACE_DIPOLE_MODEL_PATH",
+            str(
+                Path.home()
+                / "mace_gaussian"
+                / "mace4ir_models"
+                / "pretrained_models"
+                / "model_1_dipole.model"
+            ),
+        )
+        helper_script_path = os.getenv(
+            "MACE_HELPER_SCRIPT_PATH",
+            str(Path(__file__).parent / "gm_helper.py"),
+        )
+
         validate_all_prerequisites(
             check_gaussian=True,
             check_formchk_tool=True,
-            dipole_model_path=None,  # Checked later by calculators
-            helper_script_path=None,  # Checked later by workflow
+            dipole_model_path=dipole_model_path,
+            helper_script_path=helper_script_path,
         )
         click.echo("Prerequisites OK: g16 found")
     except PrerequisiteError as e:
