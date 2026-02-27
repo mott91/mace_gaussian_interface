@@ -9,29 +9,29 @@ Requirements for the refactoring milestone. Each maps to roadmap phases.
 
 ### Testing
 
-- [ ] **TEST-01**: Parser unit tests exist for harmonic frequency extraction with committed .log fixtures
-- [ ] **TEST-02**: Parser unit tests exist for anharmonic frequency, overtone, and combination band extraction
-- [ ] **TEST-03**: FCHK parser unit tests exist with committed .fchk fixtures
-- [ ] **TEST-04**: Mode matching unit tests verify eigenvector overlap and mode pairing logic
-- [ ] **TEST-05**: Reference outputs for water molecule committed as regression baseline
-- [ ] **TEST-06**: Reference outputs for CH4 molecule committed as regression baseline
-- [ ] **TEST-07**: Test markers (@pytest.mark.gpu, @pytest.mark.gaussian) separate unit from integration tests
-- [ ] **TEST-08**: Acetic acid parser edge case has a dedicated test (reproduces known bug)
-- [ ] **TEST-09**: pytest-cov configured and reports coverage for core modules
+- [x] **TEST-01**: Parser unit tests exist for harmonic frequency extraction with committed .log fixtures
+- [x] **TEST-02**: Parser unit tests exist for anharmonic frequency, overtone, and combination band extraction
+- [x] **TEST-03**: FCHK parser unit tests exist with committed .fchk fixtures
+- [x] **TEST-04**: Mode matching unit tests verify eigenvector overlap and mode pairing logic
+- [x] **TEST-05**: Reference outputs for water molecule committed as regression baseline
+- [x] **TEST-06**: Reference outputs for CH4 molecule committed as regression baseline
+- [x] **TEST-07**: Test markers (@pytest.mark.gpu, @pytest.mark.gaussian) separate unit from integration tests
+- [x] **TEST-08**: Acetic acid parser edge case has a dedicated test (reproduces known bug)
+- [x] **TEST-09**: pytest-cov configured and reports coverage for core modules
 
 ### Error Handling
 
-- [ ] **ERR-01**: Gaussian parser raises explicit error with context when expected section is missing (not empty return)
-- [ ] **ERR-02**: Prerequisite validation checks Gaussian (g16), formchk, and dipole model file exist before starting calculations
-- [ ] **ERR-03**: CUDA availability checked at startup with clear warning on CPU fallback
-- [ ] **ERR-04**: Environment variables (MACE_DIPOLE_MODEL_PATH, MACE_HELPER_SCRIPT_PATH) validated at startup
-- [ ] **ERR-05**: Input .xyz file validated for basic sanity (exists, parseable, reasonable atom count)
+- [x] **ERR-01**: Gaussian parser raises explicit error with context when expected section is missing (not empty return)
+- [x] **ERR-02**: Prerequisite validation checks Gaussian (g16), formchk, and dipole model file exist before starting calculations
+- [x] **ERR-03**: CUDA availability checked at startup with clear warning on CPU fallback
+- [x] **ERR-04**: Environment variables (MACE_DIPOLE_MODEL_PATH, MACE_HELPER_SCRIPT_PATH) validated at startup
+- [x] **ERR-05**: Input .xyz file validated for basic sanity (exists, parseable, reasonable atom count)
 - [x] **ERR-06**: Subprocess timeout added to Gaussian process to prevent indefinite hangs
 
 ### Code Structure
 
-- [ ] **STRUCT-01**: Utility functions (unit conversions, validation) extracted from gm_main.py into separate modules
-- [ ] **STRUCT-02**: DipoleCalculator classes extracted from gm_main.py into calculators/ package
+- [x] **STRUCT-01**: Utility functions (unit conversions, validation) extracted from gm_main.py into separate modules
+- [x] **STRUCT-02**: DipoleCalculator classes extracted from gm_main.py into calculators/ package
 - [x] **STRUCT-03**: MACE module monkey-patching replaced with safe loading pattern (lazy imports or process isolation)
 - [x] **STRUCT-04**: Gaussian I/O functions extracted from gm_main.py into gaussian/ package
 - [x] **STRUCT-05**: ZMQ server context manager extracted into dedicated module
@@ -43,10 +43,10 @@ Requirements for the refactoring milestone. Each maps to roadmap phases.
 
 ### Reproducibility
 
-- [ ] **REPR-01**: Results JSON includes tool version, Python version, and MACE model version
-- [ ] **REPR-02**: Calculation parameters captured alongside results
-- [ ] **REPR-03**: Optimization step count tracked properly (not hardcoded to 0)
-- [ ] **REPR-04**: uv.lock committed and documented as reproducibility mechanism
+- [x] **REPR-01**: Results JSON includes tool version, Python version, and MACE model version
+- [x] **REPR-02**: Calculation parameters captured alongside results
+- [x] **REPR-03**: Optimization step count tracked properly (not hardcoded to 0)
+- [x] **REPR-04**: uv.lock committed and documented as reproducibility mechanism
 
 ### CI/CD
 
@@ -98,23 +98,23 @@ Deferred to future milestone. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TEST-01 | Phase 1 | Pending |
-| TEST-02 | Phase 1 | Pending |
-| TEST-03 | Phase 1 | Pending |
-| TEST-04 | Phase 1 | Pending |
-| TEST-05 | Phase 1 | Pending |
-| TEST-06 | Phase 1 | Pending |
-| TEST-07 | Phase 1 | Pending |
-| TEST-08 | Phase 1 | Pending |
-| TEST-09 | Phase 1 | Pending |
-| ERR-01 | Phase 2 | Pending |
-| ERR-02 | Phase 2 | Pending |
-| ERR-03 | Phase 2 | Pending |
-| ERR-04 | Phase 2 | Pending |
-| ERR-05 | Phase 2 | Pending |
+| TEST-01 | Phase 1 | Complete |
+| TEST-02 | Phase 1 | Complete |
+| TEST-03 | Phase 1 | Complete |
+| TEST-04 | Phase 1 | Complete |
+| TEST-05 | Phase 1 | Complete |
+| TEST-06 | Phase 1 | Complete |
+| TEST-07 | Phase 1 | Complete |
+| TEST-08 | Phase 1 | Complete |
+| TEST-09 | Phase 1 | Complete |
+| ERR-01 | Phase 2 | Complete |
+| ERR-02 | Phase 2 | Complete |
+| ERR-03 | Phase 11 (gap closure) | Pending |
+| ERR-04 | Phase 11 (gap closure) | Pending |
+| ERR-05 | Phase 2 | Complete |
 | ERR-06 | Phase 2 | Complete |
-| STRUCT-01 | Phase 3 | Pending |
-| STRUCT-02 | Phase 4 | Pending |
+| STRUCT-01 | Phase 3 | Complete |
+| STRUCT-02 | Phase 4 | Complete |
 | STRUCT-03 | Phase 5 | Complete |
 | STRUCT-04 | Phase 6 | Complete |
 | STRUCT-05 | Phase 6 | Complete |
@@ -123,10 +123,10 @@ Deferred to future milestone. Tracked but not in current roadmap.
 | STRUCT-08 | Phase 8 | Complete |
 | STRUCT-09 | Phase 8 | Complete |
 | STRUCT-10 | Phase 8 | Complete |
-| REPR-01 | Phase 2 | Pending |
-| REPR-02 | Phase 2 | Pending |
-| REPR-03 | Phase 2 | Pending |
-| REPR-04 | Phase 1 | Pending |
+| REPR-01 | Phase 2 | Complete |
+| REPR-02 | Phase 11 (gap closure) | Pending |
+| REPR-03 | Phase 2 | Complete |
+| REPR-04 | Phase 1 | Complete |
 | CI-01 | Phase 9 | Complete |
 | CI-02 | Phase 9 | Complete |
 | CI-03 | Phase 9 | Complete |
@@ -144,4 +144,4 @@ Deferred to future milestone. Tracked but not in current roadmap.
 
 ---
 *Requirements defined: 2026-02-16*
-*Last updated: 2026-02-16 after roadmap creation (traceability confirmed)*
+*Last updated: 2026-02-27 — v1.0 audit confirmed 38/38 satisfied; stale checkboxes corrected; ERR-03, ERR-04, REPR-02 assigned to Phase 11 gap closure*

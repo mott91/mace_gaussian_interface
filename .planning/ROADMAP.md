@@ -12,16 +12,18 @@ Transform MACE-Gaussian from a functional thesis tool into a distribution-ready 
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Testing Infrastructure & Characterization** - Establish pytest suite with fixtures and reference outputs
-- [ ] **Phase 2: Error Handling & Input Validation** - Add defensive programming and prerequisite checking
-- [ ] **Phase 3: Extract Utilities & Conventions** - Move pure functions and establish code conventions
-- [ ] **Phase 4: Extract Calculator Classes** - Modularize calculator implementations into dedicated package
+- [x] **Phase 1: Testing Infrastructure & Characterization** - Establish pytest suite with fixtures and reference outputs (completed 2026-02-27)
+- [x] **Phase 2: Error Handling & Input Validation** - Add defensive programming and prerequisite checking (completed 2026-02-27)
+- [x] **Phase 3: Extract Utilities & Conventions** - Move pure functions and establish code conventions (completed 2026-02-27)
+- [x] **Phase 4: Extract Calculator Classes** - Modularize calculator implementations into dedicated package (completed 2026-02-27)
 - [x] **Phase 5: Replace MACE Module Monkey-Patching** - Fix highest-risk fragility with safe loading pattern (completed 2026-02-19)
 - [x] **Phase 6: Extract Gaussian I/O & ZMQ Server** - Modularize Gaussian integration components (completed 2026-02-20)
 - [x] **Phase 7: Extract Workflow Orchestrator** - Create thin coordinator for pipeline phases (completed 2026-02-24)
 - [x] **Phase 8: Package Structure & Reorganization** - Reorganize into proper mace_gaussian/ package (completed 2026-02-24)
 - [x] **Phase 9: CI/CD & Distribution Prep** - Automate testing and prepare for distribution (completed 2026-02-26)
 - [x] **Phase 10: Documentation** - Complete user docs and distribution materials (completed 2026-02-26)
+- [ ] **Phase 11: Integration Wiring Fixes** - Close 3 non-critical wiring gaps from v1.0 audit (Gap Closure)
+- [ ] **Phase 12: Distribution Polish** - Fix placeholder URLs, align CI versions, update docs and stale metadata (Gap Closure)
 
 ## Phase Details
 
@@ -38,10 +40,10 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 4 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Test infrastructure: pytest config, fixtures, conftest.py, .gitignore updates, uv.lock
-- [ ] 01-02-PLAN.md — Gaussian log parser tests (harmonic, anharmonic, overtones, combination bands, acoh bug)
-- [ ] 01-03-PLAN.md — FCHK parser and mode matching tests
-- [ ] 01-04-PLAN.md — Reference output regression tests and coverage verification
+- [x] 01-01-PLAN.md — Test infrastructure: pytest config, fixtures, conftest.py, .gitignore updates, uv.lock
+- [x] 01-02-PLAN.md — Gaussian log parser tests (harmonic, anharmonic, overtones, combination bands, acoh bug)
+- [x] 01-03-PLAN.md — FCHK parser and mode matching tests
+- [x] 01-04-PLAN.md — Reference output regression tests and coverage verification
 
 ### Phase 2: Error Handling & Input Validation
 **Goal**: Add defensive programming that makes failures explicit and catches problems before multi-hour calculations
@@ -56,9 +58,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Exception hierarchy and validation module with tests
-- [ ] 02-02-PLAN.md — Parser error hardening, optimization step tracking, and results metadata
-- [ ] 02-03-PLAN.md — CLI validation integration, subprocess timeout, and version fix
+- [x] 02-01-PLAN.md — Exception hierarchy and validation module with tests
+- [x] 02-02-PLAN.md — Parser error hardening, optimization step tracking, and results metadata
+- [x] 02-03-PLAN.md — CLI validation integration, subprocess timeout, and version fix
 
 ### Phase 3: Extract Utilities & Conventions
 **Goal**: Extract pure functions from gm_main.py and establish documented code conventions
@@ -72,8 +74,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Create utils/ package with units.py, move exceptions.py and validation.py, update all imports
-- [ ] 03-02-PLAN.md — Move ResultsManager to utils/results.py, add unit tests, document conventions
+- [x] 03-01-PLAN.md — Create utils/ package with units.py, move exceptions.py and validation.py, update all imports
+- [x] 03-02-PLAN.md — Move ResultsManager to utils/results.py, add unit tests, document conventions
 
 ### Phase 4: Extract Calculator Classes
 **Goal**: Move calculator implementations from gm_main.py into dedicated calculators/ package
@@ -86,8 +88,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Extract calculator hierarchy into calculators/ package, update gm_main.py imports
-- [ ] 04-02-PLAN.md — Unit tests for calculator interface, factory pattern, and config constants
+- [x] 04-01-PLAN.md — Extract calculator hierarchy into calculators/ package, update gm_main.py imports
+- [x] 04-02-PLAN.md — Unit tests for calculator interface, factory pattern, and config constants
 
 ### Phase 5: Replace MACE Module Monkey-Patching
 **Goal**: Replace sys.modules manipulation with safe lazy import isolation pattern
@@ -185,9 +187,36 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 10-01-PLAN.md — Fix CLI placeholder help text (compare/export) and add quickstart link to README
-- [ ] 10-02-PLAN.md — Create docs/quickstart.md and docs/examples/water/ worked example
-- [ ] 10-03-PLAN.md — Write docs/methods.md thesis methods section
+- [x] 10-01-PLAN.md — Fix CLI placeholder help text (compare/export) and add quickstart link to README
+- [x] 10-02-PLAN.md — Create docs/quickstart.md and docs/examples/water/ worked example
+- [x] 10-03-PLAN.md — Write docs/methods.md thesis methods section
+
+### Phase 11: Integration Wiring Fixes
+**Goal**: Close 3 non-critical wiring gaps identified in v1.0 audit to improve functional correctness
+**Requirements**: REPR-02, ERR-03, ERR-04 (gap closure)
+**Gap Closure:** Closes integration wiring gaps from v1.0 audit
+**Success Criteria** (what must be TRUE):
+  1. `calculation_parameters` in results JSON is populated with calculator config (not always `{}`)
+  2. `validate_all_prerequisites()` is called with resolved env var paths at CLI startup
+  3. `detect_device()` emits `warnings.warn(..., CUDANotAvailableWarning)` (catchable programmatically)
+  4. `GaussianRunError` and `GaussianTimeoutError` are importable from `mace_gaussian.utils`
+
+Plans:
+- [ ] 11-01-PLAN.md — Wire calculation_parameters in workflow.py → ResultsManager; fix cli.py env var path resolution; emit CUDANotAvailableWarning; export Gaussian errors from utils/__init__.py
+
+### Phase 12: Distribution Polish
+**Goal**: Complete distribution-readiness: real GitHub URLs, aligned CI versions, correct docs entry point, and clean planning metadata
+**Requirements**: (cross-cutting polish — no new requirements)
+**Gap Closure:** Closes packaging, documentation, and metadata gaps from v1.0 audit
+**Success Criteria** (what must be TRUE):
+  1. `pyproject.toml` GitHub URLs reference the real repository (not `yourusername/mace-gaussian-interface`)
+  2. CI ruff pin matches dev dep floor (no version skew)
+  3. Docs show `mace-gaussian` entry point, not `python cli.py`
+  4. All 20 stale REQUIREMENTS.md checkboxes updated to `[x]`
+  5. ROADMAP.md progress table accurate for all phases
+
+Plans:
+- [ ] 12-01-PLAN.md — Fix pyproject.toml URLs; align ruff CI pin; update docs entry point; update stale planning metadata
 
 ## Progress
 
@@ -196,13 +225,15 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Testing Infrastructure & Characterization | 0/4 | Planning complete | - |
-| 2. Error Handling & Input Validation | 0/3 | Planning complete | - |
-| 3. Extract Utilities & Conventions | 0/2 | Planning complete | - |
-| 4. Extract Calculator Classes | 0/2 | Planning complete | - |
-| 5. Replace MACE Module Monkey-Patching | 0/2 | Complete    | 2026-02-19 |
-| 6. Extract Gaussian I/O & ZMQ Server | 5/5 | Complete   | 2026-02-20 |
-| 7. Extract Workflow Orchestrator | 2/2 | Complete   | 2026-02-24 |
-| 8. Package Structure & Reorganization | 3/3 | Complete   | 2026-02-24 |
-| 9. CI/CD & Distribution Prep | 3/3 | Complete   | 2026-02-26 |
-| 10. Documentation | 4/4 | Complete    | 2026-02-26 |
+| 1. Testing Infrastructure & Characterization | 4/4 | Complete | 2026-02-27 |
+| 2. Error Handling & Input Validation | 3/3 | Complete | 2026-02-27 |
+| 3. Extract Utilities & Conventions | 2/2 | Complete | 2026-02-27 |
+| 4. Extract Calculator Classes | 2/2 | Complete | 2026-02-27 |
+| 5. Replace MACE Module Monkey-Patching | 2/2 | Complete | 2026-02-19 |
+| 6. Extract Gaussian I/O & ZMQ Server | 5/5 | Complete | 2026-02-20 |
+| 7. Extract Workflow Orchestrator | 2/2 | Complete | 2026-02-24 |
+| 8. Package Structure & Reorganization | 3/3 | Complete | 2026-02-24 |
+| 9. CI/CD & Distribution Prep | 3/3 | Complete | 2026-02-26 |
+| 10. Documentation | 4/4 | Complete | 2026-02-26 |
+| 11. Integration Wiring Fixes (Gap Closure) | 0/1 | Pending | - |
+| 12. Distribution Polish (Gap Closure) | 0/1 | Pending | - |
