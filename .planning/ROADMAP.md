@@ -23,7 +23,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 9: CI/CD & Distribution Prep** - Automate testing and prepare for distribution (completed 2026-02-26)
 - [x] **Phase 10: Documentation** - Complete user docs and distribution materials (completed 2026-02-26)
 - [x] **Phase 11: Integration Wiring Fixes** - Close 3 non-critical wiring gaps from v1.0 audit (Gap Closure) (completed 2026-02-27)
-- [ ] **Phase 12: Distribution Polish** - Fix placeholder URLs, align CI versions, update docs and stale metadata (Gap Closure)
+- [x] **Phase 12: Distribution Polish** - Fix placeholder URLs, align CI versions, update docs and stale metadata (Gap Closure) (completed 2026-02-27)
 
 ## Phase Details
 
@@ -237,4 +237,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 9. CI/CD & Distribution Prep | 3/3 | Complete | 2026-02-26 |
 | 10. Documentation | 4/4 | Complete | 2026-02-26 |
 | 11. Integration Wiring Fixes (Gap Closure) | 1/1 | Complete    | 2026-02-27 |
-| 12. Distribution Polish (Gap Closure) | 0/1 | Pending | - |
+| 12. Distribution Polish (Gap Closure) | 1/1 | Complete   | 2026-02-27 |

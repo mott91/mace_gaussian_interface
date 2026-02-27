@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-02-27T10:43:08.569Z"
+last_updated: "2026-02-27T10:59:35.767Z"
 progress:
   total_phases: 12
-  completed_phases: 11
-  total_plans: 31
-  completed_plans: 31
+  completed_phases: 12
+  total_plans: 32
+  completed_plans: 32
 ---
 
 # Project State
@@ -22,10 +22,10 @@ See: .planning/PROJECT.md (updated 2026-02-16)
 
 ## Current Position
 
-Phase: 11 of 11 (Integration Wiring Fixes)
+Phase: 12 of 12 (Distribution Polish)
 Plan: 1 of 1 in current phase -- COMPLETE
-Status: Phase 11 COMPLETE — 1/1 plans done
-Last activity: 2026-02-27 — Completed 11-01: four surgical wiring fixes (GaussianRunError/GaussianTimeoutError exports, CUDANotAvailableWarning emission, calculation_parameters wiring, CLI env var path resolution)
+Status: Phase 12 COMPLETE — 1/1 plans done
+Last activity: 2026-02-27 — Completed 12-01: four distribution-readiness gaps closed (placeholder URLs, CI ruff pin, entry-point docs in quickstart.md/README.md/CLAUDE.md)
 
 Progress: [██████████] 100%
 
@@ -69,6 +69,7 @@ Progress: [██████████] 100%
 | Phase 10 P03 | 2 | 1 tasks | 1 files |
 | Phase 10 P04 | 1 | 2 tasks | 1 files |
 | Phase 11 P01 | 4 | 3 tasks | 6 files |
+| Phase 12-distribution-polish P01 | 2 | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -150,6 +151,9 @@ Recent decisions affecting current work:
 - [Phase 11-01]: Use # noqa: SIM117 on nested with statements in tests — parenthesized with syntax requires Python 3.10+, system Python 3.8 runner would fail
 - [Phase 11-01]: Inline env var defaults in cli.py (not imported from calculators) to avoid DGL/espaloma heavy dep loads at CLI import time
 - [Phase 11-01]: warnings.warn(stacklevel=2) in detect_device() — warning origin points to caller, not validation.py internal
+- [Phase 12-01]: Replace yourusername placeholder URLs with mott91/mace_gaussian_interface in pyproject.toml [project.urls]
+- [Phase 12-01]: Use ruff>=0.9.0 floor in CI (not exact pin ==0.15.1) to match pyproject.toml dev dep floor and remove maintenance burden
+- [Phase 12-01]: Replace all python cli.py with mace-gaussian in quickstart.md, README.md, CLAUDE.md; preserve python run_analysis.py/run_analysis_harmonic.py unchanged
 
 ### Pending Todos
 
@@ -184,5 +188,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-27 (phase execution)
-Stopped at: Completed 11-01-PLAN.md (integration wiring fixes — Phase 11 all plans done)
+Stopped at: Completed 12-01-PLAN.md (distribution polish — placeholder URLs fixed, CI ruff pin aligned, entry-point docs updated)
 Resume file: None
