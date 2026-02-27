@@ -109,8 +109,8 @@ Deferred to future milestone. Tracked but not in current roadmap.
 | TEST-09 | Phase 1 | Complete |
 | ERR-01 | Phase 2 | Complete |
 | ERR-02 | Phase 2 | Complete |
-| ERR-03 | Phase 11 (gap closure) | Pending |
-| ERR-04 | Phase 11 (gap closure) | Pending |
+| ERR-03 | Phase 11 (gap closure) | Complete |
+| ERR-04 | Phase 11 (gap closure) | Complete |
 | ERR-05 | Phase 2 | Complete |
 | ERR-06 | Phase 2 | Complete |
 | STRUCT-01 | Phase 3 | Complete |
@@ -124,7 +124,7 @@ Deferred to future milestone. Tracked but not in current roadmap.
 | STRUCT-09 | Phase 8 | Complete |
 | STRUCT-10 | Phase 8 | Complete |
 | REPR-01 | Phase 2 | Complete |
-| REPR-02 | Phase 11 (gap closure) | Pending |
+| REPR-02 | Phase 11 (gap closure) | Complete |
 | REPR-03 | Phase 2 | Complete |
 | REPR-04 | Phase 1 | Complete |
 | CI-01 | Phase 9 | Complete |

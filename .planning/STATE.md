@@ -22,10 +22,10 @@ See: .planning/PROJECT.md (updated 2026-02-16)
 
 ## Current Position
 
-Phase: 10 of 10 (Documentation)
-Plan: 4 of 4 in current phase -- COMPLETE
-Status: Phase 10 COMPLETE — 4/4 plans done
-Last activity: 2026-02-26 — Completed 10-04: compare/export runtime body fix (COMING SOON banners replaced with honest 'Not yet implemented' messages, DOC-04 satisfied)
+Phase: 11 of 11 (Integration Wiring Fixes)
+Plan: 1 of 1 in current phase -- COMPLETE
+Status: Phase 11 COMPLETE — 1/1 plans done
+Last activity: 2026-02-27 — Completed 11-01: four surgical wiring fixes (GaussianRunError/GaussianTimeoutError exports, CUDANotAvailableWarning emission, calculation_parameters wiring, CLI env var path resolution)
 
 Progress: [██████████] 100%
 
@@ -68,6 +68,7 @@ Progress: [██████████] 100%
 | Phase 10 P01 | 2 | 2 tasks | 2 files |
 | Phase 10 P03 | 2 | 1 tasks | 1 files |
 | Phase 10 P04 | 1 | 2 tasks | 1 files |
+| Phase 11 P01 | 4 | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -145,6 +146,10 @@ Recent decisions affecting current work:
 - [Phase 10-02]: expected_output/ uses JSON only (no .chk/.fchk/.log) — portable, system-independent, human-readable reference outputs
 - [Phase 10-02]: Plots sourced from anharmonic analysis_results/ to match the quickstart workflow path
 - [Phase 10-04]: String literals in compare() message split across lines to stay within 100-char ruff limit while preserving output text
+- [Phase 11-01]: Move validation imports to module level in cli.py — local imports inside function body are not patchable as module attributes in tests
+- [Phase 11-01]: Use # noqa: SIM117 on nested with statements in tests — parenthesized with syntax requires Python 3.10+, system Python 3.8 runner would fail
+- [Phase 11-01]: Inline env var defaults in cli.py (not imported from calculators) to avoid DGL/espaloma heavy dep loads at CLI import time
+- [Phase 11-01]: warnings.warn(stacklevel=2) in detect_device() — warning origin points to caller, not validation.py internal
 
 ### Pending Todos
 
@@ -178,6 +183,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-26 (phase execution)
-Stopped at: Completed 10-04-PLAN.md (compare/export runtime body fix — Phase 10 all plans done)
+Last session: 2026-02-27 (phase execution)
+Stopped at: Completed 11-01-PLAN.md (integration wiring fixes — Phase 11 all plans done)
 Resume file: None
