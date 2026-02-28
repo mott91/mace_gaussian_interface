@@ -1,240 +1,31 @@
-# Roadmap: MACE-Gaussian Refactoring & Distribution
+# Roadmap: MACE-Gaussian Interface
 
-## Overview
+## Milestones
 
-Transform MACE-Gaussian from a functional thesis tool into a distribution-ready scientific Python package. The journey starts with establishing a test suite to protect against regressions, adds defensive error handling, incrementally extracts components from the monolithic main module (with special care around MACE module loading), reorganizes into proper package structure, and culminates in CI/CD automation and comprehensive documentation. Each phase keeps the pipeline functional—no broken states—while building toward a package that other computational chemistry researchers can clone, install, and trust.
+- ✅ **v1.0 — Refactoring & Distribution** — Phases 1–12 (shipped 2026-02-28)
 
 ## Phases
 
-**Phase Numbering:**
-- Integer phases (1, 2, 3): Planned milestone work
-- Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
+<details>
+<summary>✅ v1.0 — Refactoring & Distribution (Phases 1–12) — SHIPPED 2026-02-28</summary>
 
-Decimal phases appear between their surrounding integers in numeric order.
+- [x] **Phase 1: Testing Infrastructure & Characterization** — 4/4 plans — completed 2026-02-27
+- [x] **Phase 2: Error Handling & Input Validation** — 3/3 plans — completed 2026-02-27
+- [x] **Phase 3: Extract Utilities & Conventions** — 2/2 plans — completed 2026-02-27
+- [x] **Phase 4: Extract Calculator Classes** — 2/2 plans — completed 2026-02-27
+- [x] **Phase 5: Replace MACE Module Monkey-Patching** — 2/2 plans — completed 2026-02-19
+- [x] **Phase 6: Extract Gaussian I/O & ZMQ Server** — 5/5 plans — completed 2026-02-20
+- [x] **Phase 7: Extract Workflow Orchestrator** — 2/2 plans — completed 2026-02-24
+- [x] **Phase 8: Package Structure & Reorganization** — 3/3 plans — completed 2026-02-24
+- [x] **Phase 9: CI/CD & Distribution Prep** — 3/3 plans — completed 2026-02-26
+- [x] **Phase 10: Documentation** — 4/4 plans — completed 2026-02-26
+- [x] **Phase 11: Integration Wiring Fixes (Gap Closure)** — 1/1 plan — completed 2026-02-27
+- [x] **Phase 12: Distribution Polish (Gap Closure)** — 1/1 plan — completed 2026-02-27
 
-- [x] **Phase 1: Testing Infrastructure & Characterization** - Establish pytest suite with fixtures and reference outputs (completed 2026-02-27)
-- [x] **Phase 2: Error Handling & Input Validation** - Add defensive programming and prerequisite checking (completed 2026-02-27)
-- [x] **Phase 3: Extract Utilities & Conventions** - Move pure functions and establish code conventions (completed 2026-02-27)
-- [x] **Phase 4: Extract Calculator Classes** - Modularize calculator implementations into dedicated package (completed 2026-02-27)
-- [x] **Phase 5: Replace MACE Module Monkey-Patching** - Fix highest-risk fragility with safe loading pattern (completed 2026-02-19)
-- [x] **Phase 6: Extract Gaussian I/O & ZMQ Server** - Modularize Gaussian integration components (completed 2026-02-20)
-- [x] **Phase 7: Extract Workflow Orchestrator** - Create thin coordinator for pipeline phases (completed 2026-02-24)
-- [x] **Phase 8: Package Structure & Reorganization** - Reorganize into proper mace_gaussian/ package (completed 2026-02-24)
-- [x] **Phase 9: CI/CD & Distribution Prep** - Automate testing and prepare for distribution (completed 2026-02-26)
-- [x] **Phase 10: Documentation** - Complete user docs and distribution materials (completed 2026-02-26)
-- [x] **Phase 11: Integration Wiring Fixes** - Close 3 non-critical wiring gaps from v1.0 audit (Gap Closure) (completed 2026-02-27)
-- [x] **Phase 12: Distribution Polish** - Fix placeholder URLs, align CI versions, update docs and stale metadata (Gap Closure) (completed 2026-02-27)
+Full archive: `.planning/milestones/v1.0-ROADMAP.md`
 
-## Phase Details
+</details>
 
-### Phase 1: Testing Infrastructure & Characterization
-**Goal**: Establish comprehensive test suite that protects against regressions during refactoring
-**Depends on**: Nothing (first phase)
-**Requirements**: TEST-01, TEST-02, TEST-03, TEST-04, TEST-05, TEST-06, TEST-07, TEST-08, TEST-09, REPR-04
-**Success Criteria** (what must be TRUE):
-  1. User can run pytest and see passing tests for Gaussian parsers using committed fixtures
-  2. Water and CH4 reference outputs are committed and can be regenerated to verify reproducibility
-  3. Test markers allow separating unit tests (run in CI) from integration tests (require GPU/Gaussian)
-  4. Acetic acid parser bug is captured in a test that documents expected vs actual behavior
-  5. Coverage report shows which code paths are tested vs untested
-**Plans**: 4 plans
+---
 
-Plans:
-- [x] 01-01-PLAN.md — Test infrastructure: pytest config, fixtures, conftest.py, .gitignore updates, uv.lock
-- [x] 01-02-PLAN.md — Gaussian log parser tests (harmonic, anharmonic, overtones, combination bands, acoh bug)
-- [x] 01-03-PLAN.md — FCHK parser and mode matching tests
-- [x] 01-04-PLAN.md — Reference output regression tests and coverage verification
-
-### Phase 2: Error Handling & Input Validation
-**Goal**: Add defensive programming that makes failures explicit and catches problems before multi-hour calculations
-**Depends on**: Phase 1
-**Requirements**: ERR-01, ERR-02, ERR-03, ERR-04, ERR-05, ERR-06, REPR-01, REPR-02, REPR-03
-**Success Criteria** (what must be TRUE):
-  1. Parser failures raise exceptions with context instead of returning empty data silently
-  2. User gets clear error at startup if Gaussian, formchk, or dipole model are missing
-  3. CUDA availability is checked and logged with warning if falling back to CPU
-  4. Results JSON includes version metadata (tool version, Python version, model versions, calculation parameters)
-  5. Optimization step count is tracked correctly and appears in results
-**Plans**: 3 plans
-
-Plans:
-- [x] 02-01-PLAN.md — Exception hierarchy and validation module with tests
-- [x] 02-02-PLAN.md — Parser error hardening, optimization step tracking, and results metadata
-- [x] 02-03-PLAN.md — CLI validation integration, subprocess timeout, and version fix
-
-### Phase 3: Extract Utilities & Conventions
-**Goal**: Extract pure functions from gm_main.py and establish documented code conventions
-**Depends on**: Phase 2
-**Requirements**: STRUCT-01
-**Success Criteria** (what must be TRUE):
-  1. Unit conversion functions exist in utils/units.py and are tested
-  2. Input validation functions exist in utils/validation.py and are reused consistently
-  3. ResultsManager is extracted to utils/results.py
-  4. Code conventions are documented (naming, error handling, units) and followed
-**Plans**: 2 plans
-
-Plans:
-- [x] 03-01-PLAN.md — Create utils/ package with units.py, move exceptions.py and validation.py, update all imports
-- [x] 03-02-PLAN.md — Move ResultsManager to utils/results.py, add unit tests, document conventions
-
-### Phase 4: Extract Calculator Classes
-**Goal**: Move calculator implementations from gm_main.py into dedicated calculators/ package
-**Depends on**: Phase 3
-**Requirements**: STRUCT-02
-**Success Criteria** (what must be TRUE):
-  1. DipoleCalculator base class and implementations (espaloma, mace_ml, xtb) exist in calculators/ package
-  2. Calculator factory pattern is cleanly separated and tested
-  3. Full pipeline still runs on water molecule using all 4 model combinations
-**Plans**: 2 plans
-
-Plans:
-- [x] 04-01-PLAN.md — Extract calculator hierarchy into calculators/ package, update gm_main.py imports
-- [x] 04-02-PLAN.md — Unit tests for calculator interface, factory pattern, and config constants
-
-### Phase 5: Replace MACE Module Monkey-Patching
-**Goal**: Replace sys.modules manipulation with safe lazy import isolation pattern
-**Depends on**: Phase 4
-**Requirements**: STRUCT-03
-**Success Criteria** (what must be TRUE):
-  1. MACE standard and MACE dipole can be loaded independently without sys.modules cleanup
-  2. calculators/mace_loader.py provides safe loading mechanism tested in isolation
-  3. CUDA device placement is handled correctly across MACE variants
-  4. Full pipeline runs on water without cleanup_mace_modules() calls
-**Plans**: 2 plans
-
-Plans:
-- [ ] 05-01-PLAN.md — Create safe mace_loader.py with pickle_module remapping, update mace_ml.py import, add tests
-- [ ] 05-02-PLAN.md — Delete mace_calculators.py, clean up all references (CLAUDE.md, pyproject.toml, test mocks)
-
-### Phase 6: Extract Gaussian I/O & ZMQ Server
-**Goal**: Modularize Gaussian integration into focused components in gaussian/ package
-**Depends on**: Phase 5
-**Requirements**: STRUCT-04, STRUCT-05, STRUCT-07
-**Success Criteria** (what must be TRUE):
-  1. Gaussian I/O functions (parse_gaussian_input, write outputs) are in gaussian/io.py
-  2. GaussianLogParser and FCHK parser are in gaussian/parser.py and gaussian/fchk.py
-  3. ZMQ server is a context manager in gaussian/zmq_server.py with proper socket cleanup
-  4. Gaussian subprocess runner in gaussian/runner.py handles timeouts
-  5. Full pipeline still runs with modular Gaussian integration
-**Plans**: 5 plans
-
-Plans:
-- [ ] 06-01-PLAN.md — Add GaussianRunError/GaussianTimeoutError exceptions, create gaussian/io.py
-- [ ] 06-02-PLAN.md — Create gaussian/parser.py and gaussian/fchk.py (move top-level parser files)
-- [ ] 06-03-PLAN.md — Create gaussian/zmq_server.py with GaussianZMQServer class (LINGER=0 fix)
-- [ ] 06-04-PLAN.md — Create gaussian/runner.py with run_gaussian_with_zmq (SIGKILL timeout)
-- [ ] 06-05-PLAN.md — Wire everything: gaussian/__init__.py, update all callers, delete old files
-
-### Phase 7: Extract Workflow Orchestrator
-**Goal**: Create thin workflow.py that sequences pipeline phases by calling modular components
-**Depends on**: Phase 6
-**Requirements**: STRUCT-06
-**Success Criteria** (what must be TRUE):
-  1. workflow.py exists as the main entry point coordinating all pipeline phases
-  2. gm_main.py is deprecated or removed
-  3. CLI delegates to workflow.py functions
-  4. Full pipeline runs with new orchestrator on water and CH4
-**Plans**: 2 plans
-
-Plans:
-- [ ] 07-01-PLAN.md — Create workflow.py with all extracted pipeline functions and stage functions
-- [ ] 07-02-PLAN.md — Update cli.py to use workflow imports, inline print_diagnostics, delete gm_main.py
-
-### Phase 8: Package Structure & Reorganization
-**Goal**: Reorganize entire codebase into proper mace_gaussian/ package with clean imports
-**Depends on**: Phase 7
-**Requirements**: STRUCT-08, STRUCT-09, STRUCT-10
-**Success Criteria** (what must be TRUE):
-  1. Code is organized as mace_gaussian/ package with proper __init__.py files
-  2. Analysis modules are in mace_gaussian/analysis/ subpackage
-  3. CLI entry point in pyproject.toml aligns with package structure
-  4. All imports are relative within package, absolute from outside
-  5. Full pipeline runs from installed package location
-**Plans**: 3 plans
-
-Plans:
-- [ ] 08-01-PLAN.md — Create mace_gaussian/ package, move calculators/ gaussian/ utils/ subpackages, convert internal imports to relative
-- [ ] 08-02-PLAN.md — Move flat root files + create analysis/ subpackage, update imports, rewrite root shims, move scripts
-- [ ] 08-03-PLAN.md — Update pyproject.toml (entry points, packages, isort, coverage), update test imports, uv sync, verify full suite
-
-### Phase 9: CI/CD & Distribution Prep
-**Goal**: Automate testing, linting, and prepare infrastructure for distribution to other researchers
-**Depends on**: Phase 8
-**Requirements**: CI-01, CI-02, CI-03, CI-04
-**Success Criteria** (what must be TRUE):
-  1. GitHub Actions workflow runs ruff check and ruff format --check on every push
-  2. GitHub Actions runs pytest unit tests (no GPU/Gaussian) on every push
-  3. Ruff rules include B, SIM, PTH, RUF for better code quality
-  4. Install script or documented procedure exists for custom MACE packages
-  5. pytest-cov reports coverage in CI for core modules
-**Plans**: 3 plans
-
-Plans:
-- [x] 09-01-PLAN.md — Expand ruff rules to B/SIM/PTH/RUF, fix all 83 violations + 12 format files, fix stale test
-- [ ] 09-02-PLAN.md — Create .github/workflows/ci.yml with lint and test jobs
-- [ ] 09-03-PLAN.md — Rewrite README Installation section with explicit 5-step manual procedure
-
-### Phase 10: Documentation
-**Goal**: Provide complete documentation for installation, usage, and method description
-**Depends on**: Phase 9
-**Requirements**: DOC-01, DOC-02, DOC-03, DOC-04, DOC-05
-**Success Criteria** (what must be TRUE):
-  1. README includes step-by-step installation (including custom MACE packages)
-  2. Quickstart guide (clone -> install -> run water -> view results) is tested and works
-  3. Worked example with expected output is committed to repo
-  4. CLI help text is complete and accurate for all commands
-  5. Method description suitable for thesis methods section is available
-**Plans**: 3 plans
-
-Plans:
-- [x] 10-01-PLAN.md — Fix CLI placeholder help text (compare/export) and add quickstart link to README
-- [x] 10-02-PLAN.md — Create docs/quickstart.md and docs/examples/water/ worked example
-- [x] 10-03-PLAN.md — Write docs/methods.md thesis methods section
-
-### Phase 11: Integration Wiring Fixes
-**Goal**: Close 3 non-critical wiring gaps identified in v1.0 audit to improve functional correctness
-**Requirements**: REPR-02, ERR-03, ERR-04 (gap closure)
-**Gap Closure:** Closes integration wiring gaps from v1.0 audit
-**Success Criteria** (what must be TRUE):
-  1. `calculation_parameters` in results JSON is populated with calculator config (not always `{}`)
-  2. `validate_all_prerequisites()` is called with resolved env var paths at CLI startup
-  3. `detect_device()` emits `warnings.warn(..., CUDANotAvailableWarning)` (catchable programmatically)
-  4. `GaussianRunError` and `GaussianTimeoutError` are importable from `mace_gaussian.utils`
-
-Plans:
-- [ ] 11-01-PLAN.md — Wire calculation_parameters in workflow.py → ResultsManager; fix cli.py env var path resolution; emit CUDANotAvailableWarning; export Gaussian errors from utils/__init__.py
-
-### Phase 12: Distribution Polish
-**Goal**: Complete distribution-readiness: real GitHub URLs, aligned CI versions, correct docs entry point, and clean planning metadata
-**Requirements**: (cross-cutting polish — no new requirements)
-**Gap Closure:** Closes packaging, documentation, and metadata gaps from v1.0 audit
-**Success Criteria** (what must be TRUE):
-  1. `pyproject.toml` GitHub URLs reference the real repository (not `yourusername/mace-gaussian-interface`)
-  2. CI ruff pin matches dev dep floor (no version skew)
-  3. Docs show `mace-gaussian` entry point, not `python cli.py`
-  4. All 20 stale REQUIREMENTS.md checkboxes updated to `[x]`
-  5. ROADMAP.md progress table accurate for all phases
-**Plans**: 1 plan
-
-Plans:
-- [ ] 12-01-PLAN.md — Fix pyproject.toml URLs (real GitHub coordinates); align CI ruff pin to >=0.9.0; update python cli.py to mace-gaussian in quickstart.md, README.md, and CLAUDE.md
-
-## Progress
-
-**Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
-
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Testing Infrastructure & Characterization | 4/4 | Complete | 2026-02-27 |
-| 2. Error Handling & Input Validation | 3/3 | Complete | 2026-02-27 |
-| 3. Extract Utilities & Conventions | 2/2 | Complete | 2026-02-27 |
-| 4. Extract Calculator Classes | 2/2 | Complete | 2026-02-27 |
-| 5. Replace MACE Module Monkey-Patching | 2/2 | Complete | 2026-02-19 |
-| 6. Extract Gaussian I/O & ZMQ Server | 5/5 | Complete | 2026-02-20 |
-| 7. Extract Workflow Orchestrator | 2/2 | Complete | 2026-02-24 |
-| 8. Package Structure & Reorganization | 3/3 | Complete | 2026-02-24 |
-| 9. CI/CD & Distribution Prep | 3/3 | Complete | 2026-02-26 |
-| 10. Documentation | 4/4 | Complete | 2026-02-26 |
-| 11. Integration Wiring Fixes (Gap Closure) | 1/1 | Complete    | 2026-02-27 |
-| 12. Distribution Polish (Gap Closure) | 1/1 | Complete   | 2026-02-27 |
+*Next milestone: define with `/gsd:new-milestone`*
