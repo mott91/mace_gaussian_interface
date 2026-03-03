@@ -42,9 +42,9 @@ Full archive: `.planning/milestones/v1.0-ROADMAP.md`
 **Plans**: 3 plans
 
 Plans:
-- [ ] 13-01-PLAN.md — CLI validation: add mace_off/mace_anicc to --energy-calculators callback + --optimization-calculator Choice
-- [ ] 13-02-PLAN.md — workflow.py: add mace_anicc branch with correct API + element guard at call sites
-- [ ] 13-03-PLAN.md — Parser fix: dual-format anharmonic section detection + H/L-prefix regex + xfail removal
+- [x] 13-01-PLAN.md — CLI validation: add mace_off/mace_anicc to --energy-calculators callback + --optimization-calculator Choice
+- [x] 13-02-PLAN.md — workflow.py: add mace_anicc branch with correct API + element guard at call sites
+- [x] 13-03-PLAN.md — Parser fix: dual-format anharmonic section detection + H/L-prefix regex + xfail removal
 
 ### Phase 14: Batch Runner & PubChem Fetcher
 **Goal**: Users can fetch 3D structures by name and run the full pipeline over a list of molecules with per-molecule failure isolation and restart safety.
@@ -109,7 +109,7 @@ Plans:
 | 10. Documentation | v1.0 | 4/4 | Complete | 2026-02-26 |
 | 11. Integration Wiring | v1.0 | 1/1 | Complete | 2026-02-27 |
 | 12. Distribution Polish | v1.0 | 1/1 | Complete | 2026-02-27 |
-| 13. Calculator Expansion & Acoh Fix | 2/3 | In Progress|  | - |
+| 13. Calculator Expansion & Acoh Fix | v1.1 | 3/3 | Complete | 2026-03-03 |
 | 14. Batch Runner & PubChem Fetcher | v1.1 | 0/TBD | Not started | - |
 | 15. SLURM Integration & Batch Report | v1.1 | 0/TBD | Not started | - |
 | 16. Benchmark Campaign | v1.1 | 0/TBD | Not started | - |

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: — Batch Benchmarking & Calculator Expansion
 status: planning
-stopped_at: Completed 13-03-PLAN.md (acoh anharmonic parser fix)
-last_updated: "2026-03-03T17:35:01.953Z"
+stopped_at: Completed 13-01-PLAN.md (CLI calculator validation callbacks)
+last_updated: "2026-03-03T17:37:41Z"
 last_activity: 2026-03-03 — v1.1 roadmap created (Phases 13–17 defined, 17/17 requirements mapped)
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 3
-  completed_plans: 2
+  completed_plans: 3
   percent: 35
 ---
 
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 ## Current Position
 
 Phase: 13 of 17 (Calculator Expansion & Acoh Bug Fix)
-Plan: 2 of 3 in current phase
-Status: In progress — Phase 13 plans 01 and 02 complete
-Last activity: 2026-03-03 — Plan 13-02 complete (mace_anicc calculator branch + element guard)
+Plan: 3 of 3 in current phase
+Status: Phase 13 complete — all 3 plans done
+Last activity: 2026-03-03 — Plan 13-01 complete (CLI validation callbacks for mace_off/mace_anicc)
 
 Progress: [███████░░░░░░░░░░░░░] 35% (12/17 phases complete; v1.1 not started)
 
@@ -61,6 +61,8 @@ Recent decisions affecting v1.1 work:
 - [Phase 13-calculator-expansion-acoh-bug-fix]: Negative frequencies captured in Format B regex (imaginary modes from unconverged geometry are valid data points)
 - [13-02]: mace_anicc uses mace_anicc(device="cuda") only — no model= or default_dtype= (TypeError if passed; different API from mace_mp/mace_off/mace_omol)
 - [13-02]: Element guard placed OUTSIDE try/except in run_frequency_calculation so ValueError propagates instead of being silently caught
+- [13-01]: Use callback= not type=click.Choice for comma-separated options (click.Choice validates atomically, rejecting "mace_mp,mace_omol" as a whole string)
+- [13-01]: VALID_ENERGY_CALCULATORS and VALID_DIPOLE_CALCULATORS exported at module level for test assertions
 
 ### Pending Todos
 
@@ -74,6 +76,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-03T17:34:47Z
-Stopped at: Completed 13-02-PLAN.md (mace_anicc calculator branch + element guard)
+Last session: 2026-03-03T17:37:41Z
+Stopped at: Completed 13-01-PLAN.md (CLI calculator validation callbacks — Phase 13 fully done)
 Resume file: None
