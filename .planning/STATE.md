@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: unknown
-last_updated: "2026-02-28T12:48:49.160Z"
+status: milestone_complete
+last_updated: "2026-03-03T00:00:00.000Z"
 progress:
   total_phases: 12
   completed_phases: 12
@@ -15,10 +15,10 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-16)
+See: .planning/PROJECT.md (updated 2026-02-28 after v1.0 milestone)
 
 **Core value:** Reliable, reproducible IR spectral predictions using ML potentials that can be validated against DFT reference data.
-**Current focus:** Phase 10 - Documentation
+**Current focus:** Planning next milestone — run `/gsd:new-milestone`
 
 ## Current Position
 
@@ -161,32 +161,11 @@ None yet.
 
 ### Blockers/Concerns
 
-**Phase 1 considerations:**
-- Acetic acid parser bug (commit a4384c4) needs test case to capture expected vs actual behavior
-- Coverage targets should be pragmatic (focus on parsers, mode matching, calculators — not necessarily 100%)
-
-**Phase 5 status:** COMPLETE
-- Safe loading mechanism (pickle_module remapping) implemented and tested in 05-01
-- Legacy mace_calculators.py deleted, all references cleaned up in 05-02
-
-**Phase 6 status:** COMPLETE
-- 06-01 complete: gaussian/ package foundation (exceptions, io.py)
-- 06-02 complete: gaussian/parser.py and gaussian/fchk.py created (verbatim copies)
-- 06-03 complete: gaussian/zmq_server.py with GaussianZMQServer class (LINGER=0 fix, no placeholder)
-- 06-04 complete: gaussian/runner.py with run_gaussian_with_zmq (SIGKILL timeout, stdout/stderr capture)
-- 06-05 complete: Final wiring - all callers use gaussian.* imports, gaussian_parser.py/fchk_parser.py deleted, gaussian/ is single authoritative source
-
-**Phase 7 status:** COMPLETE
-- 07-01 complete: workflow.py created with run_pipeline() + stage functions extracted from gm_main.py (718 lines, ruff clean)
-- 07-02 complete: cli.py rewired to workflow.run_pipeline(), print_diagnostics inlined using dipole_factory, gm_main.py deleted — STRUCT-06 fully satisfied
-
-**Phase 8 status:** COMPLETE
-- 08-01 complete: mace_gaussian/ package created via git mv (17 renames, history preserved), all internal imports converted to relative dot-notation — STRUCT-08 satisfied
-- 08-02 complete: all root files moved into mace_gaussian/, analysis/ subpackage created, root shims rewritten as 3-line delegators, run_pipeline re-export activated — STRUCT-08, STRUCT-10 satisfied
-- 08-03 complete: pyproject.toml wired (mace-gaussian entry point, packages = ["mace_gaussian"]), all 128 tests updated to mace_gaussian.* imports and passing — STRUCT-08, STRUCT-09, STRUCT-10 satisfied
+- **Acetic acid parser bug** (commit a4384c4): xfail test documents it. Needs root cause diagnosis. In backlog.
+- **docs/ARCHITECTURE.md and docs/DEVELOPMENT.md** reference pre-refactor module names. Tech debt, in backlog.
 
 ## Session Continuity
 
-Last session: 2026-02-27 (phase execution)
-Stopped at: Completed 12-01-PLAN.md (distribution polish — placeholder URLs fixed, CI ruff pin aligned, entry-point docs updated)
+Last session: 2026-03-03 (milestone completion)
+Stopped at: v1.0 milestone complete — RETROSPECTIVE.md written, STATE.md updated
 Resume file: None
