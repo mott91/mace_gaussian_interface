@@ -9,7 +9,7 @@
 ### Calculator Expansion
 
 - [ ] **CALC-01**: User can specify `mace_off` as `--energy-calculators` choice in CLI (organic-optimized PES, H/C/N/O/F/P/S/Cl/Br/I)
-- [ ] **CALC-02**: User can specify `mace_anicc` as `--energy-calculators` choice in CLI (CC-quality PES, CHNO only)
+- [x] **CALC-02**: User can specify `mace_anicc` as `--energy-calculators` choice in CLI (CC-quality PES, CHNO only)
 - [ ] **CALC-03**: User can specify `xtb` as `--energy-calculators` choice in CLI (GFN2-xTB semiempirical)
 - [ ] **CALC-04**: xTB dipole calculator produces correct dipole derivatives (unit bug verified and fixed; `xtb` usable as `--dipole-calculators` choice)
 
@@ -71,7 +71,7 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | CALC-01 | Phase 13 | Pending |
-| CALC-02 | Phase 13 | Pending |
+| CALC-02 | Phase 13 | Complete |
 | CALC-03 | Phase 13 | Pending |
 | CALC-04 | Phase 13 | Pending |
 | BATCH-01 | Phase 14 | Pending |

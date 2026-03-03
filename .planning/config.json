@@ -10,8 +10,13 @@
   "workflow": {
     "research": true,
     "plan_check": true,
-    "verifier": true
+    "verifier": true,
+    "auto_advance": false,
+    "_auto_chain_active": false
   },
   "parallelization": true,
-  "brave_search": false
+  "brave_search": false,
+  "git": {
+    "branching_strategy": "none"
+  }
 }

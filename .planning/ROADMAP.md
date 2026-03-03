@@ -109,7 +109,7 @@ Plans:
 | 10. Documentation | v1.0 | 4/4 | Complete | 2026-02-26 |
 | 11. Integration Wiring | v1.0 | 1/1 | Complete | 2026-02-27 |
 | 12. Distribution Polish | v1.0 | 1/1 | Complete | 2026-02-27 |
-| 13. Calculator Expansion & Acoh Fix | 1/3 | In Progress|  | - |
+| 13. Calculator Expansion & Acoh Fix | 2/3 | In Progress|  | - |
 | 14. Batch Runner & PubChem Fetcher | v1.1 | 0/TBD | Not started | - |
 | 15. SLURM Integration & Batch Report | v1.1 | 0/TBD | Not started | - |
 | 16. Benchmark Campaign | v1.1 | 0/TBD | Not started | - |

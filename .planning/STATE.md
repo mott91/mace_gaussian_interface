@@ -10,7 +10,7 @@ progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 2
   percent: 35
 ---
 
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 ## Current Position
 
 Phase: 13 of 17 (Calculator Expansion & Acoh Bug Fix)
-Plan: 0 of TBD in current phase
-Status: Ready to plan Phase 13
-Last activity: 2026-03-03 — v1.1 roadmap created (Phases 13–17 defined, 17/17 requirements mapped)
+Plan: 2 of 3 in current phase
+Status: In progress — Phase 13 plans 01 and 02 complete
+Last activity: 2026-03-03 — Plan 13-02 complete (mace_anicc calculator branch + element guard)
 
 Progress: [███████░░░░░░░░░░░░░] 35% (12/17 phases complete; v1.1 not started)
 
@@ -59,6 +59,8 @@ Recent decisions affecting v1.1 work:
 - [v1.1 start]: Batch SLURM uses SSH/SCP subprocess; qsub.sh on disk is the template
 - [Phase 13-calculator-expansion-acoh-bug-fix]: Format B entries return ir_intensity=0.0 — ML external log format does not emit IR intensities; downstream plotting code handles this correctly
 - [Phase 13-calculator-expansion-acoh-bug-fix]: Negative frequencies captured in Format B regex (imaginary modes from unconverged geometry are valid data points)
+- [13-02]: mace_anicc uses mace_anicc(device="cuda") only — no model= or default_dtype= (TypeError if passed; different API from mace_mp/mace_off/mace_omol)
+- [13-02]: Element guard placed OUTSIDE try/except in run_frequency_calculation so ValueError propagates instead of being silently caught
 
 ### Pending Todos
 
@@ -72,6 +74,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-03T17:35:01.951Z
-Stopped at: Completed 13-03-PLAN.md (acoh anharmonic parser fix)
+Last session: 2026-03-03T17:34:47Z
+Stopped at: Completed 13-02-PLAN.md (mace_anicc calculator branch + element guard)
 Resume file: None
