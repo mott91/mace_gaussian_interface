@@ -36,16 +36,15 @@ Full archive: `.planning/milestones/v1.0-ROADMAP.md`
 ## Phase Details
 
 ### Phase 13: Calculator Expansion & Acoh Bug Fix
-**Goal**: Users can run `mace-gaussian` with three new energy/force calculators (mace_off, mace_anicc, xtb) and a corrected xTB dipole calculator, and the acetic acid frequency parser no longer fails on regression plots.
+**Goal**: Users can run `mace-gaussian` with two new energy calculators (mace_off, mace_anicc) and the acetic acid frequency parser no longer fails on regression plots. (xTB deferred pending supervisor discussion.)
 **Depends on**: Nothing (all code already partially exists; no new infrastructure required)
-**Requirements**: CALC-01, CALC-02, CALC-03, CALC-04, FIX-01
-**Success Criteria** (what must be TRUE):
-  1. User can pass `--energy-calculators mace_off` to `mace-gaussian run` and geometry optimization completes without error on a CHNO molecule.
-  2. User can pass `--energy-calculators mace_anicc` and the calculator raises a clear error (not a cryptic crash) when the molecule contains atoms outside H/C/N/O.
-  3. User can pass `--energy-calculators xtb` and geometry optimization completes using GFN2-xTB.
-  4. User can pass `--dipole-calculators xtb` and dipole derivatives are numerically consistent with the espaloma reference (unit bug verified and fixed or confirmed absent).
-  5. Acetic acid regression plot generates without error, and the previously-xfailing test passes without xfail marker.
-**Plans**: TBD
+**Requirements**: CALC-01, CALC-02, FIX-01
+**Plans**: 3 plans
+
+Plans:
+- [ ] 13-01-PLAN.md — CLI validation: add mace_off/mace_anicc to --energy-calculators callback + --optimization-calculator Choice
+- [ ] 13-02-PLAN.md — workflow.py: add mace_anicc branch with correct API + element guard at call sites
+- [ ] 13-03-PLAN.md — Parser fix: dual-format anharmonic section detection + H/L-prefix regex + xfail removal
 
 ### Phase 14: Batch Runner & PubChem Fetcher
 **Goal**: Users can fetch 3D structures by name and run the full pipeline over a list of molecules with per-molecule failure isolation and restart safety.
@@ -110,7 +109,7 @@ Full archive: `.planning/milestones/v1.0-ROADMAP.md`
 | 10. Documentation | v1.0 | 4/4 | Complete | 2026-02-26 |
 | 11. Integration Wiring | v1.0 | 1/1 | Complete | 2026-02-27 |
 | 12. Distribution Polish | v1.0 | 1/1 | Complete | 2026-02-27 |
-| 13. Calculator Expansion & Acoh Fix | v1.1 | 0/TBD | Not started | - |
+| 13. Calculator Expansion & Acoh Fix | v1.1 | 0/3 | Not started | - |
 | 14. Batch Runner & PubChem Fetcher | v1.1 | 0/TBD | Not started | - |
 | 15. SLURM Integration & Batch Report | v1.1 | 0/TBD | Not started | - |
 | 16. Benchmark Campaign | v1.1 | 0/TBD | Not started | - |
