@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: — Batch Benchmarking & Calculator Expansion
-status: planning
-stopped_at: Completed 13-01-PLAN.md (CLI calculator validation callbacks)
-last_updated: "2026-03-03T17:37:41Z"
-last_activity: 2026-03-03 — v1.1 roadmap created (Phases 13–17 defined, 17/17 requirements mapped)
+status: completed
+stopped_at: Completed 13-01-PLAN.md (CLI calculator validation callbacks — Phase 13 fully done)
+last_updated: "2026-03-03T17:44:05.258Z"
+last_activity: 2026-03-03 — Plan 13-01 complete (CLI validation callbacks for mace_off/mace_anicc)
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
   completed_plans: 3
   percent: 35
