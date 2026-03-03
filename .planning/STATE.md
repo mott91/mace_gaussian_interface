@@ -63,7 +63,7 @@ None yet.
 
 - **xTB dipole unit bug** (Phase 13): verify whether xtb.py divides by BOHR_TO_ANGSTROM before declaring xtb usable as dipole calculator; risk of ~1.89x factor error
 - **mace_anicc model file**: confirm `ani500k_large_CC.model` exists on disk before Phase 13 planning
-- **SLURM open questions** (Phase 15): shared filesystem vs SCP, formchk availability on cluster, passwordless SSH, partition walltime limit — user must answer before Phase 15
+- **SLURM answers confirmed** (Phase 15): SCP (no shared filesystem); formchk NOT on cluster — pull `.chk` and convert locally; DFT results land in `comparison_results/` (existing structure, not a new dir); passwordless SSH is set up
 
 ## Session Continuity
 
