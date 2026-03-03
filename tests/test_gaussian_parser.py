@@ -257,30 +257,20 @@ class TestEdgeCases:
         with pytest.raises(FileNotFoundError):
             GaussianLogParser("nonexistent_file_that_does_not_exist.log")
 
-    @pytest.mark.xfail(
-        reason=(
-            "Acoh ML log lacks 'Anharmonic Infrared Spectroscopy' section; parser regex "
-            "also misses H/L-prefixed lines in 'Vibrational Energies at Anharmonic Level' "
-            "section. See commit a4384c4."
-        )
-    )
     def test_acoh_anharmonic_parsing(self, acoh_ml_log):
-        """Acetic acid ML log demonstrates two parser bugs:
-
-        1. The ML external calculation log lacks the 'Anharmonic Infrared Spectroscopy'
-           section (no I(anharm)/DS(anharm) headers), so the parser never sets
-           in_fundamental_section = True.
-
-        2. Even in the 'Vibrational Energies at Anharmonic Level' section, lines are
-           prefixed with H/L overlap indicators (e.g., 'H      4(1)      active') that
-           don't match the regex '^\\s*(\\d+)\\(1\\)'.
+        """Acetic acid ML log uses 'Vibrational Energies at Anharmonic Level' format
+        (Format B) with H/L overlap prefix indicators. Parser now handles both formats.
 
         Expected: 18 modes (8 atoms -> 3*8-6 = 18)
-        Actual: 0 (parser returns empty list)
         """
         parser = GaussianLogParser(acoh_ml_log)
         result = parser.parse_anharmonic_frequencies()
         assert len(result) == 18  # 8 atoms -> 3*8-6 = 18 modes
+        for entry in result:
+            assert "mode" in entry
+            assert "freq_cm" in entry
+            assert "freq_harmonic" in entry
+            assert "ir_intensity" in entry
 
 
 # --- Parser error handling tests (Phase 2) ---

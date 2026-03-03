@@ -105,20 +105,31 @@ class GaussianLogParser:
         frequencies = []
 
         # Look for the section with IR intensities
-        # Format:
-        # Mode(n)                  E(harm)   E(anharm)       I(harm)        I(anharm)
-        #    1(1)                  3764.146   3579.741                    625.83031627
+        # Format A (DFT logs — "Anharmonic Infrared Spectroscopy"):
+        #   Mode(n)  E(harm)  E(anharm)  I(harm)  I(anharm)
+        #      1(1)  3764.146  3579.741           625.83031627
+        #
+        # Format B (ML external calc logs — "Vibrational Energies at Anharmonic Level"):
+        #   Mode(n)  Status  E(harm)  E(anharm)  Aa(x)  Ba(y)  Ca(z)
+        #      1(1)  active  3796.914  3544.674  ...
+        #   H  4(1)  active  1828.929  1812.980  ...   <- H/L prefix = high/low overlap
 
         lines = self.content.split("\n")
         in_fundamental_section = False
+        in_format_b = False
 
         for i, line in enumerate(lines):
-            # Check if we're in the Fundamental Bands section with intensities
+            # Check if we're in the Fundamental Bands section
             if "Fundamental Bands" in line:
-                # Look ahead to see if this section has intensities
+                # Lookahead: determine which format this section is
                 for j in range(i, min(i + 10, len(lines))):
                     if "I(anharm)" in lines[j] or "DS(anharm)" in lines[j]:
                         in_fundamental_section = True
+                        in_format_b = False  # Format A: has intensity column
+                        break
+                    if "E(anharm)" in lines[j] and "Status" in lines[j]:
+                        in_fundamental_section = True
+                        in_format_b = True  # Format B: no intensity column
                         break
                 continue
 
@@ -127,32 +138,52 @@ class GaussianLogParser:
                 break
 
             if in_fundamental_section:
-                # Match lines like:
-                #    1(1)                  3764.146   3579.741                    625.83031627
-                # or with I(harm) value:
-                #    1(1)                  3764.146   3579.741    653.06339135    625.83031627
-
-                # Pattern: mode number, harmonic freq, anharmonic freq,
-                # optional harm intensity, anharm intensity
-                match = re.match(
-                    r"^\s*(\d+)\(1\)\s+([\d\.]+)\s+([\d\.]+)\s+(?:([\d\.]+)\s+)?([\d\.]+)\s*$", line
-                )
-
-                if match:
-                    mode = int(match.group(1))
-                    freq_harm = float(match.group(2))
-                    freq_anharm = float(match.group(3))
-                    # Group 4 is optional harmonic intensity
-                    ir_anharm = float(match.group(5))
-
-                    frequencies.append(
-                        {
-                            "mode": mode,
-                            "freq_cm": freq_anharm,
-                            "ir_intensity": ir_anharm,
-                            "freq_harmonic": freq_harm,
-                        }
+                if in_format_b:
+                    # Format B: optional H/L overlap prefix, mode(1), status word, two floats
+                    # Matches: "   1(1)  active  3796.914  3544.674 ..."
+                    # Matches: "H  4(1)  active  1828.929  1812.980 ..."
+                    # Matches: "  18(1)  active  -255.103  -250.532 ..."  (imaginary/negative modes)
+                    match = re.match(
+                        r"^\s*(?:[HL]\s+)?(\d+)\(1\)\s+\w+\s+(-?[\d\.]+)\s+(-?[\d\.]+)",
+                        line,
                     )
+                    if match:
+                        mode = int(match.group(1))
+                        freq_harm = float(match.group(2))
+                        freq_anharm = float(match.group(3))
+                        frequencies.append(
+                            {
+                                "mode": mode,
+                                "freq_cm": freq_anharm,
+                                "ir_intensity": 0.0,  # Format B logs have no IR intensity column
+                                "freq_harmonic": freq_harm,
+                            }
+                        )
+                else:
+                    # Format A: mode(1), harm freq, anharm freq, optional harm intensity,
+                    # then anharm intensity
+                    # Match lines like:
+                    #    1(1)                  3764.146   3579.741                    625.83031627
+                    # or with I(harm) value:
+                    #    1(1)                  3764.146   3579.741    653.06339135    625.83031627
+                    match = re.match(
+                        r"^\s*(\d+)\(1\)\s+([\d\.]+)\s+([\d\.]+)\s+(?:([\d\.]+)\s+)?([\d\.]+)\s*$",
+                        line,
+                    )
+                    if match:
+                        mode = int(match.group(1))
+                        freq_harm = float(match.group(2))
+                        freq_anharm = float(match.group(3))
+                        # Group 4 is optional harmonic intensity
+                        ir_anharm = float(match.group(5))
+                        frequencies.append(
+                            {
+                                "mode": mode,
+                                "freq_cm": freq_anharm,
+                                "ir_intensity": ir_anharm,
+                                "freq_harmonic": freq_harm,
+                            }
+                        )
 
         if strict and not frequencies:
             raise GaussianParseError(
