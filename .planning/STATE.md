@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Batch Benchmarking & Calculator Expansion
-status: defining_requirements
+status: ready_to_plan
 last_updated: "2026-03-03T00:00:00.000Z"
 progress:
-  total_phases: 12
+  total_phases: 17
   completed_phases: 12
   total_plans: 32
   completed_plans: 32
@@ -15,145 +15,45 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-28 after v1.0 milestone)
+See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** Reliable, reproducible IR spectral predictions using ML potentials that can be validated against DFT reference data.
-**Current focus:** v1.1 — Batch Benchmarking & Calculator Expansion
+**Current focus:** v1.1 — Phase 13: Calculator Expansion & Acoh Bug Fix
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements for v1.1
-Last activity: 2026-03-03 — Milestone v1.1 started (Batch Benchmarking & Calculator Expansion)
+Phase: 13 of 17 (Calculator Expansion & Acoh Bug Fix)
+Plan: 0 of TBD in current phase
+Status: Ready to plan Phase 13
+Last activity: 2026-03-03 — v1.1 roadmap created (Phases 13–17 defined, 17/17 requirements mapped)
 
-Progress: [██████████] 100%
+Progress: [███████░░░░░░░░░░░░░] 35% (12/17 phases complete; v1.1 not started)
 
 ## Performance Metrics
 
-**Velocity:**
-- Total plans completed: 16
-- Average duration: 3.9 min
-- Total execution time: 0.97 hours
-
-**By Phase:**
-
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| 01 | 4 | 22 min | 5.5 min |
-| 02 | 3 | 13 min | 4.3 min |
-| 03 | 2 | 9 min | 4.5 min |
-| 04 | 2 | 7 min | 3.5 min |
-| 05 | 2 | 6 min | 3.0 min |
-| 06 | 5 | 15 min | 3.0 min |
-| 07 | 2 | 8 min | 4.0 min |
-| 08 | 1+ | 2 min | 2.0 min |
+**Velocity (v1.0):**
+- Total plans completed: 32
+- Average duration: ~3.9 min
+- Total execution time: ~2.1 hours
 
 **Recent Trend:**
-- Last 5 plans: 06-04 (2 min), 06-05 (4 min), 07-01 (3 min), 07-02 (5 min), 08-01 (2 min)
-- Trend: Consistent fast execution on well-scoped plans
+- Last plans were fast (2–7 min each) on well-scoped work
+- v1.1 plans expected similar cadence for Phase 13; Phase 15–16 may be longer (HPC/campaign work)
 
 *Updated after each plan completion*
-| Phase 06 P04 | 2 | 1 tasks | 1 files |
-| Phase 06 P05 | 4 | 2 tasks | 12 files |
-| Phase 07 P01 | 3 | 1 tasks | 1 files |
-| Phase 07 P02 | 5 | 2 tasks | 3 files |
-| Phase 08 P01 | 2 | 2 tasks | 13 files |
-| Phase 08 P02 | 4 | 2 tasks | 15 files |
-| Phase 08 P03 | 7 | 2 tasks | 13 files |
-| Phase 09 P01 | 90 | 2 tasks | 23 files |
-| Phase 09 P02 | 5 | 1 tasks | 1 files |
-| Phase 09 P03 | 2 | 1 tasks | 1 files |
-| Phase 10 P02 | 2 | 2 tasks | 8 files |
-| Phase 10 P01 | 2 | 2 tasks | 2 files |
-| Phase 10 P03 | 2 | 1 tasks | 1 files |
-| Phase 10 P04 | 1 | 2 tasks | 1 files |
-| Phase 11 P01 | 4 | 3 tasks | 6 files |
-| Phase 12-distribution-polish P01 | 2 | 3 tasks | 5 files |
 
 ## Accumulated Context
 
 ### Decisions
 
 Decisions are logged in PROJECT.md Key Decisions table.
-Recent decisions affecting current work:
+Recent decisions affecting v1.1 work:
 
-- Focus on refactoring before new features (code quality and reproducibility are prerequisites for distribution)
-- Keep all 4 ML model combinations (comparison across combinations is part of thesis methodology)
-- Use quality model profile for GSD agents (important project, want thorough analysis and planning)
-- Reproducibility over pip-installability (thesis needs clone-and-reproduce, not package distribution yet)
-- [Phase 01]: Moved dev dependencies from orphaned [project] key to [dependency-groups] section for proper uv lockfile inclusion
-- [Phase 01-03]: Vib-E2 section has 14 values per mode (freq + thermodynamic properties), not just frequencies; test first N entries
-- [Phase 01-03]: Import only pure numerical functions from mode_matching to avoid formchk dependency in tests
-- [Phase 01-04]: Used range-based frequency assertions (not exact values) for regression test robustness
-- [Phase 01-04]: CH4 harmonic has 4 entries (collapsed degenerate modes), not 9
-- [Phase 02-02]: Created exceptions.py and validation.py inline as Plan 01 prerequisites (Rule 3 blocking)
-- [Phase 02-02]: Used lazy import (try/except ImportError) for validation module in results_manager
-- [Phase 02-02]: Default strict=False preserves backward compatibility for anharmonic-type parsers
-- [Phase 02-03]: Timeout tests gracefully handle gm_main import failures (heavy deps like DGL/espaloma)
-- [Phase 02-03]: Validation only on run command, not list/diagnose/compare/export
-- [Phase 03-01]: Used CODATA 2018 full precision constants (0.529177210903, 27.211386245988)
-- [Phase 03-01]: Preserved original numerical behavior when replacing misnamed constants (ANGSTROM_TO_BOHR=0.529 -> BOHR_TO_ANGSTROM)
-- [Phase 03-01]: No compatibility shims -- clean break with direct import updates across codebase
-- [Phase 03-02]: Corrected angstrom_to_bohr test expected value to match CODATA 2018 derived inverse
-- [Phase 04-01]: Lazy import of MACEDipoleCalculator inside _check_availability to avoid module-level side effects
-- [Phase 04-01]: Modernized type annotations (tuple/dict) in new calculator files for Python 3.12
-- [Phase 04-02]: Pre-mock heavy deps via sys.modules before importing calculators package to avoid DGL/espaloma/xtb side effects in tests
-- [Phase 04-02]: Added from __future__ import annotations to calculators/base.py, factory.py, gm_main.py for Python 3.8 compatibility
-- [Phase 05-01]: Used consistent mock package hierarchy in tests for reliable import resolution with Python's import machinery
-- [Phase 05-01]: Falls-through test verifies real mace.modules.models class returned when dipole module lacks attribute
-- [Phase 05-01]: Docstring avoids literal cleanup/sys.modules strings for source-grep test reliability
-- [Phase 05-02]: Replaced mace_calculators mock with full mace_dipole_core hierarchy in test pre-mock list
-- [Phase 06-01]: DEFAULT_HELPER_SCRIPT in gaussian/io.py uses Path(__file__).parent.parent to reach project root (one level up from gaussian/)
-- [Phase 06-01]: gm_main.py callers not updated in plan 06-01 - import wiring deferred to plan 06-05 to minimize per-plan diff scope
-- [Phase 06-01]: gaussian/__init__.py stays sparse stub until all submodules exist in later plans
-- [Phase 06-02]: No behavioral changes — gaussian/parser.py and gaussian/fchk.py are verbatim copies with added docstrings; originals preserved until plan 05 cleans up callers
-- [Phase 06-03]: LINGER=0 applied after socket() and before bind() to prevent socket.close() blocking forever on Gaussian crash (STRUCT-07)
-- [Phase 06-03]: No open() placeholder file creation in __enter__ — socket.bind() creates IPC file itself; original zmq_server() had this bug
-- [Phase 06-03]: __exit__ returns False (not suppress); nested try/finally ensures cleanup even if socket.close() raises
-- [Phase 06-04]: stdout=PIPE and stderr=PIPE always captured so both GaussianTimeoutError and GaussianRunError include full Gaussian output for diagnostics
-- [Phase 06-04]: proc.kill() (SIGKILL) on timeout, not proc.terminate() (SIGTERM) — Gaussian ignores SIGTERM
-- [Phase 06-04]: runner imports only from gaussian.zmq_server and utils.exceptions — clean dependency boundary, no gaussian.io or gaussian.parser
-- [Phase 06]: ruff auto-fix removed unused ase.data.chemical_symbols from gm_main.py after parse_gaussian_input moved to gaussian.io
-- [Phase 06]: test_cli_validation.py GAUSSIAN_TIMEOUT_SECONDS replaced with DEFAULT_TIMEOUT_SECONDS from gaussian.runner throughout
-- [Phase 07-01]: Optional[np.ndarray] replaced with np.ndarray | None (modern Python type syntax, ruff UP045)
-- [Phase 07-01]: detect_device() called for side effect (logging) without storing return value
-- [Phase 07-01]: dft_baseline lazy import stays inside run_dft_baselines() body — prevents DGL/espaloma side effects at module load
-- [Phase 07-01]: Dead code excluded: setup_output_directory (no callers), analyze_molecular_charges (not in pipeline path), print_diagnostics (CLI concern)
-- [Phase 07-02]: No try/except around 'from workflow import run_pipeline' — workflow.py internal imports don't have heavy-dep failure risk unlike gm_main
-- [Phase 07-02]: testingStuff/test_refactoring.py gm_main import left as-is — legacy scratch, acceptable dead reference per plan spec
-- [Phase 08-01]: workflow.run_pipeline import commented out in mace_gaussian/__init__.py — workflow.py not yet inside package (Plan 02 activates it)
-- [Phase 08-01]: ruff --select I,F401 --fix applied to auto-sort 2 import blocks after manual relative import conversion (espaloma.py, runner.py)
-- [Phase 08-01]: mace_loader.py lazy import inside _check_availability converted to from .mace_loader — same lazy semantics, now relative
-- [Phase 08-02]: cli.py uses absolute mace_gaussian.* imports (not relative) — entry boundary, must work standalone
-- [Phase 08-02]: gm_helper.py uses only stdlib + zmq — runs as standalone subprocess invoked by Gaussian, relative imports would fail
-- [Phase 08-02]: run_analysis_main() and run_analysis_harmonic_main() added to analysis_workflow.py — shims delegate to package
-- [Phase 08-02]: comparison_workflow.py renamed to analysis_workflow.py during git mv to match its orchestrator role
-- [Phase 08-03]: Lazy wrapper functions in analysis/__init__.py to defer seaborn/pandas import — avoids module-level side effects when importing lightweight submodules like mode_matching
-- [Phase 08-03]: results.py lazy import of collect_version_metadata was silently failing (flat path), fixed to mace_gaussian.utils.validation
-- [Phase 08-03]: click installed separately into venv — uv sync blocked by dgl 2.2.1 having no Linux wheels
-- [Phase 09-01]: Use # noqa: F401 for intentional import-for-testing in diagnostics.py (not worth removing the test intent)
-- [Phase 09-01]: water_dft_fchk fixture changed to return Path (not str) to enable .open() — all callers accept both str and Path
-- [Phase 09-01]: B017 pytest.raises(Exception) replaced with specific exception type for improved test clarity
-- [Phase 09-02]: pip install -e . --no-deps avoids dgl==2.2.1 Windows-only wheels that block uv sync on ubuntu-latest
-- [Phase 09-02]: ruff==0.15.1 pinned to match uv.lock for CI reproducibility
-- [Phase 09-02]: lint and test jobs run in parallel (no needs: field) for fastest CI feedback
-- [Phase 09-02]: No --cov-fail-under threshold — coverage is informational only (locked decision)
-- [Phase 09]: Manual pip install steps shown explicitly before mentioning install_mace_packages.sh convenience script
-- [Phase 10-01]: compare and export docstrings reference run_analysis.py/run_analysis_harmonic.py as existing alternatives — avoids implying CLI will gain compare/export features in near term
-- [Phase 10-01]: Quickstart section added before Usage section (not duplicating 5-step Installation from Phase 9)
-- [Phase 10-03]: methods.md written in passive voice past tense throughout — ZMQ injection described as novel software contribution with four paragraphs; placeholder citations in [Author, Year] format for easy journal reformatting
-- [Phase 10-02]: quickstart.md references README#installation rather than duplicating install steps to avoid drift
-- [Phase 10-02]: expected_output/ uses JSON only (no .chk/.fchk/.log) — portable, system-independent, human-readable reference outputs
-- [Phase 10-02]: Plots sourced from anharmonic analysis_results/ to match the quickstart workflow path
-- [Phase 10-04]: String literals in compare() message split across lines to stay within 100-char ruff limit while preserving output text
-- [Phase 11-01]: Move validation imports to module level in cli.py — local imports inside function body are not patchable as module attributes in tests
-- [Phase 11-01]: Use # noqa: SIM117 on nested with statements in tests — parenthesized with syntax requires Python 3.10+, system Python 3.8 runner would fail
-- [Phase 11-01]: Inline env var defaults in cli.py (not imported from calculators) to avoid DGL/espaloma heavy dep loads at CLI import time
-- [Phase 11-01]: warnings.warn(stacklevel=2) in detect_device() — warning origin points to caller, not validation.py internal
-- [Phase 12-01]: Replace yourusername placeholder URLs with mott91/mace_gaussian_interface in pyproject.toml [project.urls]
-- [Phase 12-01]: Use ruff>=0.9.0 floor in CI (not exact pin ==0.15.1) to match pyproject.toml dev dep floor and remove maintenance burden
-- [Phase 12-01]: Replace all python cli.py with mace-gaussian in quickstart.md, README.md, CLAUDE.md; preserve python run_analysis.py/run_analysis_harmonic.py unchanged
+- [v1.0 complete]: mace_off and mace_anicc already in workflow.py::calculator() — CLI wiring only needed
+- [v1.0 complete]: xTB dipole in calculators/xtb.py — unit bug (e*Bohr vs e*Angstrom) must be verified before production use
+- [v1.1 start]: ORCA/VPT2 confirmed out of scope — no external hook in ORCA (research finding)
+- [v1.1 start]: PubChem fetcher uses requests directly against PUG REST API (not pubchempy)
+- [v1.1 start]: Batch SLURM uses SSH/SCP subprocess; qsub.sh on disk is the template
 
 ### Pending Todos
 
@@ -161,11 +61,12 @@ None yet.
 
 ### Blockers/Concerns
 
-- **Acetic acid parser bug** (commit a4384c4): xfail test documents it. Needs root cause diagnosis. In backlog.
-- **docs/ARCHITECTURE.md and docs/DEVELOPMENT.md** reference pre-refactor module names. Tech debt, in backlog.
+- **xTB dipole unit bug** (Phase 13): verify whether xtb.py divides by BOHR_TO_ANGSTROM before declaring xtb usable as dipole calculator; risk of ~1.89x factor error
+- **mace_anicc model file**: confirm `ani500k_large_CC.model` exists on disk before Phase 13 planning
+- **SLURM open questions** (Phase 15): shared filesystem vs SCP, formchk availability on cluster, passwordless SSH, partition walltime limit — user must answer before Phase 15
 
 ## Session Continuity
 
-Last session: 2026-03-03 (milestone initialization)
-Stopped at: v1.1 started — PROJECT.md and STATE.md updated, defining requirements
+Last session: 2026-03-03 (roadmap creation)
+Stopped at: ROADMAP.md written, STATE.md written, REQUIREMENTS.md traceability confirmed — ready to plan Phase 13
 Resume file: None
