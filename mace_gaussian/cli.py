@@ -34,6 +34,33 @@ except ImportError:
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
+VALID_ENERGY_CALCULATORS = ["mace_mp", "mace_omol", "mace_off", "mace_anicc"]
+VALID_DIPOLE_CALCULATORS = ["espaloma", "mace_ml"]
+
+
+def _validate_energy_calculators(ctx, param, value):
+    """Validate comma-separated energy calculator names."""
+    for name in [c.strip() for c in value.split(",")]:
+        if name not in VALID_ENERGY_CALCULATORS:
+            raise click.BadParameter(
+                f"'{name}' is not a valid energy calculator. "
+                f"Choose from: {', '.join(VALID_ENERGY_CALCULATORS)}",
+                param=param,
+            )
+    return value
+
+
+def _validate_dipole_calculators(ctx, param, value):
+    """Validate comma-separated dipole calculator names."""
+    for name in [c.strip() for c in value.split(",")]:
+        if name not in VALID_DIPOLE_CALCULATORS:
+            raise click.BadParameter(
+                f"'{name}' is not a valid dipole calculator. "
+                f"Choose from: {', '.join(VALID_DIPOLE_CALCULATORS)}",
+                param=param,
+            )
+    return value
+
 
 @click.group()
 @click.version_option(version="0.2.0", prog_name="MACE-Gaussian Comparison Framework")
@@ -47,18 +74,20 @@ def cli():
 @click.option(
     "--optimization-calculator",
     default="mace_omol",
-    type=click.Choice(["mace_omol", "mace_off", "mace_mp"]),
+    type=click.Choice(["mace_omol", "mace_off", "mace_mp", "mace_anicc"]),
     help="Calculator for geometry optimization (default: mace_omol)",
 )
 @click.option(
     "--energy-calculators",
     default="mace_mp,mace_omol",
-    help="Comma-separated list of energy calculators (default: mace_mp,mace_omol)",
+    callback=_validate_energy_calculators,
+    help="Comma-separated energy calculators. Choices: mace_mp, mace_omol, mace_off, mace_anicc",
 )
 @click.option(
     "--dipole-calculators",
     default="espaloma,mace_ml",
-    help="Comma-separated list of dipole calculators (default: espaloma,mace_ml)",
+    callback=_validate_dipole_calculators,
+    help="Comma-separated dipole calculators. Choices: espaloma, mace_ml",
 )
 @click.option(
     "--force-optimization",

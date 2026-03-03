@@ -5,7 +5,126 @@ from unittest.mock import patch
 
 from click.testing import CliRunner
 
-from mace_gaussian.cli import cli
+from mace_gaussian.cli import VALID_DIPOLE_CALCULATORS, VALID_ENERGY_CALCULATORS, cli
+
+
+class TestEnergyCalculatorValidation:
+    """Tests for --energy-calculators CLI option validation callback."""
+
+    def test_mace_off_accepted(self, tmp_path):
+        """mace_off should be accepted without a BadParameter error."""
+        xyz_file = tmp_path / "water.xyz"
+        xyz_file.write_text("3\nwater\nO 0.0 0.0 0.0\nH 1.0 0.0 0.0\nH 0.0 1.0 0.0\n")
+        runner = CliRunner()
+        result = runner.invoke(cli, ["run", str(xyz_file), "--energy-calculators", "mace_off"])
+        # Should not fail at CLI validation (BadParameter); may fail later due to missing prereqs
+        assert "BadParameter" not in result.output
+        assert "'mace_off' is not a valid" not in result.output
+
+    def test_mace_anicc_accepted(self, tmp_path):
+        """mace_anicc should be accepted without a BadParameter error."""
+        xyz_file = tmp_path / "water.xyz"
+        xyz_file.write_text("3\nwater\nO 0.0 0.0 0.0\nH 1.0 0.0 0.0\nH 0.0 1.0 0.0\n")
+        runner = CliRunner()
+        result = runner.invoke(cli, ["run", str(xyz_file), "--energy-calculators", "mace_anicc"])
+        assert "BadParameter" not in result.output
+        assert "'mace_anicc' is not a valid" not in result.output
+
+    def test_comma_separated_both_valid(self, tmp_path):
+        """Comma-separated list with valid values should pass validation."""
+        xyz_file = tmp_path / "water.xyz"
+        xyz_file.write_text("3\nwater\nO 0.0 0.0 0.0\nH 1.0 0.0 0.0\nH 0.0 1.0 0.0\n")
+        runner = CliRunner()
+        result = runner.invoke(
+            cli, ["run", str(xyz_file), "--energy-calculators", "mace_mp,mace_off"]
+        )
+        assert "'mace_mp' is not a valid" not in result.output
+        assert "'mace_off' is not a valid" not in result.output
+
+    def test_invalid_calculator_rejected(self, tmp_path):
+        """An unknown calculator name should produce BadParameter before any workflow runs."""
+        xyz_file = tmp_path / "water.xyz"
+        xyz_file.write_text("3\nwater\nO 0.0 0.0 0.0\nH 1.0 0.0 0.0\nH 0.0 1.0 0.0\n")
+        runner = CliRunner()
+        result = runner.invoke(
+            cli, ["run", str(xyz_file), "--energy-calculators", "invalid_calc"]
+        )
+        assert result.exit_code != 0
+        assert "invalid_calc" in result.output
+
+    def test_invalid_second_token_rejected(self, tmp_path):
+        """Comma-separated list where second token is invalid should be rejected."""
+        xyz_file = tmp_path / "water.xyz"
+        xyz_file.write_text("3\nwater\nO 0.0 0.0 0.0\nH 1.0 0.0 0.0\nH 0.0 1.0 0.0\n")
+        runner = CliRunner()
+        result = runner.invoke(
+            cli, ["run", str(xyz_file), "--energy-calculators", "mace_mp,bad_name"]
+        )
+        assert result.exit_code != 0
+        assert "bad_name" in result.output
+
+    def test_valid_energy_calculators_constant(self):
+        """VALID_ENERGY_CALCULATORS must include mace_mp, mace_omol, mace_off, mace_anicc."""
+        assert "mace_mp" in VALID_ENERGY_CALCULATORS
+        assert "mace_omol" in VALID_ENERGY_CALCULATORS
+        assert "mace_off" in VALID_ENERGY_CALCULATORS
+        assert "mace_anicc" in VALID_ENERGY_CALCULATORS
+
+
+class TestOptimizationCalculatorValidation:
+    """Tests for --optimization-calculator click.Choice validation."""
+
+    def test_mace_anicc_accepted_by_click(self, tmp_path):
+        """mace_anicc should be a valid choice for --optimization-calculator."""
+        xyz_file = tmp_path / "water.xyz"
+        xyz_file.write_text("3\nwater\nO 0.0 0.0 0.0\nH 1.0 0.0 0.0\nH 0.0 1.0 0.0\n")
+        runner = CliRunner()
+        result = runner.invoke(
+            cli, ["run", str(xyz_file), "--optimization-calculator", "mace_anicc"]
+        )
+        # Should NOT be rejected by click.Choice
+        assert "Invalid value for '--optimization-calculator'" not in result.output
+        assert "mace_anicc" not in result.output or "is not" not in result.output
+
+    def test_invalid_optimization_calculator_rejected(self, tmp_path):
+        """An unknown optimization calculator should be rejected by click.Choice."""
+        xyz_file = tmp_path / "water.xyz"
+        xyz_file.write_text("3\nwater\nO 0.0 0.0 0.0\nH 1.0 0.0 0.0\nH 0.0 1.0 0.0\n")
+        runner = CliRunner()
+        result = runner.invoke(
+            cli, ["run", str(xyz_file), "--optimization-calculator", "totally_invalid"]
+        )
+        assert result.exit_code != 0
+
+
+class TestDipoleCalculatorValidation:
+    """Tests for --dipole-calculators CLI option validation callback."""
+
+    def test_espaloma_accepted(self, tmp_path):
+        """espaloma should be accepted without error."""
+        xyz_file = tmp_path / "water.xyz"
+        xyz_file.write_text("3\nwater\nO 0.0 0.0 0.0\nH 1.0 0.0 0.0\nH 0.0 1.0 0.0\n")
+        runner = CliRunner()
+        result = runner.invoke(
+            cli, ["run", str(xyz_file), "--dipole-calculators", "espaloma"]
+        )
+        assert "'espaloma' is not a valid" not in result.output
+
+    def test_invalid_dipole_calculator_rejected(self, tmp_path):
+        """Unknown dipole calculator name should produce BadParameter."""
+        xyz_file = tmp_path / "water.xyz"
+        xyz_file.write_text("3\nwater\nO 0.0 0.0 0.0\nH 1.0 0.0 0.0\nH 0.0 1.0 0.0\n")
+        runner = CliRunner()
+        result = runner.invoke(
+            cli, ["run", str(xyz_file), "--dipole-calculators", "unknown_dipole"]
+        )
+        assert result.exit_code != 0
+        assert "unknown_dipole" in result.output
+
+    def test_valid_dipole_calculators_constant(self):
+        """VALID_DIPOLE_CALCULATORS must include espaloma and mace_ml."""
+        assert "espaloma" in VALID_DIPOLE_CALCULATORS
+        assert "mace_ml" in VALID_DIPOLE_CALCULATORS
 
 
 class TestCliRunValidation:
