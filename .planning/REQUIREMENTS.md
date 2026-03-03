@@ -34,7 +34,7 @@
 
 ### Bug Fixes & Docs
 
-- [ ] **FIX-01**: Acetic acid (acoh) frequency parser bug fixed — regression plot frequency matching works correctly and xfail test is promoted to passing
+- [x] **FIX-01**: Acetic acid (acoh) frequency parser bug fixed — regression plot frequency matching works correctly and xfail test is promoted to passing
 - [ ] **FIX-02**: `docs/ARCHITECTURE.md` updated to reflect current `mace_gaussian/` package layout and module names
 - [ ] **FIX-03**: `docs/DEVELOPMENT.md` updated to reflect current package layout (adding calculators, running tests, etc.)
 
@@ -84,7 +84,7 @@
 | BENCH-01 | Phase 16 | Pending |
 | BENCH-02 | Phase 16 | Pending |
 | BENCH-03 | Phase 16 | Pending |
-| FIX-01 | Phase 13 | Pending |
+| FIX-01 | Phase 13 | Complete |
 | FIX-02 | Phase 17 | Pending |
 | FIX-03 | Phase 17 | Pending |
 

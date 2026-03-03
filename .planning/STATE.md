@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: — Batch Benchmarking & Calculator Expansion
 status: planning
-stopped_at: Phase 13 context gathered
-last_updated: "2026-03-03T17:17:27.590Z"
+stopped_at: Completed 13-03-PLAN.md (acoh anharmonic parser fix)
+last_updated: "2026-03-03T17:35:01.953Z"
 last_activity: 2026-03-03 — v1.1 roadmap created (Phases 13–17 defined, 17/17 requirements mapped)
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 3
+  completed_plans: 1
   percent: 35
 ---
 
@@ -57,6 +57,8 @@ Recent decisions affecting v1.1 work:
 - [v1.1 start]: ORCA/VPT2 confirmed out of scope — no external hook in ORCA (research finding)
 - [v1.1 start]: PubChem fetcher uses requests directly against PUG REST API (not pubchempy)
 - [v1.1 start]: Batch SLURM uses SSH/SCP subprocess; qsub.sh on disk is the template
+- [Phase 13-calculator-expansion-acoh-bug-fix]: Format B entries return ir_intensity=0.0 — ML external log format does not emit IR intensities; downstream plotting code handles this correctly
+- [Phase 13-calculator-expansion-acoh-bug-fix]: Negative frequencies captured in Format B regex (imaginary modes from unconverged geometry are valid data points)
 
 ### Pending Todos
 
@@ -70,6 +72,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-03T17:17:27.588Z
-Stopped at: Phase 13 context gathered
-Resume file: .planning/phases/13-calculator-expansion-acoh-bug-fix/13-CONTEXT.md
+Last session: 2026-03-03T17:35:01.951Z
+Stopped at: Completed 13-03-PLAN.md (acoh anharmonic parser fix)
+Resume file: None
