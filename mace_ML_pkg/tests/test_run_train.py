@@ -9,7 +9,6 @@ import numpy as np
 import pytest
 import torch
 from ase.atoms import Atoms
-
 from mace.calculators.mace import MACECalculator
 
 try:

@@ -20,6 +20,7 @@ from mace_dipole_core.tools import torch_geometric, torch_tools, utils
 from mace_dipole_core.tools.compile import prepare
 from mace_dipole_core.tools.scripts_utils import extract_load
 
+
 def get_model_dtype(model: torch.nn.Module) -> torch.dtype:
     """Get the dtype of the model"""
     mode_dtype = next(model.parameters()).dtype

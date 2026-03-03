@@ -10,7 +10,6 @@ from ase import build
 from ase.atoms import Atoms
 from ase.calculators.test import gradient_test
 from ase.constraints import ExpCellFilter
-
 from mace_dipole_core.calculators import mace_mp, mace_off
 from mace_dipole_core.calculators.mace import MACECalculator
 from mace_dipole_core.modules.models import ScaleShiftMACE

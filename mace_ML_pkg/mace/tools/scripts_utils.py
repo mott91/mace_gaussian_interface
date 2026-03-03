@@ -422,7 +422,7 @@ def get_atomic_energies(E0s, train_collection, z_table) -> dict:
         else:
             if E0s.endswith(".json"):
                 logging.info(f"Loading atomic energies from {E0s}")
-                with open(E0s, "r", encoding="utf-8") as f:
+                with open(E0s, encoding="utf-8") as f:
                     atomic_energies_dict = json.load(f)
                     atomic_energies_dict = {
                         int(key): value for key, value in atomic_energies_dict.items()

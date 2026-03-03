@@ -11,7 +11,7 @@ from mace_dipole_core.tools.utils import AtomicNumberTable
 
 class HDF5Dataset(Dataset):
     def __init__(self, file_path, r_max, z_table, **kwargs):
-        super(HDF5Dataset, self).__init__()  # pylint: disable=super-with-arguments
+        super().__init__()  # pylint: disable=super-with-arguments
         self.file_path = file_path
         self._file = None
         batch_key = list(self.file.keys())[0]
@@ -64,7 +64,7 @@ class HDF5Dataset(Dataset):
             virials_weight=unpack_value(subgrp["virials_weight"][()]),
             dipole_weight=unpack_value(subgrp["dipole_weight"][()]),
             polarizability_weight=unpack_value(subgrp["polarizability_weight"][()]),
-            # temporary fix. this should ideally be addressed in the i/o stage. 
+            # temporary fix. this should ideally be addressed in the i/o stage.
             polarizability=unpack_value(subgrp["polarizability"][()]) if "polarizability" in subgrp else None,
             config_type=unpack_value(subgrp["config_type"][()]),
             pbc=unpack_value(subgrp["pbc"][()]),

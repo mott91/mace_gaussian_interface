@@ -2,7 +2,6 @@ import numpy as np
 import torch
 import torch.nn.functional
 from e3nn import o3
-
 from mace_dipole_core.data import AtomicData, Configuration
 from mace_dipole_core.modules import (
     AtomicEnergiesBlock,

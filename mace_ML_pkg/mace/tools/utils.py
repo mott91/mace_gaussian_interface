@@ -8,7 +8,8 @@ import json
 import logging
 import os
 import sys
-from typing import Any, Dict, Iterable, Optional, Sequence, Union
+from collections.abc import Iterable, Sequence
+from typing import Any, Dict, Optional, Union
 
 import numpy as np
 import torch

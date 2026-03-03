@@ -6,14 +6,13 @@ import torch
 import torch.nn.functional
 from ase.build import molecule
 from e3nn import o3
-from scipy.spatial.transform import Rotation as R
-
 from mace import data, modules, tools
 from mace.calculators import mace_mp, mace_off
 from mace.tools import torch_geometric
 from mace.tools.finetuning_utils import load_foundations_elements
 from mace.tools.scripts_utils import extract_config_mace_model, remove_pt_head
 from mace.tools.utils import AtomicNumberTable
+from scipy.spatial.transform import Rotation as R
 
 MODEL_PATH = (
     Path(__file__).parent.parent

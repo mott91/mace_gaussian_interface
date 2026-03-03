@@ -1,5 +1,5 @@
-import pytest
 import numpy as np
+import pytest
 from ase.build import fcc111
 from mace_dipole_core.calculators import mace_mp
 

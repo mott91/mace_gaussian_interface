@@ -6,7 +6,6 @@ import pytest
 import torch
 import torch.nn.functional as F
 from e3nn import o3
-
 from mace_dipole_core import data, modules, tools
 from mace_dipole_core.tools import scripts_utils, torch_geometric
 

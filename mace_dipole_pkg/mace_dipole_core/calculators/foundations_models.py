@@ -6,8 +6,8 @@ from typing import Literal, Union
 import torch
 from ase import units
 from ase.calculators.mixing import SumCalculator
-from .mace import MACECalculator_dipole as MACECalculator
 
+from .mace import MACECalculator_dipole as MACECalculator
 
 module_dir = os.path.dirname(__file__)
 local_model_path = os.path.join(
