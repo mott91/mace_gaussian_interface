@@ -32,27 +32,48 @@ Reliable, reproducible IR spectral predictions using ML potentials that can be v
 - ✓ CUDANotAvailableWarning emitted via warnings.warn — v1.0
 - ✓ Env vars resolved at CLI startup before prerequisite validation — v1.0
 
-### Active
+### Active (v1.1)
 
-(No active requirements — define in next milestone with `/gsd:new-milestone`)
+- [ ] Calculator expansion: mace_off and mace_anicc wired into CLI as energy calculator choices
+- [ ] Calculator expansion: xTB registered as energy calculator option
+- [ ] Calculator expansion: xTB dipole unit bug verified and fixed; xTB dipole usable in production
+- [ ] Batch runner: `mace-gaussian batch molecules.txt` runs pipeline over multiple molecules with per-molecule failure isolation and restart-safe manifest
+- [ ] PubChem fetcher: `mace-gaussian fetch <name>` downloads 3D structure as XYZ
+- [ ] HPC/SLURM: DFT baseline can be submitted to cluster via `--dft-on-cluster`, polled, and results retrieved automatically
+- [ ] Batch report: multi-molecule HTML report with aggregated R², RMSE per calculator combination
+- [ ] Benchmark campaign: systematic results for ~25 molecules (size-scaling + functional group series)
+- [ ] Bug fix: acetic acid (acoh) frequency parser corrected and xfail test promoted to passing
+- [ ] Docs update: ARCHITECTURE.md and DEVELOPMENT.md reflect current mace_gaussian/ package layout
 
 ### Out of Scope
 
-- Autograd-based dipole derivatives for MACE-ML — currently numerical finite differences (18 calls/water, 126/aspirin). Would be ~10× faster. Revisit if scaling to large molecules.
+- Autograd-based dipole derivatives for MACE-ML — numerical finite differences sufficient for thesis scale; revisit for >100 atom molecules
 - Fixing ML intensity accuracy — research problem, not a code problem
-- Adding new ML model backends — focus on existing 4 combinations
+- ORCA/VPT2 integration — no external hook in ORCA; technically blocked; v2.0 or never
+- Periodic systems — different project (QM engine, dipole model, analysis all need replacing); thesis future-work section
 - Web interface or GUI — CLI is appropriate for research use
-- Support for non-Gaussian QM packages — single-target for now
-- Performance optimization for very large molecules (>100 atoms) — thesis molecules are smaller
 - PyPI distribution — clone-and-reproduce is the target, not pip install from index
 - `compare`/`export` CLI commands — stubs, deferred to v2
+- TorchANI/ANI-2x — defer until zero-effort calculator additions are validated and benchmark molecules chosen
+
+## Current Milestone: v1.1 — Batch Benchmarking & Calculator Expansion
+
+**Goal:** Expand from 4 to 7+ ML calculator combinations and run a systematic ~25-molecule benchmark campaign to answer the thesis question: does energy surface quality or dipole model quality dominate IR accuracy?
+
+**Target features:**
+- mace_off, mace_anicc, xTB as new energy/dipole options (near-zero code effort)
+- `mace-gaussian batch` command for multi-molecule pipelines with SLURM DFT offload
+- `mace-gaussian fetch` for PubChem structure retrieval
+- Systematic benchmark dataset + aggregated multi-molecule HTML report
+- Acoh parser bug fix + ARCHITECTURE/DEVELOPMENT.md doc update
 
 ## Context
 
 - **Current state (v1.0):** Distribution-ready Python package. 7,648 LOC source + 2,147 LOC tests. 131 tests pass. CI runs on every push. `mace-gaussian run water.xyz` works end-to-end.
+- **Current state (v1.1 starting):** Calculator expansion and batch tooling in progress. Research complete for all v1.1 features.
 - **Known limitations:** `compare`/`export` CLI stubs. docs/ARCHITECTURE.md references pre-refactor module names. E2E GPU+Gaussian test requires hardware.
-- **Known bug:** Acetic acid (acoh) DFT frequency parsing fails for regression plots (commit a4384c4, xfail test documents it).
-- **Thesis stage:** Method validated on water/CH4; expanding to larger molecules (BH3·NH3, acoh). mace_omol/mace_ml is the best-performing combination.
+- **Known bug:** Acetic acid (acoh) DFT frequency parsing fails for regression plots (commit a4384c4, xfail test documents it). Targeted for v1.1 fix.
+- **Thesis stage:** Method validated on water/CH4/BH3·NH3/acoh. Expanding to systematic ~25-molecule benchmark. mace_omol/mace_ml is the best-performing combination so far.
 - **Target audience:** Computational chemistry researchers with Gaussian 16 who want ML-augmented spectral predictions.
 
 ## Constraints
@@ -79,4 +100,4 @@ Reliable, reproducible IR spectral predictions using ML potentials that can be v
 | ruff>=0.9.0 floor (not exact pin) in CI | Removes maintenance burden vs. exact pin | ✓ Good — aligned with dev dep declaration |
 
 ---
-*Last updated: 2026-02-28 after v1.0 milestone*
+*Last updated: 2026-03-03 after v1.1 milestone start*

@@ -1,8 +1,8 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: milestone_complete
+milestone: v1.1
+milestone_name: Batch Benchmarking & Calculator Expansion
+status: defining_requirements
 last_updated: "2026-03-03T00:00:00.000Z"
 progress:
   total_phases: 12
@@ -18,14 +18,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-28 after v1.0 milestone)
 
 **Core value:** Reliable, reproducible IR spectral predictions using ML potentials that can be validated against DFT reference data.
-**Current focus:** Planning next milestone — run `/gsd:new-milestone`
+**Current focus:** v1.1 — Batch Benchmarking & Calculator Expansion
 
 ## Current Position
 
-Phase: 12 of 12 (Distribution Polish)
-Plan: 1 of 1 in current phase -- COMPLETE
-Status: Phase 12 COMPLETE — 1/1 plans done
-Last activity: 2026-02-27 — Completed 12-01: four distribution-readiness gaps closed (placeholder URLs, CI ruff pin, entry-point docs in quickstart.md/README.md/CLAUDE.md)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements for v1.1
+Last activity: 2026-03-03 — Milestone v1.1 started (Batch Benchmarking & Calculator Expansion)
 
 Progress: [██████████] 100%
 
@@ -166,6 +166,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-03 (milestone completion)
-Stopped at: v1.0 milestone complete — RETROSPECTIVE.md written, STATE.md updated
+Last session: 2026-03-03 (milestone initialization)
+Stopped at: v1.1 started — PROJECT.md and STATE.md updated, defining requirements
 Resume file: None
