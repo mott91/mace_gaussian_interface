@@ -8,10 +8,16 @@ from .base import DipoleCalculatorBase
 
 logger = logging.getLogger(__name__)
 
-# Default path for the MACE dipole model
+# Default path for the MACE dipole model (MACE4IR foundation model, 78 elements)
 DEFAULT_MACE_DIPOLE_MODEL = os.getenv(
     "MACE_DIPOLE_MODEL_PATH",
-    str(Path.home() / "mace_gaussian" / "dipole_model" / "model_1.model"),
+    str(
+        Path.home()
+        / "mace_gaussian"
+        / "mace4ir_models"
+        / "pretrained_models"
+        / "model_1_dipole.model"
+    ),
 )
 
 

@@ -8,7 +8,6 @@ tables, and statistics for IR spectral analysis.
 import base64
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List
 
 import pandas as pd
 
@@ -19,7 +18,7 @@ class HTMLReportGenerator:
     def __init__(self, molecule_name: str, output_dir: Path):
         """
         Initialize report generator
-        
+
         Parameters
         ----------
         molecule_name : str
@@ -34,7 +33,7 @@ class HTMLReportGenerator:
 
     def encode_image(self, image_path: Path) -> str:
         """Encode image to base64 for embedding"""
-        with open(image_path, 'rb') as f:
+        with Path(image_path).open("rb") as f:
             encoded = base64.b64encode(f.read()).decode()
         return f"data:image/png;base64,{encoded}"
 
@@ -49,7 +48,7 @@ class HTMLReportGenerator:
             }
 
             body {
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
                 line-height: 1.6;
                 color: #1a1a1a;
                 background: #f5f5f5;
@@ -316,7 +315,6 @@ class HTMLReportGenerator:
         </style>
         """
 
-
     def create_header(self) -> str:
         """Create HTML header"""
         return f"""
@@ -327,14 +325,14 @@ class HTMLReportGenerator:
         </header>
         """
 
-    def create_navigation(self, comparisons: List[Dict]) -> str:
+    def create_navigation(self, comparisons: list[dict]) -> str:
         """Create navigation menu"""
         nav_items = ['<a href="#overview">Overview</a>', '<a href="#combined">Combined</a>']
         for i, comp in enumerate(comparisons, 1):
             nav_items.append(f'<a href="#comp{i}">{comp["name"]}</a>')
         nav_items.append('<a href="#summary">Summary</a>')
 
-        return f'<nav>{" ".join(nav_items)}</nav>'
+        return f"<nav>{' '.join(nav_items)}</nav>"
 
     def create_mode_overlap_section(self) -> str:
         """Create section with mode overlap heatmaps"""
@@ -354,12 +352,13 @@ class HTMLReportGenerator:
             dft_method = parts[1] if len(parts) > 1 else "DFT"
 
             heatmap_sections.append(f"""
-            <h3>Mode Overlap: {ml_method.upper().replace('_', ' ')} vs {dft_method.upper()}</h3>
+            <h3>Mode Overlap: {ml_method.upper().replace("_", " ")} vs {dft_method.upper()}</h3>
             <div class="plot-container">
-                <img src="plots/{filename}" alt="Mode overlap heatmap" style="width: 100%; max-width: 900px;">
+                <img src="plots/{filename}" alt="Mode overlap" style="width: 100%;">
             </div>
             <p style="color: #666; font-size: 0.9em; margin-bottom: 30px;">
-                Heatmap shows the overlap (dot product) between vibrational modes. Red = high overlap (modes match),
+                Heatmap shows the overlap (dot product) between vibrational modes.
+                Red = high overlap (modes match),
                 Blue = weak overlap, White = no overlap (modes are orthogonal).
             </p>
             """)
@@ -370,13 +369,12 @@ class HTMLReportGenerator:
         <section id="mode-overlap" class="comparison-section">
             <h2>Mode Matching Analysis</h2>
             <p style="color: #666; margin-bottom: 20px;">
-                Vibrational modes can change order between DFT and ML calculations. Mode matching via normal mode overlap
-                ensures we compare the correct physical modes rather than just matching by mode number.
+                Vibrational modes can change order between DFT and ML calculations.
+                Mode matching via normal mode overlap ensures we compare the correct physical modes.
             </p>
 
-            <div style="padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px; margin-bottom: 25px;">
-                <strong>⚠ Important:</strong> If red spots appear off-diagonal (not on the main diagonal), this indicates
-                mode reordering occurred between ML and DFT calculations.
+            <div style="padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107;">
+                <strong>Important:</strong> Off-diagonal red spots indicate mode reordering.
                 Perfect overlap = 1.00 (dark red), orthogonal modes = 0.00 (white).
             </div>
 
@@ -405,7 +403,7 @@ class HTMLReportGenerator:
             extended_section = f"""
             <h3>Extended IR Spectrum (400-8000 cm⁻¹, includes overtones)</h3>
             <div class="plot-container">
-                <img src="{extended_img}" alt="Extended spectrum with overtones" style="width: 100%; max-width: 1400px;">
+                <img src="{extended_img}" alt="Extended spectrum" style="width: 100%;">
             </div>
             <p style="color: #666; font-size: 0.9em; margin-bottom: 30px;">
                 Extended frequency range shows fundamental modes, overtones, and combination bands.
@@ -421,25 +419,24 @@ class HTMLReportGenerator:
 
             <h3>Combined IR Spectrum (Fundamentals)</h3>
             <div class="plot-container">
-                <img src="{spectrum_img}" alt="Combined spectrum comparison" style="width: 100%; max-width: 1200px;">
+                <img src="{spectrum_img}" alt="Combined spectrum" style="width: 100%;">
             </div>
 
             {extended_section}
 
             <h3>Combined Regression Analysis</h3>
             <div class="plot-container">
-                <img src="{regression_img}" alt="Combined regression analysis" style="width: 100%; max-width: 1200px;">
+                <img src="{regression_img}" alt="Combined regression" style="width: 100%;">
             </div>
 
-            <p style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-left: 4px solid #667eea; border-radius: 4px;">
-                <strong>Note:</strong> The combined plots allow for quick visual comparison of how different ML methods
-                perform relative to each other and the DFT reference. R² values of "N/A" indicate insufficient data points (N&lt;3)
-                for statistical correlation.
+            <p style="margin-top: 20px; padding: 15px; background: #f8f9fa;">
+                <strong>Note:</strong> Combined plots compare ML methods vs DFT reference.
+                R² values of "N/A" indicate insufficient data points (N&lt;3).
             </p>
         </section>
         """
 
-    def create_overview(self, comparisons: List[Dict]) -> str:
+    def create_overview(self, comparisons: list[dict]) -> str:
         """Create overview section"""
         # FIXED: Check list length instead of truthy value
         if len(comparisons) == 0:
@@ -454,9 +451,9 @@ class HTMLReportGenerator:
             """
 
         num_comparisons = len(comparisons)
-        avg_mae = sum(c['metrics'].mae_freq for c in comparisons) / num_comparisons
-        best_r2 = max(c['metrics'].r2_freq for c in comparisons)
-        avg_speedup = sum(c['speedup'] for c in comparisons) / num_comparisons
+        avg_mae = sum(c["metrics"].mae_freq for c in comparisons) / num_comparisons
+        best_r2 = max(c["metrics"].r2_freq for c in comparisons)
+        avg_speedup = sum(c["speedup"] for c in comparisons) / num_comparisons
 
         return f"""
         <section id="overview">
@@ -480,24 +477,38 @@ class HTMLReportGenerator:
                     <div class="value">{avg_speedup:.1f}x</div>
                 </div>
             </div>
-            
+
             <p style="margin-top: 30px; font-size: 1.1em; line-height: 1.8;">
-                This report presents a comprehensive comparison of machine learning (ML) force fields 
-                against density functional theory (DFT) anharmonic calculations for IR spectroscopy. 
-                All spectra include anharmonic fundamentals, overtones, and combination bands. 
+                This report compares machine learning (ML) force fields
+                against density functional theory (DFT) anharmonic calculations for IR spectroscopy.
+                All spectra include anharmonic fundamentals, overtones, and combination bands.
                 Broadening was applied using Gaussian convolution with 8 cm^-1 FWHM.
             </p>
         </section>
         """
 
-    def create_comparison_section(self, comparison: Dict, index: int, dft_method: str = "DFT") -> str:
+    def create_comparison_section(
+        self, comparison: dict, index: int, dft_method: str = "DFT"
+    ) -> str:
         """Create detailed comparison section for one ML calculator"""
-        m = comparison['metrics']
-        ml_name = comparison['name']
+        m = comparison["metrics"]
+        ml_name = comparison["name"]
 
         # Determine quality coloring
-        r2_class = 'metric-good' if m.r2_freq > 0.95 else 'metric-warning' if m.r2_freq > 0.90 else 'metric-bad'
-        mae_class = 'metric-good' if m.mae_freq < 10 else 'metric-warning' if m.mae_freq < 20 else 'metric-bad'
+        r2_class = (
+            "metric-good"
+            if m.r2_freq > 0.95
+            else "metric-warning"
+            if m.r2_freq > 0.90
+            else "metric-bad"
+        )
+        mae_class = (
+            "metric-good"
+            if m.mae_freq < 10
+            else "metric-warning"
+            if m.mae_freq < 20
+            else "metric-bad"
+        )
 
         # Find corresponding mode overlap heatmap
         mode_overlap_files = list(self.plots_dir.glob(f"mode_overlap_{ml_name}_*.png"))
@@ -508,17 +519,17 @@ class HTMLReportGenerator:
             heatmap_section = f"""
             <h3>Mode Overlap Matrix</h3>
             <div class="plot-container">
-                <img src="{heatmap_img}" alt="Mode overlap heatmap" style="width: 100%; max-width: 900px;">
+                <img src="{heatmap_img}" alt="Mode overlap heatmap" style="width: 100%;">
             </div>
             <p style="color: #666; font-size: 0.9em; margin-bottom: 20px;">
-                Heatmap shows the eigenvector overlap (dot product) between vibrational modes.
-                Red = high overlap (modes match), White = no overlap. Perfect overlap = 1.00, orthogonal = 0.00.
-                Off-diagonal red spots indicate mode reordering between ML and DFT calculations.
+                Heatmap shows the eigenvector overlap between vibrational modes.
+                Red = high overlap, White = no overlap. Perfect overlap = 1.00, orthogonal = 0.00.
+                Off-diagonal red spots indicate mode reordering between ML and DFT.
             </p>
             """
 
         # Read comparison table - FIXED: Handle empty DataFrames properly
-        table_path = self.data_dir / comparison['table_file']
+        table_path = self.data_dir / comparison["table_file"]
 
         # FIXED: Use proper pandas empty check
         try:
@@ -526,24 +537,28 @@ class HTMLReportGenerator:
             if not df.empty:
                 # Custom formatter for Mode_Overlap column
                 formatters = {}
-                if 'Mode_Overlap' in df.columns:
-                    formatters['Mode_Overlap'] = lambda x: f'{x:.3f}' if pd.notna(x) else 'N/A'
+                if "Mode_Overlap" in df.columns:
+                    formatters["Mode_Overlap"] = lambda x: f"{x:.3f}" if pd.notna(x) else "N/A"
 
                 table_html = df.head(20).to_html(
                     index=False,
-                    float_format=lambda x: f'{x:.2f}',
+                    float_format=lambda x: f"{x:.2f}",
                     formatters=formatters,
-                    classes='data-table',
-                    na_rep='N/A'
+                    classes="data-table",
+                    na_rep="N/A",
                 )
             else:
-                table_html = '<p class="warning-box">No matched peaks found for this calculator.</p>'
+                table_html = (
+                    '<p class="warning-box">No matched peaks found for this calculator.</p>'
+                )
         except Exception as e:
             table_html = f'<p class="warning-box">Error loading comparison table: {e}</p>'
 
+        spectrum_img = self.encode_image(self.plots_dir / comparison["spectrum_plot"])
+        regression_img = self.encode_image(self.plots_dir / comparison["regression_plot"])
         return f"""
         <section id="comp{index}" class="comparison-section">
-            <h2>{comparison['name']}</h2>
+            <h2>{comparison["name"]}</h2>
 
             {heatmap_section}
 
@@ -584,39 +599,39 @@ class HTMLReportGenerator:
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Speedup</div>
-                        <div class="stat-value">{comparison['speedup']:.1f}x</div>
+                        <div class="stat-value">{comparison["speedup"]:.1f}x</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">ML Runtime</div>
-                        <div class="stat-value">{comparison['ml_runtime']:.1f} s</div>
+                        <div class="stat-value">{comparison["ml_runtime"]:.1f} s</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">DFT Runtime</div>
-                        <div class="stat-value">{comparison['dft_runtime']:.1f} s</div>
+                        <div class="stat-value">{comparison["dft_runtime"]:.1f} s</div>
                     </div>
                 </div>
             </div>
 
             <h3>Spectral Comparison</h3>
             <div class="plot-container">
-                <img src="{self.encode_image(self.plots_dir / comparison['spectrum_plot'])}" alt="Spectrum comparison">
+                <img src="{spectrum_img}" alt="Spectrum">
             </div>
 
             <h3>Regression Analysis</h3>
             <div class="plot-container">
-                <img src="{self.encode_image(self.plots_dir / comparison['regression_plot'])}" alt="Regression plot">
+                <img src="{regression_img}" alt="Regression">
             </div>
 
             <h3>Detailed Frequency Comparison</h3>
-            <p>Showing first 20 matched peaks (full table available in data/{comparison['table_file']})</p>
+            <p>First 20 matched peaks (full table: data/{comparison["table_file"]})</p>
             <p style="color: #666; font-size: 0.9em; margin-bottom: 10px;">
-                <strong>Mode_Overlap</strong> column shows the eigenvector dot product between matched modes (1.0 = perfect match, 0.0 = orthogonal).
+                <strong>Mode_Overlap</strong>: eigenvector dot product (1.0=perfect, 0.0=orth.).
             </p>
             {table_html}
         </section>
         """
 
-    def create_summary_table(self, comparisons: List[Dict]) -> str:
+    def create_summary_table(self, comparisons: list[dict]) -> str:
         """Create summary comparison table"""
         # FIXED: Check list length
         if len(comparisons) == 0:
@@ -631,17 +646,17 @@ class HTMLReportGenerator:
 
         rows = []
         for comp in comparisons:
-            m = comp['metrics']
+            m = comp["metrics"]
             rows.append(f"""
             <tr>
-                <td>{comp['name']}</td>
+                <td>{comp["name"]}</td>
                 <td>{m.r2_freq:.4f}</td>
                 <td>{m.mae_freq:.2f}</td>
                 <td>{m.rmse_freq:.2f}</td>
                 <td>{m.max_error_freq:.2f}</td>
                 <td>{m.num_matched}/{m.num_matched + m.num_dft_only}</td>
                 <td>{m.match_rate:.1%}</td>
-                <td>{comp['speedup']:.1f}x</td>
+                <td>{comp["speedup"]:.1f}x</td>
             </tr>
             """)
 
@@ -678,27 +693,27 @@ class HTMLReportGenerator:
         </footer>
         """
 
-    def generate_report(self, analysis_results: Dict):
+    def generate_report(self, analysis_results: dict):
         """
         Generate complete HTML report
-        
+
         Parameters
         ----------
         analysis_results : dict
             Results from comparison workflow
         """
-        comparisons = analysis_results['comparisons']
+        comparisons = analysis_results["comparisons"]
 
         html_parts = [
-            '<!DOCTYPE html>',
+            "<!DOCTYPE html>",
             '<html lang="en">',
-            '<head>',
+            "<head>",
             '<meta charset="UTF-8">',
             '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
-            f'<title>IR Analysis: {self.molecule_name}</title>',
+            f"<title>IR Analysis: {self.molecule_name}</title>",
             self.create_css(),
-            '</head>',
-            '<body>',
+            "</head>",
+            "<body>",
             '<div class="container">',
             self.create_header(),
             self.create_navigation(comparisons),
@@ -712,23 +727,25 @@ class HTMLReportGenerator:
             html_parts.append(self.create_comparison_section(comp, i))
 
         # Add summary and footer
-        html_parts.extend([
-            self.create_summary_table(comparisons),
-            '</div>',  # content
-            self.create_footer(),
-            '</div>',  # container
-            '</body>',
-            '</html>'
-        ])
+        html_parts.extend(
+            [
+                self.create_summary_table(comparisons),
+                "</div>",  # content
+                self.create_footer(),
+                "</div>",  # container
+                "</body>",
+                "</html>",
+            ]
+        )
 
         # Write to file
         output_path = self.output_dir / "report.html"
-        with open(output_path, 'w') as f:
-            f.write('\n'.join(html_parts))
+        with output_path.open("w") as f:
+            f.write("\n".join(html_parts))
 
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print("HTML REPORT GENERATED")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
         print(f"Location: {output_path}")
         print(f"Open in browser: file://{output_path.absolute()}")
-        print(f"{'='*60}\n")
+        print(f"{'=' * 60}\n")

@@ -8,7 +8,7 @@ version = "0.2.0"
 description = "Interface between MACE ML potentials and Gaussian for molecular calculations with MACE-OMOL-0 support"
 readme = "README.md"
 authors = [
-    {name = "Manuel Ott", email = "your.email@domain.com"}
+    {name = "Manuel Ott", email = "csav4386@student.uibk.ac.at"}
 ]
 keywords = ["quantum-chemistry", "machine-learning", "molecular-simulation", "gaussian", "mace", "mace-omol"]
 classifiers = [

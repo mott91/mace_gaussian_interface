@@ -6,7 +6,6 @@ produces identical results.
 """
 
 import shutil
-import json
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
@@ -327,7 +326,7 @@ def main():
         COMP / "water" / "b3lyp_6-31Gdp" / "gaussian_dft.fchk",
         FIX / "water" / "dft_b3lyp.fchk"
     )
-    print(f"  dft_b3lyp.fchk: copied")
+    print("  dft_b3lyp.fchk: copied")
 
     # Water ML log (trimmed)
     n = trim_gaussian_log(
@@ -341,14 +340,14 @@ def main():
         COMP / "water" / "mace_mp_espaloma" / "gaussian_freq.fchk",
         FIX / "water" / "ml_mace_mp_esp.fchk"
     )
-    print(f"  ml_mace_mp_esp.fchk: copied")
+    print("  ml_mace_mp_esp.fchk: copied")
 
     # Water results.json (copy)
     shutil.copy2(
         COMP / "water" / "mace_mp_espaloma" / "results.json",
         FIX / "water" / "results.json"
     )
-    print(f"  results.json: copied")
+    print("  results.json: copied")
 
     # ===== CH4 fixtures =====
     print("\n=== CH4 fixtures ===")
@@ -365,7 +364,7 @@ def main():
         COMP / "CH4_ase" / "b3lyp_6-31Gdp" / "gaussian_dft.fchk",
         FIX / "CH4_ase" / "dft_b3lyp.fchk"
     )
-    print(f"  dft_b3lyp.fchk: copied")
+    print("  dft_b3lyp.fchk: copied")
 
     # CH4 ML log (trimmed)
     n = trim_gaussian_log(
@@ -379,14 +378,14 @@ def main():
         COMP / "CH4_ase" / "mace_mp_espaloma" / "gaussian_freq.fchk",
         FIX / "CH4_ase" / "ml_mace_mp_esp.fchk"
     )
-    print(f"  ml_mace_mp_esp.fchk: copied")
+    print("  ml_mace_mp_esp.fchk: copied")
 
     # CH4 results.json (copy)
     shutil.copy2(
         COMP / "CH4_ase" / "mace_mp_espaloma" / "results.json",
         FIX / "CH4_ase" / "results.json"
     )
-    print(f"  results.json: copied")
+    print("  results.json: copied")
 
     # ===== Acoh fixtures =====
     print("\n=== Acoh fixtures ===")

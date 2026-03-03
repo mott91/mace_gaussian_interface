@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 from ase.data import chemical_symbols
@@ -34,7 +33,7 @@ def parse_gaussian_input(infile: str) -> tuple[int, int, int, int, np.ndarray, l
         - coordinates: Numpy array of shape (natoms, 3) in Angstroms
         - atomnames: List of element symbols
     """
-    with open(infile) as f:
+    with Path(infile).open() as f:
         lines = f.readlines()
 
     # Extract system info from header line
@@ -71,7 +70,7 @@ def write_gaussian_output(
     gradient: np.ndarray,
     dipole: np.ndarray,
     dipole_derivatives: np.ndarray,
-    hessian: Optional[np.ndarray],
+    hessian: np.ndarray | None,
     deriv: int,
 ):
     """
@@ -96,14 +95,15 @@ def write_gaussian_output(
     # Polarizability (not implemented, set to zero)
     polarizability = np.zeros(6)
 
-    with open(outfile, "w") as f:
+    with Path(outfile).open("w") as f:
         # Write energy and dipole (Fortran format with 'D' exponent)
         line = f"{energy_hartree:20.12E}{dipole[0]:20.12E}{dipole[1]:20.12E}{dipole[2]:20.12E}"
         f.write(line.replace("E", "D") + "\n")
 
         # Write gradient (forces)
         for i in range(natoms):
-            line = f"{gradient_hartree_bohr[i, 0]:20.12E}{gradient_hartree_bohr[i, 1]:20.12E}{gradient_hartree_bohr[i, 2]:20.12E}"
+            g = gradient_hartree_bohr[i]
+            line = f"{g[0]:20.12E}{g[1]:20.12E}{g[2]:20.12E}"
             f.write(line.replace("E", "D") + "\n")
 
         # Write polarizability (2 lines, 3 components each)
@@ -114,7 +114,8 @@ def write_gaussian_output(
 
         # Write dipole derivatives (3*natoms lines, 3 components each)
         for i in range(3 * natoms):
-            line = f"{dipole_derivatives[i, 0]:20.12E}{dipole_derivatives[i, 1]:20.12E}{dipole_derivatives[i, 2]:20.12E}"
+            d = dipole_derivatives[i]
+            line = f"{d[0]:20.12E}{d[1]:20.12E}{d[2]:20.12E}"
             f.write(line.replace("E", "D") + "\n")
 
         # Write Hessian if second derivatives requested
@@ -149,7 +150,7 @@ def ase_to_gjf(
     symbols = atoms.get_chemical_symbols()
     positions = atoms.get_positions()  # Angstrom by ASE convention
     link0 = f"%chk={filename[:-3]}chk\n%mem=2GB\n%NProcShared=2"
-    with open(filename, "w") as f:
+    with Path(filename).open("w") as f:
         f.write(f"{link0}\n")
         f.write(f"{route}\n\n")
         f.write(f"{title}\n\n")
