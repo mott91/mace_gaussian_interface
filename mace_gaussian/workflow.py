@@ -42,6 +42,9 @@ from .utils.units import BOHR_TO_ANGSTROM, HARTREE_TO_EV
 warnings.filterwarnings("ignore", message=".*weights_only=False.*", category=FutureWarning)
 os.environ["PYTHONWARNINGS"] = "ignore::FutureWarning"
 
+# Elements supported by mace_anicc (HCNO molecules only)
+_MACE_ANICC_SUPPORTED_ELEMENTS = frozenset({"H", "C", "N", "O"})
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
@@ -216,6 +219,17 @@ def geometry_optimisation(mol, fmax=0.000001):
     return mol, num_steps
 
 
+def _check_mace_anicc_elements(atoms) -> None:
+    """Raise ValueError if atoms contains elements outside H/C/N/O (mace_anicc restriction)."""
+    symbols = set(atoms.get_chemical_symbols())
+    unsupported = sorted(symbols - _MACE_ANICC_SUPPORTED_ELEMENTS)
+    if unsupported:
+        raise ValueError(
+            f"mace_anicc only supports H/C/N/O — "
+            f"molecule contains: {unsupported}"
+        )
+
+
 def calculator(nnp):
     """Return an ASE calculator for the named neural network potential."""
     if nnp == "mace_mp":
@@ -239,6 +253,12 @@ def calculator(nnp):
             default_dtype="float64",
             dispersion=False,
         )
+        return calc
+
+    if nnp == "mace_anicc":
+        from mace.calculators import mace_anicc
+
+        calc = mace_anicc(device="cuda")
         return calc
 
 
@@ -345,6 +365,10 @@ def run_frequency_calculation(
 
     timestamp = time.strftime("%Y%m%d_%H%M%S")
     start_time = time.time()
+
+    # Element guard for mace_anicc (must run before model load)
+    if energy_calculator_name == "mace_anicc":
+        _check_mace_anicc_elements(atoms)
 
     try:
         # Setup calculator for energy
@@ -645,6 +669,9 @@ def run_pipeline(
         mol.info["charge"] = 0.0
         mol.info["spin"] = 1.0
 
+        # Element guard for mace_anicc (must run before model load)
+        if optimization_calculator == "mace_anicc":
+            _check_mace_anicc_elements(mol)
         # Setup calculator for optimization
         calc = calculator(optimization_calculator)
         mol.calc = calc
