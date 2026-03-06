@@ -20,7 +20,11 @@ Three phases to take the existing 12-slide deck from rough structure to presenta
   1. Slides flow in the narrative arc: motivation → IR basics → ZMQ bridge → results → ongoing/next
   2. Slide 10 reads as a research journey (physics and chemistry progress) not a git version history
   3. The VPT2/anharmonic slide frames anharmonicity as context and positions it as ongoing work, not a deep dive
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Reframe IR theory, cut VPT2 slide, add results slides (ls + table), fix slide order and output path
+- [ ] 01-02-PLAN.md — Rewrite status slide as research journey; tighten motivation slide
 
 ### Phase 2: Content
 **Goal**: Every claim in the deck is backed by a visible artifact — the results table is complete, plots are embedded, the ZMQ diagram is clear, and the scaling argument is explicit
@@ -48,6 +52,6 @@ Three phases to take the existing 12-slide deck from rough structure to presenta
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Narrative & Structure | 0/? | Not started | - |
+| 1. Narrative & Structure | 0/2 | Not started | - |
 | 2. Content | 0/? | Not started | - |
 | 3. Polish & Speaking Notes | 0/? | Not started | - |
