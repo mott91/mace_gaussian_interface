@@ -253,51 +253,6 @@ def slide_ir_theory(prs):
     )
 
 
-def slide_vpt2(prs):
-    two_col_slide(prs, "$ cat vpt2_theory.md",
-        left_lines=[
-            ("# Beyond the harmonic approximation", ACCENT),
-            ("", DIM),
-            ("  Real potential = anharmonic:", TEXT),
-            ("  V(x) = ½kx² + αx³ + βx⁴ + …", TEXT),
-            ("", DIM),
-            ("  The cubic term (αx³) causes:", TEXT),
-            ("  → overtone at ~2ω (not exactly)", TEXT),
-            ("  → frequency shifts", TEXT),
-            ("  → mode coupling", TEXT),
-            ("", DIM),
-            ("# VPT2 — Vibrational Perturbation Theory", ACCENT),
-            ("  (2nd order)", TEXT),
-            ("", DIM),
-            ("  Treat anharmonicity as a perturbation.", TEXT),
-            ("  Gaussian computes 3rd + 4th derivatives", TEXT),
-            ("  of V and μ numerically (finite diff.).", TEXT),
-            ("  → Overtones, combination bands", TEXT),
-        ],
-        right_lines=[
-            ("# What Gaussian needs from ML", ACCENT),
-            ("", DIM),
-            ("  For each displaced geometry:", TEXT),
-            ("  → energy  (from MACE-OMOL/MP)", TEXT),
-            ("  → dipole  (from MACE4IR/Espaloma)", TEXT),
-            ("", DIM),
-            ("  Gaussian displaces the molecule", TEXT),
-            ("  hundreds of times and asks the", TEXT),
-            ("  external program each time.", TEXT),
-            ("", DIM),
-            ("# The dipole gap", ACCENT),
-            ("", DIM),
-            ("  MACE energy models: good forces,", TEXT),
-            ("  bad dipoles (not trained for it).", TEXT),
-            ("", DIM),
-            ("  → Need a dedicated dipole model", TEXT),
-            ("  → MACE4IR: trained on dipole data,", TEXT),
-            ("    78 elements, E(3)-equivariant", TEXT),
-        ],
-        split=5.0,
-    )
-
-
 def slide_architecture(prs):
     content_slide(prs, "$ python3 main.py  # system architecture",  [
         ("  [molecule.xyz]", GREEN),
@@ -602,27 +557,26 @@ def main():
     prs.slide_width  = Inches(10)
     prs.slide_height = Inches(7.5)
 
-    slide_title(prs)           # 0 — neofetch header
-    slide_motivation(prs)      # 1 — problem / solution / impact
-    slide_ir_theory(prs)       # 2 — what is IR, harmonic limit (life scientists)
-    slide_vpt2(prs)            # 3 — VPT2, anharmonicity, the dipole gap
-    slide_architecture(prs)    # 4 — system architecture diagram
-    slide_dipole_methods(prs)  # 5 — MACE4IR + Espaloma + energy models
-    slide_zmq(prs)             # 6 — ZMQ bridge + engineering challenges
-    slide_mode_matching(prs)   # 7 — eigenvector dot product
-    slide_results_water(prs)   # 8 — water: 8 calculator combos
-    slide_results_aspirin(prs) # 9 — aspirin: 51 modes, scaling
-    slide_status(prs)          # 10 — current status + next steps
-    slide_questions(prs)       # 11 — questions
+    slide_title(prs)            # 0 — neofetch header
+    slide_motivation(prs)       # 1 — problem / solution / impact
+    slide_ir_theory(prs)        # 2 — what is IR, harmonic limit (life scientists)
+    slide_architecture(prs)     # 3 — system architecture diagram
+    slide_dipole_methods(prs)   # 4 — MACE4IR + Espaloma + energy models
+    slide_zmq(prs)              # 5 — ZMQ bridge + engineering challenges
+    slide_mode_matching(prs)    # 6 — eigenvector dot product
+    slide_results_overview(prs) # 7 — HTML report listing
+    slide_results_table(prs)    # 8 — harmonic comparison table (8 combos)
+    slide_status(prs)           # 9 — current status + next steps
+    slide_questions(prs)        # 10 — questions
 
-    out = "/home/mot/mace_gaussian/presentation/presentation_v2.pptx"
+    out = "presentation/presentation_v2.pptx"
     prs.save(out)
 
     print(f"✓ Saved: {out}")
-    print(f"  12 slides  (~15 min)")
-    print(f"  Slides: title · motivation · IR theory · VPT2 ·")
+    print(f"  11 slides  (~15 min)")
+    print(f"  Slides: title · motivation · IR theory ·")
     print(f"          architecture · dipole methods · ZMQ bridge ·")
-    print(f"          mode matching · water results · aspirin results ·")
+    print(f"          mode matching · results overview · results table ·")
     print(f"          status · questions")
 
 
