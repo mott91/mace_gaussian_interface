@@ -256,7 +256,10 @@ def slide_ir_theory(prs):
 
 
 def slide_architecture(prs):
-    content_slide(prs, "$ python3 main.py  # system architecture", [
+    slide = blank_slide(prs)
+    add_prompt(slide, "$ python3 main.py")
+
+    lines = [
         ("                              [molecule.xyz]", GREEN),
         ("                                    ▼", DIM),
         ("  ┌────────────────────────────────────────────────────────────────────────┐", DIM),
@@ -281,7 +284,20 @@ def slide_architecture(prs):
         ("  └───────────────────────────────┬────────────────────────────────────────┘", DIM),
         ("                                  ▼", DIM),
         ("                        generate_html_report()", GREEN),
-    ])
+    ]
+
+    box = slide.shapes.add_textbox(Inches(0.3), Inches(1.15), Inches(9.4), Inches(5.4))
+    tf = box.text_frame
+    tf.word_wrap = False
+    for i, (text, color) in enumerate(lines):
+        p = tf.paragraphs[i] if i == 0 else tf.add_paragraph()
+        p.text = text
+        p.font.size = Pt(10)
+        p.font.name = FONT
+        p.font.color.rgb = color
+        p.space_after = Pt(0)
+
+    add_footer(slide)
 
 
 def slide_dipole_methods(prs):
