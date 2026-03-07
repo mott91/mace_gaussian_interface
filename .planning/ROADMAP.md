@@ -35,7 +35,10 @@ Plans:
   2. A molecule-size vs speedup table or visual exists (water ~1×, glycine ~7–10×, aspirin ~18–29×)
   3. Spectrum comparison plots from `analysis_results_harmonic/` are embedded for at least water and aspirin
   4. ZMQ bridge slide contains a flow diagram showing real-time ML dipole injection at the right Gaussian hook point
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [ ] 02-01-PLAN.md — Rewrite ZMQ/architecture slides, add JSON-sourced results tables (water + aspirin), add scaling slide, update overview with ASCII molecule art
 
 ### Phase 3: Polish & Speaking Notes
 **Goal**: The deck is visually consistent and the presenter has personal notes for every slide
@@ -53,5 +56,5 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Narrative & Structure | 2/2 | Complete   | 2026-03-07 |
-| 2. Content | 0/? | Not started | - |
+| 2. Content | 0/1 | Not started | - |
 | 3. Polish & Speaking Notes | 0/? | Not started | - |
