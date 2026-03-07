@@ -8,15 +8,15 @@
 ### Narrative & Structure
 
 - [x] **NARR-01**: Slide structure reviewed and reordered to match harmonic-first narrative arc (why → how → what we found → what's next)
-- [ ] **NARR-02**: Slide 10 rewritten as research journey — physics and chemistry progress, not git versions
+- [x] **NARR-02**: Slide 10 rewritten as research journey — physics and chemistry progress, not git versions
 - [x] **NARR-03**: VPT2/anharmonic slide scoped to context + "ongoing work" framing (not a deep dive)
 
 ### Content
 
-- [ ] **CONT-01**: Harmonic results slide shows all 8 calculator combos with ranked R²/MAE table (frequencies and intensities separate)
-- [ ] **CONT-02**: Scaling argument made explicit — molecule size vs speedup (water ~1×, glycine ~7–10×, aspirin ~18–29×)
-- [ ] **CONT-03**: Spectrum plot images embedded from `analysis_results_harmonic/` (at least water + aspirin)
-- [ ] **CONT-04**: ZMQ bridge slide has clear flow diagram showing real-time ML dipole injection into Gaussian
+- [x] **CONT-01**: Harmonic results slide shows all 8 calculator combos with ranked R²/MAE table (frequencies and intensities separate)
+- [x] **CONT-02**: Scaling argument made explicit — molecule size vs speedup (water ~1×, glycine ~7–10×, aspirin ~18–29×)
+- [x] **CONT-03**: Spectrum plot images embedded from `analysis_results_harmonic/` (at least water + aspirin)
+- [x] **CONT-04**: ZMQ bridge slide has clear flow diagram showing real-time ML dipole injection into Gaussian
 
 ### Polish
 
@@ -51,12 +51,12 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | NARR-01 | Phase 1 — Narrative & Structure | Complete |
-| NARR-02 | Phase 1 — Narrative & Structure | Pending |
+| NARR-02 | Phase 1 — Narrative & Structure | Complete |
 | NARR-03 | Phase 1 — Narrative & Structure | Complete |
-| CONT-01 | Phase 2 — Content | Pending |
-| CONT-02 | Phase 2 — Content | Pending |
-| CONT-03 | Phase 2 — Content | Pending |
-| CONT-04 | Phase 2 — Content | Pending |
+| CONT-01 | Phase 2 — Content | Complete |
+| CONT-02 | Phase 2 — Content | Complete |
+| CONT-03 | Phase 2 — Content | Complete |
+| CONT-04 | Phase 2 — Content | Complete |
 | POLS-01 | Phase 3 — Polish & Speaking Notes | Pending |
 | POLS-02 | Phase 3 — Polish & Speaking Notes | Pending |
 | POLS-03 | Phase 3 — Polish & Speaking Notes | Pending |

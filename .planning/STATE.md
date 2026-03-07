@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 2 context gathered
-last_updated: "2026-03-07T08:09:09.671Z"
+stopped_at: Completed 02-content-01-PLAN.md
+last_updated: "2026-03-07T12:15:49.196Z"
 last_activity: 2026-03-06 — Roadmap created
 progress:
   total_phases: 3
-  completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  completed_phases: 2
+  total_plans: 3
+  completed_plans: 3
   percent: 0
 ---
 
@@ -52,6 +52,7 @@ Progress: [░░░░░░░░░░] 0%
 *Updated after each plan completion*
 | Phase 01-narrative-structure P01 | 15 | 2 tasks | 2 files |
 | Phase 01-narrative-structure P02 | 5 | 2 tasks | 1 files |
+| Phase 02-content P01 | 4 | 4 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -69,6 +70,9 @@ Recent decisions affecting current work:
 - [Phase 01-narrative-structure]: slide_ir_theory reframed as computational pipeline (harmonic approx → displaced geometries → ML query), not IR-101 audience intro
 - [Phase 01-narrative-structure]: Anharmonic/VPT2 framed as ongoing work with results pending, not a broken feature
 - [Phase 01-narrative-structure]: slide_status: replaced git-task-checklist language with what-we-built/ran/found research journey narrative
+- [Phase 02-content]: Results table sorted by MAE ascending (lowest error first), data from metrics_summary.json
+- [Phase 02-content]: slide_zmq() uses content_slide() single-column layout with zmq_server.py narrative
+- [Phase 02-content]: Uniform TEXT color for data rows — color-coding deferred to Phase 3 polish
 
 ### Pending Todos
 
@@ -80,6 +84,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-07T08:09:09.668Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-content/02-CONTEXT.md
+Last session: 2026-03-07T12:15:39.664Z
+Stopped at: Completed 02-content-01-PLAN.md
+Resume file: None
