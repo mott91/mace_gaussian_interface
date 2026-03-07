@@ -320,7 +320,7 @@ def style_9(prs):
 
     raw = pyfiglet.figlet_format("MACE", font="block")
     art_lines = [(ln, ACCENT) for ln in raw.splitlines() if ln.strip()]
-    art_lines.append(("       GAUSSIAN", ACCENT))
+    art_lines.append(("              GAUSSIAN", GREEN))
 
     block(slide, art_lines, x=0.6, y=1.6, w=9.2, h=3.0, size=16,
           align=PP_ALIGN.CENTER)
