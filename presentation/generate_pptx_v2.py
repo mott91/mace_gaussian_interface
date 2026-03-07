@@ -421,43 +421,68 @@ def slide_mode_matching(prs):
 
 
 def slide_results_overview(prs):
-    """Slide 7: HTML report listing — terminal ls idiom."""
+    """Slide 7: HTML report listing with ASCII molecule art."""
     content_slide(prs, "$ ls analysis_results_harmonic/", [
-        ("# HTML reports generated per molecule", ACCENT),
+        ("# Spectrum analysis reports", ACCENT),
+        ("", DIM),
+        ("       O                       O   OH", GREEN),
+        ("      / \\                      ‖   |", GREEN),
+        ("     H   H   H₂O          CH₃-C-O-C₆H₄-COOH", GREEN),
+        ("                               aspirin C₉H₈O₄", DIM),
         ("", DIM),
         ("  water/report.html       3 atoms  · 3 modes  · 8 combos", GREEN),
         ("  aspirin/report.html    19 atoms  · 51 modes · 4 combos", GREEN),
-        ("  gly/report.html        10 atoms  · 24 modes · 4 combos", GREEN),
-        ("  ammonia/report.html     4 atoms  · 6 modes  · 4 combos", GREEN),
-        ("  CH4_ase/report.html     5 atoms  · 9 modes  · 4 combos", GREEN),
-        ("  C2H6_ase/report.html    8 atoms  · 18 modes · 4 combos", GREEN),
-        ("  co/report.html          2 atoms  · 1 mode   · 4 combos", DIM),
-        ("  bh3_nh3/report.html     6 atoms  · 12 modes · 4 combos", DIM),
         ("", DIM),
         ("  Each report: regression plots · KDE spectra · mode matching", TEXT),
-        ("  Anharmonic reports also in analysis_results/", DIM),
+        ("  Open: $ open analysis_results_harmonic/water/report.html", DIM),
+        ("         $ open analysis_results_harmonic/aspirin/report.html", DIM),
     ])
 
 
 def slide_results_table(prs):
-    """Slide 8: Harmonic benchmark comparison table — 8 combos, water."""
-    content_slide(prs, "$ cat results/water/metrics_summary.json | sort-by-freq", [
-        ("# Harmonic benchmark — water (H\u2082O, 3 modes)", ACCENT),
-        ("  Ref: B3LYP/6-31G(d,p)   |   sorted by frequency MAE", DIM),
+    """Slides 8–9: Harmonic benchmark — water (8 combos) and aspirin (4 combos).
+
+    Rows sorted by MAE(freq) ascending (lowest error = best = shown first).
+    Uniform TEXT color — no per-row color logic.
+    Data loaded from analysis_results_harmonic/{molecule}/data/metrics_summary.json.
+    """
+    water = load_combo_metrics("water")
+    aspirin = load_combo_metrics("aspirin")
+
+    def table_lines(combos, mol_label):
+        lines = [
+            (f"# Harmonic benchmark — {mol_label}", ACCENT),
+            ("  Ref: B3LYP/6-31G(d,p)   |   sorted by MAE(freq) ascending", DIM),
+            ("", DIM),
+            ("  Energy model    Dipole      MAE(freq)   R²(freq)    R²(intens)", DIM),
+            ("  " + "─" * 60, DIM),
+        ]
+        for c in combos:
+            energy, dipole = parse_combo_name(c["name"])
+            row = (
+                f"  {energy:<14}  {dipole:<10}"
+                f"  {c['mae_freq']:>6.1f} cm⁻¹"
+                f"   {c['r2_freq']:.7f}"
+                f"   {c['r2_intensity']:.2f}"
+            )
+            lines.append((row, TEXT))
+        return lines
+
+    water_lines = table_lines(water, "water (H₂O, 3 modes)")
+    aspirin_lines = table_lines(aspirin, "aspirin (C₉H₈O₄, 51 modes)")
+
+    # Water slide
+    content_slide(prs, "$ cat analysis_results_harmonic/water/data/metrics_summary.json | sort-by-mae", water_lines + [
         ("", DIM),
-        ("  Energy model   Dipole     MAE(freq)   R\u00b2(freq)   R\u00b2(intens)", DIM),
-        ("  \u2500" * 57, DIM),
-        ("  mace_anicc     mace_ml      19 cm\u207b\u00b9   0.999997     0.72  \u2713", GREEN),
-        ("  mace_anicc     espaloma     19 cm\u207b\u00b9   0.999997     0.52", TEXT),
-        ("  mace_off       mace_ml      21 cm\u207b\u00b9   0.999934     0.72  \u2713", GREEN),
-        ("  mace_off       espaloma     21 cm\u207b\u00b9   0.999934     0.52", TEXT),
-        ("  mace_omol      mace_ml      23 cm\u207b\u00b9   0.999963     0.72  \u2713", GREEN),
-        ("  mace_omol      espaloma     23 cm\u207b\u00b9   0.999963     0.52", TEXT),
-        ("  mace_mp        mace_ml     106 cm\u207b\u00b9   0.999998     0.72", YELLOW),
-        ("  mace_mp        espaloma    106 cm\u207b\u00b9   0.999998     0.51", YELLOW),
+        ("  → Frequencies: all combos excellent (R² > 0.9999)", TEXT),
+        ("  → Intensities: mace_ml consistently beats espaloma", TEXT),
+    ])
+
+    # Aspirin slide
+    content_slide(prs, "$ cat analysis_results_harmonic/aspirin/data/metrics_summary.json | sort-by-mae", aspirin_lines + [
         ("", DIM),
-        ("  \u2192 Frequencies: all combos excellent except mace_mp", TEXT),
-        ("  \u2192 Intensities: mace_ml dipole consistently beats espaloma", GREEN),
+        ("  → mace_omol: best accuracy (MAE < 9 cm⁻¹, R² 0.9998)", TEXT),
+        ("  → mace_mp: most speedup (~29×) but worse accuracy", TEXT),
     ])
 
 
