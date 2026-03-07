@@ -211,48 +211,27 @@ def slide_motivation(prs):
 
 
 def slide_ir_theory(prs):
-    """Slide 2: What the software computes — computational framing."""
-    two_col_slide(prs, "$ man ir_spectroscopy",
-        left_lines=[
-            ("# What the software computes", ACCENT),
-            ("", DIM),
-            ("  Harmonic approximation:", TEXT),
-            ("  V(x) \u2248 V\u2080 + \u00bdk\u00b7x\u00b2", TEXT),
-            ("", DIM),
-            ("  \u2192 Diagonalise Hessian \u2192 normal modes", TEXT),
-            ("  \u2192 3N\u22126 frequencies \u03c9\u1d62", TEXT),
-            ("  \u2192 Intensities \u221d |\u0394\u03bc/\u0394Q|\u00b2", TEXT),
-            ("", DIM),
-            ("  For each displaced geometry:", TEXT),
-            ("  \u2192 energy (forces \u2192 Hessian)", TEXT),
-            ("  \u2192 dipole \u03bc\u20d7 (intensity)", TEXT),
-            ("  \u2192 Gaussian displaces ~hundreds of times", TEXT),
-            ("", DIM),
-            ("# Anharmonic (VPT2): ongoing work", ACCENT),
-            ("  \u2192 Already running. Overtones + combination bands.", TEXT),
-            ("  \u2192 Results pending full validation \u2014 next direction.", DIM),
-        ],
-        right_lines=[
-            ("# What ML provides", ACCENT),
-            ("", DIM),
-            ("  Each displaced geometry \u2192 ML query:", TEXT),
-            ("", DIM),
-            ("  [geometry]", GREEN),
-            ("      \u2193  MACE energy model", TEXT),
-            ("  E, F, Hessian contribution", DIM),
-            ("", DIM),
-            ("  [geometry]", GREEN),
-            ("      \u2193  MACE dipole model", TEXT),
-            ("  \u03bc\u20d7 = (\u03bc_x, \u03bc_y, \u03bc_z)", DIM),
-            ("", DIM),
-            ("  Both injected into Gaussian", TEXT),
-            ("  via ZMQ bridge \u2014 next slide.", TEXT),
-            ("", DIM),
-            ("  IR range: 400\u20134000 cm\u207b\u00b9", DIM),
-            ("  1 cm\u207b\u00b9 \u2248 0.124 meV", DIM),
-        ],
-        split=5.0,
-    )
+    """Slide 2: IR spectroscopy — what Gaussian needs and why."""
+    content_slide(prs, "$ cat ir_spectroscopy.md", [
+        ("# How IR spectra are computed", ACCENT),
+        ("  → Displace each atom in x, y, z  (small nudges around equilibrium)", TEXT),
+        ("  → For each displacement, compute energy + forces", TEXT),
+        ("  → Build Hessian (matrix of force constants) → diagonalise", TEXT),
+        ("  → Eigenvalues = frequencies, eigenvectors = normal modes", TEXT),
+        ("  → 3N−6 modes for N atoms  (e.g. water: 3 modes)", TEXT),
+        ("", DIM),
+        ("# Where do intensities come from?", ACCENT),
+        ("  → Dipole μ⃗ = charge distribution of the molecule", TEXT),
+        ("  → When atoms vibrate, μ⃗ changes → molecule absorbs IR light", TEXT),
+        ("  → Intensity ∝ |∂μ/∂Q|²  (how much dipole changes per mode)", TEXT),
+        ("  → So we also need μ⃗ at every displaced geometry", TEXT),
+        ("", DIM),
+        ("# The bottleneck", ACCENT),
+        ("  → Gaussian displaces the molecule hundreds of times", TEXT),
+        ("  → Each time: needs energy E, forces F, and dipole μ⃗", TEXT),
+        ("  → With DFT: minutes to hours per molecule", TEXT),
+        ("  → With ML:  seconds  ← this is what we replace", GREEN),
+    ])
 
 
 def slide_architecture(prs):
