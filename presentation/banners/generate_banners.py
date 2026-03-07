@@ -13,6 +13,7 @@ Styles:
   6 — lean font (filled █)
   7 — block font (thin strokes)
   8 — block font (filled █)
+  9 — block + GAUSSIAN, centered, neofetch spirit
 """
 
 import pyfiglet
@@ -310,6 +311,28 @@ def style_8(prs):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Style 9: block + GAUSSIAN subtitle, centered, neofetch spirit
+# ─────────────────────────────────────────────────────────────────────────────
+
+def style_9(prs):
+    slide = blank(prs)
+    label(slide, 9, "block + GAUSSIAN — neofetch spirit")
+
+    raw = pyfiglet.figlet_format("MACE", font="block")
+    art_lines = [(ln, ACCENT) for ln in raw.splitlines() if ln.strip()]
+    art_lines.append(("       GAUSSIAN", ACCENT))
+
+    block(slide, art_lines, x=0.6, y=1.6, w=9.2, h=3.0, size=16,
+          align=PP_ALIGN.CENTER)
+
+    block(slide, [
+        ("// ML-accelerated IR spectrum calculations", DIM),
+    ], x=0.8, y=5.0, w=8.4, h=0.6, size=16, align=PP_ALIGN.CENTER)
+
+    footer(slide)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 
 def main():
     prs = Presentation()
@@ -324,10 +347,11 @@ def main():
     style_6(prs)
     style_7(prs)
     style_8(prs)
+    style_9(prs)
 
     out = "presentation/banners/title_banners.pptx"
     prs.save(out)
-    print(f"✓ Saved: {out}  (8 slides)")
+    print(f"✓ Saved: {out}  (9 slides)")
     print("  1 — MACE doom block letters")
     print("  2 — ASCII IR spectrum art")
     print("  3 — system boot sequence")
@@ -336,6 +360,7 @@ def main():
     print("  6 — lean, filled █")
     print("  7 — block, thin strokes")
     print("  8 — block, filled █")
+    print("  9 — block + GAUSSIAN, centered")
 
 
 if __name__ == "__main__":
