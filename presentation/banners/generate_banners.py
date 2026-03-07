@@ -3,8 +3,15 @@
 Title slide banner workshop — 4 style variations.
 Run: python3.8 presentation/banners/generate_banners.py
 Output: presentation/banners/title_banners.pptx
+
+Styles:
+  1 — MACE in doom block letters (pyfiglet)
+  2 — ASCII IR spectrum art
+  3 — system boot / progress bars
+  4 — v1 spirit, perfected
 """
 
+import pyfiglet
 from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.enum.text import PP_ALIGN
@@ -14,6 +21,7 @@ BG     = RGBColor(13,  17,  23)
 TEXT   = RGBColor(201, 209, 217)
 ACCENT = RGBColor(88,  166, 255)
 GREEN  = RGBColor(63,  185, 80)
+YELLOW = RGBColor(210, 153, 34)
 DIM    = RGBColor(139, 148, 158)
 FONT   = "Consolas"
 DATE   = "Manuel Ott · Hofer Lab · 2026-03-26"
@@ -37,18 +45,17 @@ def footer(slide):
     p.alignment = PP_ALIGN.CENTER
 
 
-def label(slide, text, color=DIM):
-    """Small top-left style label."""
-    box = slide.shapes.add_textbox(Inches(0.5), Inches(0.25), Inches(4), Inches(0.3))
+def label(slide, n, desc):
+    box = slide.shapes.add_textbox(Inches(0.5), Inches(0.22), Inches(8), Inches(0.3))
     tf = box.text_frame
-    tf.text = text
+    tf.text = f"// style {n} — {desc}"
     p = tf.paragraphs[0]
-    p.font.size = Pt(11)
+    p.font.size = Pt(10)
     p.font.name = FONT
-    p.font.color.rgb = color
+    p.font.color.rgb = DIM
 
 
-def text_block(slide, lines, x, y, w, h, size=15, align=PP_ALIGN.CENTER):
+def block(slide, lines, x, y, w, h, size, align=PP_ALIGN.LEFT):
     box = slide.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(h))
     tf = box.text_frame
     tf.word_wrap = False
@@ -60,103 +67,129 @@ def text_block(slide, lines, x, y, w, h, size=15, align=PP_ALIGN.CENTER):
         p.font.color.rgb = color
         p.space_after = Pt(0)
         p.alignment = align
-    return box
 
 
-# ── Style 1: Minimal — v1 spirit, centered, breathing room ───────────────────
+# ─────────────────────────────────────────────────────────────────────────────
+# Style 1: MACE in doom font block letters
+# ─────────────────────────────────────────────────────────────────────────────
 
 def style_1(prs):
     slide = blank(prs)
-    label(slide, "style 1 — minimal")
+    label(slide, 1, "figlet doom — MACE block letters")
 
-    text_block(slide, [
-        ("$ ./presentation.sh",         ACCENT),
-        ("",                             DIM),
-        ("// ML-accelerated IR spectroscopy", DIM),
-    ], x=1, y=2.8, w=8, h=1.5, size=28)
+    raw = pyfiglet.figlet_format("MACE", font="doom")
+    art_lines = [(ln, ACCENT) for ln in raw.splitlines() if ln.strip()]
+
+    block(slide, art_lines, x=0.6, y=1.0, w=9.2, h=2.8, size=16,
+          align=PP_ALIGN.CENTER)
+
+    block(slide, [
+        ("─" * 44,                           DIM),
+        ("",                                  DIM),
+        ("$ ./presentation.sh",               ACCENT),
+        ("",                                  DIM),
+        ("// ML-accelerated IR spectroscopy", TEXT),
+        ("// MACE × Gaussian 16 · ZMQ · VPT2", DIM),
+    ], x=0.8, y=4.1, w=8.4, h=2.0, size=16, align=PP_ALIGN.CENTER)
 
     footer(slide)
 
 
-# ── Style 2: Big ASCII block title ───────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────
+# Style 2: ASCII IR spectrum art
+# ─────────────────────────────────────────────────────────────────────────────
 
 def style_2(prs):
     slide = blank(prs)
-    label(slide, "style 2 — block letters")
+    label(slide, 2, "ASCII IR spectrum")
 
-    # MACE in figlet-style block letters (hand-crafted)
-    banner = [
-        (r" __  __   _   ___ ___    __ _   _   _   _ ___ ___ _   _   _  _ ",  ACCENT),
-        (r"|  \/  | /_\ / __| __|  / _` | /_\ | | | / __/ __| | /_\ | \| |", ACCENT),
-        (r"| |\/| |/ _ \ (__| _|  | (_| |/ _ \| |_| \__ \__ \ |/ _ \| .` |", ACCENT),
-        (r"|_|  |_/_/ \_\___|___|  \__, /_/ \_\\___/|___/___/_/_/ \_\_|\_|", ACCENT),
-        (r"                        |___/                                    ", DIM),
-    ]
+    # Hand-crafted IR spectrum — 52 columns, 8 rows
+    # Peaks: ~700 (aromatic), ~1000-1200 (C-O), ~1680 (C=O), ~3000 (C-H), ~3300 (O-H)
+    H = [0] * 52
+    for i, h in [
+        (3,4),(4,5),(5,5),(6,4),           # ~700  aromatic C-H bend
+        (8,5),(9,7),(10,8),(11,7),(12,5),  # ~1050 C-O stretch
+        (14,4),(15,6),(16,5),              # ~1200 C-O
+        (18,4),(19,5),(20,4),              # ~1380 C-H deform
+        (21,8),(22,8),(23,7),(24,5),       # ~1680 C=O stretch (tallest)
+        (33,3),(34,4),(35,3),              # ~2900 C-H stretch
+        (36,5),(37,6),(38,5),              # ~3050 C-H stretch
+        (40,3),(41,5),(42,6),(43,4),       # ~3300 O-H stretch
+    ]:
+        H[i] = h
 
-    text_block(slide, banner, x=0.2, y=1.6, w=9.6, h=1.5, size=10, align=PP_ALIGN.CENTER)
+    rows = []
+    for row in range(8, 0, -1):
+        line = "  "
+        for h in H:
+            line += "|" if h >= row else " "
+        rows.append((line, ACCENT if row >= 6 else (TEXT if row >= 3 else DIM)))
 
-    text_block(slide, [
-        ("",                                        DIM),
-        ("// ML-accelerated IR spectroscopy",       DIM),
-        ("// MACE × Gaussian · ZMQ · VPT2",         DIM),
-    ], x=1, y=3.5, w=8, h=1.2, size=16, align=PP_ALIGN.CENTER)
+    rows.append(("  " + "─" * 52 + "→", DIM))
+    rows.append(("   400    700   1200  1680       2900 3050 3300    cm⁻¹", DIM))
+
+    block(slide, rows, x=0.4, y=0.8, w=9.2, h=4.4, size=12, align=PP_ALIGN.LEFT)
+
+    block(slide, [
+        ("$ mace-gaussian run aspirin.xyz  # harmonic benchmark", ACCENT),
+        ("",                                                        DIM),
+        ("  // ML-accelerated IR spectroscopy",                    DIM),
+    ], x=0.6, y=5.5, w=9.0, h=1.0, size=14, align=PP_ALIGN.LEFT)
 
     footer(slide)
 
 
-# ── Style 3: Terminal box frame ───────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────
+# Style 3: System boot / loading bars
+# ─────────────────────────────────────────────────────────────────────────────
 
 def style_3(prs):
     slide = blank(prs)
-    label(slide, "style 3 — box frame")
+    label(slide, 3, "system boot sequence")
 
-    W = 52
-    inner = "mace-gaussian  //  ML-accelerated IR spectroscopy"
-    sub   = "MACE × Gaussian 16 · ZMQ bridge · VPT2 pipeline"
-    pad   = lambda s: s.center(W)
+    BAR = "=" * 24
+    OK  = "[done]"
 
-    box_lines = [
-        ("┌" + "─" * W + "┐",       DIM),
-        ("│" + " " * W + "│",       DIM),
-        ("│" + pad("$ ./mace_gaussian.sh") + "│",  ACCENT),
-        ("│" + " " * W + "│",       DIM),
-        ("│" + pad(inner) + "│",    TEXT),
-        ("│" + pad(sub)   + "│",    DIM),
-        ("│" + " " * W + "│",       DIM),
-        ("└" + "─" * W + "┘",       DIM),
+    lines = [
+        ("  Initializing mace-gaussian v1.1",                 ACCENT),
+        ("",                                                    DIM),
+        (f"  [{BAR}]  Loading MACE-OMOL-0        {OK}",       GREEN),
+        (f"  [{BAR}]  Loading MACE4IR dipole      {OK}",      GREEN),
+        (f"  [{BAR}]  Starting ZMQ IPC server     {OK}",      GREEN),
+        (f"  [{BAR}]  Gaussian 16 bridge ready    {OK}",      GREEN),
+        ("",                                                    DIM),
+        ("  ─" * 22,                                           DIM),
+        ("",                                                    DIM),
+        ("  $ mace-gaussian run molecule.xyz",                 ACCENT),
+        ("",                                                    DIM),
+        ("  // all systems go",                                DIM),
     ]
 
-    text_block(slide, box_lines, x=0.5, y=2.4, w=9, h=2.2, size=14, align=PP_ALIGN.CENTER)
+    block(slide, lines, x=0.8, y=1.5, w=8.8, h=4.5, size=16,
+          align=PP_ALIGN.LEFT)
 
     footer(slide)
 
 
-# ── Style 4: Molecule-first, command below ────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────
+# Style 4: v1 spirit — pure, centered, breathing room
+# ─────────────────────────────────────────────────────────────────────────────
 
 def style_4(prs):
     slide = blank(prs)
-    label(slide, "style 4 — molecule-first")
+    label(slide, 4, "v1 spirit — minimal + centered")
 
-    molecules = [
-        ("      O          O   OH   ",       GREEN),
-        ("     / \\         ‖   |    ",       GREEN),
-        ("    H   H    CH₃-C-O-C₆H₄-COOH",  GREEN),
-        ("    H₂O           aspirin  ",      DIM),
-    ]
-
-    text_block(slide, molecules, x=1, y=1.6, w=8, h=1.4, size=17, align=PP_ALIGN.CENTER)
-
-    text_block(slide, [
-        ("",                                     DIM),
-        ("$ python3 mace_gaussian.py water.xyz", ACCENT),
-        ("",                                     DIM),
-        ("// ML potentials + Gaussian VPT2",     DIM),
-    ], x=1, y=3.3, w=8, h=1.5, size=20, align=PP_ALIGN.CENTER)
+    block(slide, [
+        ("$ ./presentation.sh",               ACCENT),
+        ("",                                   DIM),
+        ("",                                   DIM),
+        ("// ML-accelerated IR spectroscopy",  DIM),
+    ], x=1.0, y=2.6, w=8.0, h=2.2, size=30, align=PP_ALIGN.CENTER)
 
     footer(slide)
 
 
-# ── Main ──────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────
 
 def main():
     prs = Presentation()
@@ -171,10 +204,10 @@ def main():
     out = "presentation/banners/title_banners.pptx"
     prs.save(out)
     print(f"✓ Saved: {out}  (4 slides)")
-    print("  1 — minimal (v1 spirit)")
-    print("  2 — ASCII block letters")
-    print("  3 — terminal box frame")
-    print("  4 — molecule-first")
+    print("  1 — MACE doom block letters")
+    print("  2 — ASCII IR spectrum art")
+    print("  3 — system boot sequence")
+    print("  4 — v1 spirit, minimal + centered")
 
 
 if __name__ == "__main__":
