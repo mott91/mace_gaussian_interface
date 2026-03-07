@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 01-narrative-structure-01-01-PLAN.md
-last_updated: "2026-03-07T07:32:39.155Z"
+stopped_at: Completed 01-narrative-structure-01-02-PLAN.md
+last_updated: "2026-03-07T07:42:50.717Z"
 last_activity: 2026-03-06 — Roadmap created
 progress:
   total_phases: 3
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -51,6 +51,7 @@ Progress: [░░░░░░░░░░] 0%
 
 *Updated after each plan completion*
 | Phase 01-narrative-structure P01 | 15 | 2 tasks | 2 files |
+| Phase 01-narrative-structure P02 | 5 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -65,6 +66,9 @@ Recent decisions affecting current work:
 - [Phase 01-narrative-structure]: Delete slide_vpt2 entirely — harmonic-first narrative, VPT2 is future work
 - [Phase 01-narrative-structure]: Replace per-molecule water/aspirin slides with cross-molecule overview + harmonic table
 - [Phase 01-narrative-structure]: Output path fixed to relative presentation/presentation_v2.pptx
+- [Phase 01-narrative-structure]: slide_ir_theory reframed as computational pipeline (harmonic approx → displaced geometries → ML query), not IR-101 audience intro
+- [Phase 01-narrative-structure]: Anharmonic/VPT2 framed as ongoing work with results pending, not a broken feature
+- [Phase 01-narrative-structure]: slide_status: replaced git-task-checklist language with what-we-built/ran/found research journey narrative
 
 ### Pending Todos
 
@@ -76,6 +80,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-07T07:32:39.153Z
-Stopped at: Completed 01-narrative-structure-01-01-PLAN.md
+Last session: 2026-03-07T07:42:50.715Z
+Stopped at: Completed 01-narrative-structure-01-02-PLAN.md
 Resume file: None

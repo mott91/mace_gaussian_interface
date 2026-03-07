@@ -6,7 +6,7 @@ Three phases to take the existing 12-slide deck from rough structure to presenta
 
 ## Phases
 
-- [ ] **Phase 1: Narrative & Structure** - Lock the story arc and slide order before any content work
+- [x] **Phase 1: Narrative & Structure** - Lock the story arc and slide order before any content work (completed 2026-03-07)
 - [ ] **Phase 2: Content** - Add the substance: results table, plots, ZMQ diagram, scaling argument
 - [ ] **Phase 3: Polish & Speaking Notes** - Make it presentable and speakable
 
@@ -52,6 +52,6 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Narrative & Structure | 1/2 | In Progress|  |
+| 1. Narrative & Structure | 2/2 | Complete   | 2026-03-07 |
 | 2. Content | 0/? | Not started | - |
 | 3. Polish & Speaking Notes | 0/? | Not started | - |
