@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 MACE-Gaussian Interface — Research Presentation v2
-March 2026 · ~15 minutes · 12 slides
+March 2026 · ~15 minutes · 13 slides
 Run: python generate_pptx_v2.py
 Output: presentation_v2.pptx
 """
@@ -486,6 +486,39 @@ def slide_results_table(prs):
     ])
 
 
+def slide_scaling(prs):
+    """Slide 10: Molecule size vs speedup — ASCII bar chart."""
+    MAX_BAR = 20
+    molecules = [
+        ("water",   3,  1,  "~1×"),
+        ("glycine", 10, 6,  "~7–10×"),
+        ("aspirin", 21, 20, "~18–29×"),
+    ]
+    bar_lines = []
+    for name, atoms, bar_val, label in molecules:
+        bar = "=" * bar_val + " " * (MAX_BAR - bar_val)
+        bar_lines.append((
+            f"  {name:<10}  ({atoms:>2} atoms)  |{bar}|  {label}",
+            TEXT,
+        ))
+
+    content_slide(prs, "$ python benchmark.py --scaling", [
+        ("# ML speedup scales with molecule size", ACCENT),
+        ("  Dipole step: ML vs DFT (B3LYP/6-31G(d,p))", DIM),
+        ("", DIM),
+        ("  molecule      atoms         speedup", DIM),
+        ("  " + "─" * 50, DIM),
+        *bar_lines,
+        ("", DIM),
+        ("  → Water (3 atoms): ML overhead visible — no speedup at this scale", TEXT),
+        ("  → Glycine (10 atoms): ~7–10× — target use case", TEXT),
+        ("  → Aspirin (21 atoms): ~18–29× — strong benefit", TEXT),
+        ("", DIM),
+        ("  Speedup source: DFT dipoles O(N³); ML dipoles O(N)", DIM),
+        ("  (estimated ranges — not benchmarked to the second)", DIM),
+    ])
+
+
 def slide_status(prs):
     """Slide 9: Research journey — what we built, ran, found, and what's next."""
     two_col_slide(prs, "$ git log --oneline --graph",
@@ -558,27 +591,29 @@ def main():
     prs.slide_width  = Inches(10)
     prs.slide_height = Inches(7.5)
 
-    slide_title(prs)            # 0 — neofetch header
-    slide_motivation(prs)       # 1 — problem / solution / impact
-    slide_ir_theory(prs)        # 2 — what is IR, harmonic limit (life scientists)
-    slide_architecture(prs)     # 3 — system architecture diagram
-    slide_dipole_methods(prs)   # 4 — MACE4IR + Espaloma + energy models
-    slide_zmq(prs)              # 5 — ZMQ bridge + engineering challenges
-    slide_mode_matching(prs)    # 6 — eigenvector dot product
-    slide_results_overview(prs) # 7 — HTML report listing
-    slide_results_table(prs)    # 8 — harmonic comparison table (8 combos)
-    slide_status(prs)           # 9 — current status + next steps
-    slide_questions(prs)        # 10 — questions
+    slide_title(prs)            # 0  — neofetch header
+    slide_motivation(prs)       # 1  — problem / solution / impact
+    slide_ir_theory(prs)        # 2  — what is IR, harmonic limit
+    slide_architecture(prs)     # 3  — system architecture diagram
+    slide_dipole_methods(prs)   # 4  — MACE4IR + Espaloma + energy models
+    slide_zmq(prs)              # 5  — ZMQ bridge — pedagogical flow
+    slide_mode_matching(prs)    # 6  — eigenvector dot product
+    slide_results_overview(prs) # 7  — HTML report listing + ASCII art
+    slide_results_table(prs)    # 8–9 — harmonic table (water + aspirin, 2 slides)
+    slide_scaling(prs)          # 10 — molecule size vs speedup bar chart
+    slide_status(prs)           # 11 — research journey
+    slide_questions(prs)        # 12 — questions
 
     out = "presentation/presentation_v2.pptx"
     prs.save(out)
 
     print(f"✓ Saved: {out}")
-    print(f"  11 slides  (~15 min)")
+    print(f"  13 slides  (~15 min)")
     print(f"  Slides: title · motivation · IR theory ·")
     print(f"          architecture · dipole methods · ZMQ bridge ·")
-    print(f"          mode matching · results overview · results table ·")
-    print(f"          status · questions")
+    print(f"          mode matching · results overview ·")
+    print(f"          results table (water) · results table (aspirin) ·")
+    print(f"          scaling · status · questions")
 
 
 if __name__ == "__main__":
