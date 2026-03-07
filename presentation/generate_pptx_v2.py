@@ -9,6 +9,7 @@ Output: presentation_v2.pptx
 import json
 import os
 
+import pyfiglet
 from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.enum.text import PP_ALIGN
@@ -156,82 +157,35 @@ def parse_combo_name(name):
 # ── Slides ────────────────────────────────────────────────────────────────────
 
 def slide_title(prs):
-    """Slide 0: neofetch-style title."""
+    """Slide 0: style 9 — block font MACE + GAUSSIAN, centered."""
     slide = blank_slide(prs)
 
-    # ASCII art — left panel (molecule + project logo)
-    ascii_art = [
-        "  __  __   _   ___ ___    ",
-        " |  \\/  | /_\\ / __| __|   ",
-        " | |\\/| |/ _ \\ (__| _|    ",
-        " |_|  |_/_/ \\_\\___|___|   ",
-        "       GAUSSIAN            ",
-        "                           ",
-        "  // ML-accelerated        ",
-        "  // IR spectroscopy       ",
-        "                           ",
-        "     O                     ",
-        "    / \\                    ",
-        "   H   H   H₂O             ",
-        "                           ",
-        "     O   OH                ",
-        "     ‖   |                 ",
-        " CH₃-C-O-C₆H₄-COOH        ",
-        "   aspirin C₉H₈O₄          ",
-    ]
+    # MACE in block font
+    raw = pyfiglet.figlet_format("MACE", font="block")
+    art_lines = [(ln, ACCENT) for ln in raw.splitlines() if ln.strip()]
+    art_lines.append(("              GAUSSIAN", GREEN))
 
-    abox = slide.shapes.add_textbox(Inches(0.4), Inches(1.0), Inches(4.4), Inches(5.6))
-    atf = abox.text_frame
-    for i, line in enumerate(ascii_art):
-        p = atf.paragraphs[i] if i == 0 else atf.add_paragraph()
-        p.text = line
-        p.font.size = Pt(15)
-        p.font.name = FONT
-        p.font.color.rgb = GREEN if i < 5 else (ACCENT if i >= 9 else DIM)
-        p.space_after = Pt(0)
-
-    # Divider
-    div = slide.shapes.add_textbox(Inches(4.9), Inches(1.0), Inches(0.1), Inches(5.6))
-    dtf = div.text_frame
-    for i in range(17):
-        p = dtf.paragraphs[i] if i == 0 else dtf.add_paragraph()
-        p.text = "│"
-        p.font.size = Pt(15)
-        p.font.name = FONT
-        p.font.color.rgb = DIM
-        p.space_after = Pt(0)
-
-    # Info panel — right
-    info = [
-        ("mot@hofer-hpc", ACCENT),
-        ("─" * 28, DIM),
-        ("OS       Hofer Lab · TU München", TEXT),
-        ("Shell    zsh + oh-my-zsh", TEXT),
-        ("─" * 28, DIM),
-        ("Project  mace-gaussian v1.1", GREEN),
-        ("Method   VPT2 + ML Dipoles", TEXT),
-        ("Engine   Gaussian 16", TEXT),
-        ("Bridge   ZMQ (IPC socket)", TEXT),
-        ("─" * 28, DIM),
-        ("ML       MACE-OMOL-0, MACE-MP", TEXT),
-        ("Dipoles  MACE4IR / Espaloma", TEXT),
-        ("Combos   4 energy × 2 dipole", TEXT),
-        ("─" * 28, DIM),
-        ("Tests    131 passing ✓", GREEN),
-        ("CI       GitHub Actions ✓", GREEN),
-        ("─" * 28, DIM),
-        ("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓", ACCENT),
-    ]
-
-    ibox = slide.shapes.add_textbox(Inches(5.1), Inches(1.0), Inches(4.6), Inches(5.6))
-    itf = ibox.text_frame
-    for i, (line, color) in enumerate(info):
-        p = itf.paragraphs[i] if i == 0 else itf.add_paragraph()
-        p.text = line
-        p.font.size = Pt(14)
+    box = slide.shapes.add_textbox(Inches(0.6), Inches(1.6), Inches(9.2), Inches(3.0))
+    tf = box.text_frame
+    tf.word_wrap = False
+    for i, (text, color) in enumerate(art_lines):
+        p = tf.paragraphs[i] if i == 0 else tf.add_paragraph()
+        p.text = text
+        p.font.size = Pt(16)
         p.font.name = FONT
         p.font.color.rgb = color
-        p.space_after = Pt(1)
+        p.space_after = Pt(0)
+        p.alignment = PP_ALIGN.CENTER
+
+    # Subtitle
+    sub = slide.shapes.add_textbox(Inches(0.8), Inches(5.0), Inches(8.4), Inches(0.6))
+    stf = sub.text_frame
+    stf.text = "// ML-accelerated IR spectrum calculations"
+    sp = stf.paragraphs[0]
+    sp.font.size = Pt(16)
+    sp.font.name = FONT
+    sp.font.color.rgb = DIM
+    sp.alignment = PP_ALIGN.CENTER
 
     add_footer(slide)
 
