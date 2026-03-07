@@ -31,9 +31,9 @@ Plans:
 **Depends on**: Phase 1
 **Requirements**: CONT-01, CONT-02, CONT-03, CONT-04
 **Success Criteria** (what must be TRUE):
-  1. Results slide shows all 8 calculator combos ranked by R²/MAE with frequencies and intensities in separate columns
+  1. Results slide shows all 8 calculator combos ranked by MAE_freq ascending with frequencies and intensities in separate columns
   2. A molecule-size vs speedup table or visual exists (water ~1×, glycine ~7–10×, aspirin ~18–29×)
-  3. Spectrum comparison plots from `analysis_results_harmonic/` are embedded for at least water and aspirin
+  3. HTML report links with ASCII molecule art serve as the spectrum reference for at least water and aspirin
   4. ZMQ bridge slide contains a flow diagram showing real-time ML dipole injection at the right Gaussian hook point
 **Plans**: 1 plan
 

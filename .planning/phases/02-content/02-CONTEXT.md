@@ -22,10 +22,11 @@ Fill every content gap in the deck so that every claim is backed by a visible ar
 
 ### Results table (CONT-01)
 - Per-molecule tables: water results on the water slide, aspirin results on the aspirin slide
-- Columns: Frequency R² | Frequency MAE (cm⁻¹) | Intensity R² | Intensity MAE — no RMSE (redundant for this audience)
-- Row ordering: ranked by frequency R² descending (makes the winner immediately obvious)
+- Columns: Energy model | Dipole model | MAE(freq) | R²(freq) | R²(intens) — no RMSE (redundant for this audience)
+- Row ordering: **MAE_freq ascending** (lowest error = best = shown first; overrides original "R² descending" from discuss-phase — research confirmed MAE is the clearer metric for this audience and ascending order makes rank immediately legible)
 - Molecules covered: water + aspirin only (complete harmonic data available; acoh has known parsing bugs)
-- Data source: pull from `comparison_results/{molecule}/{combo}/results.json` files
+- Data source: **`analysis_results_harmonic/{molecule}/data/metrics_summary.json`** (overrides original `comparison_results/{molecule}/{combo}/results.json` from discuss-phase — metrics_summary.json already aggregates and normalizes all combo results in one file, eliminating multi-file directory walks; RESEARCH.md confirmed this is the authoritative pre-aggregated source)
+- Uniform text color for all data rows — no per-row color-coding (that is Phase 3 polish)
 
 ### Scaling argument (CONT-02)
 - Gets a dedicated slide (not tucked into the results slides)
@@ -48,7 +49,6 @@ Fill every content gap in the deck so that every claim is backed by a visible ar
 - Exact ASCII art representation of H₂O and aspirin on the links slide
 - Specific bar widths/scale for the ASCII speedup chart
 - Exact wording of the ZMQ pedagogical narrative
-- Whether to regenerate data from JSON or hardcode the key numbers (either is fine)
 
 </decisions>
 
@@ -58,7 +58,7 @@ Fill every content gap in the deck so that every claim is backed by a visible ar
 - ASCII molecule art next to or above the HTML report links — user explicitly asked for H₂O and aspirin ASCII structures
 - The scaling bar chart should feel like a terminal benchmark output — tidy columns, molecule name left-padded, bar right-aligned
 - ZMQ slide: "problem → solution → how → why non-trivial" as the pedagogical spine
-- The results tables should make the winner (mace_omol + mace_ml) obvious from rank position alone
+- The results tables should make the winner (mace_omol + mace_ml) obvious from rank position alone (top of the ascending MAE sort)
 
 </specifics>
 
@@ -69,7 +69,7 @@ Fill every content gap in the deck so that every claim is backed by a visible ar
 - `content_slide(prs, command, lines)` — standard single-column slide; use for scaling slide and ZMQ redesign
 - `two_col_slide(prs, command, left_lines, right_lines, split=4.3)` — still available if needed
 - `slide_results_overview(prs)` and `slide_results_table(prs)` — existing results slides to be updated
-- Color constants: BG, TEXT, ACCENT, GREEN, YELLOW, DIM, RED — use GREEN for winner row, YELLOW for moderate
+- Color constants: BG, TEXT, ACCENT, GREEN, YELLOW, DIM, RED — use for section headers and highlights; uniform TEXT/DIM for data rows
 
 ### Established Patterns
 - Every slide has `$ command` header via `add_prompt()` — keep this for new slides
@@ -77,7 +77,7 @@ Fill every content gap in the deck so that every claim is backed by a visible ar
 - ASCII art: `Consolas Pt(13-15)`, `space_after=Pt(0)` for tight lines
 
 ### Integration Points
-- `comparison_results/{molecule}/{combo}/results.json` — source for R²/MAE numbers
+- `analysis_results_harmonic/{molecule}/data/metrics_summary.json` — source for R²/MAE numbers (aggregated per molecule)
 - `analysis_results_harmonic/{molecule}/report.html` — paths to reference on the links slide
 - `slide_zmq(prs)` at line 325 — function to rewrite
 - `slide_architecture(prs)` at line 257 — function to update (remove stale function names)
