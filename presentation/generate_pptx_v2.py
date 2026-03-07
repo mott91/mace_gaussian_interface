@@ -6,6 +6,9 @@ Run: python generate_pptx_v2.py
 Output: presentation_v2.pptx
 """
 
+import json
+import os
+
 from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.enum.text import PP_ALIGN
@@ -105,6 +108,49 @@ def two_col_slide(prs, command, left_lines, right_lines, split=4.3):
 
     add_footer(slide)
     return slide
+
+
+# ── Data helpers ──────────────────────────────────────────────────────────────
+
+def load_combo_metrics(molecule):
+    """Load combo results from analysis_results_harmonic/{molecule}/data/metrics_summary.json.
+
+    Data source: pre-aggregated metrics_summary.json (not comparison_results/ directory walk).
+    Sorted by mae_freq ascending so the best-performing combo (lowest error) appears first.
+    Per CONTEXT.md line 28: overrides original comparison_results/ approach from discuss-phase.
+    """
+    summary_path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        "analysis_results_harmonic",
+        molecule,
+        "data",
+        "metrics_summary.json",
+    )
+    if not os.path.isfile(summary_path):
+        return []
+    with open(summary_path) as f:
+        data = json.load(f)
+    combos = []
+    for entry in data.get("comparisons", []):
+        combos.append({
+            "name": entry.get("name", "unknown"),
+            "mae_freq": entry.get("mae_freq", float("inf")),
+            "r2_freq": entry.get("r2_freq", 0.0),
+            "r2_intensity": entry.get("r2_intensity", 0.0),
+            "speedup": entry.get("speedup"),
+        })
+    # Sort by mae_freq ascending (lowest MAE = best = shown first)
+    # Per CONTEXT.md line 26: overrides original "R² descending" from discuss-phase.
+    combos.sort(key=lambda c: c["mae_freq"], reverse=False)
+    return combos
+
+
+def parse_combo_name(name):
+    """Split combo name into (energy_model, dipole_model)."""
+    for suffix in ("_mace_ml", "_espaloma"):
+        if name.endswith(suffix):
+            return name[: -len(suffix)], suffix[1:]
+    return name, "?"
 
 
 # ── Slides ────────────────────────────────────────────────────────────────────
