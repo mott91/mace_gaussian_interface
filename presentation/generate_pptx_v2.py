@@ -255,7 +255,7 @@ def slide_ir_theory(prs):
 
 
 def slide_architecture(prs):
-    content_slide(prs, "$ python3 main.py  # system architecture",  [
+    content_slide(prs, "$ python3 main.py  # system architecture", [
         ("  [molecule.xyz]", GREEN),
         ("       ↓", DIM),
         ("  ┌─────────────────────────────────────────────────────┐", DIM),
@@ -265,16 +265,16 @@ def slide_architecture(prs):
         ("  ┌──────────────┴──────────────┐", DIM),
         ("  │ DFT BASELINE                │   ┌─────────────────────────────┐", DIM),
         ("  │ B3LYP/6-31G(d,p)           │   │ ML FREQ CALC                │", DIM),
-        ("  │ gaussian_freq()             │   │ load_mace_calculator()      │", DIM),
-        ("  │ parse_gaussian()            │   │ get_dipole_calculator()     │", DIM),
-        ("  └──────────────┬──────────────┘   │ setup_zmq_server()          │", DIM),
-        ("                 │                  │ launch_gaussian()           │", DIM),
-        ("                 └──────────────────┤ zmq_dipole_loop()           │", DIM),
+        ("  │ Gaussian 16                 │   │ MACE energy + forces        │", DIM),
+        ("  │ freq + dipoles              │   │ MACE dipole model           │", DIM),
+        ("  └──────────────┬──────────────┘   │ ZMQ bridge (zmq_server.py) │", DIM),
+        ("                 │                  │                             │", DIM),
+        ("                 └──────────────────┤ → fort.7 → Gaussian        │", DIM),
         ("                                    └──────────────┬──────────────┘", DIM),
         ("                                                   ↓", DIM),
-        ("  ┌─────────────────────────────────────────────────────────────┐", DIM),
-        ("  │ ANALYSIS  eigenvector_match → kde_broaden → metrics → HTML │", DIM),
-        ("  └─────────────────────────────────────────────────────────────┘", DIM),
+        ("  ┌──────────────────────────────────────────────────────────────┐", DIM),
+        ("  │ ANALYSIS  eigenvector matching → KDE broadening → HTML      │", DIM),
+        ("  └──────────────────────────────────────────────────────────────┘", DIM),
     ])
 
 
@@ -323,48 +323,30 @@ def slide_dipole_methods(prs):
 
 
 def slide_zmq(prs):
-    two_col_slide(prs, "$ cat zmq_bridge.md",
-        left_lines=[
-            ("# The bridge: how it works", ACCENT),
-            ("", DIM),
-            ("  Gaussian 16: 'External' keyword", TEXT),
-            ("  → calls a helper script for each", TEXT),
-            ("     displaced geometry", TEXT),
-            ("", DIM),
-            ("  ┌──────────────────────────────┐", DIM),
-            ("  │  Gaussian (Fortran)          │", DIM),
-            ("  │  ↓  writes geometry file     │", DIM),
-            ("  │  ↓  calls gm_helper.py       │", DIM),
-            ("  └────────────┬─────────────────┘", DIM),
-            ("               │ ZMQ (IPC socket)", DIM),
-            ("  ┌────────────┴─────────────────┐", DIM),
-            ("  │  gm_main.py  (Python)        │", DIM),
-            ("  │  → MACE energy + forces      │", DIM),
-            ("  │  → dipole calculator         │", DIM),
-            ("  │  ← returns fort.7 format     │", DIM),
-            ("  └──────────────────────────────┘", DIM),
-        ],
-        right_lines=[
-            ("# Key engineering challenges", ACCENT),
-            ("", DIM),
-            ("  LINGER=0:", TEXT),
-            ("  → ZMQ socket must close cleanly", TEXT),
-            ("  → Fixed: explicit SIGKILL timeout", TEXT),
-            ("", DIM),
-            ("  Absolute paths:", TEXT),
-            ("  → Gaussian needs full path to", TEXT),
-            ("    helper script in .gjf files", TEXT),
-            ("  → Resolved at CLI startup via", TEXT),
-            ("    MACE_HELPER_SCRIPT_PATH env var", TEXT),
-            ("", DIM),
-            ("  MACE module loading:", TEXT),
-            ("  → Dipole model saved with different", TEXT),
-            ("    class paths than runtime", TEXT),
-            ("  → mace_loader.py handles remapping", TEXT),
-            ("    via torch.load(pickle_module=…)", TEXT),
-        ],
-        split=5.1,
-    )
+    """Slide 5: ZMQ bridge — single-column pedagogical flow."""
+    content_slide(prs, "$ cat zmq_bridge.md", [
+        ("# Problem", ACCENT),
+        ("  Gaussian needs dipole derivatives for every displaced geometry", TEXT),
+        ("  → DFT dipoles: expensive. This is the bottleneck.", TEXT),
+        ("", DIM),
+        ("# Solution: ZMQ bridge", ACCENT),
+        ("  Gaussian 'External' keyword calls gm_helper.py per geometry", TEXT),
+        ("  → gm_helper.py sends geometry over ZMQ IPC socket", TEXT),
+        ("  → zmq_server.py receives, queries ML, returns results", TEXT),
+        ("", DIM),
+        ("# How it works", ACCENT),
+        ("  [Gaussian]  → writes geometry → calls gm_helper.py", DIM),
+        ("                                        ↓  ZMQ (IPC)", DIM),
+        ("                                  zmq_server.py", DIM),
+        ("                                        ↓  MACE energy + forces", DIM),
+        ("                                        ↓  MACE dipole model", DIM),
+        ("  [Gaussian]  ← reads fort.7  ←         ↑  returns results", DIM),
+        ("", DIM),
+        ("# Why it's non-trivial", ACCENT),
+        ("  Socket cleanup: LINGER=0 + SIGKILL timeout (no orphan processes)", TEXT),
+        ("  Absolute paths: Gaussian needs full path resolved at CLI startup", TEXT),
+        ("  Model loading: dipole class remapping via torch.load()", TEXT),
+    ])
 
 
 def slide_mode_matching(prs):
