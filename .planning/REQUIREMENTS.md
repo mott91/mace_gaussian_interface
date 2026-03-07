@@ -7,9 +7,9 @@
 
 ### Narrative & Structure
 
-- [ ] **NARR-01**: Slide structure reviewed and reordered to match harmonic-first narrative arc (why → how → what we found → what's next)
+- [x] **NARR-01**: Slide structure reviewed and reordered to match harmonic-first narrative arc (why → how → what we found → what's next)
 - [ ] **NARR-02**: Slide 10 rewritten as research journey — physics and chemistry progress, not git versions
-- [ ] **NARR-03**: VPT2/anharmonic slide scoped to context + "ongoing work" framing (not a deep dive)
+- [x] **NARR-03**: VPT2/anharmonic slide scoped to context + "ongoing work" framing (not a deep dive)
 
 ### Content
 
@@ -50,9 +50,9 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| NARR-01 | Phase 1 — Narrative & Structure | Pending |
+| NARR-01 | Phase 1 — Narrative & Structure | Complete |
 | NARR-02 | Phase 1 — Narrative & Structure | Pending |
-| NARR-03 | Phase 1 — Narrative & Structure | Pending |
+| NARR-03 | Phase 1 — Narrative & Structure | Complete |
 | CONT-01 | Phase 2 — Content | Pending |
 | CONT-02 | Phase 2 — Content | Pending |
 | CONT-03 | Phase 2 — Content | Pending |

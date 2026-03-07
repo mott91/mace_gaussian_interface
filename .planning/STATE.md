@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 1 context gathered
-last_updated: "2026-03-06T20:00:49.073Z"
+stopped_at: Completed 01-narrative-structure-01-01-PLAN.md
+last_updated: "2026-03-07T07:32:39.155Z"
 last_activity: 2026-03-06 — Roadmap created
 progress:
   total_phases: 3
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 2
+  completed_plans: 1
   percent: 0
 ---
 
@@ -50,6 +50,7 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: —
 
 *Updated after each plan completion*
+| Phase 01-narrative-structure P01 | 15 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -61,6 +62,9 @@ Recent decisions affecting current work:
 - Harmonic-first narrative: results are solid and complete; anharmonic is ongoing work only
 - ZMQ bridge as technical deep dive: novel engineering, surprising to any audience
 - BH3·NH3 excluded: future-work molecule, not ready to present
+- [Phase 01-narrative-structure]: Delete slide_vpt2 entirely — harmonic-first narrative, VPT2 is future work
+- [Phase 01-narrative-structure]: Replace per-molecule water/aspirin slides with cross-molecule overview + harmonic table
+- [Phase 01-narrative-structure]: Output path fixed to relative presentation/presentation_v2.pptx
 
 ### Pending Todos
 
@@ -72,6 +76,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-06T20:00:49.070Z
-Stopped at: Phase 1 context gathered
-Resume file: .planning/phases/01-narrative-structure/01-CONTEXT.md
+Last session: 2026-03-07T07:32:39.153Z
+Stopped at: Completed 01-narrative-structure-01-01-PLAN.md
+Resume file: None

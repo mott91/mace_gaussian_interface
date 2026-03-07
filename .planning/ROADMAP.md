@@ -52,6 +52,6 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Narrative & Structure | 0/2 | Not started | - |
+| 1. Narrative & Structure | 1/2 | In Progress|  |
 | 2. Content | 0/? | Not started | - |
 | 3. Polish & Speaking Notes | 0/? | Not started | - |
