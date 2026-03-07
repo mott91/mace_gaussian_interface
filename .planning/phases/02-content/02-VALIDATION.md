@@ -57,7 +57,7 @@ None — existing infrastructure covers all phase requirements. No new test file
 
 | Behavior | Requirement | Why Manual | Test Instructions |
 |----------|-------------|------------|-------------------|
-| Results table visually readable and sorted correctly | CONT-01 | Font size and column width require visual inspection | Open pptx, verify water table shows 8 rows sorted by MAE ascending, aspirin shows 4 rows |
+| Results table visually readable and sorted correctly | CONT-01 | Font size and column width require visual inspection | Open pptx, verify water table shows 8 rows sorted by R²_freq descending, aspirin shows 4 rows, all rows uniform text color |
 | HTML report links and ASCII art legible at slide scale | CONT-03 | Layout quality requires visual check | Open pptx, verify ASCII art and report paths are readable on the overview slide |
 | ZMQ flow diagram arrows and labels correct | CONT-04 | Diagram layout requires visual inspection | Open pptx, verify flow diagram shows hook point and zmq_server.py label |
 

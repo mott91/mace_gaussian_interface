@@ -27,13 +27,13 @@ Plans:
 - [ ] 01-02-PLAN.md — Rewrite status slide as research journey; tighten motivation slide
 
 ### Phase 2: Content
-**Goal**: Every claim in the deck is backed by a visible artifact — the results table is complete, plots are embedded, the ZMQ diagram is clear, and the scaling argument is explicit
+**Goal**: Every claim in the deck is backed by a visible artifact — the results table is complete, spectrum results are referenced, the ZMQ diagram is clear, and the scaling argument is explicit
 **Depends on**: Phase 1
 **Requirements**: CONT-01, CONT-02, CONT-03, CONT-04
 **Success Criteria** (what must be TRUE):
-  1. Results slide shows all 8 calculator combos ranked by MAE_freq ascending with frequencies and intensities in separate columns
+  1. Results slide shows all 8 calculator combos ranked by R²_freq descending with frequencies and intensities in separate columns
   2. A molecule-size vs speedup table or visual exists (water ~1×, glycine ~7–10×, aspirin ~18–29×)
-  3. HTML report links with ASCII molecule art serve as the spectrum reference for at least water and aspirin
+  3. Spectrum results are referenced via HTML report links with ASCII molecule art for at least water and aspirin (no PNG embedding)
   4. ZMQ bridge slide contains a flow diagram showing real-time ML dipole injection at the right Gaussian hook point
 **Plans**: 1 plan
 
@@ -47,7 +47,7 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Results table cells are color-coded: green for strong performance, yellow for moderate, red for poor
   2. Every slide has a visible slide number
-  3. Font, spacing, and accent colors are consistent across all 12 slides (no visual outliers)
+  3. Font, spacing, and accent colors are consistent across all 13 slides (no visual outliers)
   4. Each slide has 2–4 bullet speaking notes covering what to say and what to emphasise
 **Plans**: TBD
 
