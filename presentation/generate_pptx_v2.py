@@ -240,18 +240,19 @@ def slide_motivation(prs):
     """Slide 1: Why we built this."""
     content_slide(prs, "$ cat motivation.md", [
         ("# Problem", ACCENT),
-        ("  \u2192 DFT frequency calculations: slow (minutes to hours per molecule)", TEXT),
-        ("  \u2192 Anharmonic VPT2: even more expensive \u2014 scales as O(N\u2074)", TEXT),
-        ("  \u2192 Bottleneck for any systematic benchmark campaign", TEXT),
+        ("  \u2192 DFT frequency calculations: slow", TEXT),
+        ("  \u2192 Minutes to hours per molecule", TEXT),
+        ("  \u2192 Bottleneck for systematic benchmark campaigns", TEXT),
         ("", DIM),
         ("# Solution", ACCENT),
-        ("  \u2192 Hybrid ML-QM: ML computes dipole derivatives in real-time", TEXT),
-        ("  \u2192 ZMQ bridge injects results into Gaussian \u2014 no modifications needed", TEXT),
-        ("  \u2192 10\u2013100\u00d7 faster than pure DFT for dipole-heavy steps", TEXT),
+        ("  \u2192 Hybrid ML-QM approach", TEXT),
+        ("  \u2192 ML dipoles and energies", TEXT),
+        ("  \u2192 Possibly 10\u2013100\u00d7 faster than pure DFT", TEXT),
         ("", DIM),
         ("# Impact", ACCENT),
-        ("  \u2192 Rapid IR predictions across chemical space", TEXT),
-        ("  \u2192 Thesis question: energy surface vs dipole model quality", TEXT),
+        ("  \u2192 Enable rapid IR spectral predictions", TEXT),
+        ("  \u2192 Maintain DFT-level accuracy", TEXT),
+        ("  \u2192 Systematic comparison: energy surface vs dipole model quality", TEXT),
     ])
 
 
