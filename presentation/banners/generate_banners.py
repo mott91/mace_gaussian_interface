@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Title slide banner workshop — 4 style variations.
+Title slide banner workshop — 8 style variations.
 Run: python3.8 presentation/banners/generate_banners.py
 Output: presentation/banners/title_banners.pptx
 
@@ -9,6 +9,10 @@ Styles:
   2 — ASCII IR spectrum art
   3 — system boot / progress bars
   4 — v1 spirit, perfected
+  5 — lean font (thin strokes)
+  6 — lean font (filled █)
+  7 — block font (thin strokes)
+  8 — block font (filled █)
 """
 
 import pyfiglet
@@ -189,6 +193,122 @@ def style_4(prs):
     footer(slide)
 
 
+def _figlet_fill(text, font):
+    """Generate figlet art with all strokes replaced by █."""
+    raw = pyfiglet.figlet_format(text, font=font)
+    filled = ""
+    for ch in raw:
+        if ch in ("_", "/", "\\", "|"):
+            filled += "█"
+        else:
+            filled += ch
+    return filled
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Style 5: lean font — thin strokes
+# ─────────────────────────────────────────────────────────────────────────────
+
+def style_5(prs):
+    slide = blank(prs)
+    label(slide, 5, "lean — thin strokes")
+
+    raw = pyfiglet.figlet_format("MACE", font="lean")
+    art_lines = [(ln, ACCENT) for ln in raw.splitlines() if ln.strip()]
+
+    block(slide, art_lines, x=0.4, y=1.0, w=9.2, h=2.8, size=16,
+          align=PP_ALIGN.CENTER)
+
+    block(slide, [
+        ("─" * 44,                           DIM),
+        ("",                                  DIM),
+        ("$ mace-gaussian run molecule.xyz",  ACCENT),
+        ("",                                  DIM),
+        ("// ML-accelerated IR spectroscopy", TEXT),
+        ("// MACE × Gaussian 16 · ZMQ · VPT2", DIM),
+    ], x=0.8, y=4.1, w=8.4, h=2.0, size=16, align=PP_ALIGN.CENTER)
+
+    footer(slide)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Style 6: lean font — filled █
+# ─────────────────────────────────────────────────────────────────────────────
+
+def style_6(prs):
+    slide = blank(prs)
+    label(slide, 6, "lean — filled █")
+
+    raw = _figlet_fill("MACE", "lean")
+    art_lines = [(ln, ACCENT) for ln in raw.splitlines() if ln.strip()]
+
+    block(slide, art_lines, x=0.4, y=1.0, w=9.2, h=2.8, size=16,
+          align=PP_ALIGN.CENTER)
+
+    block(slide, [
+        ("─" * 44,                           DIM),
+        ("",                                  DIM),
+        ("$ mace-gaussian run molecule.xyz",  ACCENT),
+        ("",                                  DIM),
+        ("// ML-accelerated IR spectroscopy", TEXT),
+        ("// MACE × Gaussian 16 · ZMQ · VPT2", DIM),
+    ], x=0.8, y=4.1, w=8.4, h=2.0, size=16, align=PP_ALIGN.CENTER)
+
+    footer(slide)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Style 7: block font — thin strokes
+# ─────────────────────────────────────────────────────────────────────────────
+
+def style_7(prs):
+    slide = blank(prs)
+    label(slide, 7, "block — thin strokes")
+
+    raw = pyfiglet.figlet_format("MACE", font="block")
+    art_lines = [(ln, ACCENT) for ln in raw.splitlines() if ln.strip()]
+
+    block(slide, art_lines, x=0.6, y=1.0, w=9.2, h=2.8, size=16,
+          align=PP_ALIGN.CENTER)
+
+    block(slide, [
+        ("─" * 44,                           DIM),
+        ("",                                  DIM),
+        ("$ mace-gaussian run molecule.xyz",  ACCENT),
+        ("",                                  DIM),
+        ("// ML-accelerated IR spectroscopy", TEXT),
+        ("// MACE × Gaussian 16 · ZMQ · VPT2", DIM),
+    ], x=0.8, y=4.1, w=8.4, h=2.0, size=16, align=PP_ALIGN.CENTER)
+
+    footer(slide)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Style 8: block font — filled █
+# ─────────────────────────────────────────────────────────────────────────────
+
+def style_8(prs):
+    slide = blank(prs)
+    label(slide, 8, "block — filled █")
+
+    raw = _figlet_fill("MACE", "block")
+    art_lines = [(ln, ACCENT) for ln in raw.splitlines() if ln.strip()]
+
+    block(slide, art_lines, x=0.6, y=1.0, w=9.2, h=2.8, size=16,
+          align=PP_ALIGN.CENTER)
+
+    block(slide, [
+        ("─" * 44,                           DIM),
+        ("",                                  DIM),
+        ("$ mace-gaussian run molecule.xyz",  ACCENT),
+        ("",                                  DIM),
+        ("// ML-accelerated IR spectroscopy", TEXT),
+        ("// MACE × Gaussian 16 · ZMQ · VPT2", DIM),
+    ], x=0.8, y=4.1, w=8.4, h=2.0, size=16, align=PP_ALIGN.CENTER)
+
+    footer(slide)
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 
 def main():
@@ -200,14 +320,22 @@ def main():
     style_2(prs)
     style_3(prs)
     style_4(prs)
+    style_5(prs)
+    style_6(prs)
+    style_7(prs)
+    style_8(prs)
 
     out = "presentation/banners/title_banners.pptx"
     prs.save(out)
-    print(f"✓ Saved: {out}  (4 slides)")
+    print(f"✓ Saved: {out}  (8 slides)")
     print("  1 — MACE doom block letters")
     print("  2 — ASCII IR spectrum art")
     print("  3 — system boot sequence")
     print("  4 — v1 spirit, minimal + centered")
+    print("  5 — lean, thin strokes")
+    print("  6 — lean, filled █")
+    print("  7 — block, thin strokes")
+    print("  8 — block, filled █")
 
 
 if __name__ == "__main__":
