@@ -328,30 +328,61 @@ def slide_dipole_methods(prs):
 
 
 def slide_zmq(prs):
-    """Slide 5: ZMQ bridge — single-column pedagogical flow."""
-    content_slide(prs, "$ cat zmq_bridge.md", [
-        ("# Problem", ACCENT),
-        ("  Gaussian needs dipole derivatives for every displaced geometry", TEXT),
-        ("  → DFT dipoles: expensive. This is the bottleneck.", TEXT),
+    """Slide 5: ZMQ bridge — ASCII diagram + External keyword."""
+    slide = blank_slide(prs)
+    add_prompt(slide, "$ cat zmq_bridge.md")
+
+    # Brief refresher + External keyword
+    top_lines = [
+        ("# Gaussian needs E, F, μ⃗ at every displaced geometry — how do we inject ML?", ACCENT),
+        ("  → Gaussian 'External' keyword: calls an external script per displacement", TEXT),
+        ("  → We intercept this with a ZMQ bridge — no Gaussian modifications needed", TEXT),
+    ]
+
+    tbox = slide.shapes.add_textbox(Inches(0.5), Inches(1.15), Inches(9.0), Inches(1.2))
+    ttf = tbox.text_frame
+    ttf.word_wrap = True
+    for i, (text, color) in enumerate(top_lines):
+        p = ttf.paragraphs[i] if i == 0 else ttf.add_paragraph()
+        p.text = text
+        p.font.size = Pt(13)
+        p.font.name = FONT
+        p.font.color.rgb = color
+        p.space_after = Pt(2)
+
+    # ASCII flow diagram
+    diagram = [
+        ("  ┌─────────────────────┐                    ┌─────────────────────────────┐", DIM),
+        ("  │                     │   displacement #n  │                             │", DIM),
+        ("  │    GAUSSIAN 16      │ ──────────────────→│     gm_helper.py            │", ACCENT),
+        ("  │                     │                    │     (External script)        │", DIM),
+        ("  │    freq=anharmonic  │                    └──────────────┬──────────────┘", DIM),
+        ("  │    external='...'   │                                   │ ZMQ IPC", DIM),
+        ("  │                     │                                   ▼", DIM),
+        ("  │                     │                    ┌─────────────────────────────┐", DIM),
+        ("  │                     │                    │     zmq_server.py           │", ACCENT),
+        ("  │                     │                    │                             │", DIM),
+        ("  │                     │     fort.7         │  ┌─ MACE energy → E, F     │", GREEN),
+        ("  │                     │ ←──────────────────│  └─ MACE dipole → μ⃗        │", GREEN),
+        ("  │                     │   E, F, μ⃗          │                             │", DIM),
+        ("  └─────────────────────┘                    └─────────────────────────────┘", DIM),
         ("", DIM),
-        ("# Solution: ZMQ bridge", ACCENT),
-        ("  Gaussian 'External' keyword calls gm_helper.py per geometry", TEXT),
-        ("  → gm_helper.py sends geometry over ZMQ IPC socket", TEXT),
-        ("  → zmq_server.py receives, queries ML, returns results", TEXT),
-        ("", DIM),
-        ("# How it works", ACCENT),
-        ("  [Gaussian]  → writes geometry → calls gm_helper.py", DIM),
-        ("                                        ↓  ZMQ (IPC)", DIM),
-        ("                                  zmq_server.py", DIM),
-        ("                                        ↓  MACE energy + forces", DIM),
-        ("                                        ↓  MACE dipole model", DIM),
-        ("  [Gaussian]  ← reads fort.7  ←         ↑  returns results", DIM),
-        ("", DIM),
-        ("# Why it's non-trivial", ACCENT),
-        ("  Socket cleanup: LINGER=0 + SIGKILL timeout (no orphan processes)", TEXT),
-        ("  Absolute paths: Gaussian needs full path resolved at CLI startup", TEXT),
-        ("  Model loading: dipole class remapping via torch.load()", TEXT),
-    ])
+        ("  ↻ repeats for every displacement (hundreds per molecule)", TEXT),
+    ]
+
+    dbox = slide.shapes.add_textbox(Inches(0.1), Inches(2.8), Inches(9.8), Inches(4.0))
+    dtf = dbox.text_frame
+    dtf.word_wrap = False
+    for i, (text, color) in enumerate(diagram):
+        p = dtf.paragraphs[i] if i == 0 else dtf.add_paragraph()
+        p.text = text
+        p.font.size = Pt(11)
+        p.font.name = FONT
+        p.font.color.rgb = color
+        p.space_after = Pt(0)
+        p.alignment = PP_ALIGN.CENTER
+
+    add_footer(slide)
 
 
 def slide_mode_matching(prs):
