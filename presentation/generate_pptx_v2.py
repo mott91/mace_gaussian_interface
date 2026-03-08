@@ -518,43 +518,27 @@ def slide_scaling(prs):
 
 
 def slide_status(prs):
-    """Slide 9: Research journey — what we built, ran, found, and what's next."""
-    two_col_slide(prs, "$ git log --oneline --graph",
-        left_lines=[
-            ("# What we built", ACCENT),
-            ("  ZMQ bridge: ML dipoles \u2192 Gaussian VPT2", TEXT),
-            ("  CLI: mace-gaussian run molecule.xyz", DIM),
-            ("  4 energy \u00d7 2 dipole models = 8 combinations", TEXT),
-            ("", DIM),
-            ("# What we ran", ACCENT),
-            ("  Harmonic benchmark across 8 molecules", TEXT),
-            ("  Water, aspirin, glycine, methane, ethane, NH\u2083, CO", DIM),
-            ("", DIM),
-            ("# What we found", ACCENT),
-            ("  Frequencies: R\u00b2 > 0.999 across all combos \u2713", GREEN),
-            ("  Intensities: mace_ml >> espaloma (0.72 vs 0.52)", GREEN),
-            ("  Speedup scales with molecule size (aspirin: ~18\u00d7)", GREEN),
-        ],
-        right_lines=[
-            ("# Still open", ACCENT),
-            ("", DIM),
-            ("  Anharmonic validation:", TEXT),
-            ("  \u2192 VPT2 pipeline runs; accuracy TBD", DIM),
-            ("  \u2192 Overtones + combination bands", DIM),
-            ("", DIM),
-            ("  25-molecule benchmark campaign:", TEXT),
-            ("  \u2192 Systematic across functional groups", DIM),
-            ("  \u2192 Batch runner in progress", DIM),
-            ("", DIM),
-            ("# Thesis question", ACCENT),
-            ("  Energy surface quality", TEXT),
-            ("  vs dipole model quality \u2014", TEXT),
-            ("  which dominates IR accuracy?", TEXT),
-            ("", DIM),
-            ("  $ mace-gaussian run molecule.xyz", GREEN),
-        ],
-        split=5.1,
-    )
+    """Slide 11: Built → Preliminary results → Next."""
+    content_slide(prs, "$ git log --oneline --graph", [
+        ("# What we built", ACCENT),
+        ("  → ZMQ bridge: ML dipoles → Gaussian VPT2 (harmonic + anharmonic)", TEXT),
+        ("  → 4 energy × 2 dipole models = 8 calculator combinations", TEXT),
+        ("  → CLI: mace-gaussian run molecule.xyz", DIM),
+        ("", DIM),
+        ("# Preliminary results", ACCENT),
+        ("  → Frequencies: R² > 0.999 for best combos (MACE-ANI-CC, MACE-OMOL)", GREEN),
+        ("  → Intensities: MACE4IR >> Espaloma (R² 0.95 vs 0.25 on aspirin)", GREEN),
+        ("  → Speedup: ~36× on aspirin (incl. anharmonic)", GREEN),
+        ("", DIM),
+        ("# Next steps", ACCENT),
+        ("  → Systematic benchmark campaign", TEXT),
+        ("    Growing molecule size: CH₄ → C₂H₆ → C₃H₈ → C₄H₁₀ (scaling)", DIM),
+        ("    New functional groups: methanol, acetone, aniline (chemistry)", DIM),
+        ("    Larger targets: paracetamol, caffeine, ibuprofen", DIM),
+        ("", DIM),
+        ("# Thesis question", ACCENT),
+        ("  → How much can we accelerate while retaining DFT-level accuracy?", TEXT),
+    ])
 
 
 def slide_questions(prs):
