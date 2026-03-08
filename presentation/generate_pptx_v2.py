@@ -429,49 +429,56 @@ def slide_results_overview(prs):
 
 
 def slide_results_table(prs):
-    """Slides 8–9: Harmonic benchmark — water (8 combos) and aspirin (4 combos).
+    """Slides 8–9: Harmonic benchmark — water and aspirin.
 
-    Rows sorted by MAE(freq) ascending (lowest error = best = shown first).
-    Uniform TEXT color — no per-row color logic.
-    Data loaded from analysis_results_harmonic/{molecule}/data/metrics_summary.json.
+    Data from analysis_results_harmonic/{molecule}/data/metrics_summary.json.
+    Best row (lowest MAE) highlighted in green.
     """
     water = load_combo_metrics("water")
     aspirin = load_combo_metrics("aspirin")
 
-    def table_lines(combos, mol_label):
+    def table_lines(combos, mol_label, show_speedup=False):
+        hdr_speed = "  Speedup" if show_speedup else ""
         lines = [
             (f"# Harmonic benchmark — {mol_label}", ACCENT),
-            ("  Ref: B3LYP/6-31G(d,p)   |   sorted by MAE(freq) ascending", DIM),
+            ("  Ref: B3LYP/6-31G(d,p)   |   sorted by MAE ascending", DIM),
             ("", DIM),
-            ("  Energy model    Dipole      MAE(freq)   R²(freq)    R²(intens)", DIM),
-            ("  " + "─" * 60, DIM),
+            (f"  Energy        Dipole      MAE(freq)   R²(freq)  R²(int){hdr_speed}", DIM),
+            ("  " + "─" * (68 if show_speedup else 58), DIM),
         ]
+        best_mae = min(c["mae_freq"] for c in combos) if combos else float("inf")
         for c in combos:
             energy, dipole = parse_combo_name(c["name"])
             row = (
                 f"  {energy:<14}  {dipole:<10}"
                 f"  {c['mae_freq']:>6.1f} cm⁻¹"
-                f"   {c['r2_freq']:.7f}"
+                f"   {c['r2_freq']:.4f}"
                 f"   {c['r2_intensity']:.2f}"
             )
-            lines.append((row, TEXT))
+            if show_speedup and c.get("speedup"):
+                row += f"    {c['speedup']:>5.1f}×"
+            is_best = abs(c["mae_freq"] - best_mae) < 0.01
+            lines.append((row, GREEN if is_best else TEXT))
         return lines
 
     water_lines = table_lines(water, "water (H₂O, 3 modes)")
-    aspirin_lines = table_lines(aspirin, "aspirin (C₉H₈O₄, 51 modes)")
+    aspirin_lines = table_lines(aspirin, "aspirin (C₉H₈O₄, 57 modes)", show_speedup=True)
 
     # Water slide
-    content_slide(prs, "$ cat analysis_results_harmonic/water/data/metrics_summary.json | sort-by-mae", water_lines + [
+    content_slide(prs, "$ cat metrics.json | sort-by-mae  # water", water_lines + [
         ("", DIM),
-        ("  → Frequencies: all combos excellent (R² > 0.9999)", TEXT),
-        ("  → Intensities: mace_ml consistently beats espaloma", TEXT),
+        ("  ⚠ R²(freq) misleading: only 3 data points — any line fits well", YELLOW),
+        ("    MACE-MP has best R² despite 106 cm⁻¹ MAE (systematic shift)", YELLOW),
+        ("  → MAE is the reliable metric here", TEXT),
+        ("  → mace_ml consistently beats espaloma on intensities", TEXT),
     ])
 
     # Aspirin slide
-    content_slide(prs, "$ cat analysis_results_harmonic/aspirin/data/metrics_summary.json | sort-by-mae", aspirin_lines + [
+    content_slide(prs, "$ cat metrics.json | sort-by-mae  # aspirin", aspirin_lines + [
         ("", DIM),
-        ("  → mace_omol: best accuracy (MAE < 9 cm⁻¹, R² 0.9998)", TEXT),
-        ("  → mace_mp: most speedup (~29×) but worse accuracy", TEXT),
+        ("  → 57 modes: R² now meaningful — MACE-MP drops to 0.9958", TEXT),
+        ("  → MACE-ANI-CC: best accuracy (7.6 cm⁻¹), trained on coupled cluster", TEXT),
+        ("  → mace_ml dipole: R²(int) 0.94–0.96 vs espaloma 0.15–0.26", TEXT),
     ])
 
 
