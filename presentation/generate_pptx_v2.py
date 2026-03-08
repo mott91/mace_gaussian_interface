@@ -265,14 +265,13 @@ def slide_architecture(prs):
         ("                        generate_html_report()", GREEN),
     ]
 
-    box = slide.shapes.add_textbox(Inches(0.1), Inches(1.15), Inches(9.8), Inches(5.4))
+    box = slide.shapes.add_textbox(Inches(0.75), Inches(1.15), Inches(8.5), Inches(5.4))
     tf = box.text_frame
     tf.word_wrap = False
     for i, (text, color) in enumerate(lines):
         p = tf.paragraphs[i] if i == 0 else tf.add_paragraph()
         p.text = text
         p.font.size = Pt(14)
-        p.alignment = PP_ALIGN.CENTER
         p.font.name = FONT
         p.font.color.rgb = color
         p.space_after = Pt(0)
@@ -370,7 +369,7 @@ def slide_zmq(prs):
         ("  ↻ repeats for every displacement (hundreds per molecule)", TEXT),
     ]
 
-    dbox = slide.shapes.add_textbox(Inches(0.1), Inches(2.8), Inches(9.8), Inches(4.0))
+    dbox = slide.shapes.add_textbox(Inches(0.75), Inches(2.8), Inches(8.5), Inches(4.0))
     dtf = dbox.text_frame
     dtf.word_wrap = False
     for i, (text, color) in enumerate(diagram):
@@ -380,7 +379,6 @@ def slide_zmq(prs):
         p.font.name = FONT
         p.font.color.rgb = color
         p.space_after = Pt(0)
-        p.alignment = PP_ALIGN.CENTER
 
     add_footer(slide)
 
