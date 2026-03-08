@@ -495,7 +495,7 @@ def slide_scaling(prs):
     w_name = " / ".join(parse_combo_name(w["name"])) if w else ""
     a_name = " / ".join(parse_combo_name(a["name"])) if a else ""
 
-    BAR_MAX = 30
+    BAR_MAX = 12
     w_bar = max(1, round((w_speed / a_speed) * BAR_MAX))
     a_bar = BAR_MAX
 
