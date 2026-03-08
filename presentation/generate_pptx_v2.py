@@ -387,10 +387,11 @@ def slide_mode_matching(prs):
     content_slide(prs, "$ cat mode_matching.md", [
         ("# Problem: ML and DFT don't output modes in the same order", ACCENT),
         ("", DIM),
-        ("  DFT:  [500, 1200, 1500, 2900, 3100] cm⁻¹", TEXT),
-        ("  ML:   [498, 3095, 1205, 2895, 1498] cm⁻¹   ← different order!", YELLOW),
+        ("  DFT:  [1595, 1610, 2900, 3050, 3100] cm⁻¹", TEXT),
+        ("  ML:   [1608, 1590, 3045, 3098, 2895] cm⁻¹   ← swapped + reordered!", YELLOW),
         ("", DIM),
-        ("  → Cannot compare by index. Need to identify which mode is which.", TEXT),
+        ("  → Modes 1 & 2 are close (1595 vs 1610) but physically different", TEXT),
+        ("  → Cannot compare by index — need to identify which mode is which", TEXT),
         ("", DIM),
         ("# Solution: Eigenvector dot product", ACCENT),
         ("", DIM),
@@ -402,9 +403,9 @@ def slide_mode_matching(prs):
         ("  → Assign each ML mode to its best-matching DFT mode", TEXT),
         ("  → Robust to reordering, robust to small frequency errors", TEXT),
         ("", DIM),
-        ("# Example (water)", ACCENT),
-        ("  ML 3095 cm⁻¹ → DFT 1200 cm⁻¹  [overlap: 0.027]   ✗ wrong match", RED),
-        ("  ML 3095 cm⁻¹ → DFT 3100 cm⁻¹  [overlap: 0.989]   ✓ correct", GREEN),
+        ("# Example", ACCENT),
+        ("  ML 1608 cm⁻¹ → DFT 1595 cm⁻¹  [overlap: 0.12]   ✗ closest freq, wrong mode", RED),
+        ("  ML 1608 cm⁻¹ → DFT 1610 cm⁻¹  [overlap: 0.97]   ✓ correct — same motion", GREEN),
     ])
 
 
