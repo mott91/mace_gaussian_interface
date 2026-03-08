@@ -265,13 +265,14 @@ def slide_architecture(prs):
         ("                        generate_html_report()", GREEN),
     ]
 
-    box = slide.shapes.add_textbox(Inches(0.3), Inches(1.15), Inches(9.4), Inches(5.4))
+    box = slide.shapes.add_textbox(Inches(0.1), Inches(1.15), Inches(9.8), Inches(5.4))
     tf = box.text_frame
     tf.word_wrap = False
     for i, (text, color) in enumerate(lines):
         p = tf.paragraphs[i] if i == 0 else tf.add_paragraph()
         p.text = text
-        p.font.size = Pt(11)
+        p.font.size = Pt(14)
+        p.alignment = PP_ALIGN.CENTER
         p.font.name = FONT
         p.font.color.rgb = color
         p.space_after = Pt(0)
@@ -542,30 +543,6 @@ def slide_questions(prs):
     add_footer(slide)
 
 
-def slide_ir_diagram_idea(prs):
-    """Bonus slide: IR spectrum diagram idea — intensity = dipole derivative."""
-    content_slide(prs, "$ cat ir_intensity.md  # idea — for IR theory slide?", [
-        ("  Intensity ∝ |∂μ/∂Q|²", ACCENT),
-        ("", DIM),
-        ("  │                                large ∂μ/∂Q", TEXT),
-        ("  │                                ║", ACCENT),
-        ("  │          medium                ║", TEXT),
-        ("  │          ║                     ║", ACCENT),
-        ("  │          ║                     ║", ACCENT),
-        ("  │  small   ║                     ║", TEXT),
-        ("  │  ║       ║                     ║", ACCENT),
-        ("  ──────────────────────────────────────── cm⁻¹", DIM),
-        ("     ν₁      ν₂                   ν₃", DIM),
-        ("     bend    sym. stretch      asym. stretch", DIM),
-        ("", DIM),
-        ("  → Same molecule, same frequencies", TEXT),
-        ("  → Different peak heights because ∂μ/∂Q differs per mode", TEXT),
-        ("  → Asymmetric stretch changes dipole most → tallest peak", TEXT),
-        ("", DIM),
-        ("  // this is what ML replaces: μ⃗ at every displaced geometry", GREEN),
-    ])
-
-
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
@@ -584,19 +561,18 @@ def main():
     slide_results_table(prs)    # 8–9 — harmonic table (water + aspirin, 2 slides)
     slide_scaling(prs)          # 10 — molecule size vs speedup bar chart
     slide_status(prs)           # 11 — research journey
-    slide_questions(prs)            # 12 — questions
-    slide_ir_diagram_idea(prs)      # 13 — bonus: IR diagram idea
+    slide_questions(prs)        # 12 — questions
 
     out = "presentation/presentation_v2.pptx"
     prs.save(out)
 
     print(f"✓ Saved: {out}")
-    print(f"  14 slides  (~15 min)")
+    print(f"  13 slides  (~15 min)")
     print(f"  Slides: title · motivation · IR theory ·")
     print(f"          architecture · calculators · ZMQ bridge ·")
     print(f"          mode matching · results overview ·")
     print(f"          results table (water) · results table (aspirin) ·")
-    print(f"          scaling · status · questions · [bonus: IR diagram idea]")
+    print(f"          scaling · status · questions")
 
 
 if __name__ == "__main__":
