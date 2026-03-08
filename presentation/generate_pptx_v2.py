@@ -251,7 +251,7 @@ def slide_architecture(prs):
         ("  │  ┌──────────────────┐          │  │  • load_mace_calculator()           │", DIM),
         ("  │  │ Built-in opt     │          │  │    (MACE-MP / MACE-OMOL)            │", DIM),
         ("  │  │ B3LYP/6-31G(d,p)│          │  │  • get_dipole_calculator()           │", DIM),
-        ("  │  └──────────────────┘          │  │    (Espaloma / MACE_DIPOLE)          │", DIM),
+        ("  │  └──────────────────┘          │  │    (Espaloma / MACE4IR)          │", DIM),
         ("  │  • gaussian_freq()             │  │  • setup_zmq_server()               │", DIM),
         ("  │  • gaussian_dipoles()          │  │  • launch_gaussian()                │", DIM),
         ("  │  • parse_gaussian()            │  │  • zmq_dipole_loop()                │", DIM),
@@ -470,7 +470,7 @@ def slide_results_table(prs):
         ("  ⚠ R²(freq) misleading: only 3 data points — any line fits well", YELLOW),
         ("    MACE-MP has best R² despite 106 cm⁻¹ MAE (systematic shift)", YELLOW),
         ("  → MAE is the reliable metric here", TEXT),
-        ("  → mace_ml consistently beats espaloma on intensities", TEXT),
+        ("  → MACE4IR consistently beats Espaloma on intensities", TEXT),
     ])
 
     # Aspirin slide
@@ -478,7 +478,7 @@ def slide_results_table(prs):
         ("", DIM),
         ("  → 57 modes: R² now meaningful — MACE-MP drops to 0.9958", TEXT),
         ("  → MACE-ANI-CC: best accuracy (7.6 cm⁻¹), trained on coupled cluster", TEXT),
-        ("  → mace_ml dipole: R²(int) 0.94–0.96 vs espaloma 0.15–0.26", TEXT),
+        ("  → MACE4IR dipole: R²(int) 0.94–0.96 vs Espaloma 0.15–0.26", TEXT),
     ])
 
 
@@ -523,7 +523,6 @@ def slide_status(prs):
         ("# What we built", ACCENT),
         ("  → ZMQ bridge: ML dipoles → Gaussian VPT2 (harmonic + anharmonic)", TEXT),
         ("  → 4 energy × 2 dipole models = 8 calculator combinations", TEXT),
-        ("  → CLI: mace-gaussian run molecule.xyz", DIM),
         ("", DIM),
         ("# Preliminary results", ACCENT),
         ("  → Frequencies: R² > 0.999 for best combos (MACE-ANI-CC, MACE-OMOL)", GREEN),
@@ -532,12 +531,11 @@ def slide_status(prs):
         ("", DIM),
         ("# Next steps", ACCENT),
         ("  → Systematic benchmark campaign", TEXT),
-        ("    Growing molecule size: CH₄ → C₂H₆ → C₃H₈ → C₄H₁₀ (scaling)", DIM),
-        ("    New functional groups: methanol, acetone, aniline (chemistry)", DIM),
-        ("    Larger targets: paracetamol, caffeine, ibuprofen", DIM),
-        ("", DIM),
-        ("# Thesis question", ACCENT),
-        ("  → How much can we accelerate while retaining DFT-level accuracy?", TEXT),
+        ("    Growing size: CH₄ → C₂H₆ → C₃H₈ → C₄H₁₀ (scaling)", DIM),
+        ("    Exotic molecules: paracetamol, caffeine, ibuprofen", DIM),
+        ("    Larger systems: peptides, drug-like molecules", DIM),
+        ("  → Batch processing: HPC queue integration for large campaigns", TEXT),
+        ("  → ORCA integration: open-source QM engine as Gaussian alternative", TEXT),
     ])
 
 
