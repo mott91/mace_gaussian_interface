@@ -236,7 +236,7 @@ def slide_ir_theory(prs):
 
 def slide_architecture(prs):
     slide = blank_slide(prs)
-    add_prompt(slide, "$ python3 main.py")
+    add_prompt(slide, "$ python3 workflow.py")
 
     lines = [
         ("                              [molecule.xyz]", GREEN),
@@ -271,7 +271,7 @@ def slide_architecture(prs):
     for i, (text, color) in enumerate(lines):
         p = tf.paragraphs[i] if i == 0 else tf.add_paragraph()
         p.text = text
-        p.font.size = Pt(10)
+        p.font.size = Pt(11)
         p.font.name = FONT
         p.font.color.rgb = color
         p.space_after = Pt(0)
@@ -280,7 +280,7 @@ def slide_architecture(prs):
 
 
 def slide_dipole_methods(prs):
-    two_col_slide(prs, "$ cat dipole_methods.md",
+    two_col_slide(prs, "$ ls -l calculators/",
         left_lines=[
             ("# MACE4IR (direct dipole)", ACCENT),
             ("", DIM),
@@ -313,11 +313,14 @@ def slide_dipole_methods(prs):
             ("  → Available as pip package", TEXT),
             ("  → No custom model needed", TEXT),
             ("", DIM),
-            ("# Energy calculators", ACCENT),
-            ("  MACE-OMOL-0  molecules, default", TEXT),
-            ("  MACE-MP-0    universal (130 el.)", TEXT),
-            ("  MACE-OFF     organic molecules", TEXT),
-            ("  MACE-ANI     organic H,C,N,O,S,F", TEXT),
+            ("# Energy calculators (PES)", ACCENT),
+            ("", DIM),
+            ("  MACE-OMOL-0   molecules, default", GREEN),
+            ("  MACE-MP-0     universal (130 el.)", GREEN),
+            ("  MACE-OFF      organic molecules", GREEN),
+            ("  MACE-ANI-CC   organic (CC training data)", GREEN),
+            ("", DIM),
+            ("  → 4 energy × 2 dipole = 8 combos", TEXT),
         ],
         split=5.1,
     )
@@ -539,6 +542,30 @@ def slide_questions(prs):
     add_footer(slide)
 
 
+def slide_ir_diagram_idea(prs):
+    """Bonus slide: IR spectrum diagram idea — intensity = dipole derivative."""
+    content_slide(prs, "$ cat ir_intensity.md  # idea — for IR theory slide?", [
+        ("  Intensity ∝ |∂μ/∂Q|²", ACCENT),
+        ("", DIM),
+        ("  │                                large ∂μ/∂Q", TEXT),
+        ("  │                                ║", ACCENT),
+        ("  │          medium                ║", TEXT),
+        ("  │          ║                     ║", ACCENT),
+        ("  │          ║                     ║", ACCENT),
+        ("  │  small   ║                     ║", TEXT),
+        ("  │  ║       ║                     ║", ACCENT),
+        ("  ──────────────────────────────────────── cm⁻¹", DIM),
+        ("     ν₁      ν₂                   ν₃", DIM),
+        ("     bend    sym. stretch      asym. stretch", DIM),
+        ("", DIM),
+        ("  → Same molecule, same frequencies", TEXT),
+        ("  → Different peak heights because ∂μ/∂Q differs per mode", TEXT),
+        ("  → Asymmetric stretch changes dipole most → tallest peak", TEXT),
+        ("", DIM),
+        ("  // this is what ML replaces: μ⃗ at every displaced geometry", GREEN),
+    ])
+
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
@@ -557,18 +584,19 @@ def main():
     slide_results_table(prs)    # 8–9 — harmonic table (water + aspirin, 2 slides)
     slide_scaling(prs)          # 10 — molecule size vs speedup bar chart
     slide_status(prs)           # 11 — research journey
-    slide_questions(prs)        # 12 — questions
+    slide_questions(prs)            # 12 — questions
+    slide_ir_diagram_idea(prs)      # 13 — bonus: IR diagram idea
 
     out = "presentation/presentation_v2.pptx"
     prs.save(out)
 
     print(f"✓ Saved: {out}")
-    print(f"  13 slides  (~15 min)")
+    print(f"  14 slides  (~15 min)")
     print(f"  Slides: title · motivation · IR theory ·")
-    print(f"          architecture · dipole methods · ZMQ bridge ·")
+    print(f"          architecture · calculators · ZMQ bridge ·")
     print(f"          mode matching · results overview ·")
     print(f"          results table (water) · results table (aspirin) ·")
-    print(f"          scaling · status · questions")
+    print(f"          scaling · status · questions · [bonus: IR diagram idea]")
 
 
 if __name__ == "__main__":
