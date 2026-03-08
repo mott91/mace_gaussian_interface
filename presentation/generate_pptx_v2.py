@@ -375,7 +375,7 @@ def slide_zmq(prs):
     for i, (text, color) in enumerate(diagram):
         p = dtf.paragraphs[i] if i == 0 else dtf.add_paragraph()
         p.text = text
-        p.font.size = Pt(11)
+        p.font.size = Pt(14)
         p.font.name = FONT
         p.font.color.rgb = color
         p.space_after = Pt(0)
