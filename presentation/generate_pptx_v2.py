@@ -532,7 +532,7 @@ def slide_status(prs):
         ("# Next steps", ACCENT),
         ("  → Systematic benchmark campaign", TEXT),
         ("    Growing size: CH₄ → C₂H₆ → C₃H₈ → C₄H₁₀ (scaling)", DIM),
-        ("    Exotic molecules: paracetamol, caffeine, ibuprofen", DIM),
+        ("    Molecules with exotic atoms: S, P, halogens, metals", DIM),
         ("    Larger systems: peptides, drug-like molecules", DIM),
         ("  → Batch processing: HPC queue integration for large campaigns", TEXT),
         ("  → ORCA integration: open-source QM engine as Gaussian alternative", TEXT),
