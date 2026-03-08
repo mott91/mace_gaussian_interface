@@ -483,35 +483,40 @@ def slide_results_table(prs):
 
 
 def slide_scaling(prs):
-    """Slide 10: Molecule size vs speedup — ASCII bar chart."""
-    MAX_BAR = 20
-    molecules = [
-        ("water",   3,  1,  "~1×"),
-        ("glycine", 10, 6,  "~7–10×"),
-        ("aspirin", 21, 20, "~18–29×"),
-    ]
-    bar_lines = []
-    for name, atoms, bar_val, label in molecules:
-        bar = "=" * bar_val + " " * (MAX_BAR - bar_val)
-        bar_lines.append((
-            f"  {name:<10}  ({atoms:>2} atoms)  |{bar}|  {label}",
-            TEXT,
-        ))
+    """Slide 10: ML speedup — best-accuracy combo per molecule."""
+    water = load_combo_metrics("water")
+    aspirin = load_combo_metrics("aspirin")
+
+    # Best accuracy = lowest MAE (already sorted)
+    w = water[0] if water else None
+    a = aspirin[0] if aspirin else None
+    w_speed = w["speedup"] if w else 1.0
+    a_speed = a["speedup"] if a else 1.0
+    w_name = " / ".join(parse_combo_name(w["name"])) if w else ""
+    a_name = " / ".join(parse_combo_name(a["name"])) if a else ""
+
+    BAR_MAX = 30
+    w_bar = max(1, round((w_speed / a_speed) * BAR_MAX))
+    a_bar = BAR_MAX
 
     content_slide(prs, "$ python benchmark.py --scaling", [
-        ("# ML speedup scales with molecule size", ACCENT),
-        ("  Dipole step: ML vs DFT (B3LYP/6-31G(d,p))", DIM),
+        ("# ML speedup — best-accuracy combo per molecule", ACCENT),
+        ("  Includes full anharmonic VPT2 calculation", DIM),
         ("", DIM),
-        ("  molecule      atoms         speedup", DIM),
-        ("  " + "─" * 50, DIM),
-        *bar_lines,
+        ("  molecule    atoms    best combo                  speedup", DIM),
+        ("  " + "─" * 62, DIM),
+        (f"  water        3      {w_name:<28s} {w_speed:>5.1f}×", TEXT),
+        (f"               |{'=' * w_bar}{' ' * (BAR_MAX - w_bar)}|", ACCENT),
         ("", DIM),
-        ("  → Water (3 atoms): ML overhead visible — no speedup at this scale", TEXT),
-        ("  → Glycine (10 atoms): ~7–10× — target use case", TEXT),
-        ("  → Aspirin (21 atoms): ~18–29× — strong benefit", TEXT),
+        (f"  aspirin     21      {a_name:<28s} {a_speed:>5.1f}×", GREEN),
+        (f"               |{'=' * a_bar}|", GREEN),
         ("", DIM),
-        ("  Speedup source: DFT dipoles O(N³); ML dipoles O(N)", DIM),
-        ("  (estimated ranges — not benchmarked to the second)", DIM),
+        ("", DIM),
+        ("  → Water too small for ML to outpace DFT overhead", TEXT),
+        ("  → Aspirin: 21 atoms × 3 dirs × 2 = 126 displacements → ML wins", TEXT),
+        ("  → Harmonic-only would be even faster (less Gaussian overhead)", TEXT),
+        ("", DIM),
+        ("  // speedup = wall time DFT / wall time ML (same machine, same basis)", DIM),
     ])
 
 
