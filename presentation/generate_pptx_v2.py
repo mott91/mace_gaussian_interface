@@ -504,7 +504,6 @@ def slide_results_table(prs):
     # Aspirin slide
     content_slide(prs, "$ cat metrics.json | sort-by-mae  # aspirin", aspirin_lines + [
         ("", DIM),
-        ("  → 57 modes: R² now meaningful — MACE-MP drops to 0.9958", TEXT),
         ("  → MACE-ANI-CC: best accuracy (7.6 cm⁻¹), trained on coupled cluster", TEXT),
         ("  → MACE4IR dipole: R²(int) 0.94–0.96 vs Espaloma 0.15–0.26", TEXT),
     ])
