@@ -25,7 +25,7 @@ DIM    = RGBColor(139, 148, 158)  # #8B949E
 RED    = RGBColor(248, 81,  73)   # #F85149
 FONT   = "Consolas"
 
-DATE   = "Manuel Ott · Hofer Lab · 2026-03-11"
+DATE   = "Manuel Ott · Hofer Lab · 2026-03-10"
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -37,8 +37,11 @@ def blank_slide(prs):
     return slide
 
 
+_slide_counter = 0
+
 def add_footer(slide, text=DATE):
-    box = slide.shapes.add_textbox(Inches(1), Inches(6.85), Inches(8), Inches(0.4))
+    global _slide_counter
+    box = slide.shapes.add_textbox(Inches(1), Inches(6.85), Inches(7), Inches(0.4))
     tf = box.text_frame
     tf.text = text
     p = tf.paragraphs[0]
@@ -46,6 +49,16 @@ def add_footer(slide, text=DATE):
     p.font.name = FONT
     p.font.color.rgb = DIM
     p.alignment = PP_ALIGN.CENTER
+    # Slide number (right-aligned)
+    nbox = slide.shapes.add_textbox(Inches(8.5), Inches(6.85), Inches(1), Inches(0.4))
+    ntf = nbox.text_frame
+    ntf.text = str(_slide_counter)
+    np = ntf.paragraphs[0]
+    np.font.size = Pt(11)
+    np.font.name = FONT
+    np.font.color.rgb = DIM
+    np.alignment = PP_ALIGN.RIGHT
+    _slide_counter += 1
 
 
 def add_prompt(slide, command, y=0.35):
@@ -290,8 +303,7 @@ def slide_dipole_methods(prs):
             ("", DIM),
             ("  → Equivariant: respects rotations", TEXT),
             ("  → Trained specifically on dipoles", TEXT),
-            ("  → 78-element coverage", TEXT),
-            ("  → Custom MACE4IR model (78 el.)", TEXT),
+            ("  → Custom MACE4IR model (78 elements)", TEXT),
             ("  → Fast — single forward pass", TEXT),
             ("", DIM),
             ("# Why E(3)-equivariance matters", ACCENT),
