@@ -1,0 +1,72 @@
+{
+  "molecule": "aspirin",
+  "analysis_date": "2026-03-08T16:10:43.018112",
+  "num_ml_calculators": 8,
+  "dft_method": "b3lyp_6-31Gdp",
+  "comparisons": [
+    {
+      "name": "mace_anicc_mace_ml",
+      "mae_freq": 11.554750000000007,
+      "rmse_freq": 16.954484404680997,
+      "r2_freq": 0.9997045766186964,
+      "r2_intensity": 0.0,
+      "speedup": 35.77350530617427
+    },
+    {
+      "name": "mace_mp_mace_ml",
+      "mae_freq": 145.92535416666666,
+      "rmse_freq": 178.3944087056472,
+      "r2_freq": 0.9788511045652292,
+      "r2_intensity": 0.0,
+      "speedup": 32.14455425142897
+    },
+    {
+      "name": "mace_off_espaloma",
+      "mae_freq": 21.685311878291387,
+      "rmse_freq": 25.948833432595386,
+      "r2_freq": 0.9997864057761227,
+      "r2_intensity": 0.0029782337889884577,
+      "speedup": 19.774757283191704
+    },
+    {
+      "name": "mace_omol_espaloma",
+      "mae_freq": 41.29756733021077,
+      "rmse_freq": 72.66671707457526,
+      "r2_freq": 0.9983869735543316,
+      "r2_intensity": 0.01153379783044401,
+      "speedup": 21.625434326265744
+    },
+    {
+      "name": "mace_anicc_espaloma",
+      "mae_freq": 11.554750000000007,
+      "rmse_freq": 16.954484404680997,
+      "r2_freq": 0.9997045766186964,
+      "r2_intensity": 0.0,
+      "speedup": 39.4130232257569
+    },
+    {
+      "name": "mace_mp_espaloma",
+      "mae_freq": 145.92535416666666,
+      "rmse_freq": 178.3944087056472,
+      "r2_freq": 0.9788511045652292,
+      "r2_intensity": 0.0,
+      "speedup": 34.89754497181955
+    },
+    {
+      "name": "mace_off_mace_ml",
+      "mae_freq": 21.685311878291387,
+      "rmse_freq": 25.948833432595386,
+      "r2_freq": 0.9997864057761227,
+      "r2_intensity": 0.0030517211586116727,
+      "speedup": 18.770268061884043
+    },
+    {
+      "name": "mace_omol_mace_ml",
+      "mae_freq": 41.29756733021077,
+      "rmse_freq": 72.66671707457526,
+      "r2_freq": 0.9983869735543316,
+      "r2_intensity": 0.0059488064287215,
+      "speedup": 20.51526859677062
+    }
+  ]
+}

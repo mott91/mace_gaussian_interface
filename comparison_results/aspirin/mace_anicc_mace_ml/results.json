@@ -1,0 +1,600 @@
+{
+  "molecule": "aspirin",
+  "energy_calculator": "mace_anicc",
+  "dipole_calculator": "mace_ml",
+  "calculator_type": "ml",
+  "timestamp": null,
+  "frequencies": {
+    "harmonic": [
+      {
+        "freq_cm": 98.1295,
+        "ir_intensity": 1.2005
+      },
+      {
+        "freq_cm": 121.8986,
+        "ir_intensity": 0.3802
+      },
+      {
+        "freq_cm": 135.6775,
+        "ir_intensity": 2.1323
+      },
+      {
+        "freq_cm": 227.6121,
+        "ir_intensity": 0.6474
+      },
+      {
+        "freq_cm": 272.8767,
+        "ir_intensity": 0.2837
+      },
+      {
+        "freq_cm": 313.0014,
+        "ir_intensity": 2.9933
+      },
+      {
+        "freq_cm": 357.822,
+        "ir_intensity": 0.0679
+      },
+      {
+        "freq_cm": 419.7906,
+        "ir_intensity": 2.9982
+      },
+      {
+        "freq_cm": 425.5794,
+        "ir_intensity": 4.5585
+      },
+      {
+        "freq_cm": 510.6628,
+        "ir_intensity": 4.295
+      },
+      {
+        "freq_cm": 531.0456,
+        "ir_intensity": 8.1732
+      },
+      {
+        "freq_cm": 559.4482,
+        "ir_intensity": 2.4635
+      },
+      {
+        "freq_cm": 583.9285,
+        "ir_intensity": 18.2003
+      },
+      {
+        "freq_cm": 631.0411,
+        "ir_intensity": 58.781
+      },
+      {
+        "freq_cm": 642.9723,
+        "ir_intensity": 35.5023
+      },
+      {
+        "freq_cm": 671.6631,
+        "ir_intensity": 9.0314
+      },
+      {
+        "freq_cm": 718.6501,
+        "ir_intensity": 64.7087
+      },
+      {
+        "freq_cm": 748.8934,
+        "ir_intensity": 63.3811
+      },
+      {
+        "freq_cm": 779.9918,
+        "ir_intensity": 26.3881
+      },
+      {
+        "freq_cm": 805.817,
+        "ir_intensity": 0.1681
+      },
+      {
+        "freq_cm": 848.4139,
+        "ir_intensity": 22.4328
+      },
+      {
+        "freq_cm": 896.7816,
+        "ir_intensity": 16.0826
+      },
+      {
+        "freq_cm": 933.7936,
+        "ir_intensity": 43.0998
+      },
+      {
+        "freq_cm": 984.3469,
+        "ir_intensity": 2.2569
+      },
+      {
+        "freq_cm": 1018.8189,
+        "ir_intensity": 0.1529
+      },
+      {
+        "freq_cm": 1030.8397,
+        "ir_intensity": 48.1303
+      },
+      {
+        "freq_cm": 1069.8425,
+        "ir_intensity": 14.1809
+      },
+      {
+        "freq_cm": 1071.2709,
+        "ir_intensity": 1.2767
+      },
+      {
+        "freq_cm": 1094.5004,
+        "ir_intensity": 215.6072
+      },
+      {
+        "freq_cm": 1159.7271,
+        "ir_intensity": 4.7875
+      },
+      {
+        "freq_cm": 1179.7675,
+        "ir_intensity": 30.3435
+      },
+      {
+        "freq_cm": 1223.5709,
+        "ir_intensity": 322.8113
+      },
+      {
+        "freq_cm": 1244.859,
+        "ir_intensity": 500.4088
+      },
+      {
+        "freq_cm": 1256.6806,
+        "ir_intensity": 13.2001
+      },
+      {
+        "freq_cm": 1303.9235,
+        "ir_intensity": 1.1611
+      },
+      {
+        "freq_cm": 1358.4126,
+        "ir_intensity": 78.3329
+      },
+      {
+        "freq_cm": 1392.3512,
+        "ir_intensity": 102.672
+      },
+      {
+        "freq_cm": 1406.5215,
+        "ir_intensity": 61.9127
+      },
+      {
+        "freq_cm": 1485.1364,
+        "ir_intensity": 8.3756
+      },
+      {
+        "freq_cm": 1486.4532,
+        "ir_intensity": 16.5097
+      },
+      {
+        "freq_cm": 1493.5003,
+        "ir_intensity": 8.351
+      },
+      {
+        "freq_cm": 1535.7741,
+        "ir_intensity": 65.577
+      },
+      {
+        "freq_cm": 1644.3447,
+        "ir_intensity": 26.0825
+      },
+      {
+        "freq_cm": 1675.1451,
+        "ir_intensity": 66.2237
+      },
+      {
+        "freq_cm": 1809.8497,
+        "ir_intensity": 357.9053
+      },
+      {
+        "freq_cm": 1847.4764,
+        "ir_intensity": 292.6971
+      },
+      {
+        "freq_cm": 3063.0834,
+        "ir_intensity": 27.2113
+      },
+      {
+        "freq_cm": 3136.6927,
+        "ir_intensity": 2.6742
+      },
+      {
+        "freq_cm": 3176.9432,
+        "ir_intensity": 1.1347
+      },
+      {
+        "freq_cm": 3183.4288,
+        "ir_intensity": 3.2319
+      },
+      {
+        "freq_cm": 3198.8622,
+        "ir_intensity": 0.3766
+      },
+      {
+        "freq_cm": 3208.9448,
+        "ir_intensity": 9.943
+      },
+      {
+        "freq_cm": 3225.6837,
+        "ir_intensity": 8.745
+      },
+      {
+        "freq_cm": 3740.8737,
+        "ir_intensity": 80.0833
+      }
+    ],
+    "anharmonic": [
+      {
+        "mode": 1,
+        "freq_cm": 3550.176,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 3740.874
+      },
+      {
+        "mode": 2,
+        "freq_cm": 3110.503,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 3225.684
+      },
+      {
+        "mode": 3,
+        "freq_cm": 3060.114,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 3208.945
+      },
+      {
+        "mode": 4,
+        "freq_cm": 3044.878,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 3198.862
+      },
+      {
+        "mode": 5,
+        "freq_cm": 3021.497,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 3183.429
+      },
+      {
+        "mode": 6,
+        "freq_cm": 3021.373,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 3176.943
+      },
+      {
+        "mode": 7,
+        "freq_cm": 2990.639,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 3136.693
+      },
+      {
+        "mode": 8,
+        "freq_cm": 2927.387,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 3063.083
+      },
+      {
+        "mode": 9,
+        "freq_cm": 1813.386,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 1847.476
+      },
+      {
+        "mode": 10,
+        "freq_cm": 1777.419,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 1809.85
+      },
+      {
+        "mode": 11,
+        "freq_cm": 1632.915,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 1675.145
+      },
+      {
+        "mode": 12,
+        "freq_cm": 1605.286,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 1644.345
+      },
+      {
+        "mode": 13,
+        "freq_cm": 1504.787,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 1535.774
+      },
+      {
+        "mode": 14,
+        "freq_cm": 1461.443,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 1493.5
+      },
+      {
+        "mode": 15,
+        "freq_cm": 1434.461,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 1486.453
+      },
+      {
+        "mode": 16,
+        "freq_cm": 1431.218,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 1485.136
+      },
+      {
+        "mode": 17,
+        "freq_cm": 1367.793,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 1406.522
+      },
+      {
+        "mode": 18,
+        "freq_cm": 1358.783,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 1392.351
+      },
+      {
+        "mode": 19,
+        "freq_cm": 1327.176,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 1358.413
+      },
+      {
+        "mode": 20,
+        "freq_cm": 1278.692,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 1303.923
+      },
+      {
+        "mode": 21,
+        "freq_cm": 1233.866,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 1256.681
+      },
+      {
+        "mode": 22,
+        "freq_cm": 1208.294,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 1244.859
+      },
+      {
+        "mode": 23,
+        "freq_cm": 1186.224,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 1223.571
+      },
+      {
+        "mode": 24,
+        "freq_cm": 1162.658,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 1179.767
+      },
+      {
+        "mode": 25,
+        "freq_cm": 1137.956,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 1159.727
+      },
+      {
+        "mode": 26,
+        "freq_cm": 1071.015,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 1094.5
+      },
+      {
+        "mode": 27,
+        "freq_cm": 1055.74,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 1071.271
+      },
+      {
+        "mode": 28,
+        "freq_cm": 1043.962,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 1069.843
+      },
+      {
+        "mode": 29,
+        "freq_cm": 1009.595,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 1030.84
+      },
+      {
+        "mode": 30,
+        "freq_cm": 994.993,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 1018.819
+      },
+      {
+        "mode": 31,
+        "freq_cm": 963.349,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 984.347
+      },
+      {
+        "mode": 32,
+        "freq_cm": 918.044,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 933.794
+      },
+      {
+        "mode": 33,
+        "freq_cm": 882.732,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 896.782
+      },
+      {
+        "mode": 34,
+        "freq_cm": 831.578,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 848.414
+      },
+      {
+        "mode": 35,
+        "freq_cm": 795.728,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 805.817
+      },
+      {
+        "mode": 36,
+        "freq_cm": 767.457,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 779.992
+      },
+      {
+        "mode": 37,
+        "freq_cm": 733.219,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 748.893
+      },
+      {
+        "mode": 38,
+        "freq_cm": 723.765,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 718.65
+      },
+      {
+        "mode": 39,
+        "freq_cm": 671.119,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 671.663
+      },
+      {
+        "mode": 40,
+        "freq_cm": 639.886,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 642.972
+      },
+      {
+        "mode": 41,
+        "freq_cm": 577.687,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 631.041
+      },
+      {
+        "mode": 42,
+        "freq_cm": 583.683,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 583.929
+      },
+      {
+        "mode": 43,
+        "freq_cm": 554.29,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 559.448
+      },
+      {
+        "mode": 44,
+        "freq_cm": 528.04,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 531.046
+      },
+      {
+        "mode": 45,
+        "freq_cm": 499.79,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 510.663
+      },
+      {
+        "mode": 46,
+        "freq_cm": 430.896,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 425.579
+      },
+      {
+        "mode": 47,
+        "freq_cm": 407.675,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 419.791
+      },
+      {
+        "mode": 48,
+        "freq_cm": 352.554,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 357.822
+      },
+      {
+        "mode": 49,
+        "freq_cm": 310.553,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 313.001
+      },
+      {
+        "mode": 50,
+        "freq_cm": 267.305,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 272.877
+      },
+      {
+        "mode": 51,
+        "freq_cm": 225.262,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 227.612
+      },
+      {
+        "mode": 52,
+        "freq_cm": 130.289,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 135.678
+      },
+      {
+        "mode": 53,
+        "freq_cm": 165.109,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 121.899
+      },
+      {
+        "mode": 54,
+        "freq_cm": 72.456,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 98.129
+      },
+      {
+        "mode": 55,
+        "freq_cm": 100.551,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 90.853
+      },
+      {
+        "mode": 56,
+        "freq_cm": 31.824,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 82.446
+      },
+      {
+        "mode": 57,
+        "freq_cm": -41.622,
+        "ir_intensity": 0.0,
+        "freq_harmonic": -19.75
+      }
+    ],
+    "overtones": [],
+    "combination_bands": []
+  },
+  "energy_eV": 3.277938009964206,
+  "dipole": {
+    "x": -0.5955303791651311,
+    "y": 0.095687595273072,
+    "z": 0.5850083122968001,
+    "magnitude": 0.8402661922593687
+  },
+  "runtime_s": 1348.6505146026611,
+  "files": {
+    "gaussian_log": "gaussian_freq.log",
+    "gaussian_input": "gaussian_freq.gjf"
+  },
+  "version_info": {
+    "tool_version": "0.1.0",
+    "python_version": "3.10.19 | packaged by conda-forge | (main, Oct 13 2025, 14:08:27) [GCC 14.3.0]",
+    "platform": "Linux-5.10.0-37-amd64-x86_64-with-glibc2.31",
+    "torch_version": "2.4.0+cu121",
+    "cuda_available": true,
+    "cuda_version": "12.1",
+    "gpu_name": "NVIDIA GeForce RTX 2070 SUPER",
+    "mace_version": "0.3.14",
+    "ase_version": "3.26.0"
+  },
+  "calculation_parameters": {
+    "energy_calculator": "mace_anicc",
+    "dipole_calculator": "mace_ml"
+  }
+}

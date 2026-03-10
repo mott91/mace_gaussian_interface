@@ -1,0 +1,158 @@
+{
+  "molecule": "n_alkane_4C",
+  "energy_calculator": "mace_mp",
+  "dipole_calculator": "mace_ml",
+  "calculator_type": "ml",
+  "timestamp": null,
+  "frequencies": {
+    "harmonic": [
+      {
+        "freq_cm": 206.9846,
+        "ir_intensity": 1.0354
+      },
+      {
+        "freq_cm": 378.24,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 551.5779,
+        "ir_intensity": 2.2202
+      },
+      {
+        "freq_cm": 668.9617,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 783.4973,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 841.4329,
+        "ir_intensity": 6.0588
+      },
+      {
+        "freq_cm": 850.7297,
+        "ir_intensity": 15.2609
+      },
+      {
+        "freq_cm": 1013.8969,
+        "ir_intensity": 0.0835
+      },
+      {
+        "freq_cm": 1016.2514,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 1018.8271,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 1031.0514,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 1052.7563,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 1098.5389,
+        "ir_intensity": 0.0166
+      },
+      {
+        "freq_cm": 1131.3096,
+        "ir_intensity": 5.3029
+      },
+      {
+        "freq_cm": 1234.9207,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 1247.7385,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 1273.9025,
+        "ir_intensity": 7.3013
+      },
+      {
+        "freq_cm": 1282.4804,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 1290.5149,
+        "ir_intensity": 3.3777
+      },
+      {
+        "freq_cm": 1323.0101,
+        "ir_intensity": 18.8374
+      },
+      {
+        "freq_cm": 1328.5353,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 1340.5681,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 1344.752,
+        "ir_intensity": 4.0954
+      },
+      {
+        "freq_cm": 2991.2228,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 3000.7883,
+        "ir_intensity": 71.8296
+      },
+      {
+        "freq_cm": 3027.761,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 3036.2454,
+        "ir_intensity": 79.3759
+      },
+      {
+        "freq_cm": 3062.4703,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 3076.8491,
+        "ir_intensity": 35.9905
+      },
+      {
+        "freq_cm": 3107.5767,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 3111.3279,
+        "ir_intensity": 107.2583
+      },
+      {
+        "freq_cm": 3125.3687,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 3126.3244,
+        "ir_intensity": 38.8205
+      }
+    ],
+    "anharmonic": [],
+    "overtones": [],
+    "combination_bands": []
+  },
+  "energy_eV": 2.635096221290148,
+  "dipole": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0,
+    "magnitude": 0.0
+  },
+  "runtime_s": 848.4171979427338,
+  "files": {
+    "gaussian_log": "gaussian_freq.log",
+    "gaussian_input": "gaussian_freq.gjf"
+  }
+}

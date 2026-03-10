@@ -1,0 +1,13 @@
+{
+  "molecule": "C3H8_ase",
+  "calculator": "mace_omol",
+  "initial_energy_eV": -3240.7774562587924,
+  "final_energy_eV": -3240.7784119503413,
+  "converged": true,
+  "num_steps": 0,
+  "runtime_s": 8.004850387573242,
+  "files": {
+    "initial_geometry": "initial.xyz",
+    "optimized_geometry": "optimized.xyz"
+  }
+}

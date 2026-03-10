@@ -1,0 +1,4 @@
+DFT_Frequency_cm,ML_Frequency_cm,Freq_Difference_cm,Percent_Error,Mode_Overlap,DFT_Intensity_km_mol,ML_Intensity_km_mol,Intensity_Difference
+1665.3001,1621.5909,-43.7092,-2.6247,1.0000,70.3304,704.1071,633.7767
+3799.2204,3813.4191,14.1988,0.3737,1.0000,1.6374,360.5984,358.9610
+3912.4175,3908.1593,-4.2581,-0.1088,0.9999,20.2278,698.7508,678.5230

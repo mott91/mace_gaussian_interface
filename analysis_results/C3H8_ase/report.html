@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IR Analysis: C3H8_ase</title>
+
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                line-height: 1.6;
+                color: #1a1a1a;
+                background: #f5f5f5;
+                padding: 0;
+            }
+
+            .container {
+                max-width: 100%;
+                margin: 0;
+                background: white;
+                min-height: 100vh;
+            }
+
+            header {
+                background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+                color: white;
+                padding: 3rem 4rem;
+                border-bottom: 3px solid #3498db;
+            }
+
+            header h1 {
+                font-size: 2.2em;
+                margin-bottom: 0.5rem;
+                font-weight: 600;
+                letter-spacing: -0.5px;
+            }
+
+            header .subtitle {
+                font-size: 1.1em;
+                opacity: 0.85;
+                font-weight: 300;
+            }
+
+            nav {
+                background: white;
+                padding: 1rem 4rem;
+                border-bottom: 1px solid #e5e7eb;
+                position: sticky;
+                top: 0;
+                z-index: 100;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            }
+
+            nav a {
+                color: #374151;
+                text-decoration: none;
+                margin-right: 2rem;
+                font-weight: 500;
+                font-size: 0.95rem;
+                transition: all 0.2s;
+                padding-bottom: 0.25rem;
+                border-bottom: 2px solid transparent;
+            }
+
+            nav a:hover {
+                color: #3498db;
+                border-bottom-color: #3498db;
+            }
+
+            .content {
+                padding: 3rem 4rem;
+                max-width: 1600px;
+                margin: 0 auto;
+            }
+
+            section {
+                margin-bottom: 4rem;
+            }
+
+            h2 {
+                color: #1a1a1a;
+                font-size: 1.75em;
+                margin-bottom: 1.5rem;
+                padding-bottom: 0.75rem;
+                border-bottom: 2px solid #e5e7eb;
+                font-weight: 600;
+                letter-spacing: -0.3px;
+            }
+
+            h3 {
+                color: #374151;
+                font-size: 1.3em;
+                margin: 2rem 0 1rem 0;
+                font-weight: 600;
+            }
+
+            .summary-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 1.5rem;
+                margin: 2rem 0;
+            }
+
+            .summary-card {
+                background: white;
+                border: 1px solid #e5e7eb;
+                padding: 1.5rem;
+                border-radius: 8px;
+                transition: all 0.2s;
+            }
+
+            .summary-card:hover {
+                box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+                transform: translateY(-2px);
+            }
+
+            .summary-card .value {
+                font-size: 2.2em;
+                font-weight: 600;
+                margin: 0.5rem 0;
+                color: #1a1a1a;
+            }
+
+            .summary-card .label {
+                font-size: 0.85rem;
+                color: #6b7280;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                font-weight: 500;
+            }
+
+            .comparison-section {
+                background: #fafafa;
+                padding: 2rem;
+                border-radius: 8px;
+                margin-bottom: 2.5rem;
+                border: 1px solid #e5e7eb;
+            }
+
+            .plot-container {
+                background: white;
+                padding: 1.5rem;
+                border-radius: 6px;
+                border: 1px solid #e5e7eb;
+                margin: 1.5rem 0;
+            }
+
+            .plot-container img {
+                width: 100%;
+                height: auto;
+                display: block;
+                border-radius: 4px;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 1.5rem 0;
+                background: white;
+                border: 1px solid #e5e7eb;
+                border-radius: 6px;
+                overflow: hidden;
+                font-size: 0.9rem;
+            }
+
+            thead {
+                background: #f9fafb;
+                border-bottom: 2px solid #e5e7eb;
+            }
+
+            th, td {
+                padding: 0.875rem 1rem;
+                text-align: left;
+                border-bottom: 1px solid #f3f4f6;
+            }
+
+            th {
+                font-weight: 600;
+                color: #374151;
+                font-size: 0.85rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            td {
+                color: #4b5563;
+            }
+
+            tbody tr:hover {
+                background: #f9fafb;
+            }
+
+            .metric-good {
+                color: #059669;
+                font-weight: 600;
+            }
+
+            .metric-warning {
+                color: #d97706;
+                font-weight: 600;
+            }
+
+            .metric-bad {
+                color: #dc2626;
+                font-weight: 600;
+            }
+
+            .stats-box {
+                background: white;
+                padding: 1.5rem;
+                border-radius: 6px;
+                border: 1px solid #e5e7eb;
+                margin: 1.5rem 0;
+            }
+
+            .stats-box h4 {
+                color: #374151;
+                margin-bottom: 1rem;
+                font-weight: 600;
+                font-size: 1.1rem;
+            }
+
+            .stats-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                gap: 1rem;
+            }
+
+            .stat-item {
+                padding: 1rem;
+                background: #f9fafb;
+                border-radius: 6px;
+                border: 1px solid #f3f4f6;
+            }
+
+            .stat-label {
+                font-size: 0.8rem;
+                color: #6b7280;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-bottom: 0.25rem;
+                font-weight: 500;
+            }
+
+            .stat-value {
+                font-size: 1.5em;
+                font-weight: 600;
+                color: #1a1a1a;
+            }
+
+            .warning-box {
+                background: #fef3c7;
+                border-left: 3px solid #f59e0b;
+                padding: 1rem;
+                margin: 1.5rem 0;
+                border-radius: 4px;
+                color: #92400e;
+            }
+
+            footer {
+                background: #f9fafb;
+                padding: 2rem;
+                text-align: center;
+                color: #6b7280;
+                border-top: 1px solid #e5e7eb;
+                font-size: 0.9rem;
+            }
+
+            .timestamp {
+                font-style: italic;
+                color: #9ca3af;
+                margin-top: 0.5rem;
+            }
+        </style>
+        
+</head>
+<body>
+<div class="container">
+
+        <header>
+            <h1>IR Spectral Analysis Report</h1>
+            <div class="subtitle">C3H8_ASE</div>
+            <div class="subtitle">ML vs DFT Comparison</div>
+        </header>
+        
+<nav><a href="#overview">Overview</a> <a href="#combined">Combined</a> <a href="#comp1">mace_mp_mace_ml</a> <a href="#comp2">mace_omol_espaloma</a> <a href="#comp3">mace_mp_espaloma</a> <a href="#comp4">mace_omol_mace_ml</a> <a href="#summary">Summary</a></nav>
+<div class="content">
+
+        <section id="overview">
+            <h2>Overview</h2>
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="label">ML Calculators Tested</div>
+                    <div class="value">4</div>
+                </div>
+                <div class="summary-card">
+                    <div class="label">Average MAE</div>
+                    <div class="value">34.0</div>
+                    <div class="label">cm^-1</div>
+                </div>
+                <div class="summary-card">
+                    <div class="label">Best R^2</div>
+                    <div class="value">0.9992</div>
+                </div>
+                <div class="summary-card">
+                    <div class="label">Avg Speedup</div>
+                    <div class="value">6.7x</div>
+                </div>
+            </div>
+            
+            <p style="margin-top: 30px; font-size: 1.1em; line-height: 1.8;">
+                This report presents a comprehensive comparison of machine learning (ML) force fields 
+                against density functional theory (DFT) anharmonic calculations for IR spectroscopy. 
+                All spectra include anharmonic fundamentals, overtones, and combination bands. 
+                Broadening was applied using Gaussian convolution with 8 cm^-1 FWHM.
+            </p>
+        </section>
+        
+
+        <section id="combined" class="comparison-section">
+            <h2>Combined Analysis: All Methods</h2>
+            <p style="color: #666; margin-bottom: 20px;">
+                Direct comparison of all ML methods against the DFT baseline in a single view.
+            </p>
+
+            <h3>Combined IR Spectrum (Fundamentals)</h3>
+            <div class="plot-container">
+                <img src="plots/spectrum_combined.png" alt="Combined spectrum comparison" style="width: 100%; max-width: 1200px;">
+            </div>
+
+            
+            <h3>Extended IR Spectrum (400-8000 cm⁻¹, includes overtones)</h3>
+            <div class="plot-container">
+                <img src="plots/spectrum_combined_extended.png" alt="Extended spectrum with overtones" style="width: 100%; max-width: 1400px;">
+            </div>
+            <p style="color: #666; font-size: 0.9em; margin-bottom: 30px;">
+                Extended frequency range shows fundamental modes, overtones, and combination bands.
+            </p>
+            
+
+            <h3>Combined Regression Analysis</h3>
+            <div class="plot-container">
+                <img src="plots/regression_combined.png" alt="Combined regression analysis" style="width: 100%; max-width: 1200px;">
+            </div>
+
+            <p style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-left: 4px solid #667eea; border-radius: 4px;">
+                <strong>Note:</strong> The combined plots allow for quick visual comparison of how different ML methods
+                perform relative to each other and the DFT reference. R² values of "N/A" indicate insufficient data points (N&lt;3)
+                for statistical correlation.
+            </p>
+        </section>
+        
+
+        <section id="comp1" class="comparison-section">
+            <h2>mace_mp_mace_ml</h2>
+            
+            <div class="stats-box">
+                <h4>Statistical Metrics</h4>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">R^2 (Frequency)</div>
+                        <div class="stat-value metric-bad">0.0000</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">MAE</div>
+                        <div class="stat-value metric-good">0.00 cm^-1</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">RMSE</div>
+                        <div class="stat-value">0.00 cm^-1</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Max Error</div>
+                        <div class="stat-value">0.00 cm^-1</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Matched Modes</div>
+                        <div class="stat-value">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Match Rate</div>
+                        <div class="stat-value">0.0%</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Missing Modes (DFT only)</div>
+                        <div class="stat-value">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Spurious Modes (ML only)</div>
+                        <div class="stat-value">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Speedup</div>
+                        <div class="stat-value">7.5x</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">ML Runtime</div>
+                        <div class="stat-value">279.7 s</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">DFT Runtime</div>
+                        <div class="stat-value">2095.3 s</div>
+                    </div>
+                </div>
+            </div>
+            
+            <h3>Spectral Comparison</h3>
+            <div class="plot-container">
+                <img src="plots/spectrum_mace_mp_mace_ml.png" alt="Spectrum comparison">
+            </div>
+            
+            <h3>Regression Analysis</h3>
+            <div class="plot-container">
+                <img src="plots/regression_mace_mp_mace_ml.png" alt="Regression plot">
+            </div>
+            
+            <h3>Detailed Frequency Comparison</h3>
+            <p>Showing first 20 matched peaks (full table available in data/comparison_mace_mp_mace_ml.csv)</p>
+            <p class="warning-box">No matched peaks found for this calculator.</p>
+        </section>
+        
+
+        <section id="comp2" class="comparison-section">
+            <h2>mace_omol_espaloma</h2>
+            
+            <div class="stats-box">
+                <h4>Statistical Metrics</h4>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">R^2 (Frequency)</div>
+                        <div class="stat-value metric-good">0.9992</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">MAE</div>
+                        <div class="stat-value metric-bad">67.90 cm^-1</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">RMSE</div>
+                        <div class="stat-value">77.20 cm^-1</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Max Error</div>
+                        <div class="stat-value">157.97 cm^-1</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Matched Modes</div>
+                        <div class="stat-value">405</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Match Rate</div>
+                        <div class="stat-value">100.0%</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Missing Modes (DFT only)</div>
+                        <div class="stat-value">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Spurious Modes (ML only)</div>
+                        <div class="stat-value">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Speedup</div>
+                        <div class="stat-value">5.6x</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">ML Runtime</div>
+                        <div class="stat-value">374.9 s</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">DFT Runtime</div>
+                        <div class="stat-value">2095.3 s</div>
+                    </div>
+                </div>
+            </div>
+            
+            <h3>Spectral Comparison</h3>
+            <div class="plot-container">
+                <img src="plots/spectrum_mace_omol_espaloma.png" alt="Spectrum comparison">
+            </div>
+            
+            <h3>Regression Analysis</h3>
+            <div class="plot-container">
+                <img src="plots/regression_mace_omol_espaloma.png" alt="Regression plot">
+            </div>
+            
+            <h3>Detailed Frequency Comparison</h3>
+            <p>Showing first 20 matched peaks (full table available in data/comparison_mace_omol_espaloma.csv)</p>
+            <table border="1" class="dataframe data-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>DFT_Frequency_cm</th>
+      <th>ML_Frequency_cm</th>
+      <th>Freq_Difference_cm</th>
+      <th>Percent_Error</th>
+      <th>DFT_Intensity_km_mol</th>
+      <th>ML_Intensity_km_mol</th>
+      <th>Intensity_Difference</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>220.95</td>
+      <td>211.12</td>
+      <td>-9.83</td>
+      <td>-4.45</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>266.62</td>
+      <td>259.97</td>
+      <td>-6.65</td>
+      <td>-2.49</td>
+      <td>0.00</td>
+      <td>0.13</td>
+      <td>0.13</td>
+    </tr>
+    <tr>
+      <td>361.73</td>
+      <td>370.30</td>
+      <td>8.57</td>
+      <td>2.37</td>
+      <td>0.15</td>
+      <td>2.74</td>
+      <td>2.59</td>
+    </tr>
+    <tr>
+      <td>439.09</td>
+      <td>419.92</td>
+      <td>-19.17</td>
+      <td>-4.37</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>-0.00</td>
+    </tr>
+    <tr>
+      <td>473.96</td>
+      <td>454.85</td>
+      <td>-19.11</td>
+      <td>-4.03</td>
+      <td>0.15</td>
+      <td>0.01</td>
+      <td>-0.14</td>
+    </tr>
+    <tr>
+      <td>528.20</td>
+      <td>513.27</td>
+      <td>-14.93</td>
+      <td>-2.83</td>
+      <td>0.00</td>
+      <td>0.03</td>
+      <td>0.03</td>
+    </tr>
+    <tr>
+      <td>582.99</td>
+      <td>581.28</td>
+      <td>-1.71</td>
+      <td>-0.29</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>632.61</td>
+      <td>634.13</td>
+      <td>1.52</td>
+      <td>0.24</td>
+      <td>0.03</td>
+      <td>0.00</td>
+      <td>-0.03</td>
+    </tr>
+    <tr>
+      <td>722.39</td>
+      <td>745.89</td>
+      <td>23.50</td>
+      <td>3.25</td>
+      <td>5.01</td>
+      <td>24.33</td>
+      <td>19.32</td>
+    </tr>
+    <tr>
+      <td>725.96</td>
+      <td>742.90</td>
+      <td>16.94</td>
+      <td>2.33</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>-0.00</td>
+    </tr>
+    <tr>
+      <td>850.40</td>
+      <td>875.34</td>
+      <td>24.94</td>
+      <td>2.93</td>
+      <td>1.19</td>
+      <td>3.62</td>
+      <td>2.43</td>
+    </tr>
+    <tr>
+      <td>864.85</td>
+      <td>900.64</td>
+      <td>35.78</td>
+      <td>4.14</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>884.44</td>
+      <td>920.34</td>
+      <td>35.90</td>
+      <td>4.06</td>
+      <td>2.14</td>
+      <td>13.43</td>
+      <td>11.30</td>
+    </tr>
+    <tr>
+      <td>943.04</td>
+      <td>959.23</td>
+      <td>16.18</td>
+      <td>1.72</td>
+      <td>0.24</td>
+      <td>1.81</td>
+      <td>1.57</td>
+    </tr>
+    <tr>
+      <td>988.48</td>
+      <td>1006.35</td>
+      <td>17.88</td>
+      <td>1.81</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>1034.52</td>
+      <td>1059.52</td>
+      <td>24.99</td>
+      <td>2.42</td>
+      <td>0.52</td>
+      <td>0.74</td>
+      <td>0.22</td>
+    </tr>
+    <tr>
+      <td>1071.92</td>
+      <td>1087.33</td>
+      <td>15.41</td>
+      <td>1.44</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>1083.12</td>
+      <td>1115.13</td>
+      <td>32.01</td>
+      <td>2.96</td>
+      <td>0.05</td>
+      <td>0.19</td>
+      <td>0.14</td>
+    </tr>
+    <tr>
+      <td>1087.32</td>
+      <td>1114.55</td>
+      <td>27.23</td>
+      <td>2.50</td>
+      <td>0.10</td>
+      <td>0.00</td>
+      <td>-0.10</td>
+    </tr>
+    <tr>
+      <td>1106.57</td>
+      <td>1153.74</td>
+      <td>47.18</td>
+      <td>4.26</td>
+      <td>1.44</td>
+      <td>5.81</td>
+      <td>4.37</td>
+    </tr>
+  </tbody>
+</table>
+        </section>
+        
+
+        <section id="comp3" class="comparison-section">
+            <h2>mace_mp_espaloma</h2>
+            
+            <div class="stats-box">
+                <h4>Statistical Metrics</h4>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">R^2 (Frequency)</div>
+                        <div class="stat-value metric-bad">0.0000</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">MAE</div>
+                        <div class="stat-value metric-good">0.00 cm^-1</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">RMSE</div>
+                        <div class="stat-value">0.00 cm^-1</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Max Error</div>
+                        <div class="stat-value">0.00 cm^-1</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Matched Modes</div>
+                        <div class="stat-value">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Match Rate</div>
+                        <div class="stat-value">0.0%</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Missing Modes (DFT only)</div>
+                        <div class="stat-value">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Spurious Modes (ML only)</div>
+                        <div class="stat-value">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Speedup</div>
+                        <div class="stat-value">8.7x</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">ML Runtime</div>
+                        <div class="stat-value">240.1 s</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">DFT Runtime</div>
+                        <div class="stat-value">2095.3 s</div>
+                    </div>
+                </div>
+            </div>
+            
+            <h3>Spectral Comparison</h3>
+            <div class="plot-container">
+                <img src="plots/spectrum_mace_mp_espaloma.png" alt="Spectrum comparison">
+            </div>
+            
+            <h3>Regression Analysis</h3>
+            <div class="plot-container">
+                <img src="plots/regression_mace_mp_espaloma.png" alt="Regression plot">
+            </div>
+            
+            <h3>Detailed Frequency Comparison</h3>
+            <p>Showing first 20 matched peaks (full table available in data/comparison_mace_mp_espaloma.csv)</p>
+            <p class="warning-box">No matched peaks found for this calculator.</p>
+        </section>
+        
+
+        <section id="comp4" class="comparison-section">
+            <h2>mace_omol_mace_ml</h2>
+            
+            <div class="stats-box">
+                <h4>Statistical Metrics</h4>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">R^2 (Frequency)</div>
+                        <div class="stat-value metric-good">0.9992</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">MAE</div>
+                        <div class="stat-value metric-bad">67.90 cm^-1</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">RMSE</div>
+                        <div class="stat-value">77.20 cm^-1</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Max Error</div>
+                        <div class="stat-value">157.97 cm^-1</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Matched Modes</div>
+                        <div class="stat-value">405</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Match Rate</div>
+                        <div class="stat-value">100.0%</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Missing Modes (DFT only)</div>
+                        <div class="stat-value">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Spurious Modes (ML only)</div>
+                        <div class="stat-value">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Speedup</div>
+                        <div class="stat-value">5.1x</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">ML Runtime</div>
+                        <div class="stat-value">410.1 s</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">DFT Runtime</div>
+                        <div class="stat-value">2095.3 s</div>
+                    </div>
+                </div>
+            </div>
+            
+            <h3>Spectral Comparison</h3>
+            <div class="plot-container">
+                <img src="plots/spectrum_mace_omol_mace_ml.png" alt="Spectrum comparison">
+            </div>
+            
+            <h3>Regression Analysis</h3>
+            <div class="plot-container">
+                <img src="plots/regression_mace_omol_mace_ml.png" alt="Regression plot">
+            </div>
+            
+            <h3>Detailed Frequency Comparison</h3>
+            <p>Showing first 20 matched peaks (full table available in data/comparison_mace_omol_mace_ml.csv)</p>
+            <table border="1" class="dataframe data-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>DFT_Frequency_cm</th>
+      <th>ML_Frequency_cm</th>
+      <th>Freq_Difference_cm</th>
+      <th>Percent_Error</th>
+      <th>DFT_Intensity_km_mol</th>
+      <th>ML_Intensity_km_mol</th>
+      <th>Intensity_Difference</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>220.95</td>
+      <td>211.12</td>
+      <td>-9.83</td>
+      <td>-4.45</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>266.62</td>
+      <td>259.97</td>
+      <td>-6.65</td>
+      <td>-2.49</td>
+      <td>0.00</td>
+      <td>0.27</td>
+      <td>0.26</td>
+    </tr>
+    <tr>
+      <td>361.73</td>
+      <td>370.30</td>
+      <td>8.57</td>
+      <td>2.37</td>
+      <td>0.15</td>
+      <td>0.15</td>
+      <td>-0.00</td>
+    </tr>
+    <tr>
+      <td>439.09</td>
+      <td>419.92</td>
+      <td>-19.17</td>
+      <td>-4.37</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>-0.00</td>
+    </tr>
+    <tr>
+      <td>473.96</td>
+      <td>454.85</td>
+      <td>-19.11</td>
+      <td>-4.03</td>
+      <td>0.15</td>
+      <td>0.01</td>
+      <td>-0.15</td>
+    </tr>
+    <tr>
+      <td>528.20</td>
+      <td>513.27</td>
+      <td>-14.93</td>
+      <td>-2.83</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>582.99</td>
+      <td>581.28</td>
+      <td>-1.71</td>
+      <td>-0.29</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>632.61</td>
+      <td>634.13</td>
+      <td>1.52</td>
+      <td>0.24</td>
+      <td>0.03</td>
+      <td>0.04</td>
+      <td>0.01</td>
+    </tr>
+    <tr>
+      <td>722.39</td>
+      <td>745.89</td>
+      <td>23.50</td>
+      <td>3.25</td>
+      <td>5.01</td>
+      <td>5.49</td>
+      <td>0.48</td>
+    </tr>
+    <tr>
+      <td>725.96</td>
+      <td>742.90</td>
+      <td>16.94</td>
+      <td>2.33</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>850.40</td>
+      <td>875.34</td>
+      <td>24.94</td>
+      <td>2.93</td>
+      <td>1.19</td>
+      <td>0.07</td>
+      <td>-1.12</td>
+    </tr>
+    <tr>
+      <td>864.85</td>
+      <td>900.64</td>
+      <td>35.78</td>
+      <td>4.14</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>884.44</td>
+      <td>920.34</td>
+      <td>35.90</td>
+      <td>4.06</td>
+      <td>2.14</td>
+      <td>0.32</td>
+      <td>-1.82</td>
+    </tr>
+    <tr>
+      <td>943.04</td>
+      <td>959.23</td>
+      <td>16.18</td>
+      <td>1.72</td>
+      <td>0.24</td>
+      <td>0.03</td>
+      <td>-0.21</td>
+    </tr>
+    <tr>
+      <td>988.48</td>
+      <td>1006.35</td>
+      <td>17.88</td>
+      <td>1.81</td>
+      <td>0.00</td>
+      <td>0.02</td>
+      <td>0.02</td>
+    </tr>
+    <tr>
+      <td>1034.52</td>
+      <td>1059.52</td>
+      <td>24.99</td>
+      <td>2.42</td>
+      <td>0.52</td>
+      <td>5.64</td>
+      <td>5.13</td>
+    </tr>
+    <tr>
+      <td>1071.92</td>
+      <td>1087.33</td>
+      <td>15.41</td>
+      <td>1.44</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>1083.12</td>
+      <td>1115.13</td>
+      <td>32.01</td>
+      <td>2.96</td>
+      <td>0.05</td>
+      <td>0.01</td>
+      <td>-0.04</td>
+    </tr>
+    <tr>
+      <td>1087.32</td>
+      <td>1114.55</td>
+      <td>27.23</td>
+      <td>2.50</td>
+      <td>0.10</td>
+      <td>0.00</td>
+      <td>-0.10</td>
+    </tr>
+    <tr>
+      <td>1106.57</td>
+      <td>1153.74</td>
+      <td>47.18</td>
+      <td>4.26</td>
+      <td>1.44</td>
+      <td>4.74</td>
+      <td>3.30</td>
+    </tr>
+  </tbody>
+</table>
+        </section>
+        
+
+        <section id="summary">
+            <h2>Summary Comparison</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Calculator</th>
+                        <th>R^2</th>
+                        <th>MAE (cm^-1)</th>
+                        <th>RMSE (cm^-1)</th>
+                        <th>Max Error (cm^-1)</th>
+                        <th>Matched Modes</th>
+                        <th>Match Rate</th>
+                        <th>Speedup</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+            <tr>
+                <td>mace_mp_mace_ml</td>
+                <td>0.0000</td>
+                <td>0.00</td>
+                <td>0.00</td>
+                <td>0.00</td>
+                <td>0/0</td>
+                <td>0.0%</td>
+                <td>7.5x</td>
+            </tr>
+            
+            <tr>
+                <td>mace_omol_espaloma</td>
+                <td>0.9992</td>
+                <td>67.90</td>
+                <td>77.20</td>
+                <td>157.97</td>
+                <td>405/405</td>
+                <td>100.0%</td>
+                <td>5.6x</td>
+            </tr>
+            
+            <tr>
+                <td>mace_mp_espaloma</td>
+                <td>0.0000</td>
+                <td>0.00</td>
+                <td>0.00</td>
+                <td>0.00</td>
+                <td>0/0</td>
+                <td>0.0%</td>
+                <td>8.7x</td>
+            </tr>
+            
+            <tr>
+                <td>mace_omol_mace_ml</td>
+                <td>0.9992</td>
+                <td>67.90</td>
+                <td>77.20</td>
+                <td>157.97</td>
+                <td>405/405</td>
+                <td>100.0%</td>
+                <td>5.1x</td>
+            </tr>
+            
+                </tbody>
+            </table>
+        </section>
+        
+</div>
+
+        <footer>
+            <p>Generated by IR Spectral Analysis Framework</p>
+            <p class="timestamp">Report generated: 2025-10-31 13:33:31</p>
+        </footer>
+        
+</div>
+</body>
+</html>

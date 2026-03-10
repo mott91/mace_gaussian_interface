@@ -1,0 +1,117 @@
+{
+  "molecule": "C3H8_ase",
+  "energy_calculator": "mace_mp",
+  "dipole_calculator": "espaloma",
+  "calculator_type": "ml",
+  "timestamp": null,
+  "frequencies": {
+    "harmonic": [
+      {
+        "freq_cm": 581.8311,
+        "ir_intensity": 24.4866
+      },
+      {
+        "freq_cm": 782.8493,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 798.2868,
+        "ir_intensity": 18.7096
+      },
+      {
+        "freq_cm": 854.021,
+        "ir_intensity": 6.2656
+      },
+      {
+        "freq_cm": 1016.5299,
+        "ir_intensity": 4.2252
+      },
+      {
+        "freq_cm": 1019.226,
+        "ir_intensity": 3.1599
+      },
+      {
+        "freq_cm": 1030.93,
+        "ir_intensity": 3.7547
+      },
+      {
+        "freq_cm": 1057.8107,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 1196.2084,
+        "ir_intensity": 16.9446
+      },
+      {
+        "freq_cm": 1238.0829,
+        "ir_intensity": 10.6935
+      },
+      {
+        "freq_cm": 1269.5825,
+        "ir_intensity": 13.0313
+      },
+      {
+        "freq_cm": 1272.0452,
+        "ir_intensity": 31.6691
+      },
+      {
+        "freq_cm": 1311.6405,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 1325.7078,
+        "ir_intensity": 13.9246
+      },
+      {
+        "freq_cm": 1327.0226,
+        "ir_intensity": 5.0297
+      },
+      {
+        "freq_cm": 1345.5717,
+        "ir_intensity": 20.1306
+      },
+      {
+        "freq_cm": 3008.4776,
+        "ir_intensity": 0.0519
+      },
+      {
+        "freq_cm": 3015.4725,
+        "ir_intensity": 3.9678
+      },
+      {
+        "freq_cm": 3044.1679,
+        "ir_intensity": 13.7097
+      },
+      {
+        "freq_cm": 3089.4257,
+        "ir_intensity": 0.0131
+      },
+      {
+        "freq_cm": 3101.3908,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 3117.1101,
+        "ir_intensity": 47.0828
+      },
+      {
+        "freq_cm": 3124.6089,
+        "ir_intensity": 10.2814
+      },
+      {
+        "freq_cm": 3127.3011,
+        "ir_intensity": 18.9423
+      }
+    ],
+    "anharmonic": [],
+    "overtones": [],
+    "combination_bands": []
+  },
+  "energy_eV": 1.959383078029476,
+  "dipole": null,
+  "runtime_s": 240.09631443023682,
+  "files": {
+    "gaussian_log": "gaussian_freq.log",
+    "gaussian_input": "gaussian_freq.gjf"
+  }
+}

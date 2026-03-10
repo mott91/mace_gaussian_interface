@@ -1,0 +1,98 @@
+{
+  "molecule": "bh3_nh3",
+  "energy_calculator": "mace_mp",
+  "dipole_calculator": "mace_ml",
+  "calculator_type": "ml",
+  "timestamp": null,
+  "frequencies": {
+    "harmonic": [
+      {
+        "freq_cm": 776.3658,
+        "ir_intensity": 7.4858
+      },
+      {
+        "freq_cm": 823.5141,
+        "ir_intensity": 4.5592
+      },
+      {
+        "freq_cm": 823.5141,
+        "ir_intensity": 4.5613
+      },
+      {
+        "freq_cm": 884.6184,
+        "ir_intensity": 22.0091
+      },
+      {
+        "freq_cm": 884.6185,
+        "ir_intensity": 22.0145
+      },
+      {
+        "freq_cm": 996.5116,
+        "ir_intensity": 187.8164
+      },
+      {
+        "freq_cm": 1130.4331,
+        "ir_intensity": 85.0483
+      },
+      {
+        "freq_cm": 1527.1615,
+        "ir_intensity": 20.822
+      },
+      {
+        "freq_cm": 1527.1616,
+        "ir_intensity": 20.8242
+      },
+      {
+        "freq_cm": 2310.2072,
+        "ir_intensity": 212.9334
+      },
+      {
+        "freq_cm": 2310.2072,
+        "ir_intensity": 212.9563
+      },
+      {
+        "freq_cm": 2352.9881,
+        "ir_intensity": 90.2411
+      },
+      {
+        "freq_cm": 3395.6163,
+        "ir_intensity": 11.081
+      },
+      {
+        "freq_cm": 3528.9646,
+        "ir_intensity": 26.4714
+      },
+      {
+        "freq_cm": 3528.9646,
+        "ir_intensity": 26.4734
+      }
+    ],
+    "anharmonic": [],
+    "overtones": [],
+    "combination_bands": []
+  },
+  "energy_eV": 1.1025509479149418,
+  "dipole": {
+    "x": 6.862714821000001e-06,
+    "y": 0.0,
+    "z": 2.788259521513534,
+    "magnitude": 2.7882595215219794
+  },
+  "runtime_s": 115.45957469940186,
+  "files": {
+    "gaussian_log": "gaussian_freq.log",
+    "gaussian_input": "gaussian_freq.gjf"
+  },
+  "version_info": {
+    "tool_version": "0.1.0",
+    "python_version": "3.10.19 | packaged by conda-forge | (main, Oct 13 2025, 14:08:27) [GCC 14.3.0]",
+    "platform": "Linux-5.10.0-37-amd64-x86_64-with-glibc2.31",
+    "torch_version": "2.4.0+cu121",
+    "cuda_available": true,
+    "cuda_version": "12.1",
+    "gpu_name": "NVIDIA GeForce RTX 2070 SUPER",
+    "mace_version": "0.3.14",
+    "ase_version": "3.26.0"
+  },
+  "calculation_parameters": {}
+}

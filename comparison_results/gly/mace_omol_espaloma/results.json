@@ -1,0 +1,4301 @@
+{
+  "molecule": "gly",
+  "energy_calculator": "mace_omol",
+  "dipole_calculator": "espaloma",
+  "calculator_type": "ml",
+  "timestamp": null,
+  "frequencies": {
+    "harmonic": [
+      {
+        "freq_cm": 68.2716,
+        "ir_intensity": 36.9001
+      },
+      {
+        "freq_cm": 200.2021,
+        "ir_intensity": 277.4912
+      },
+      {
+        "freq_cm": 258.4857,
+        "ir_intensity": 28.134
+      },
+      {
+        "freq_cm": 467.6029,
+        "ir_intensity": 60.801
+      },
+      {
+        "freq_cm": 506.5598,
+        "ir_intensity": 90.8308
+      },
+      {
+        "freq_cm": 639.346,
+        "ir_intensity": 11.8338
+      },
+      {
+        "freq_cm": 647.7494,
+        "ir_intensity": 605.1878
+      },
+      {
+        "freq_cm": 830.9383,
+        "ir_intensity": 614.9268
+      },
+      {
+        "freq_cm": 916.327,
+        "ir_intensity": 256.9802
+      },
+      {
+        "freq_cm": 921.0599,
+        "ir_intensity": 722.6883
+      },
+      {
+        "freq_cm": 1146.2036,
+        "ir_intensity": 215.7599
+      },
+      {
+        "freq_cm": 1175.7028,
+        "ir_intensity": 258.6361
+      },
+      {
+        "freq_cm": 1183.9841,
+        "ir_intensity": 0.1632
+      },
+      {
+        "freq_cm": 1309.4443,
+        "ir_intensity": 145.9036
+      },
+      {
+        "freq_cm": 1381.9223,
+        "ir_intensity": 84.9443
+      },
+      {
+        "freq_cm": 1412.1002,
+        "ir_intensity": 123.4935
+      },
+      {
+        "freq_cm": 1450.3122,
+        "ir_intensity": 61.4526
+      },
+      {
+        "freq_cm": 1666.4365,
+        "ir_intensity": 806.5579
+      },
+      {
+        "freq_cm": 1840.8826,
+        "ir_intensity": 362.9403
+      },
+      {
+        "freq_cm": 3071.3819,
+        "ir_intensity": 19.1111
+      },
+      {
+        "freq_cm": 3106.3004,
+        "ir_intensity": 31.993
+      },
+      {
+        "freq_cm": 3514.0351,
+        "ir_intensity": 446.816
+      },
+      {
+        "freq_cm": 3580.4702,
+        "ir_intensity": 863.9665
+      },
+      {
+        "freq_cm": 3761.737,
+        "ir_intensity": 620.6087
+      }
+    ],
+    "anharmonic": [
+      {
+        "mode": 1,
+        "freq_cm": 3571.666,
+        "ir_intensity": 565.58908686,
+        "freq_harmonic": 3761.737
+      },
+      {
+        "mode": 2,
+        "freq_cm": 3654.449,
+        "ir_intensity": 392.48014514,
+        "freq_harmonic": 3514.035
+      },
+      {
+        "mode": 3,
+        "freq_cm": 2927.453,
+        "ir_intensity": 15.66978885,
+        "freq_harmonic": 3071.382
+      },
+      {
+        "mode": 4,
+        "freq_cm": 1816.338,
+        "ir_intensity": 275.96266354,
+        "freq_harmonic": 1840.883
+      },
+      {
+        "mode": 5,
+        "freq_cm": 1632.775,
+        "ir_intensity": 550.50304487,
+        "freq_harmonic": 1666.437
+      },
+      {
+        "mode": 6,
+        "freq_cm": 1420.057,
+        "ir_intensity": 55.92616927,
+        "freq_harmonic": 1450.312
+      },
+      {
+        "mode": 7,
+        "freq_cm": 1384.883,
+        "ir_intensity": 43.40757778,
+        "freq_harmonic": 1412.1
+      },
+      {
+        "mode": 8,
+        "freq_cm": 1292.472,
+        "ir_intensity": 120.64978257,
+        "freq_harmonic": 1309.444
+      },
+      {
+        "mode": 9,
+        "freq_cm": 1142.831,
+        "ir_intensity": 180.74592537,
+        "freq_harmonic": 1175.703
+      },
+      {
+        "mode": 10,
+        "freq_cm": 1113.997,
+        "ir_intensity": 224.01026831,
+        "freq_harmonic": 1146.204
+      },
+      {
+        "mode": 11,
+        "freq_cm": 958.47,
+        "ir_intensity": 953.02619131,
+        "freq_harmonic": 921.06
+      },
+      {
+        "mode": 12,
+        "freq_cm": 834.152,
+        "ir_intensity": 409.12138142,
+        "freq_harmonic": 830.938
+      },
+      {
+        "mode": 13,
+        "freq_cm": 635.949,
+        "ir_intensity": 12.04724714,
+        "freq_harmonic": 639.346
+      },
+      {
+        "mode": 14,
+        "freq_cm": 463.266,
+        "ir_intensity": 57.77536883,
+        "freq_harmonic": 467.603
+      },
+      {
+        "mode": 15,
+        "freq_cm": 263.078,
+        "ir_intensity": 26.1257557,
+        "freq_harmonic": 258.486
+      },
+      {
+        "mode": 16,
+        "freq_cm": 3791.385,
+        "ir_intensity": 173.90976267,
+        "freq_harmonic": 3580.47
+      },
+      {
+        "mode": 17,
+        "freq_cm": 2945.584,
+        "ir_intensity": 34.02489631,
+        "freq_harmonic": 3106.3
+      },
+      {
+        "mode": 18,
+        "freq_cm": 1344.009,
+        "ir_intensity": 70.0986031,
+        "freq_harmonic": 1381.922
+      },
+      {
+        "mode": 19,
+        "freq_cm": 1160.139,
+        "ir_intensity": 0.15992587,
+        "freq_harmonic": 1183.984
+      },
+      {
+        "mode": 20,
+        "freq_cm": 909.869,
+        "ir_intensity": 247.23407044,
+        "freq_harmonic": 916.327
+      },
+      {
+        "mode": 21,
+        "freq_cm": 621.56,
+        "ir_intensity": 562.47528581,
+        "freq_harmonic": 647.749
+      },
+      {
+        "mode": 22,
+        "freq_cm": 495.264,
+        "ir_intensity": 104.58705908,
+        "freq_harmonic": 506.56
+      },
+      {
+        "mode": 23,
+        "freq_cm": 171.784,
+        "ir_intensity": 237.43419037,
+        "freq_harmonic": 200.202
+      },
+      {
+        "mode": 24,
+        "freq_cm": 59.339,
+        "ir_intensity": 38.48252167,
+        "freq_harmonic": 68.272
+      }
+    ],
+    "overtones": [
+      {
+        "mode": 1,
+        "overtone_level": 2,
+        "freq_harmonic": 7523.474,
+        "freq_anharmonic": 6969.55,
+        "ir_intensity": 14.34701182
+      },
+      {
+        "mode": 2,
+        "overtone_level": 2,
+        "freq_harmonic": 7028.07,
+        "freq_anharmonic": 7311.977,
+        "ir_intensity": 5.2211678
+      },
+      {
+        "mode": 3,
+        "overtone_level": 2,
+        "freq_harmonic": 6142.764,
+        "freq_anharmonic": 5718.215,
+        "ir_intensity": 0.48609878
+      },
+      {
+        "mode": 4,
+        "overtone_level": 2,
+        "freq_harmonic": 3681.765,
+        "freq_anharmonic": 3615.269,
+        "ir_intensity": 0.77668211
+      },
+      {
+        "mode": 5,
+        "overtone_level": 2,
+        "freq_harmonic": 3332.873,
+        "freq_anharmonic": 3294.367,
+        "ir_intensity": 7.95797858
+      },
+      {
+        "mode": 6,
+        "overtone_level": 2,
+        "freq_harmonic": 2900.624,
+        "freq_anharmonic": 2825.872,
+        "ir_intensity": 1.30915042
+      },
+      {
+        "mode": 7,
+        "overtone_level": 2,
+        "freq_harmonic": 2824.2,
+        "freq_anharmonic": 2748.63,
+        "ir_intensity": 0.57537264
+      },
+      {
+        "mode": 8,
+        "overtone_level": 2,
+        "freq_harmonic": 2618.889,
+        "freq_anharmonic": 2538.322,
+        "ir_intensity": 1.09664068
+      },
+      {
+        "mode": 9,
+        "overtone_level": 2,
+        "freq_harmonic": 2351.406,
+        "freq_anharmonic": 2282.176,
+        "ir_intensity": 0.83052839
+      },
+      {
+        "mode": 10,
+        "overtone_level": 2,
+        "freq_harmonic": 2292.407,
+        "freq_anharmonic": 2220.701,
+        "ir_intensity": 0.5927039
+      },
+      {
+        "mode": 11,
+        "overtone_level": 2,
+        "freq_harmonic": 1842.12,
+        "freq_anharmonic": 1887.625,
+        "ir_intensity": 5.36871928
+      },
+      {
+        "mode": 12,
+        "overtone_level": 2,
+        "freq_harmonic": 1661.877,
+        "freq_anharmonic": 1682.561,
+        "ir_intensity": 157.55594784
+      },
+      {
+        "mode": 13,
+        "overtone_level": 2,
+        "freq_harmonic": 1278.692,
+        "freq_anharmonic": 1272.034,
+        "ir_intensity": 1.30420642
+      },
+      {
+        "mode": 14,
+        "overtone_level": 2,
+        "freq_harmonic": 935.206,
+        "freq_anharmonic": 926.893,
+        "ir_intensity": 21.09190313
+      },
+      {
+        "mode": 15,
+        "overtone_level": 2,
+        "freq_harmonic": 516.971,
+        "freq_anharmonic": 523.148,
+        "ir_intensity": 0.51989655
+      },
+      {
+        "mode": 16,
+        "overtone_level": 2,
+        "freq_harmonic": 7160.94,
+        "freq_anharmonic": 7663.235,
+        "ir_intensity": 5.95145944
+      },
+      {
+        "mode": 17,
+        "overtone_level": 2,
+        "freq_harmonic": 6212.601,
+        "freq_anharmonic": 5886.74,
+        "ir_intensity": 0.00784106
+      },
+      {
+        "mode": 18,
+        "overtone_level": 2,
+        "freq_harmonic": 2763.845,
+        "freq_anharmonic": 2683.051,
+        "ir_intensity": 0.92591445
+      },
+      {
+        "mode": 19,
+        "overtone_level": 2,
+        "freq_harmonic": 2367.968,
+        "freq_anharmonic": 2318.293,
+        "ir_intensity": 0.67819909
+      },
+      {
+        "mode": 20,
+        "overtone_level": 2,
+        "freq_harmonic": 1832.654,
+        "freq_anharmonic": 1819.312,
+        "ir_intensity": 73.80164752
+      },
+      {
+        "mode": 21,
+        "overtone_level": 2,
+        "freq_harmonic": 1295.499,
+        "freq_anharmonic": 1209.695,
+        "ir_intensity": 35.44704963
+      },
+      {
+        "mode": 22,
+        "overtone_level": 2,
+        "freq_harmonic": 1013.12,
+        "freq_anharmonic": 990.476,
+        "ir_intensity": 3.70759563
+      },
+      {
+        "mode": 23,
+        "overtone_level": 2,
+        "freq_harmonic": 400.404,
+        "freq_anharmonic": 322.912,
+        "ir_intensity": 9.38428984
+      },
+      {
+        "mode": 24,
+        "overtone_level": 2,
+        "freq_harmonic": 136.543,
+        "freq_anharmonic": 120.83,
+        "ir_intensity": 1.68623596
+      }
+    ],
+    "combination_bands": [
+      {
+        "mode1": 2,
+        "mode2": 1,
+        "freq_harmonic": 7275.772,
+        "freq_anharmonic": 7216.843,
+        "ir_intensity": 1.166e-05
+      },
+      {
+        "mode1": 3,
+        "mode2": 1,
+        "freq_harmonic": 6833.119,
+        "freq_anharmonic": 6500.428,
+        "ir_intensity": 0.00115972
+      },
+      {
+        "mode1": 3,
+        "mode2": 2,
+        "freq_harmonic": 6585.417,
+        "freq_anharmonic": 6579.839,
+        "ir_intensity": 0.00719788
+      },
+      {
+        "mode1": 4,
+        "mode2": 1,
+        "freq_harmonic": 5602.62,
+        "freq_anharmonic": 5387.245,
+        "ir_intensity": 0.0380299
+      },
+      {
+        "mode1": 4,
+        "mode2": 2,
+        "freq_harmonic": 5354.918,
+        "freq_anharmonic": 5461.743,
+        "ir_intensity": 0.00010428
+      },
+      {
+        "mode1": 4,
+        "mode2": 3,
+        "freq_harmonic": 4912.265,
+        "freq_anharmonic": 4744.177,
+        "ir_intensity": 0.00013463
+      },
+      {
+        "mode1": 5,
+        "mode2": 1,
+        "freq_harmonic": 5428.174,
+        "freq_anharmonic": 5225.696,
+        "ir_intensity": 1.314e-05
+      },
+      {
+        "mode1": 5,
+        "mode2": 2,
+        "freq_harmonic": 5180.472,
+        "freq_anharmonic": 5296.25,
+        "ir_intensity": 0.38901408
+      },
+      {
+        "mode1": 5,
+        "mode2": 3,
+        "freq_harmonic": 4737.818,
+        "freq_anharmonic": 4582.032,
+        "ir_intensity": 0.00027394
+      },
+      {
+        "mode1": 5,
+        "mode2": 4,
+        "freq_harmonic": 3507.319,
+        "freq_anharmonic": 3470.457,
+        "ir_intensity": 10.78479276
+      },
+      {
+        "mode1": 6,
+        "mode2": 1,
+        "freq_harmonic": 5212.049,
+        "freq_anharmonic": 4991.471,
+        "ir_intensity": 0.00130709
+      },
+      {
+        "mode1": 6,
+        "mode2": 2,
+        "freq_harmonic": 4964.347,
+        "freq_anharmonic": 5064.485,
+        "ir_intensity": 0.00159691
+      },
+      {
+        "mode1": 6,
+        "mode2": 3,
+        "freq_harmonic": 4521.694,
+        "freq_anharmonic": 4342.416,
+        "ir_intensity": 0.02337318
+      },
+      {
+        "mode1": 6,
+        "mode2": 4,
+        "freq_harmonic": 3291.195,
+        "freq_anharmonic": 3235.481,
+        "ir_intensity": 0.00411677
+      },
+      {
+        "mode1": 6,
+        "mode2": 5,
+        "freq_harmonic": 3116.749,
+        "freq_anharmonic": 3073.886,
+        "ir_intensity": 0.00532055
+      },
+      {
+        "mode1": 7,
+        "mode2": 1,
+        "freq_harmonic": 5173.837,
+        "freq_anharmonic": 4947.586,
+        "ir_intensity": 0.23879853
+      },
+      {
+        "mode1": 7,
+        "mode2": 2,
+        "freq_harmonic": 4926.135,
+        "freq_anharmonic": 5028.938,
+        "ir_intensity": 0.00150398
+      },
+      {
+        "mode1": 7,
+        "mode2": 3,
+        "freq_harmonic": 4483.482,
+        "freq_anharmonic": 4320.773,
+        "ir_intensity": 0.0437239
+      },
+      {
+        "mode1": 7,
+        "mode2": 4,
+        "freq_harmonic": 3252.983,
+        "freq_anharmonic": 3196.564,
+        "ir_intensity": 0.39165563
+      },
+      {
+        "mode1": 7,
+        "mode2": 5,
+        "freq_harmonic": 3078.537,
+        "freq_anharmonic": 3034.553,
+        "ir_intensity": 0.00452358
+      },
+      {
+        "mode1": 7,
+        "mode2": 6,
+        "freq_harmonic": 2862.412,
+        "freq_anharmonic": 2799.531,
+        "ir_intensity": 0.00822863
+      },
+      {
+        "mode1": 8,
+        "mode2": 1,
+        "freq_harmonic": 5071.181,
+        "freq_anharmonic": 4831.451,
+        "ir_intensity": 1.18248787
+      },
+      {
+        "mode1": 8,
+        "mode2": 2,
+        "freq_harmonic": 4823.479,
+        "freq_anharmonic": 4918.711,
+        "ir_intensity": 0.0034711
+      },
+      {
+        "mode1": 8,
+        "mode2": 3,
+        "freq_harmonic": 4380.826,
+        "freq_anharmonic": 4203.411,
+        "ir_intensity": 0.02495811
+      },
+      {
+        "mode1": 8,
+        "mode2": 4,
+        "freq_harmonic": 3150.327,
+        "freq_anharmonic": 3086.767,
+        "ir_intensity": 0.99583869
+      },
+      {
+        "mode1": 8,
+        "mode2": 5,
+        "freq_harmonic": 2975.881,
+        "freq_anharmonic": 2925.686,
+        "ir_intensity": 0.18038149
+      },
+      {
+        "mode1": 8,
+        "mode2": 6,
+        "freq_harmonic": 2759.756,
+        "freq_anharmonic": 2691.955,
+        "ir_intensity": 0.00821951
+      },
+      {
+        "mode1": 8,
+        "mode2": 7,
+        "freq_harmonic": 2721.544,
+        "freq_anharmonic": 2641.91,
+        "ir_intensity": 0.94579224
+      },
+      {
+        "mode1": 9,
+        "mode2": 1,
+        "freq_harmonic": 4937.44,
+        "freq_anharmonic": 4713.677,
+        "ir_intensity": 0.89730003
+      },
+      {
+        "mode1": 9,
+        "mode2": 2,
+        "freq_harmonic": 4689.738,
+        "freq_anharmonic": 4789.88,
+        "ir_intensity": 0.04736155
+      },
+      {
+        "mode1": 9,
+        "mode2": 3,
+        "freq_harmonic": 4247.085,
+        "freq_anharmonic": 4071.071,
+        "ir_intensity": 0.00516484
+      },
+      {
+        "mode1": 9,
+        "mode2": 4,
+        "freq_harmonic": 3016.585,
+        "freq_anharmonic": 2958.903,
+        "ir_intensity": 0.44867887
+      },
+      {
+        "mode1": 9,
+        "mode2": 5,
+        "freq_harmonic": 2842.139,
+        "freq_anharmonic": 2796.469,
+        "ir_intensity": 0.00740383
+      },
+      {
+        "mode1": 9,
+        "mode2": 6,
+        "freq_harmonic": 2626.015,
+        "freq_anharmonic": 2563.339,
+        "ir_intensity": 0.01679358
+      },
+      {
+        "mode1": 9,
+        "mode2": 7,
+        "freq_harmonic": 2587.803,
+        "freq_anharmonic": 2518.615,
+        "ir_intensity": 0.95832356
+      },
+      {
+        "mode1": 9,
+        "mode2": 8,
+        "freq_harmonic": 2485.147,
+        "freq_anharmonic": 2408.923,
+        "ir_intensity": 3.2425178
+      },
+      {
+        "mode1": 10,
+        "mode2": 1,
+        "freq_harmonic": 4907.941,
+        "freq_anharmonic": 4684.695,
+        "ir_intensity": 0.68559372
+      },
+      {
+        "mode1": 10,
+        "mode2": 2,
+        "freq_harmonic": 4660.239,
+        "freq_anharmonic": 4758.412,
+        "ir_intensity": 0.0602776
+      },
+      {
+        "mode1": 10,
+        "mode2": 3,
+        "freq_harmonic": 4217.586,
+        "freq_anharmonic": 4043.832,
+        "ir_intensity": 0.00139175
+      },
+      {
+        "mode1": 10,
+        "mode2": 4,
+        "freq_harmonic": 2987.086,
+        "freq_anharmonic": 2929.49,
+        "ir_intensity": 0.41134247
+      },
+      {
+        "mode1": 10,
+        "mode2": 5,
+        "freq_harmonic": 2812.64,
+        "freq_anharmonic": 2765.809,
+        "ir_intensity": 0.02009411
+      },
+      {
+        "mode1": 10,
+        "mode2": 6,
+        "freq_harmonic": 2596.516,
+        "freq_anharmonic": 2532.309,
+        "ir_intensity": 0.018018
+      },
+      {
+        "mode1": 10,
+        "mode2": 7,
+        "freq_harmonic": 2558.304,
+        "freq_anharmonic": 2492.056,
+        "ir_intensity": 0.88858004
+      },
+      {
+        "mode1": 10,
+        "mode2": 8,
+        "freq_harmonic": 2455.648,
+        "freq_anharmonic": 2380.893,
+        "ir_intensity": 2.1710409
+      },
+      {
+        "mode1": 10,
+        "mode2": 9,
+        "freq_harmonic": 2321.906,
+        "freq_anharmonic": 2246.99,
+        "ir_intensity": 2.21607993
+      },
+      {
+        "mode1": 11,
+        "mode2": 1,
+        "freq_harmonic": 4682.797,
+        "freq_anharmonic": 4524.926,
+        "ir_intensity": 0.08827917
+      },
+      {
+        "mode1": 11,
+        "mode2": 2,
+        "freq_harmonic": 4435.095,
+        "freq_anharmonic": 4690.544,
+        "ir_intensity": 2.84791412
+      },
+      {
+        "mode1": 11,
+        "mode2": 3,
+        "freq_harmonic": 3992.442,
+        "freq_anharmonic": 3881.609,
+        "ir_intensity": 0.00946388
+      },
+      {
+        "mode1": 11,
+        "mode2": 4,
+        "freq_harmonic": 2761.943,
+        "freq_anharmonic": 2771.603,
+        "ir_intensity": 0.13524812
+      },
+      {
+        "mode1": 11,
+        "mode2": 5,
+        "freq_harmonic": 2587.496,
+        "freq_anharmonic": 2599.084,
+        "ir_intensity": 0.85895471
+      },
+      {
+        "mode1": 11,
+        "mode2": 6,
+        "freq_harmonic": 2371.372,
+        "freq_anharmonic": 2372.983,
+        "ir_intensity": 0.00030792
+      },
+      {
+        "mode1": 11,
+        "mode2": 7,
+        "freq_harmonic": 2333.16,
+        "freq_anharmonic": 2336.47,
+        "ir_intensity": 0.01546021
+      },
+      {
+        "mode1": 11,
+        "mode2": 8,
+        "freq_harmonic": 2230.504,
+        "freq_anharmonic": 2225.274,
+        "ir_intensity": 0.04183837
+      },
+      {
+        "mode1": 11,
+        "mode2": 9,
+        "freq_harmonic": 2096.763,
+        "freq_anharmonic": 2092.423,
+        "ir_intensity": 2.22674002
+      },
+      {
+        "mode1": 11,
+        "mode2": 10,
+        "freq_harmonic": 2067.264,
+        "freq_anharmonic": 2061.092,
+        "ir_intensity": 0.32320231
+      },
+      {
+        "mode1": 12,
+        "mode2": 1,
+        "freq_harmonic": 4592.675,
+        "freq_anharmonic": 4407.621,
+        "ir_intensity": 0.29900066
+      },
+      {
+        "mode1": 12,
+        "mode2": 2,
+        "freq_harmonic": 4344.973,
+        "freq_anharmonic": 4521.638,
+        "ir_intensity": 2.36935244
+      },
+      {
+        "mode1": 12,
+        "mode2": 3,
+        "freq_harmonic": 3902.32,
+        "freq_anharmonic": 3766.322,
+        "ir_intensity": 0.00370269
+      },
+      {
+        "mode1": 12,
+        "mode2": 4,
+        "freq_harmonic": 2671.821,
+        "freq_anharmonic": 2655.234,
+        "ir_intensity": 0.36232439
+      },
+      {
+        "mode1": 12,
+        "mode2": 5,
+        "freq_harmonic": 2497.375,
+        "freq_anharmonic": 2488.631,
+        "ir_intensity": 0.99858287
+      },
+      {
+        "mode1": 12,
+        "mode2": 6,
+        "freq_harmonic": 2281.251,
+        "freq_anharmonic": 2256.969,
+        "ir_intensity": 0.0209568
+      },
+      {
+        "mode1": 12,
+        "mode2": 7,
+        "freq_harmonic": 2243.039,
+        "freq_anharmonic": 2213.653,
+        "ir_intensity": 0.51121245
+      },
+      {
+        "mode1": 12,
+        "mode2": 8,
+        "freq_harmonic": 2140.383,
+        "freq_anharmonic": 2109.518,
+        "ir_intensity": 0.40445697
+      },
+      {
+        "mode1": 12,
+        "mode2": 9,
+        "freq_harmonic": 2006.641,
+        "freq_anharmonic": 1978.448,
+        "ir_intensity": 0.43173225
+      },
+      {
+        "mode1": 12,
+        "mode2": 10,
+        "freq_harmonic": 1977.142,
+        "freq_anharmonic": 1949.442,
+        "ir_intensity": 2.29174691
+      },
+      {
+        "mode1": 12,
+        "mode2": 11,
+        "freq_harmonic": 1751.998,
+        "freq_anharmonic": 1780.328,
+        "ir_intensity": 18.35396765
+      },
+      {
+        "mode1": 13,
+        "mode2": 1,
+        "freq_harmonic": 4401.083,
+        "freq_anharmonic": 4206.297,
+        "ir_intensity": 0.30228004
+      },
+      {
+        "mode1": 13,
+        "mode2": 2,
+        "freq_harmonic": 4153.381,
+        "freq_anharmonic": 4281.799,
+        "ir_intensity": 0.44132686
+      },
+      {
+        "mode1": 13,
+        "mode2": 3,
+        "freq_harmonic": 3710.728,
+        "freq_anharmonic": 3564.35,
+        "ir_intensity": 0.00214812
+      },
+      {
+        "mode1": 13,
+        "mode2": 4,
+        "freq_harmonic": 2480.229,
+        "freq_anharmonic": 2447.547,
+        "ir_intensity": 0.03126687
+      },
+      {
+        "mode1": 13,
+        "mode2": 5,
+        "freq_harmonic": 2305.783,
+        "freq_anharmonic": 2291.612,
+        "ir_intensity": 0.26791561
+      },
+      {
+        "mode1": 13,
+        "mode2": 6,
+        "freq_harmonic": 2089.658,
+        "freq_anharmonic": 2055.308,
+        "ir_intensity": 0.00548508
+      },
+      {
+        "mode1": 13,
+        "mode2": 7,
+        "freq_harmonic": 2051.446,
+        "freq_anharmonic": 2013.417,
+        "ir_intensity": 0.08119282
+      },
+      {
+        "mode1": 13,
+        "mode2": 8,
+        "freq_harmonic": 1948.79,
+        "freq_anharmonic": 1907.78,
+        "ir_intensity": 1.39127798
+      },
+      {
+        "mode1": 13,
+        "mode2": 9,
+        "freq_harmonic": 1815.049,
+        "freq_anharmonic": 1777.35,
+        "ir_intensity": 6.53227657
+      },
+      {
+        "mode1": 13,
+        "mode2": 10,
+        "freq_harmonic": 1785.55,
+        "freq_anharmonic": 1748.355,
+        "ir_intensity": 1.22448965
+      },
+      {
+        "mode1": 13,
+        "mode2": 11,
+        "freq_harmonic": 1560.406,
+        "freq_anharmonic": 1587.595,
+        "ir_intensity": 18.654313
+      },
+      {
+        "mode1": 13,
+        "mode2": 12,
+        "freq_harmonic": 1470.284,
+        "freq_anharmonic": 1475.051,
+        "ir_intensity": 2.03350359
+      },
+      {
+        "mode1": 14,
+        "mode2": 1,
+        "freq_harmonic": 4229.34,
+        "freq_anharmonic": 4033.857,
+        "ir_intensity": 0.79357328
+      },
+      {
+        "mode1": 14,
+        "mode2": 2,
+        "freq_harmonic": 3981.638,
+        "freq_anharmonic": 4108.165,
+        "ir_intensity": 0.06175733
+      },
+      {
+        "mode1": 14,
+        "mode2": 3,
+        "freq_harmonic": 3538.985,
+        "freq_anharmonic": 3392.303,
+        "ir_intensity": 0.0177797
+      },
+      {
+        "mode1": 14,
+        "mode2": 4,
+        "freq_harmonic": 2308.486,
+        "freq_anharmonic": 2279.719,
+        "ir_intensity": 0.06680939
+      },
+      {
+        "mode1": 14,
+        "mode2": 5,
+        "freq_harmonic": 2134.039,
+        "freq_anharmonic": 2117.248,
+        "ir_intensity": 0.06489686
+      },
+      {
+        "mode1": 14,
+        "mode2": 6,
+        "freq_harmonic": 1917.915,
+        "freq_anharmonic": 1882.884,
+        "ir_intensity": 0.00647037
+      },
+      {
+        "mode1": 14,
+        "mode2": 7,
+        "freq_harmonic": 1879.703,
+        "freq_anharmonic": 1845.992,
+        "ir_intensity": 0.58642612
+      },
+      {
+        "mode1": 14,
+        "mode2": 8,
+        "freq_harmonic": 1777.047,
+        "freq_anharmonic": 1734.385,
+        "ir_intensity": 2.80714479
+      },
+      {
+        "mode1": 14,
+        "mode2": 9,
+        "freq_harmonic": 1643.306,
+        "freq_anharmonic": 1605.769,
+        "ir_intensity": 3.29600389
+      },
+      {
+        "mode1": 14,
+        "mode2": 10,
+        "freq_harmonic": 1613.807,
+        "freq_anharmonic": 1575.917,
+        "ir_intensity": 1.43015675
+      },
+      {
+        "mode1": 14,
+        "mode2": 11,
+        "freq_harmonic": 1388.663,
+        "freq_anharmonic": 1410.781,
+        "ir_intensity": 34.16335026
+      },
+      {
+        "mode1": 14,
+        "mode2": 12,
+        "freq_harmonic": 1298.541,
+        "freq_anharmonic": 1299.646,
+        "ir_intensity": 2.20338777
+      },
+      {
+        "mode1": 14,
+        "mode2": 13,
+        "freq_harmonic": 1106.949,
+        "freq_anharmonic": 1099.117,
+        "ir_intensity": 0.16915643
+      },
+      {
+        "mode1": 15,
+        "mode2": 1,
+        "freq_harmonic": 4020.223,
+        "freq_anharmonic": 3832.831,
+        "ir_intensity": 0.43809619
+      },
+      {
+        "mode1": 15,
+        "mode2": 2,
+        "freq_harmonic": 3772.521,
+        "freq_anharmonic": 3906.519,
+        "ir_intensity": 1.10931825
+      },
+      {
+        "mode1": 15,
+        "mode2": 3,
+        "freq_harmonic": 3329.868,
+        "freq_anharmonic": 3189.6,
+        "ir_intensity": 0.00821471
+      },
+      {
+        "mode1": 15,
+        "mode2": 4,
+        "freq_harmonic": 2099.368,
+        "freq_anharmonic": 2077.033,
+        "ir_intensity": 0.13378447
+      },
+      {
+        "mode1": 15,
+        "mode2": 5,
+        "freq_harmonic": 1924.922,
+        "freq_anharmonic": 1915.093,
+        "ir_intensity": 1.05897234
+      },
+      {
+        "mode1": 15,
+        "mode2": 6,
+        "freq_harmonic": 1708.798,
+        "freq_anharmonic": 1680.31,
+        "ir_intensity": 0.01270302
+      },
+      {
+        "mode1": 15,
+        "mode2": 7,
+        "freq_harmonic": 1670.586,
+        "freq_anharmonic": 1642.82,
+        "ir_intensity": 34.47301979
+      },
+      {
+        "mode1": 15,
+        "mode2": 8,
+        "freq_harmonic": 1567.93,
+        "freq_anharmonic": 1533.916,
+        "ir_intensity": 0.39473518
+      },
+      {
+        "mode1": 15,
+        "mode2": 9,
+        "freq_harmonic": 1434.189,
+        "freq_anharmonic": 1404.387,
+        "ir_intensity": 4.53464919
+      },
+      {
+        "mode1": 15,
+        "mode2": 10,
+        "freq_harmonic": 1404.689,
+        "freq_anharmonic": 1369.894,
+        "ir_intensity": 26.9292937
+      },
+      {
+        "mode1": 15,
+        "mode2": 11,
+        "freq_harmonic": 1179.546,
+        "freq_anharmonic": 1217.352,
+        "ir_intensity": 5.05245869
+      },
+      {
+        "mode1": 15,
+        "mode2": 12,
+        "freq_harmonic": 1089.424,
+        "freq_anharmonic": 1097.795,
+        "ir_intensity": 4.04389318
+      },
+      {
+        "mode1": 15,
+        "mode2": 13,
+        "freq_harmonic": 897.832,
+        "freq_anharmonic": 897.075,
+        "ir_intensity": 6.89635444
+      },
+      {
+        "mode1": 15,
+        "mode2": 14,
+        "freq_harmonic": 726.089,
+        "freq_anharmonic": 724.297,
+        "ir_intensity": 0.37651441
+      },
+      {
+        "mode1": 16,
+        "mode2": 1,
+        "freq_harmonic": 7342.207,
+        "freq_anharmonic": 7363.334,
+        "ir_intensity": 9.54e-06
+      },
+      {
+        "mode1": 16,
+        "mode2": 2,
+        "freq_harmonic": 7094.505,
+        "freq_anharmonic": 7545.195,
+        "ir_intensity": 20.77124661
+      },
+      {
+        "mode1": 16,
+        "mode2": 3,
+        "freq_harmonic": 6651.852,
+        "freq_anharmonic": 6726.64,
+        "ir_intensity": 0.01461406
+      },
+      {
+        "mode1": 16,
+        "mode2": 4,
+        "freq_harmonic": 5421.353,
+        "freq_anharmonic": 5607.943,
+        "ir_intensity": 0.00293348
+      },
+      {
+        "mode1": 16,
+        "mode2": 5,
+        "freq_harmonic": 5246.907,
+        "freq_anharmonic": 5459.953,
+        "ir_intensity": 2.49813648
+      },
+      {
+        "mode1": 16,
+        "mode2": 6,
+        "freq_harmonic": 5030.782,
+        "freq_anharmonic": 5211.109,
+        "ir_intensity": 0.00193486
+      },
+      {
+        "mode1": 16,
+        "mode2": 7,
+        "freq_harmonic": 4992.57,
+        "freq_anharmonic": 5175.61,
+        "ir_intensity": 0.10528699
+      },
+      {
+        "mode1": 16,
+        "mode2": 8,
+        "freq_harmonic": 4889.915,
+        "freq_anharmonic": 5065.318,
+        "ir_intensity": 0.04889117
+      },
+      {
+        "mode1": 16,
+        "mode2": 9,
+        "freq_harmonic": 4756.173,
+        "freq_anharmonic": 4936.957,
+        "ir_intensity": 0.18544108
+      },
+      {
+        "mode1": 16,
+        "mode2": 10,
+        "freq_harmonic": 4726.674,
+        "freq_anharmonic": 4905.551,
+        "ir_intensity": 0.10344968
+      },
+      {
+        "mode1": 16,
+        "mode2": 11,
+        "freq_harmonic": 4501.53,
+        "freq_anharmonic": 4839.582,
+        "ir_intensity": 4.50138121
+      },
+      {
+        "mode1": 16,
+        "mode2": 12,
+        "freq_harmonic": 4411.409,
+        "freq_anharmonic": 4669.309,
+        "ir_intensity": 2.24365223
+      },
+      {
+        "mode1": 16,
+        "mode2": 13,
+        "freq_harmonic": 4219.816,
+        "freq_anharmonic": 4428.423,
+        "ir_intensity": 0.15522461
+      },
+      {
+        "mode1": 16,
+        "mode2": 14,
+        "freq_harmonic": 4048.073,
+        "freq_anharmonic": 4254.768,
+        "ir_intensity": 0.04395747
+      },
+      {
+        "mode1": 16,
+        "mode2": 15,
+        "freq_harmonic": 3838.956,
+        "freq_anharmonic": 4053.444,
+        "ir_intensity": 0.37039825
+      },
+      {
+        "mode1": 17,
+        "mode2": 1,
+        "freq_harmonic": 6868.037,
+        "freq_anharmonic": 6517.872,
+        "ir_intensity": 3.86e-06
+      },
+      {
+        "mode1": 17,
+        "mode2": 2,
+        "freq_harmonic": 6620.336,
+        "freq_anharmonic": 6598.938,
+        "ir_intensity": 0.02251237
+      },
+      {
+        "mode1": 17,
+        "mode2": 3,
+        "freq_harmonic": 6177.682,
+        "freq_anharmonic": 5722.128,
+        "ir_intensity": 0.87963368
+      },
+      {
+        "mode1": 17,
+        "mode2": 4,
+        "freq_harmonic": 4947.183,
+        "freq_anharmonic": 4761.598,
+        "ir_intensity": 0.00052189
+      },
+      {
+        "mode1": 17,
+        "mode2": 5,
+        "freq_harmonic": 4772.737,
+        "freq_anharmonic": 4600.048,
+        "ir_intensity": 0.00198662
+      },
+      {
+        "mode1": 17,
+        "mode2": 6,
+        "freq_harmonic": 4556.613,
+        "freq_anharmonic": 4344.557,
+        "ir_intensity": 0.1089356
+      },
+      {
+        "mode1": 17,
+        "mode2": 7,
+        "freq_harmonic": 4518.401,
+        "freq_anharmonic": 4326.968,
+        "ir_intensity": 0.00047576
+      },
+      {
+        "mode1": 17,
+        "mode2": 8,
+        "freq_harmonic": 4415.745,
+        "freq_anharmonic": 4215.276,
+        "ir_intensity": 0.00030145
+      },
+      {
+        "mode1": 17,
+        "mode2": 9,
+        "freq_harmonic": 4282.003,
+        "freq_anharmonic": 4087.868,
+        "ir_intensity": 0.00376814
+      },
+      {
+        "mode1": 17,
+        "mode2": 10,
+        "freq_harmonic": 4252.504,
+        "freq_anharmonic": 4061.619,
+        "ir_intensity": 0.00242045
+      },
+      {
+        "mode1": 17,
+        "mode2": 11,
+        "freq_harmonic": 4027.36,
+        "freq_anharmonic": 3899.267,
+        "ir_intensity": 0.00219502
+      },
+      {
+        "mode1": 17,
+        "mode2": 12,
+        "freq_harmonic": 3937.239,
+        "freq_anharmonic": 3784.181,
+        "ir_intensity": 0.01873098
+      },
+      {
+        "mode1": 17,
+        "mode2": 13,
+        "freq_harmonic": 3745.646,
+        "freq_anharmonic": 3581.848,
+        "ir_intensity": 0.0073527
+      },
+      {
+        "mode1": 17,
+        "mode2": 14,
+        "freq_harmonic": 3573.903,
+        "freq_anharmonic": 3409.823,
+        "ir_intensity": 0.85525397
+      },
+      {
+        "mode1": 17,
+        "mode2": 15,
+        "freq_harmonic": 3364.786,
+        "freq_anharmonic": 3206.974,
+        "ir_intensity": 0.00183359
+      },
+      {
+        "mode1": 17,
+        "mode2": 16,
+        "freq_harmonic": 6686.771,
+        "freq_anharmonic": 6745.421,
+        "ir_intensity": 0.01310437
+      },
+      {
+        "mode1": 18,
+        "mode2": 1,
+        "freq_harmonic": 5143.659,
+        "freq_anharmonic": 4916.285,
+        "ir_intensity": 6.62e-06
+      },
+      {
+        "mode1": 18,
+        "mode2": 2,
+        "freq_harmonic": 4895.957,
+        "freq_anharmonic": 4985.514,
+        "ir_intensity": 0.01932186
+      },
+      {
+        "mode1": 18,
+        "mode2": 3,
+        "freq_harmonic": 4453.304,
+        "freq_anharmonic": 4267.192,
+        "ir_intensity": 0.01576191
+      },
+      {
+        "mode1": 18,
+        "mode2": 4,
+        "freq_harmonic": 3222.805,
+        "freq_anharmonic": 3160.81,
+        "ir_intensity": 0.02335763
+      },
+      {
+        "mode1": 18,
+        "mode2": 5,
+        "freq_harmonic": 3048.359,
+        "freq_anharmonic": 2987.894,
+        "ir_intensity": 9.34869106
+      },
+      {
+        "mode1": 18,
+        "mode2": 6,
+        "freq_harmonic": 2832.234,
+        "freq_anharmonic": 2759.76,
+        "ir_intensity": 0.41795948
+      },
+      {
+        "mode1": 18,
+        "mode2": 7,
+        "freq_harmonic": 2794.022,
+        "freq_anharmonic": 2717.561,
+        "ir_intensity": 0.8065834
+      },
+      {
+        "mode1": 18,
+        "mode2": 8,
+        "freq_harmonic": 2691.367,
+        "freq_anharmonic": 2613.88,
+        "ir_intensity": 0.29465363
+      },
+      {
+        "mode1": 18,
+        "mode2": 9,
+        "freq_harmonic": 2557.625,
+        "freq_anharmonic": 2485.984,
+        "ir_intensity": 0.04731411
+      },
+      {
+        "mode1": 18,
+        "mode2": 10,
+        "freq_harmonic": 2528.126,
+        "freq_anharmonic": 2455.169,
+        "ir_intensity": 8.97e-06
+      },
+      {
+        "mode1": 18,
+        "mode2": 11,
+        "freq_harmonic": 2302.982,
+        "freq_anharmonic": 2294.081,
+        "ir_intensity": 1.34906684
+      },
+      {
+        "mode1": 18,
+        "mode2": 12,
+        "freq_harmonic": 2212.861,
+        "freq_anharmonic": 2179.307,
+        "ir_intensity": 1.06097834
+      },
+      {
+        "mode1": 18,
+        "mode2": 13,
+        "freq_harmonic": 2021.268,
+        "freq_anharmonic": 1980.099,
+        "ir_intensity": 0.08489912
+      },
+      {
+        "mode1": 18,
+        "mode2": 14,
+        "freq_harmonic": 1849.525,
+        "freq_anharmonic": 1807.839,
+        "ir_intensity": 0.00044618
+      },
+      {
+        "mode1": 18,
+        "mode2": 15,
+        "freq_harmonic": 1640.408,
+        "freq_anharmonic": 1604.889,
+        "ir_intensity": 0.03809513
+      },
+      {
+        "mode1": 18,
+        "mode2": 16,
+        "freq_harmonic": 4962.393,
+        "freq_anharmonic": 5135.047,
+        "ir_intensity": 0.74527989
+      },
+      {
+        "mode1": 18,
+        "mode2": 17,
+        "freq_harmonic": 4488.223,
+        "freq_anharmonic": 4287.92,
+        "ir_intensity": 0.01550957
+      },
+      {
+        "mode1": 19,
+        "mode2": 1,
+        "freq_harmonic": 4945.721,
+        "freq_anharmonic": 4731.951,
+        "ir_intensity": 0.00016035
+      },
+      {
+        "mode1": 19,
+        "mode2": 2,
+        "freq_harmonic": 4698.019,
+        "freq_anharmonic": 4803.223,
+        "ir_intensity": 0.00453926
+      },
+      {
+        "mode1": 19,
+        "mode2": 3,
+        "freq_harmonic": 4255.366,
+        "freq_anharmonic": 4082.001,
+        "ir_intensity": 0.00146298
+      },
+      {
+        "mode1": 19,
+        "mode2": 4,
+        "freq_harmonic": 3024.867,
+        "freq_anharmonic": 2975.86,
+        "ir_intensity": 0.08115367
+      },
+      {
+        "mode1": 19,
+        "mode2": 5,
+        "freq_harmonic": 2850.421,
+        "freq_anharmonic": 2810.243,
+        "ir_intensity": 6.26636981
+      },
+      {
+        "mode1": 19,
+        "mode2": 6,
+        "freq_harmonic": 2634.296,
+        "freq_anharmonic": 2578.107,
+        "ir_intensity": 0.0641346
+      },
+      {
+        "mode1": 19,
+        "mode2": 7,
+        "freq_harmonic": 2596.084,
+        "freq_anharmonic": 2534.839,
+        "ir_intensity": 0.32397607
+      },
+      {
+        "mode1": 19,
+        "mode2": 8,
+        "freq_harmonic": 2493.428,
+        "freq_anharmonic": 2429.729,
+        "ir_intensity": 0.27843052
+      },
+      {
+        "mode1": 19,
+        "mode2": 9,
+        "freq_harmonic": 2359.687,
+        "freq_anharmonic": 2298.644,
+        "ir_intensity": 0.01795263
+      },
+      {
+        "mode1": 19,
+        "mode2": 10,
+        "freq_harmonic": 2330.188,
+        "freq_anharmonic": 2271.677,
+        "ir_intensity": 0.00586052
+      },
+      {
+        "mode1": 19,
+        "mode2": 11,
+        "freq_harmonic": 2105.044,
+        "freq_anharmonic": 2112.451,
+        "ir_intensity": 1.05188315
+      },
+      {
+        "mode1": 19,
+        "mode2": 12,
+        "freq_harmonic": 2014.922,
+        "freq_anharmonic": 1996.315,
+        "ir_intensity": 0.52671672
+      },
+      {
+        "mode1": 19,
+        "mode2": 13,
+        "freq_harmonic": 1823.33,
+        "freq_anharmonic": 1796.089,
+        "ir_intensity": 0.03507205
+      },
+      {
+        "mode1": 19,
+        "mode2": 14,
+        "freq_harmonic": 1651.587,
+        "freq_anharmonic": 1623.539,
+        "ir_intensity": 0.00067103
+      },
+      {
+        "mode1": 19,
+        "mode2": 15,
+        "freq_harmonic": 1442.47,
+        "freq_anharmonic": 1423.031,
+        "ir_intensity": 0.82005825
+      },
+      {
+        "mode1": 19,
+        "mode2": 16,
+        "freq_harmonic": 4764.454,
+        "freq_anharmonic": 4951.064,
+        "ir_intensity": 0.77275317
+      },
+      {
+        "mode1": 19,
+        "mode2": 17,
+        "freq_harmonic": 4290.284,
+        "freq_anharmonic": 4101.557,
+        "ir_intensity": 0.05261575
+      },
+      {
+        "mode1": 19,
+        "mode2": 18,
+        "freq_harmonic": 2565.906,
+        "freq_anharmonic": 2498.74,
+        "ir_intensity": 3.89229718
+      },
+      {
+        "mode1": 20,
+        "mode2": 1,
+        "freq_harmonic": 4678.064,
+        "freq_anharmonic": 4481.548,
+        "ir_intensity": 0.00811718
+      },
+      {
+        "mode1": 20,
+        "mode2": 2,
+        "freq_harmonic": 4430.362,
+        "freq_anharmonic": 4553.193,
+        "ir_intensity": 0.03488884
+      },
+      {
+        "mode1": 20,
+        "mode2": 3,
+        "freq_harmonic": 3987.709,
+        "freq_anharmonic": 3833.982,
+        "ir_intensity": 0.00442777
+      },
+      {
+        "mode1": 20,
+        "mode2": 4,
+        "freq_harmonic": 2757.21,
+        "freq_anharmonic": 2729.196,
+        "ir_intensity": 0.00817023
+      },
+      {
+        "mode1": 20,
+        "mode2": 5,
+        "freq_harmonic": 2582.764,
+        "freq_anharmonic": 2562.568,
+        "ir_intensity": 3.4993635
+      },
+      {
+        "mode1": 20,
+        "mode2": 6,
+        "freq_harmonic": 2366.639,
+        "freq_anharmonic": 2326.971,
+        "ir_intensity": 0.42173935
+      },
+      {
+        "mode1": 20,
+        "mode2": 7,
+        "freq_harmonic": 2328.427,
+        "freq_anharmonic": 2286.278,
+        "ir_intensity": 0.01303815
+      },
+      {
+        "mode1": 20,
+        "mode2": 8,
+        "freq_harmonic": 2225.771,
+        "freq_anharmonic": 2181.138,
+        "ir_intensity": 0.00131697
+      },
+      {
+        "mode1": 20,
+        "mode2": 9,
+        "freq_harmonic": 2092.03,
+        "freq_anharmonic": 2053.55,
+        "ir_intensity": 0.14626157
+      },
+      {
+        "mode1": 20,
+        "mode2": 10,
+        "freq_harmonic": 2062.531,
+        "freq_anharmonic": 2022.643,
+        "ir_intensity": 2.294e-05
+      },
+      {
+        "mode1": 20,
+        "mode2": 11,
+        "freq_harmonic": 1837.387,
+        "freq_anharmonic": 1861.28,
+        "ir_intensity": 0.55011224
+      },
+      {
+        "mode1": 20,
+        "mode2": 12,
+        "freq_harmonic": 1747.265,
+        "freq_anharmonic": 1746.725,
+        "ir_intensity": 0.80654643
+      },
+      {
+        "mode1": 20,
+        "mode2": 13,
+        "freq_harmonic": 1555.673,
+        "freq_anharmonic": 1545.919,
+        "ir_intensity": 0.00448247
+      },
+      {
+        "mode1": 20,
+        "mode2": 14,
+        "freq_harmonic": 1383.93,
+        "freq_anharmonic": 1373.469,
+        "ir_intensity": 0.76752816
+      },
+      {
+        "mode1": 20,
+        "mode2": 15,
+        "freq_harmonic": 1174.813,
+        "freq_anharmonic": 1171.542,
+        "ir_intensity": 0.03457841
+      },
+      {
+        "mode1": 20,
+        "mode2": 16,
+        "freq_harmonic": 4496.797,
+        "freq_anharmonic": 4700.942,
+        "ir_intensity": 1.12747056
+      },
+      {
+        "mode1": 20,
+        "mode2": 17,
+        "freq_harmonic": 4022.627,
+        "freq_anharmonic": 3851.668,
+        "ir_intensity": 0.09371714
+      },
+      {
+        "mode1": 20,
+        "mode2": 18,
+        "freq_harmonic": 2298.249,
+        "freq_anharmonic": 2251.622,
+        "ir_intensity": 4.11075425
+      },
+      {
+        "mode1": 20,
+        "mode2": 19,
+        "freq_harmonic": 2100.311,
+        "freq_anharmonic": 2070.226,
+        "ir_intensity": 1.84935453
+      },
+      {
+        "mode1": 21,
+        "mode2": 1,
+        "freq_harmonic": 4409.486,
+        "freq_anharmonic": 4190.024,
+        "ir_intensity": 6.38666071
+      },
+      {
+        "mode1": 21,
+        "mode2": 2,
+        "freq_harmonic": 4161.784,
+        "freq_anharmonic": 4266.649,
+        "ir_intensity": 0.02267137
+      },
+      {
+        "mode1": 21,
+        "mode2": 3,
+        "freq_harmonic": 3719.131,
+        "freq_anharmonic": 3548.395,
+        "ir_intensity": 0.01202932
+      },
+      {
+        "mode1": 21,
+        "mode2": 4,
+        "freq_harmonic": 2488.632,
+        "freq_anharmonic": 2437.874,
+        "ir_intensity": 0.00661344
+      },
+      {
+        "mode1": 21,
+        "mode2": 5,
+        "freq_harmonic": 2314.186,
+        "freq_anharmonic": 2275.608,
+        "ir_intensity": 0.14637257
+      },
+      {
+        "mode1": 21,
+        "mode2": 6,
+        "freq_harmonic": 2098.062,
+        "freq_anharmonic": 2039.635,
+        "ir_intensity": 0.13393596
+      },
+      {
+        "mode1": 21,
+        "mode2": 7,
+        "freq_harmonic": 2059.85,
+        "freq_anharmonic": 2004.794,
+        "ir_intensity": 0.43067201
+      },
+      {
+        "mode1": 21,
+        "mode2": 8,
+        "freq_harmonic": 1957.194,
+        "freq_anharmonic": 1888.769,
+        "ir_intensity": 0.92448183
+      },
+      {
+        "mode1": 21,
+        "mode2": 9,
+        "freq_harmonic": 1823.452,
+        "freq_anharmonic": 1759.986,
+        "ir_intensity": 0.18917254
+      },
+      {
+        "mode1": 21,
+        "mode2": 10,
+        "freq_harmonic": 1793.953,
+        "freq_anharmonic": 1731.658,
+        "ir_intensity": 0.09383538
+      },
+      {
+        "mode1": 21,
+        "mode2": 11,
+        "freq_harmonic": 1568.809,
+        "freq_anharmonic": 1575.43,
+        "ir_intensity": 0.02709115
+      },
+      {
+        "mode1": 21,
+        "mode2": 12,
+        "freq_harmonic": 1478.688,
+        "freq_anharmonic": 1459.629,
+        "ir_intensity": 0.09172652
+      },
+      {
+        "mode1": 21,
+        "mode2": 13,
+        "freq_harmonic": 1287.095,
+        "freq_anharmonic": 1255.731,
+        "ir_intensity": 0.59136142
+      },
+      {
+        "mode1": 21,
+        "mode2": 14,
+        "freq_harmonic": 1115.352,
+        "freq_anharmonic": 1085.133,
+        "ir_intensity": 0.09696029
+      },
+      {
+        "mode1": 21,
+        "mode2": 15,
+        "freq_harmonic": 906.235,
+        "freq_anharmonic": 881.91,
+        "ir_intensity": 17.24801997
+      },
+      {
+        "mode1": 21,
+        "mode2": 16,
+        "freq_harmonic": 4228.22,
+        "freq_anharmonic": 4413.23,
+        "ir_intensity": 0.05556904
+      },
+      {
+        "mode1": 21,
+        "mode2": 17,
+        "freq_harmonic": 3754.05,
+        "freq_anharmonic": 3565.71,
+        "ir_intensity": 0.27491838
+      },
+      {
+        "mode1": 21,
+        "mode2": 18,
+        "freq_harmonic": 2029.672,
+        "freq_anharmonic": 1965.422,
+        "ir_intensity": 0.20283541
+      },
+      {
+        "mode1": 21,
+        "mode2": 19,
+        "freq_harmonic": 1831.733,
+        "freq_anharmonic": 1781.516,
+        "ir_intensity": 2.6115257
+      },
+      {
+        "mode1": 21,
+        "mode2": 20,
+        "freq_harmonic": 1564.076,
+        "freq_anharmonic": 1533.042,
+        "ir_intensity": 0.11968774
+      },
+      {
+        "mode1": 22,
+        "mode2": 1,
+        "freq_harmonic": 4268.297,
+        "freq_anharmonic": 4063.265,
+        "ir_intensity": 4.91948792
+      },
+      {
+        "mode1": 22,
+        "mode2": 2,
+        "freq_harmonic": 4020.595,
+        "freq_anharmonic": 4140.818,
+        "ir_intensity": 0.1240366
+      },
+      {
+        "mode1": 22,
+        "mode2": 3,
+        "freq_harmonic": 3577.942,
+        "freq_anharmonic": 3422.36,
+        "ir_intensity": 27.9383775
+      },
+      {
+        "mode1": 22,
+        "mode2": 4,
+        "freq_harmonic": 2347.442,
+        "freq_anharmonic": 2311.164,
+        "ir_intensity": 0.08512131
+      },
+      {
+        "mode1": 22,
+        "mode2": 5,
+        "freq_harmonic": 2172.996,
+        "freq_anharmonic": 2149.52,
+        "ir_intensity": 0.32508987
+      },
+      {
+        "mode1": 22,
+        "mode2": 6,
+        "freq_harmonic": 1956.872,
+        "freq_anharmonic": 1916.918,
+        "ir_intensity": 0.15755299
+      },
+      {
+        "mode1": 22,
+        "mode2": 7,
+        "freq_harmonic": 1918.66,
+        "freq_anharmonic": 1872.022,
+        "ir_intensity": 0.00360274
+      },
+      {
+        "mode1": 22,
+        "mode2": 8,
+        "freq_harmonic": 1816.004,
+        "freq_anharmonic": 1767.809,
+        "ir_intensity": 0.25781731
+      },
+      {
+        "mode1": 22,
+        "mode2": 9,
+        "freq_harmonic": 1682.263,
+        "freq_anharmonic": 1638.708,
+        "ir_intensity": 0.00199215
+      },
+      {
+        "mode1": 22,
+        "mode2": 10,
+        "freq_harmonic": 1652.763,
+        "freq_anharmonic": 1608.125,
+        "ir_intensity": 0.00094032
+      },
+      {
+        "mode1": 22,
+        "mode2": 11,
+        "freq_harmonic": 1427.62,
+        "freq_anharmonic": 1447.758,
+        "ir_intensity": 0.59283402
+      },
+      {
+        "mode1": 22,
+        "mode2": 12,
+        "freq_harmonic": 1337.498,
+        "freq_anharmonic": 1332.171,
+        "ir_intensity": 0.08719811
+      },
+      {
+        "mode1": 22,
+        "mode2": 13,
+        "freq_harmonic": 1145.906,
+        "freq_anharmonic": 1133.867,
+        "ir_intensity": 0.76789404
+      },
+      {
+        "mode1": 22,
+        "mode2": 14,
+        "freq_harmonic": 974.163,
+        "freq_anharmonic": 955.962,
+        "ir_intensity": 0.04039148
+      },
+      {
+        "mode1": 22,
+        "mode2": 15,
+        "freq_harmonic": 765.046,
+        "freq_anharmonic": 756.25,
+        "ir_intensity": 0.22578872
+      },
+      {
+        "mode1": 22,
+        "mode2": 16,
+        "freq_harmonic": 4087.03,
+        "freq_anharmonic": 4287.518,
+        "ir_intensity": 0.10768351
+      },
+      {
+        "mode1": 22,
+        "mode2": 17,
+        "freq_harmonic": 3612.86,
+        "freq_anharmonic": 3439.847,
+        "ir_intensity": 0.17019526
+      },
+      {
+        "mode1": 22,
+        "mode2": 18,
+        "freq_harmonic": 1888.482,
+        "freq_anharmonic": 1839.07,
+        "ir_intensity": 0.12830648
+      },
+      {
+        "mode1": 22,
+        "mode2": 19,
+        "freq_harmonic": 1690.544,
+        "freq_anharmonic": 1655.656,
+        "ir_intensity": 0.22078852
+      },
+      {
+        "mode1": 22,
+        "mode2": 20,
+        "freq_harmonic": 1422.887,
+        "freq_anharmonic": 1405.724,
+        "ir_intensity": 40.34955184
+      },
+      {
+        "mode1": 22,
+        "mode2": 21,
+        "freq_harmonic": 1154.309,
+        "freq_anharmonic": 1109.937,
+        "ir_intensity": 45.38297237
+      },
+      {
+        "mode1": 23,
+        "mode2": 1,
+        "freq_harmonic": 3961.939,
+        "freq_anharmonic": 3743.866,
+        "ir_intensity": 0.19342152
+      },
+      {
+        "mode1": 23,
+        "mode2": 2,
+        "freq_harmonic": 3714.237,
+        "freq_anharmonic": 3799.886,
+        "ir_intensity": 14.3625009
+      },
+      {
+        "mode1": 23,
+        "mode2": 3,
+        "freq_harmonic": 3271.584,
+        "freq_anharmonic": 3098.155,
+        "ir_intensity": 0.11827622
+      },
+      {
+        "mode1": 23,
+        "mode2": 4,
+        "freq_harmonic": 2041.085,
+        "freq_anharmonic": 1987.431,
+        "ir_intensity": 0.01302734
+      },
+      {
+        "mode1": 23,
+        "mode2": 5,
+        "freq_harmonic": 1866.639,
+        "freq_anharmonic": 1828.457,
+        "ir_intensity": 6.45005971
+      },
+      {
+        "mode1": 23,
+        "mode2": 6,
+        "freq_harmonic": 1650.514,
+        "freq_anharmonic": 1595.031,
+        "ir_intensity": 0.07595909
+      },
+      {
+        "mode1": 23,
+        "mode2": 7,
+        "freq_harmonic": 1612.302,
+        "freq_anharmonic": 1554.163,
+        "ir_intensity": 0.01142235
+      },
+      {
+        "mode1": 23,
+        "mode2": 8,
+        "freq_harmonic": 1509.646,
+        "freq_anharmonic": 1444.442,
+        "ir_intensity": 0.00010693
+      },
+      {
+        "mode1": 23,
+        "mode2": 9,
+        "freq_harmonic": 1375.905,
+        "freq_anharmonic": 1317.202,
+        "ir_intensity": 7.65982536
+      },
+      {
+        "mode1": 23,
+        "mode2": 10,
+        "freq_harmonic": 1346.406,
+        "freq_anharmonic": 1286.744,
+        "ir_intensity": 0.1863392
+      },
+      {
+        "mode1": 23,
+        "mode2": 11,
+        "freq_harmonic": 1121.262,
+        "freq_anharmonic": 1118.301,
+        "ir_intensity": 26.4698256
+      },
+      {
+        "mode1": 23,
+        "mode2": 12,
+        "freq_harmonic": 1031.14,
+        "freq_anharmonic": 1010.608,
+        "ir_intensity": 16.45819362
+      },
+      {
+        "mode1": 23,
+        "mode2": 13,
+        "freq_harmonic": 839.548,
+        "freq_anharmonic": 808.492,
+        "ir_intensity": 0.1779167
+      },
+      {
+        "mode1": 23,
+        "mode2": 14,
+        "freq_harmonic": 667.805,
+        "freq_anharmonic": 637.747,
+        "ir_intensity": 2.55659148
+      },
+      {
+        "mode1": 23,
+        "mode2": 15,
+        "freq_harmonic": 458.688,
+        "freq_anharmonic": 437.657,
+        "ir_intensity": 0.15083286
+      },
+      {
+        "mode1": 23,
+        "mode2": 16,
+        "freq_harmonic": 3780.672,
+        "freq_anharmonic": 3955.304,
+        "ir_intensity": 26.54087371
+      },
+      {
+        "mode1": 23,
+        "mode2": 17,
+        "freq_harmonic": 3306.502,
+        "freq_anharmonic": 3113.863,
+        "ir_intensity": 0.0207543
+      },
+      {
+        "mode1": 23,
+        "mode2": 18,
+        "freq_harmonic": 1582.124,
+        "freq_anharmonic": 1511.687,
+        "ir_intensity": 6.16613085
+      },
+      {
+        "mode1": 23,
+        "mode2": 19,
+        "freq_harmonic": 1384.186,
+        "freq_anharmonic": 1329.515,
+        "ir_intensity": 13.30747487
+      },
+      {
+        "mode1": 23,
+        "mode2": 20,
+        "freq_harmonic": 1116.529,
+        "freq_anharmonic": 1089.629,
+        "ir_intensity": 1.88109586
+      },
+      {
+        "mode1": 23,
+        "mode2": 21,
+        "freq_harmonic": 847.951,
+        "freq_anharmonic": 793.049,
+        "ir_intensity": 0.00611074
+      },
+      {
+        "mode1": 23,
+        "mode2": 22,
+        "freq_harmonic": 706.762,
+        "freq_anharmonic": 664.875,
+        "ir_intensity": 0.03347299
+      },
+      {
+        "mode1": 24,
+        "mode2": 1,
+        "freq_harmonic": 3830.009,
+        "freq_anharmonic": 3629.853,
+        "ir_intensity": 0.00109757
+      },
+      {
+        "mode1": 24,
+        "mode2": 2,
+        "freq_harmonic": 3582.307,
+        "freq_anharmonic": 3685.874,
+        "ir_intensity": 790.18737166
+      },
+      {
+        "mode1": 24,
+        "mode2": 3,
+        "freq_harmonic": 3139.653,
+        "freq_anharmonic": 2989.927,
+        "ir_intensity": 2.38419953
+      },
+      {
+        "mode1": 24,
+        "mode2": 4,
+        "freq_harmonic": 1909.154,
+        "freq_anharmonic": 1875.249,
+        "ir_intensity": 0.12248692
+      },
+      {
+        "mode1": 24,
+        "mode2": 5,
+        "freq_harmonic": 1734.708,
+        "freq_anharmonic": 1712.495,
+        "ir_intensity": 18.16738167
+      },
+      {
+        "mode1": 24,
+        "mode2": 6,
+        "freq_harmonic": 1518.584,
+        "freq_anharmonic": 1480.715,
+        "ir_intensity": 0.14907399
+      },
+      {
+        "mode1": 24,
+        "mode2": 7,
+        "freq_harmonic": 1480.372,
+        "freq_anharmonic": 1439.6,
+        "ir_intensity": 0.00160046
+      },
+      {
+        "mode1": 24,
+        "mode2": 8,
+        "freq_harmonic": 1377.716,
+        "freq_anharmonic": 1333.339,
+        "ir_intensity": 0.00880387
+      },
+      {
+        "mode1": 24,
+        "mode2": 9,
+        "freq_harmonic": 1243.974,
+        "freq_anharmonic": 1203.517,
+        "ir_intensity": 2.46924975
+      },
+      {
+        "mode1": 24,
+        "mode2": 10,
+        "freq_harmonic": 1214.475,
+        "freq_anharmonic": 1173.449,
+        "ir_intensity": 0.00261183
+      },
+      {
+        "mode1": 24,
+        "mode2": 11,
+        "freq_harmonic": 989.331,
+        "freq_anharmonic": 1013.634,
+        "ir_intensity": 2.16947878
+      },
+      {
+        "mode1": 24,
+        "mode2": 12,
+        "freq_harmonic": 899.21,
+        "freq_anharmonic": 897.428,
+        "ir_intensity": 0.89027181
+      },
+      {
+        "mode1": 24,
+        "mode2": 13,
+        "freq_harmonic": 707.618,
+        "freq_anharmonic": 699.236,
+        "ir_intensity": 4.55137622
+      },
+      {
+        "mode1": 24,
+        "mode2": 14,
+        "freq_harmonic": 535.874,
+        "freq_anharmonic": 523.009,
+        "ir_intensity": 14.75711148
+      },
+      {
+        "mode1": 24,
+        "mode2": 15,
+        "freq_harmonic": 326.757,
+        "freq_anharmonic": 322.324,
+        "ir_intensity": 0.54200742
+      },
+      {
+        "mode1": 24,
+        "mode2": 16,
+        "freq_harmonic": 3648.742,
+        "freq_anharmonic": 3838.263,
+        "ir_intensity": 21.95437297
+      },
+      {
+        "mode1": 24,
+        "mode2": 17,
+        "freq_harmonic": 3174.572,
+        "freq_anharmonic": 3001.541,
+        "ir_intensity": 0.99421346
+      },
+      {
+        "mode1": 24,
+        "mode2": 18,
+        "freq_harmonic": 1450.194,
+        "freq_anharmonic": 1403.115,
+        "ir_intensity": 2.22605174
+      },
+      {
+        "mode1": 24,
+        "mode2": 19,
+        "freq_harmonic": 1252.256,
+        "freq_anharmonic": 1218.045,
+        "ir_intensity": 3.79319926
+      },
+      {
+        "mode1": 24,
+        "mode2": 20,
+        "freq_harmonic": 984.599,
+        "freq_anharmonic": 971.099,
+        "ir_intensity": 2.2794783
+      },
+      {
+        "mode1": 24,
+        "mode2": 21,
+        "freq_harmonic": 716.021,
+        "freq_anharmonic": 684.8,
+        "ir_intensity": 4.41180066
+      },
+      {
+        "mode1": 24,
+        "mode2": 22,
+        "freq_harmonic": 574.831,
+        "freq_anharmonic": 552.543,
+        "ir_intensity": 1.85453577
+      },
+      {
+        "mode1": 24,
+        "mode2": 23,
+        "freq_harmonic": 268.474,
+        "freq_anharmonic": 230.312,
+        "ir_intensity": 8.9756944
+      },
+      {
+        "mode1": 2,
+        "mode2": 1,
+        "freq_harmonic": 7275.772,
+        "freq_anharmonic": 7216.843,
+        "ir_intensity": 6.45e-06
+      },
+      {
+        "mode1": 3,
+        "mode2": 1,
+        "freq_harmonic": 6833.119,
+        "freq_anharmonic": 6500.428,
+        "ir_intensity": 0.00071174
+      },
+      {
+        "mode1": 3,
+        "mode2": 2,
+        "freq_harmonic": 6585.417,
+        "freq_anharmonic": 6579.839,
+        "ir_intensity": 0.00436412
+      },
+      {
+        "mode1": 4,
+        "mode2": 1,
+        "freq_harmonic": 5602.62,
+        "freq_anharmonic": 5387.245,
+        "ir_intensity": 0.02816215
+      },
+      {
+        "mode1": 4,
+        "mode2": 2,
+        "freq_harmonic": 5354.918,
+        "freq_anharmonic": 5461.743,
+        "ir_intensity": 7.617e-05
+      },
+      {
+        "mode1": 4,
+        "mode2": 3,
+        "freq_harmonic": 4912.265,
+        "freq_anharmonic": 4744.177,
+        "ir_intensity": 0.00011321
+      },
+      {
+        "mode1": 5,
+        "mode2": 1,
+        "freq_harmonic": 5428.174,
+        "freq_anharmonic": 5225.696,
+        "ir_intensity": 1.003e-05
+      },
+      {
+        "mode1": 5,
+        "mode2": 2,
+        "freq_harmonic": 5180.472,
+        "freq_anharmonic": 5296.25,
+        "ir_intensity": 0.29302471
+      },
+      {
+        "mode1": 5,
+        "mode2": 3,
+        "freq_harmonic": 4737.818,
+        "freq_anharmonic": 4582.032,
+        "ir_intensity": 0.00023851
+      },
+      {
+        "mode1": 5,
+        "mode2": 4,
+        "freq_harmonic": 3507.319,
+        "freq_anharmonic": 3470.457,
+        "ir_intensity": 12.39745395
+      },
+      {
+        "mode1": 6,
+        "mode2": 1,
+        "freq_harmonic": 5212.049,
+        "freq_anharmonic": 4991.471,
+        "ir_intensity": 0.00104468
+      },
+      {
+        "mode1": 6,
+        "mode2": 2,
+        "freq_harmonic": 4964.347,
+        "freq_anharmonic": 5064.485,
+        "ir_intensity": 0.00125792
+      },
+      {
+        "mode1": 6,
+        "mode2": 3,
+        "freq_harmonic": 4521.694,
+        "freq_anharmonic": 4342.416,
+        "ir_intensity": 0.02147305
+      },
+      {
+        "mode1": 6,
+        "mode2": 4,
+        "freq_harmonic": 3291.195,
+        "freq_anharmonic": 3235.481,
+        "ir_intensity": 0.00507604
+      },
+      {
+        "mode1": 6,
+        "mode2": 5,
+        "freq_harmonic": 3116.749,
+        "freq_anharmonic": 3073.886,
+        "ir_intensity": 0.0069052
+      },
+      {
+        "mode1": 7,
+        "mode2": 1,
+        "freq_harmonic": 5173.837,
+        "freq_anharmonic": 4947.586,
+        "ir_intensity": 0.19255096
+      },
+      {
+        "mode1": 7,
+        "mode2": 2,
+        "freq_harmonic": 4926.135,
+        "freq_anharmonic": 5028.938,
+        "ir_intensity": 0.00119309
+      },
+      {
+        "mode1": 7,
+        "mode2": 3,
+        "freq_harmonic": 4483.482,
+        "freq_anharmonic": 4320.773,
+        "ir_intensity": 0.04037057
+      },
+      {
+        "mode1": 7,
+        "mode2": 4,
+        "freq_harmonic": 3252.983,
+        "freq_anharmonic": 3196.564,
+        "ir_intensity": 0.48879675
+      },
+      {
+        "mode1": 7,
+        "mode2": 5,
+        "freq_harmonic": 3078.537,
+        "freq_anharmonic": 3034.553,
+        "ir_intensity": 0.00594696
+      },
+      {
+        "mode1": 7,
+        "mode2": 6,
+        "freq_harmonic": 2862.412,
+        "freq_anharmonic": 2799.531,
+        "ir_intensity": 0.011726
+      },
+      {
+        "mode1": 8,
+        "mode2": 1,
+        "freq_harmonic": 5071.181,
+        "freq_anharmonic": 4831.451,
+        "ir_intensity": 0.97639723
+      },
+      {
+        "mode1": 8,
+        "mode2": 2,
+        "freq_harmonic": 4823.479,
+        "freq_anharmonic": 4918.711,
+        "ir_intensity": 0.00281529
+      },
+      {
+        "mode1": 8,
+        "mode2": 3,
+        "freq_harmonic": 4380.826,
+        "freq_anharmonic": 4203.411,
+        "ir_intensity": 0.02368739
+      },
+      {
+        "mode1": 8,
+        "mode2": 4,
+        "freq_harmonic": 3150.327,
+        "freq_anharmonic": 3086.767,
+        "ir_intensity": 1.28704157
+      },
+      {
+        "mode1": 8,
+        "mode2": 5,
+        "freq_harmonic": 2975.881,
+        "freq_anharmonic": 2925.686,
+        "ir_intensity": 0.24596405
+      },
+      {
+        "mode1": 8,
+        "mode2": 6,
+        "freq_harmonic": 2759.756,
+        "freq_anharmonic": 2691.955,
+        "ir_intensity": 0.01218107
+      },
+      {
+        "mode1": 8,
+        "mode2": 7,
+        "freq_harmonic": 2721.544,
+        "freq_anharmonic": 2641.91,
+        "ir_intensity": 1.42818731
+      },
+      {
+        "mode1": 9,
+        "mode2": 1,
+        "freq_harmonic": 4937.44,
+        "freq_anharmonic": 4713.677,
+        "ir_intensity": 0.75942562
+      },
+      {
+        "mode1": 9,
+        "mode2": 2,
+        "freq_harmonic": 4689.738,
+        "freq_anharmonic": 4789.88,
+        "ir_intensity": 0.03944652
+      },
+      {
+        "mode1": 9,
+        "mode2": 3,
+        "freq_harmonic": 4247.085,
+        "freq_anharmonic": 4071.071,
+        "ir_intensity": 0.00506123
+      },
+      {
+        "mode1": 9,
+        "mode2": 4,
+        "freq_harmonic": 3016.585,
+        "freq_anharmonic": 2958.903,
+        "ir_intensity": 0.60493991
+      },
+      {
+        "mode1": 9,
+        "mode2": 5,
+        "freq_harmonic": 2842.139,
+        "freq_anharmonic": 2796.469,
+        "ir_intensity": 0.01056219
+      },
+      {
+        "mode1": 9,
+        "mode2": 6,
+        "freq_harmonic": 2626.015,
+        "freq_anharmonic": 2563.339,
+        "ir_intensity": 0.02613634
+      },
+      {
+        "mode1": 9,
+        "mode2": 7,
+        "freq_harmonic": 2587.803,
+        "freq_anharmonic": 2518.615,
+        "ir_intensity": 1.51795103
+      },
+      {
+        "mode1": 9,
+        "mode2": 8,
+        "freq_harmonic": 2485.147,
+        "freq_anharmonic": 2408.923,
+        "ir_intensity": 5.36990843
+      },
+      {
+        "mode1": 10,
+        "mode2": 1,
+        "freq_harmonic": 4907.941,
+        "freq_anharmonic": 4684.695,
+        "ir_intensity": 0.58383876
+      },
+      {
+        "mode1": 10,
+        "mode2": 2,
+        "freq_harmonic": 4660.239,
+        "freq_anharmonic": 4758.412,
+        "ir_intensity": 0.05053606
+      },
+      {
+        "mode1": 10,
+        "mode2": 3,
+        "freq_harmonic": 4217.586,
+        "freq_anharmonic": 4043.832,
+        "ir_intensity": 0.00137301
+      },
+      {
+        "mode1": 10,
+        "mode2": 4,
+        "freq_harmonic": 2987.086,
+        "freq_anharmonic": 2929.49,
+        "ir_intensity": 0.56016892
+      },
+      {
+        "mode1": 10,
+        "mode2": 5,
+        "freq_harmonic": 2812.64,
+        "freq_anharmonic": 2765.809,
+        "ir_intensity": 0.02898371
+      },
+      {
+        "mode1": 10,
+        "mode2": 6,
+        "freq_harmonic": 2596.516,
+        "freq_anharmonic": 2532.309,
+        "ir_intensity": 0.02838555
+      },
+      {
+        "mode1": 10,
+        "mode2": 7,
+        "freq_harmonic": 2558.304,
+        "freq_anharmonic": 2492.056,
+        "ir_intensity": 1.42247982
+      },
+      {
+        "mode1": 10,
+        "mode2": 8,
+        "freq_harmonic": 2455.648,
+        "freq_anharmonic": 2380.893,
+        "ir_intensity": 3.63777253
+      },
+      {
+        "mode1": 10,
+        "mode2": 9,
+        "freq_harmonic": 2321.906,
+        "freq_anharmonic": 2246.99,
+        "ir_intensity": 3.93451856
+      },
+      {
+        "mode1": 11,
+        "mode2": 1,
+        "freq_harmonic": 4682.797,
+        "freq_anharmonic": 4524.926,
+        "ir_intensity": 0.07783128
+      },
+      {
+        "mode1": 11,
+        "mode2": 2,
+        "freq_harmonic": 4435.095,
+        "freq_anharmonic": 4690.544,
+        "ir_intensity": 2.42220607
+      },
+      {
+        "mode1": 11,
+        "mode2": 3,
+        "freq_harmonic": 3992.442,
+        "freq_anharmonic": 3881.609,
+        "ir_intensity": 0.00972668
+      },
+      {
+        "mode1": 11,
+        "mode2": 4,
+        "freq_harmonic": 2761.943,
+        "freq_anharmonic": 2771.603,
+        "ir_intensity": 0.19467385
+      },
+      {
+        "mode1": 11,
+        "mode2": 5,
+        "freq_harmonic": 2587.496,
+        "freq_anharmonic": 2599.084,
+        "ir_intensity": 1.31843093
+      },
+      {
+        "mode1": 11,
+        "mode2": 6,
+        "freq_harmonic": 2371.372,
+        "freq_anharmonic": 2372.983,
+        "ir_intensity": 0.00051767
+      },
+      {
+        "mode1": 11,
+        "mode2": 7,
+        "freq_harmonic": 2333.16,
+        "freq_anharmonic": 2336.47,
+        "ir_intensity": 0.02639748
+      },
+      {
+        "mode1": 11,
+        "mode2": 8,
+        "freq_harmonic": 2230.504,
+        "freq_anharmonic": 2225.274,
+        "ir_intensity": 0.07500646
+      },
+      {
+        "mode1": 11,
+        "mode2": 9,
+        "freq_harmonic": 2096.763,
+        "freq_anharmonic": 2092.423,
+        "ir_intensity": 4.24548527
+      },
+      {
+        "mode1": 11,
+        "mode2": 10,
+        "freq_harmonic": 2067.264,
+        "freq_anharmonic": 2061.092,
+        "ir_intensity": 0.62558225
+      },
+      {
+        "mode1": 12,
+        "mode2": 1,
+        "freq_harmonic": 4592.675,
+        "freq_anharmonic": 4407.621,
+        "ir_intensity": 0.27062958
+      },
+      {
+        "mode1": 12,
+        "mode2": 2,
+        "freq_harmonic": 4344.973,
+        "freq_anharmonic": 4521.638,
+        "ir_intensity": 2.09045737
+      },
+      {
+        "mode1": 12,
+        "mode2": 3,
+        "freq_harmonic": 3902.32,
+        "freq_anharmonic": 3766.322,
+        "ir_intensity": 0.003922
+      },
+      {
+        "mode1": 12,
+        "mode2": 4,
+        "freq_harmonic": 2671.821,
+        "freq_anharmonic": 2655.234,
+        "ir_intensity": 0.54437996
+      },
+      {
+        "mode1": 12,
+        "mode2": 5,
+        "freq_harmonic": 2497.375,
+        "freq_anharmonic": 2488.631,
+        "ir_intensity": 1.60077778
+      },
+      {
+        "mode1": 12,
+        "mode2": 6,
+        "freq_harmonic": 2281.251,
+        "freq_anharmonic": 2256.969,
+        "ir_intensity": 0.03704305
+      },
+      {
+        "mode1": 12,
+        "mode2": 7,
+        "freq_harmonic": 2243.039,
+        "freq_anharmonic": 2213.653,
+        "ir_intensity": 0.92129605
+      },
+      {
+        "mode1": 12,
+        "mode2": 8,
+        "freq_harmonic": 2140.383,
+        "freq_anharmonic": 2109.518,
+        "ir_intensity": 0.76488555
+      },
+      {
+        "mode1": 12,
+        "mode2": 9,
+        "freq_harmonic": 2006.641,
+        "freq_anharmonic": 1978.448,
+        "ir_intensity": 0.87055705
+      },
+      {
+        "mode1": 12,
+        "mode2": 10,
+        "freq_harmonic": 1977.142,
+        "freq_anharmonic": 1949.442,
+        "ir_intensity": 4.68990233
+      },
+      {
+        "mode1": 12,
+        "mode2": 11,
+        "freq_harmonic": 1751.998,
+        "freq_anharmonic": 1780.328,
+        "ir_intensity": 41.12797261
+      },
+      {
+        "mode1": 13,
+        "mode2": 1,
+        "freq_harmonic": 4401.083,
+        "freq_anharmonic": 4206.297,
+        "ir_intensity": 0.2866929
+      },
+      {
+        "mode1": 13,
+        "mode2": 2,
+        "freq_harmonic": 4153.381,
+        "freq_anharmonic": 4281.799,
+        "ir_intensity": 0.411189
+      },
+      {
+        "mode1": 13,
+        "mode2": 3,
+        "freq_harmonic": 3710.728,
+        "freq_anharmonic": 3564.35,
+        "ir_intensity": 0.00240428
+      },
+      {
+        "mode1": 13,
+        "mode2": 4,
+        "freq_harmonic": 2480.229,
+        "freq_anharmonic": 2447.547,
+        "ir_intensity": 0.05096369
+      },
+      {
+        "mode1": 13,
+        "mode2": 5,
+        "freq_harmonic": 2305.783,
+        "freq_anharmonic": 2291.612,
+        "ir_intensity": 0.46640621
+      },
+      {
+        "mode1": 13,
+        "mode2": 6,
+        "freq_harmonic": 2089.658,
+        "freq_anharmonic": 2055.308,
+        "ir_intensity": 0.01064665
+      },
+      {
+        "mode1": 13,
+        "mode2": 7,
+        "freq_harmonic": 2051.446,
+        "freq_anharmonic": 2013.417,
+        "ir_intensity": 0.160876
+      },
+      {
+        "mode1": 13,
+        "mode2": 8,
+        "freq_harmonic": 1948.79,
+        "freq_anharmonic": 1907.78,
+        "ir_intensity": 2.90933033
+      },
+      {
+        "mode1": 13,
+        "mode2": 9,
+        "freq_harmonic": 1815.049,
+        "freq_anharmonic": 1777.35,
+        "ir_intensity": 14.66219882
+      },
+      {
+        "mode1": 13,
+        "mode2": 10,
+        "freq_harmonic": 1785.55,
+        "freq_anharmonic": 1748.355,
+        "ir_intensity": 2.79404228
+      },
+      {
+        "mode1": 13,
+        "mode2": 11,
+        "freq_harmonic": 1560.406,
+        "freq_anharmonic": 1587.595,
+        "ir_intensity": 46.87559838
+      },
+      {
+        "mode1": 13,
+        "mode2": 12,
+        "freq_harmonic": 1470.284,
+        "freq_anharmonic": 1475.051,
+        "ir_intensity": 5.49978036
+      },
+      {
+        "mode1": 14,
+        "mode2": 1,
+        "freq_harmonic": 4229.34,
+        "freq_anharmonic": 4033.857,
+        "ir_intensity": 0.78482702
+      },
+      {
+        "mode1": 14,
+        "mode2": 2,
+        "freq_harmonic": 3981.638,
+        "freq_anharmonic": 4108.165,
+        "ir_intensity": 0.05997193
+      },
+      {
+        "mode1": 14,
+        "mode2": 3,
+        "freq_harmonic": 3538.985,
+        "freq_anharmonic": 3392.303,
+        "ir_intensity": 0.02090919
+      },
+      {
+        "mode1": 14,
+        "mode2": 4,
+        "freq_harmonic": 2308.486,
+        "freq_anharmonic": 2279.719,
+        "ir_intensity": 0.11691324
+      },
+      {
+        "mode1": 14,
+        "mode2": 5,
+        "freq_harmonic": 2134.039,
+        "freq_anharmonic": 2117.248,
+        "ir_intensity": 0.12228113
+      },
+      {
+        "mode1": 14,
+        "mode2": 6,
+        "freq_harmonic": 1917.915,
+        "freq_anharmonic": 1882.884,
+        "ir_intensity": 0.01370923
+      },
+      {
+        "mode1": 14,
+        "mode2": 7,
+        "freq_harmonic": 1879.703,
+        "freq_anharmonic": 1845.992,
+        "ir_intensity": 1.26733331
+      },
+      {
+        "mode1": 14,
+        "mode2": 8,
+        "freq_harmonic": 1777.047,
+        "freq_anharmonic": 1734.385,
+        "ir_intensity": 6.45693937
+      },
+      {
+        "mode1": 14,
+        "mode2": 9,
+        "freq_harmonic": 1643.306,
+        "freq_anharmonic": 1605.769,
+        "ir_intensity": 8.18864266
+      },
+      {
+        "mode1": 14,
+        "mode2": 10,
+        "freq_harmonic": 1613.807,
+        "freq_anharmonic": 1575.917,
+        "ir_intensity": 3.62040954
+      },
+      {
+        "mode1": 14,
+        "mode2": 11,
+        "freq_harmonic": 1388.663,
+        "freq_anharmonic": 1410.781,
+        "ir_intensity": 96.60694143
+      },
+      {
+        "mode1": 14,
+        "mode2": 12,
+        "freq_harmonic": 1298.541,
+        "freq_anharmonic": 1299.646,
+        "ir_intensity": 6.76352669
+      },
+      {
+        "mode1": 14,
+        "mode2": 13,
+        "freq_harmonic": 1106.949,
+        "freq_anharmonic": 1099.117,
+        "ir_intensity": 0.61397672
+      },
+      {
+        "mode1": 15,
+        "mode2": 1,
+        "freq_harmonic": 4020.223,
+        "freq_anharmonic": 3832.831,
+        "ir_intensity": 0.45599194
+      },
+      {
+        "mode1": 15,
+        "mode2": 2,
+        "freq_harmonic": 3772.521,
+        "freq_anharmonic": 3906.519,
+        "ir_intensity": 1.1328533
+      },
+      {
+        "mode1": 15,
+        "mode2": 3,
+        "freq_harmonic": 3329.868,
+        "freq_anharmonic": 3189.6,
+        "ir_intensity": 0.01027456
+      },
+      {
+        "mode1": 15,
+        "mode2": 4,
+        "freq_harmonic": 2099.368,
+        "freq_anharmonic": 2077.033,
+        "ir_intensity": 0.25696252
+      },
+      {
+        "mode1": 15,
+        "mode2": 5,
+        "freq_harmonic": 1924.922,
+        "freq_anharmonic": 1915.093,
+        "ir_intensity": 2.20598296
+      },
+      {
+        "mode1": 15,
+        "mode2": 6,
+        "freq_harmonic": 1708.798,
+        "freq_anharmonic": 1680.31,
+        "ir_intensity": 0.03015955
+      },
+      {
+        "mode1": 15,
+        "mode2": 7,
+        "freq_harmonic": 1670.586,
+        "freq_anharmonic": 1642.82,
+        "ir_intensity": 83.71374506
+      },
+      {
+        "mode1": 15,
+        "mode2": 8,
+        "freq_harmonic": 1567.93,
+        "freq_anharmonic": 1533.916,
+        "ir_intensity": 1.0266245
+      },
+      {
+        "mode1": 15,
+        "mode2": 9,
+        "freq_harmonic": 1434.189,
+        "freq_anharmonic": 1404.387,
+        "ir_intensity": 12.8814354
+      },
+      {
+        "mode1": 15,
+        "mode2": 10,
+        "freq_harmonic": 1404.689,
+        "freq_anharmonic": 1369.894,
+        "ir_intensity": 78.42333925
+      },
+      {
+        "mode1": 15,
+        "mode2": 11,
+        "freq_harmonic": 1179.546,
+        "freq_anharmonic": 1217.352,
+        "ir_intensity": 16.55746962
+      },
+      {
+        "mode1": 15,
+        "mode2": 12,
+        "freq_harmonic": 1089.424,
+        "freq_anharmonic": 1097.795,
+        "ir_intensity": 14.69555029
+      },
+      {
+        "mode1": 15,
+        "mode2": 13,
+        "freq_harmonic": 897.832,
+        "freq_anharmonic": 897.075,
+        "ir_intensity": 30.66889877
+      },
+      {
+        "mode1": 15,
+        "mode2": 14,
+        "freq_harmonic": 726.089,
+        "freq_anharmonic": 724.297,
+        "ir_intensity": 2.0738251
+      },
+      {
+        "mode1": 16,
+        "mode2": 1,
+        "freq_harmonic": 7342.207,
+        "freq_anharmonic": 7363.334,
+        "ir_intensity": 5.17e-06
+      },
+      {
+        "mode1": 16,
+        "mode2": 2,
+        "freq_harmonic": 7094.505,
+        "freq_anharmonic": 7545.195,
+        "ir_intensity": 10.98245695
+      },
+      {
+        "mode1": 16,
+        "mode2": 3,
+        "freq_harmonic": 6651.852,
+        "freq_anharmonic": 6726.64,
+        "ir_intensity": 0.00866723
+      },
+      {
+        "mode1": 16,
+        "mode2": 4,
+        "freq_harmonic": 5421.353,
+        "freq_anharmonic": 5607.943,
+        "ir_intensity": 0.00208683
+      },
+      {
+        "mode1": 16,
+        "mode2": 5,
+        "freq_harmonic": 5246.907,
+        "freq_anharmonic": 5459.953,
+        "ir_intensity": 1.82530183
+      },
+      {
+        "mode1": 16,
+        "mode2": 6,
+        "freq_harmonic": 5030.782,
+        "freq_anharmonic": 5211.109,
+        "ir_intensity": 0.00148124
+      },
+      {
+        "mode1": 16,
+        "mode2": 7,
+        "freq_harmonic": 4992.57,
+        "freq_anharmonic": 5175.61,
+        "ir_intensity": 0.08115599
+      },
+      {
+        "mode1": 16,
+        "mode2": 8,
+        "freq_harmonic": 4889.915,
+        "freq_anharmonic": 5065.318,
+        "ir_intensity": 0.03850624
+      },
+      {
+        "mode1": 16,
+        "mode2": 9,
+        "freq_harmonic": 4756.173,
+        "freq_anharmonic": 4936.957,
+        "ir_intensity": 0.14984905
+      },
+      {
+        "mode1": 16,
+        "mode2": 10,
+        "freq_harmonic": 4726.674,
+        "freq_anharmonic": 4905.551,
+        "ir_intensity": 0.08412959
+      },
+      {
+        "mode1": 16,
+        "mode2": 11,
+        "freq_harmonic": 4501.53,
+        "freq_anharmonic": 4839.582,
+        "ir_intensity": 3.71061031
+      },
+      {
+        "mode1": 16,
+        "mode2": 12,
+        "freq_harmonic": 4411.409,
+        "freq_anharmonic": 4669.309,
+        "ir_intensity": 1.91694809
+      },
+      {
+        "mode1": 16,
+        "mode2": 13,
+        "freq_harmonic": 4219.816,
+        "freq_anharmonic": 4428.423,
+        "ir_intensity": 0.13983597
+      },
+      {
+        "mode1": 16,
+        "mode2": 14,
+        "freq_harmonic": 4048.073,
+        "freq_anharmonic": 4254.768,
+        "ir_intensity": 0.04121584
+      },
+      {
+        "mode1": 16,
+        "mode2": 15,
+        "freq_harmonic": 3838.956,
+        "freq_anharmonic": 4053.444,
+        "ir_intensity": 0.36454583
+      },
+      {
+        "mode1": 17,
+        "mode2": 1,
+        "freq_harmonic": 6868.037,
+        "freq_anharmonic": 6517.872,
+        "ir_intensity": 2.36e-06
+      },
+      {
+        "mode1": 17,
+        "mode2": 2,
+        "freq_harmonic": 6620.336,
+        "freq_anharmonic": 6598.938,
+        "ir_intensity": 0.01360989
+      },
+      {
+        "mode1": 17,
+        "mode2": 3,
+        "freq_harmonic": 6177.682,
+        "freq_anharmonic": 5722.128,
+        "ir_intensity": 0.61326996
+      },
+      {
+        "mode1": 17,
+        "mode2": 4,
+        "freq_harmonic": 4947.183,
+        "freq_anharmonic": 4761.598,
+        "ir_intensity": 0.00043725
+      },
+      {
+        "mode1": 17,
+        "mode2": 5,
+        "freq_harmonic": 4772.737,
+        "freq_anharmonic": 4600.048,
+        "ir_intensity": 0.0017229
+      },
+      {
+        "mode1": 17,
+        "mode2": 6,
+        "freq_harmonic": 4556.613,
+        "freq_anharmonic": 4344.557,
+        "ir_intensity": 0.10003034
+      },
+      {
+        "mode1": 17,
+        "mode2": 7,
+        "freq_harmonic": 4518.401,
+        "freq_anharmonic": 4326.968,
+        "ir_intensity": 0.00043864
+      },
+      {
+        "mode1": 17,
+        "mode2": 8,
+        "freq_harmonic": 4415.745,
+        "freq_anharmonic": 4215.276,
+        "ir_intensity": 0.0002853
+      },
+      {
+        "mode1": 17,
+        "mode2": 9,
+        "freq_harmonic": 4282.003,
+        "freq_anharmonic": 4087.868,
+        "ir_intensity": 0.00367737
+      },
+      {
+        "mode1": 17,
+        "mode2": 10,
+        "freq_harmonic": 4252.504,
+        "freq_anharmonic": 4061.619,
+        "ir_intensity": 0.00237741
+      },
+      {
+        "mode1": 17,
+        "mode2": 11,
+        "freq_harmonic": 4027.36,
+        "freq_anharmonic": 3899.267,
+        "ir_intensity": 0.00224576
+      },
+      {
+        "mode1": 17,
+        "mode2": 12,
+        "freq_harmonic": 3937.239,
+        "freq_anharmonic": 3784.181,
+        "ir_intensity": 0.01974676
+      },
+      {
+        "mode1": 17,
+        "mode2": 13,
+        "freq_harmonic": 3745.646,
+        "freq_anharmonic": 3581.848,
+        "ir_intensity": 0.0081893
+      },
+      {
+        "mode1": 17,
+        "mode2": 14,
+        "freq_harmonic": 3573.903,
+        "freq_anharmonic": 3409.823,
+        "ir_intensity": 1.00062334
+      },
+      {
+        "mode1": 17,
+        "mode2": 15,
+        "freq_harmonic": 3364.786,
+        "freq_anharmonic": 3206.974,
+        "ir_intensity": 0.00228094
+      },
+      {
+        "mode1": 17,
+        "mode2": 16,
+        "freq_harmonic": 6686.771,
+        "freq_anharmonic": 6745.421,
+        "ir_intensity": 0.00775023
+      },
+      {
+        "mode1": 18,
+        "mode2": 1,
+        "freq_harmonic": 5143.659,
+        "freq_anharmonic": 4916.285,
+        "ir_intensity": 5.37e-06
+      },
+      {
+        "mode1": 18,
+        "mode2": 2,
+        "freq_harmonic": 4895.957,
+        "freq_anharmonic": 4985.514,
+        "ir_intensity": 0.01546131
+      },
+      {
+        "mode1": 18,
+        "mode2": 3,
+        "freq_harmonic": 4453.304,
+        "freq_anharmonic": 4267.192,
+        "ir_intensity": 0.01473581
+      },
+      {
+        "mode1": 18,
+        "mode2": 4,
+        "freq_harmonic": 3222.805,
+        "freq_anharmonic": 3160.81,
+        "ir_intensity": 0.0294807
+      },
+      {
+        "mode1": 18,
+        "mode2": 5,
+        "freq_harmonic": 3048.359,
+        "freq_anharmonic": 2987.894,
+        "ir_intensity": 12.48225538
+      },
+      {
+        "mode1": 18,
+        "mode2": 6,
+        "freq_harmonic": 2832.234,
+        "freq_anharmonic": 2759.76,
+        "ir_intensity": 0.60418555
+      },
+      {
+        "mode1": 18,
+        "mode2": 7,
+        "freq_harmonic": 2794.022,
+        "freq_anharmonic": 2717.561,
+        "ir_intensity": 1.18407011
+      },
+      {
+        "mode1": 18,
+        "mode2": 8,
+        "freq_harmonic": 2691.367,
+        "freq_anharmonic": 2613.88,
+        "ir_intensity": 0.44971099
+      },
+      {
+        "mode1": 18,
+        "mode2": 9,
+        "freq_harmonic": 2557.625,
+        "freq_anharmonic": 2485.984,
+        "ir_intensity": 0.07592762
+      },
+      {
+        "mode1": 18,
+        "mode2": 10,
+        "freq_harmonic": 2528.126,
+        "freq_anharmonic": 2455.169,
+        "ir_intensity": 1.458e-05
+      },
+      {
+        "mode1": 18,
+        "mode2": 11,
+        "freq_harmonic": 2302.982,
+        "freq_anharmonic": 2294.081,
+        "ir_intensity": 2.3460221
+      },
+      {
+        "mode1": 18,
+        "mode2": 12,
+        "freq_harmonic": 2212.861,
+        "freq_anharmonic": 2179.307,
+        "ir_intensity": 1.94220734
+      },
+      {
+        "mode1": 18,
+        "mode2": 13,
+        "freq_harmonic": 2021.268,
+        "freq_anharmonic": 1980.099,
+        "ir_intensity": 0.17105024
+      },
+      {
+        "mode1": 18,
+        "mode2": 14,
+        "freq_harmonic": 1849.525,
+        "freq_anharmonic": 1807.839,
+        "ir_intensity": 0.00098459
+      },
+      {
+        "mode1": 18,
+        "mode2": 15,
+        "freq_harmonic": 1640.408,
+        "freq_anharmonic": 1604.889,
+        "ir_intensity": 0.09469605
+      },
+      {
+        "mode1": 18,
+        "mode2": 16,
+        "freq_harmonic": 4962.393,
+        "freq_anharmonic": 5135.047,
+        "ir_intensity": 0.57900506
+      },
+      {
+        "mode1": 18,
+        "mode2": 17,
+        "freq_harmonic": 4488.223,
+        "freq_anharmonic": 4287.92,
+        "ir_intensity": 0.01442981
+      },
+      {
+        "mode1": 19,
+        "mode2": 1,
+        "freq_harmonic": 4945.721,
+        "freq_anharmonic": 4731.951,
+        "ir_intensity": 0.00013518
+      },
+      {
+        "mode1": 19,
+        "mode2": 2,
+        "freq_harmonic": 4698.019,
+        "freq_anharmonic": 4803.223,
+        "ir_intensity": 0.00377016
+      },
+      {
+        "mode1": 19,
+        "mode2": 3,
+        "freq_harmonic": 4255.366,
+        "freq_anharmonic": 4082.001,
+        "ir_intensity": 0.00142979
+      },
+      {
+        "mode1": 19,
+        "mode2": 4,
+        "freq_harmonic": 3024.867,
+        "freq_anharmonic": 2975.86,
+        "ir_intensity": 0.10879354
+      },
+      {
+        "mode1": 19,
+        "mode2": 5,
+        "freq_harmonic": 2850.421,
+        "freq_anharmonic": 2810.243,
+        "ir_intensity": 8.89568812
+      },
+      {
+        "mode1": 19,
+        "mode2": 6,
+        "freq_harmonic": 2634.296,
+        "freq_anharmonic": 2578.107,
+        "ir_intensity": 0.09924278
+      },
+      {
+        "mode1": 19,
+        "mode2": 7,
+        "freq_harmonic": 2596.084,
+        "freq_anharmonic": 2534.839,
+        "ir_intensity": 0.50988225
+      },
+      {
+        "mode1": 19,
+        "mode2": 8,
+        "freq_harmonic": 2493.428,
+        "freq_anharmonic": 2429.729,
+        "ir_intensity": 0.45715809
+      },
+      {
+        "mode1": 19,
+        "mode2": 9,
+        "freq_harmonic": 2359.687,
+        "freq_anharmonic": 2298.644,
+        "ir_intensity": 0.03115759
+      },
+      {
+        "mode1": 19,
+        "mode2": 10,
+        "freq_harmonic": 2330.188,
+        "freq_anharmonic": 2271.677,
+        "ir_intensity": 0.01029193
+      },
+      {
+        "mode1": 19,
+        "mode2": 11,
+        "freq_harmonic": 2105.044,
+        "freq_anharmonic": 2112.451,
+        "ir_intensity": 1.98649821
+      },
+      {
+        "mode1": 19,
+        "mode2": 12,
+        "freq_harmonic": 2014.922,
+        "freq_anharmonic": 1996.315,
+        "ir_intensity": 1.05258098
+      },
+      {
+        "mode1": 19,
+        "mode2": 13,
+        "freq_harmonic": 1823.33,
+        "freq_anharmonic": 1796.089,
+        "ir_intensity": 0.07790058
+      },
+      {
+        "mode1": 19,
+        "mode2": 14,
+        "freq_harmonic": 1651.587,
+        "freq_anharmonic": 1623.539,
+        "ir_intensity": 0.00164887
+      },
+      {
+        "mode1": 19,
+        "mode2": 15,
+        "freq_harmonic": 1442.47,
+        "freq_anharmonic": 1423.031,
+        "ir_intensity": 2.2989931
+      },
+      {
+        "mode1": 19,
+        "mode2": 16,
+        "freq_harmonic": 4764.454,
+        "freq_anharmonic": 4951.064,
+        "ir_intensity": 0.62265809
+      },
+      {
+        "mode1": 19,
+        "mode2": 17,
+        "freq_harmonic": 4290.284,
+        "freq_anharmonic": 4101.557,
+        "ir_intensity": 0.05117695
+      },
+      {
+        "mode1": 19,
+        "mode2": 18,
+        "freq_harmonic": 2565.906,
+        "freq_anharmonic": 2498.74,
+        "ir_intensity": 6.21430034
+      },
+      {
+        "mode1": 20,
+        "mode2": 1,
+        "freq_harmonic": 4678.064,
+        "freq_anharmonic": 4481.548,
+        "ir_intensity": 0.00722578
+      },
+      {
+        "mode1": 20,
+        "mode2": 2,
+        "freq_harmonic": 4430.362,
+        "freq_anharmonic": 4553.193,
+        "ir_intensity": 0.03056876
+      },
+      {
+        "mode1": 20,
+        "mode2": 3,
+        "freq_harmonic": 3987.709,
+        "freq_anharmonic": 3833.982,
+        "ir_intensity": 0.00460726
+      },
+      {
+        "mode1": 20,
+        "mode2": 4,
+        "freq_harmonic": 2757.21,
+        "freq_anharmonic": 2729.196,
+        "ir_intensity": 0.01194282
+      },
+      {
+        "mode1": 20,
+        "mode2": 5,
+        "freq_harmonic": 2582.764,
+        "freq_anharmonic": 2562.568,
+        "ir_intensity": 5.44779906
+      },
+      {
+        "mode1": 20,
+        "mode2": 6,
+        "freq_harmonic": 2366.639,
+        "freq_anharmonic": 2326.971,
+        "ir_intensity": 0.72303708
+      },
+      {
+        "mode1": 20,
+        "mode2": 7,
+        "freq_harmonic": 2328.427,
+        "freq_anharmonic": 2286.278,
+        "ir_intensity": 0.02275068
+      },
+      {
+        "mode1": 20,
+        "mode2": 8,
+        "freq_harmonic": 2225.771,
+        "freq_anharmonic": 2181.138,
+        "ir_intensity": 0.00240881
+      },
+      {
+        "mode1": 20,
+        "mode2": 9,
+        "freq_harmonic": 2092.03,
+        "freq_anharmonic": 2053.55,
+        "ir_intensity": 0.28413994
+      },
+      {
+        "mode1": 20,
+        "mode2": 10,
+        "freq_harmonic": 2062.531,
+        "freq_anharmonic": 2022.643,
+        "ir_intensity": 4.525e-05
+      },
+      {
+        "mode1": 20,
+        "mode2": 11,
+        "freq_harmonic": 1837.387,
+        "freq_anharmonic": 1861.28,
+        "ir_intensity": 1.17909014
+      },
+      {
+        "mode1": 20,
+        "mode2": 12,
+        "freq_harmonic": 1747.265,
+        "freq_anharmonic": 1746.725,
+        "ir_intensity": 1.84209578
+      },
+      {
+        "mode1": 20,
+        "mode2": 13,
+        "freq_harmonic": 1555.673,
+        "freq_anharmonic": 1545.919,
+        "ir_intensity": 0.01156747
+      },
+      {
+        "mode1": 20,
+        "mode2": 14,
+        "freq_harmonic": 1383.93,
+        "freq_anharmonic": 1373.469,
+        "ir_intensity": 2.22937349
+      },
+      {
+        "mode1": 20,
+        "mode2": 15,
+        "freq_harmonic": 1174.813,
+        "freq_anharmonic": 1171.542,
+        "ir_intensity": 0.11774827
+      },
+      {
+        "mode1": 20,
+        "mode2": 16,
+        "freq_harmonic": 4496.797,
+        "freq_anharmonic": 4700.942,
+        "ir_intensity": 0.95681449
+      },
+      {
+        "mode1": 20,
+        "mode2": 17,
+        "freq_harmonic": 4022.627,
+        "freq_anharmonic": 3851.668,
+        "ir_intensity": 0.09706833
+      },
+      {
+        "mode1": 20,
+        "mode2": 18,
+        "freq_harmonic": 2298.249,
+        "freq_anharmonic": 2251.622,
+        "ir_intensity": 7.28338759
+      },
+      {
+        "mode1": 20,
+        "mode2": 19,
+        "freq_harmonic": 2100.311,
+        "freq_anharmonic": 2070.226,
+        "ir_intensity": 3.56377084
+      },
+      {
+        "mode1": 21,
+        "mode2": 1,
+        "freq_harmonic": 4409.486,
+        "freq_anharmonic": 4190.024,
+        "ir_intensity": 6.08085593
+      },
+      {
+        "mode1": 21,
+        "mode2": 2,
+        "freq_harmonic": 4161.784,
+        "freq_anharmonic": 4266.649,
+        "ir_intensity": 0.02119817
+      },
+      {
+        "mode1": 21,
+        "mode2": 3,
+        "freq_harmonic": 3719.131,
+        "freq_anharmonic": 3548.395,
+        "ir_intensity": 0.01352435
+      },
+      {
+        "mode1": 21,
+        "mode2": 4,
+        "freq_harmonic": 2488.632,
+        "freq_anharmonic": 2437.874,
+        "ir_intensity": 0.0108224
+      },
+      {
+        "mode1": 21,
+        "mode2": 5,
+        "freq_harmonic": 2314.186,
+        "freq_anharmonic": 2275.608,
+        "ir_intensity": 0.25660765
+      },
+      {
+        "mode1": 21,
+        "mode2": 6,
+        "freq_harmonic": 2098.062,
+        "freq_anharmonic": 2039.635,
+        "ir_intensity": 0.26197038
+      },
+      {
+        "mode1": 21,
+        "mode2": 7,
+        "freq_harmonic": 2059.85,
+        "freq_anharmonic": 2004.794,
+        "ir_intensity": 0.85700688
+      },
+      {
+        "mode1": 21,
+        "mode2": 8,
+        "freq_harmonic": 1957.194,
+        "freq_anharmonic": 1888.769,
+        "ir_intensity": 1.95266112
+      },
+      {
+        "mode1": 21,
+        "mode2": 9,
+        "freq_harmonic": 1823.452,
+        "freq_anharmonic": 1759.986,
+        "ir_intensity": 0.42880151
+      },
+      {
+        "mode1": 21,
+        "mode2": 10,
+        "freq_harmonic": 1793.953,
+        "freq_anharmonic": 1731.658,
+        "ir_intensity": 0.21617823
+      },
+      {
+        "mode1": 21,
+        "mode2": 11,
+        "freq_harmonic": 1568.809,
+        "freq_anharmonic": 1575.43,
+        "ir_intensity": 0.06860184
+      },
+      {
+        "mode1": 21,
+        "mode2": 12,
+        "freq_harmonic": 1478.688,
+        "freq_anharmonic": 1459.629,
+        "ir_intensity": 0.25070319
+      },
+      {
+        "mode1": 21,
+        "mode2": 13,
+        "freq_harmonic": 1287.095,
+        "freq_anharmonic": 1255.731,
+        "ir_intensity": 1.87872728
+      },
+      {
+        "mode1": 21,
+        "mode2": 14,
+        "freq_harmonic": 1115.352,
+        "freq_anharmonic": 1085.133,
+        "ir_intensity": 0.35646625
+      },
+      {
+        "mode1": 21,
+        "mode2": 15,
+        "freq_harmonic": 906.235,
+        "freq_anharmonic": 881.91,
+        "ir_intensity": 78.022989
+      },
+      {
+        "mode1": 21,
+        "mode2": 16,
+        "freq_harmonic": 4228.22,
+        "freq_anharmonic": 4413.23,
+        "ir_intensity": 0.05023238
+      },
+      {
+        "mode1": 21,
+        "mode2": 17,
+        "freq_harmonic": 3754.05,
+        "freq_anharmonic": 3565.71,
+        "ir_intensity": 0.30758498
+      },
+      {
+        "mode1": 21,
+        "mode2": 18,
+        "freq_harmonic": 2029.672,
+        "freq_anharmonic": 1965.422,
+        "ir_intensity": 0.41171378
+      },
+      {
+        "mode1": 21,
+        "mode2": 19,
+        "freq_harmonic": 1831.733,
+        "freq_anharmonic": 1781.516,
+        "ir_intensity": 5.84806304
+      },
+      {
+        "mode1": 21,
+        "mode2": 20,
+        "freq_harmonic": 1564.076,
+        "freq_anharmonic": 1533.042,
+        "ir_intensity": 0.31146057
+      },
+      {
+        "mode1": 22,
+        "mode2": 1,
+        "freq_harmonic": 4268.297,
+        "freq_anharmonic": 4063.265,
+        "ir_intensity": 4.83005625
+      },
+      {
+        "mode1": 22,
+        "mode2": 2,
+        "freq_harmonic": 4020.595,
+        "freq_anharmonic": 4140.818,
+        "ir_intensity": 0.11950088
+      },
+      {
+        "mode1": 22,
+        "mode2": 3,
+        "freq_harmonic": 3577.942,
+        "freq_anharmonic": 3422.36,
+        "ir_intensity": 32.56738543
+      },
+      {
+        "mode1": 22,
+        "mode2": 4,
+        "freq_harmonic": 2347.442,
+        "freq_anharmonic": 2311.164,
+        "ir_intensity": 0.14693149
+      },
+      {
+        "mode1": 22,
+        "mode2": 5,
+        "freq_harmonic": 2172.996,
+        "freq_anharmonic": 2149.52,
+        "ir_intensity": 0.60334992
+      },
+      {
+        "mode1": 22,
+        "mode2": 6,
+        "freq_harmonic": 1956.872,
+        "freq_anharmonic": 1916.918,
+        "ir_intensity": 0.32789169
+      },
+      {
+        "mode1": 22,
+        "mode2": 7,
+        "freq_harmonic": 1918.66,
+        "freq_anharmonic": 1872.022,
+        "ir_intensity": 0.00767766
+      },
+      {
+        "mode1": 22,
+        "mode2": 8,
+        "freq_harmonic": 1816.004,
+        "freq_anharmonic": 1767.809,
+        "ir_intensity": 0.58181407
+      },
+      {
+        "mode1": 22,
+        "mode2": 9,
+        "freq_harmonic": 1682.263,
+        "freq_anharmonic": 1638.708,
+        "ir_intensity": 0.00484983
+      },
+      {
+        "mode1": 22,
+        "mode2": 10,
+        "freq_harmonic": 1652.763,
+        "freq_anharmonic": 1608.125,
+        "ir_intensity": 0.00233272
+      },
+      {
+        "mode1": 22,
+        "mode2": 11,
+        "freq_harmonic": 1427.62,
+        "freq_anharmonic": 1447.758,
+        "ir_intensity": 1.63359533
+      },
+      {
+        "mode1": 22,
+        "mode2": 12,
+        "freq_harmonic": 1337.498,
+        "freq_anharmonic": 1332.171,
+        "ir_intensity": 0.26112863
+      },
+      {
+        "mode1": 22,
+        "mode2": 13,
+        "freq_harmonic": 1145.906,
+        "freq_anharmonic": 1133.867,
+        "ir_intensity": 2.70175922
+      },
+      {
+        "mode1": 22,
+        "mode2": 14,
+        "freq_harmonic": 974.163,
+        "freq_anharmonic": 955.962,
+        "ir_intensity": 0.16856083
+      },
+      {
+        "mode1": 22,
+        "mode2": 15,
+        "freq_harmonic": 765.046,
+        "freq_anharmonic": 756.25,
+        "ir_intensity": 1.19108852
+      },
+      {
+        "mode1": 22,
+        "mode2": 16,
+        "freq_harmonic": 4087.03,
+        "freq_anharmonic": 4287.518,
+        "ir_intensity": 0.10019605
+      },
+      {
+        "mode1": 22,
+        "mode2": 17,
+        "freq_harmonic": 3612.86,
+        "freq_anharmonic": 3439.847,
+        "ir_intensity": 0.19738573
+      },
+      {
+        "mode1": 22,
+        "mode2": 18,
+        "freq_harmonic": 1888.482,
+        "freq_anharmonic": 1839.07,
+        "ir_intensity": 0.27832859
+      },
+      {
+        "mode1": 22,
+        "mode2": 19,
+        "freq_harmonic": 1690.544,
+        "freq_anharmonic": 1655.656,
+        "ir_intensity": 0.53200259
+      },
+      {
+        "mode1": 22,
+        "mode2": 20,
+        "freq_harmonic": 1422.887,
+        "freq_anharmonic": 1405.724,
+        "ir_intensity": 114.5106873
+      },
+      {
+        "mode1": 22,
+        "mode2": 21,
+        "freq_harmonic": 1154.309,
+        "freq_anharmonic": 1109.937,
+        "ir_intensity": 163.1180457
+      },
+      {
+        "mode1": 23,
+        "mode2": 1,
+        "freq_harmonic": 3961.939,
+        "freq_anharmonic": 3743.866,
+        "ir_intensity": 0.20610662
+      },
+      {
+        "mode1": 23,
+        "mode2": 2,
+        "freq_harmonic": 3714.237,
+        "freq_anharmonic": 3799.886,
+        "ir_intensity": 15.07880269
+      },
+      {
+        "mode1": 23,
+        "mode2": 3,
+        "freq_harmonic": 3271.584,
+        "freq_anharmonic": 3098.155,
+        "ir_intensity": 0.15230064
+      },
+      {
+        "mode1": 23,
+        "mode2": 4,
+        "freq_harmonic": 2041.085,
+        "freq_anharmonic": 1987.431,
+        "ir_intensity": 0.02614997
+      },
+      {
+        "mode1": 23,
+        "mode2": 5,
+        "freq_harmonic": 1866.639,
+        "freq_anharmonic": 1828.457,
+        "ir_intensity": 14.07299201
+      },
+      {
+        "mode1": 23,
+        "mode2": 6,
+        "freq_harmonic": 1650.514,
+        "freq_anharmonic": 1595.031,
+        "ir_intensity": 0.18998438
+      },
+      {
+        "mode1": 23,
+        "mode2": 7,
+        "freq_harmonic": 1612.302,
+        "freq_anharmonic": 1554.163,
+        "ir_intensity": 0.02932016
+      },
+      {
+        "mode1": 23,
+        "mode2": 8,
+        "freq_harmonic": 1509.646,
+        "freq_anharmonic": 1444.442,
+        "ir_intensity": 0.00029533
+      },
+      {
+        "mode1": 23,
+        "mode2": 9,
+        "freq_harmonic": 1375.905,
+        "freq_anharmonic": 1317.202,
+        "ir_intensity": 23.19925423
+      },
+      {
+        "mode1": 23,
+        "mode2": 10,
+        "freq_harmonic": 1346.406,
+        "freq_anharmonic": 1286.744,
+        "ir_intensity": 0.57772268
+      },
+      {
+        "mode1": 23,
+        "mode2": 11,
+        "freq_harmonic": 1121.262,
+        "freq_anharmonic": 1118.301,
+        "ir_intensity": 94.42778801
+      },
+      {
+        "mode1": 23,
+        "mode2": 12,
+        "freq_harmonic": 1031.14,
+        "freq_anharmonic": 1010.608,
+        "ir_intensity": 64.96910515
+      },
+      {
+        "mode1": 23,
+        "mode2": 13,
+        "freq_harmonic": 839.548,
+        "freq_anharmonic": 808.492,
+        "ir_intensity": 0.87790685
+      },
+      {
+        "mode1": 23,
+        "mode2": 14,
+        "freq_harmonic": 667.805,
+        "freq_anharmonic": 637.747,
+        "ir_intensity": 15.99265292
+      },
+      {
+        "mode1": 23,
+        "mode2": 15,
+        "freq_harmonic": 458.688,
+        "freq_anharmonic": 437.657,
+        "ir_intensity": 1.37489593
+      },
+      {
+        "mode1": 23,
+        "mode2": 16,
+        "freq_harmonic": 3780.672,
+        "freq_anharmonic": 3955.304,
+        "ir_intensity": 26.76965615
+      },
+      {
+        "mode1": 23,
+        "mode2": 17,
+        "freq_harmonic": 3306.502,
+        "freq_anharmonic": 3113.863,
+        "ir_intensity": 0.02658985
+      },
+      {
+        "mode1": 23,
+        "mode2": 18,
+        "freq_harmonic": 1582.124,
+        "freq_anharmonic": 1511.687,
+        "ir_intensity": 16.27265227
+      },
+      {
+        "mode1": 23,
+        "mode2": 19,
+        "freq_harmonic": 1384.186,
+        "freq_anharmonic": 1329.515,
+        "ir_intensity": 39.9309771
+      },
+      {
+        "mode1": 23,
+        "mode2": 20,
+        "freq_harmonic": 1116.529,
+        "freq_anharmonic": 1089.629,
+        "ir_intensity": 6.88715305
+      },
+      {
+        "mode1": 23,
+        "mode2": 21,
+        "freq_harmonic": 847.951,
+        "freq_anharmonic": 793.049,
+        "ir_intensity": 0.0307398
+      },
+      {
+        "mode1": 23,
+        "mode2": 22,
+        "freq_harmonic": 706.762,
+        "freq_anharmonic": 664.875,
+        "ir_intensity": 0.2008455
+      },
+      {
+        "mode1": 24,
+        "mode2": 1,
+        "freq_harmonic": 3830.009,
+        "freq_anharmonic": 3629.853,
+        "ir_intensity": 0.00120629
+      },
+      {
+        "mode1": 24,
+        "mode2": 2,
+        "freq_harmonic": 3582.307,
+        "freq_anharmonic": 3685.874,
+        "ir_intensity": 855.25771027
+      },
+      {
+        "mode1": 24,
+        "mode2": 3,
+        "freq_harmonic": 3139.653,
+        "freq_anharmonic": 2989.927,
+        "ir_intensity": 3.18118812
+      },
+      {
+        "mode1": 24,
+        "mode2": 4,
+        "freq_harmonic": 1909.154,
+        "freq_anharmonic": 1875.249,
+        "ir_intensity": 0.26057829
+      },
+      {
+        "mode1": 24,
+        "mode2": 5,
+        "freq_harmonic": 1734.708,
+        "freq_anharmonic": 1712.495,
+        "ir_intensity": 42.3224202
+      },
+      {
+        "mode1": 24,
+        "mode2": 6,
+        "freq_harmonic": 1518.584,
+        "freq_anharmonic": 1480.715,
+        "ir_intensity": 0.40164077
+      },
+      {
+        "mode1": 24,
+        "mode2": 7,
+        "freq_harmonic": 1480.372,
+        "freq_anharmonic": 1439.6,
+        "ir_intensity": 0.00443518
+      },
+      {
+        "mode1": 24,
+        "mode2": 8,
+        "freq_harmonic": 1377.716,
+        "freq_anharmonic": 1333.339,
+        "ir_intensity": 0.02634148
+      },
+      {
+        "mode1": 24,
+        "mode2": 9,
+        "freq_harmonic": 1243.974,
+        "freq_anharmonic": 1203.517,
+        "ir_intensity": 8.18502932
+      },
+      {
+        "mode1": 24,
+        "mode2": 10,
+        "freq_harmonic": 1214.475,
+        "freq_anharmonic": 1173.449,
+        "ir_intensity": 0.00887948
+      },
+      {
+        "mode1": 24,
+        "mode2": 11,
+        "freq_harmonic": 989.331,
+        "freq_anharmonic": 1013.634,
+        "ir_intensity": 8.53850489
+      },
+      {
+        "mode1": 24,
+        "mode2": 12,
+        "freq_harmonic": 899.21,
+        "freq_anharmonic": 897.428,
+        "ir_intensity": 3.95758738
+      },
+      {
+        "mode1": 24,
+        "mode2": 13,
+        "freq_harmonic": 707.618,
+        "freq_anharmonic": 699.236,
+        "ir_intensity": 25.96726562
+      },
+      {
+        "mode1": 24,
+        "mode2": 14,
+        "freq_harmonic": 535.874,
+        "freq_anharmonic": 523.009,
+        "ir_intensity": 112.56406642
+      },
+      {
+        "mode1": 24,
+        "mode2": 15,
+        "freq_harmonic": 326.757,
+        "freq_anharmonic": 322.324,
+        "ir_intensity": 6.70841201
+      },
+      {
+        "mode1": 24,
+        "mode2": 16,
+        "freq_harmonic": 3648.742,
+        "freq_anharmonic": 3838.263,
+        "ir_intensity": 22.81885036
+      },
+      {
+        "mode1": 24,
+        "mode2": 17,
+        "freq_harmonic": 3174.572,
+        "freq_anharmonic": 3001.541,
+        "ir_intensity": 1.32142588
+      },
+      {
+        "mode1": 24,
+        "mode2": 18,
+        "freq_harmonic": 1450.194,
+        "freq_anharmonic": 1403.115,
+        "ir_intensity": 6.32921019
+      },
+      {
+        "mode1": 24,
+        "mode2": 19,
+        "freq_harmonic": 1252.256,
+        "freq_anharmonic": 1218.045,
+        "ir_intensity": 12.42366527
+      },
+      {
+        "mode1": 24,
+        "mode2": 20,
+        "freq_harmonic": 984.599,
+        "freq_anharmonic": 971.099,
+        "ir_intensity": 9.36438468
+      },
+      {
+        "mode1": 24,
+        "mode2": 21,
+        "freq_harmonic": 716.021,
+        "freq_anharmonic": 684.8,
+        "ir_intensity": 25.70154741
+      },
+      {
+        "mode1": 24,
+        "mode2": 22,
+        "freq_harmonic": 574.831,
+        "freq_anharmonic": 552.543,
+        "ir_intensity": 13.38987415
+      },
+      {
+        "mode1": 24,
+        "mode2": 23,
+        "freq_harmonic": 268.474,
+        "freq_anharmonic": 230.312,
+        "ir_intensity": 155.4747102
+      }
+    ]
+  },
+  "energy_eV": 1.38247447822803,
+  "dipole": {
+    "x": -1.1802204648339352,
+    "y": -0.35600460221249003,
+    "z": -0.0032153089809500005,
+    "magnitude": 1.2327489446846613
+  },
+  "runtime_s": 292.7007269859314,
+  "files": {
+    "gaussian_log": "gaussian_freq.log",
+    "gaussian_input": "gaussian_freq.gjf"
+  }
+}

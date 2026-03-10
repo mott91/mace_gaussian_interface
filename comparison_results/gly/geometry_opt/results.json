@@ -1,0 +1,13 @@
+{
+  "molecule": "gly",
+  "calculator": "mace_omol",
+  "initial_energy_eV": -7740.442595806291,
+  "final_energy_eV": -7740.568256768992,
+  "converged": true,
+  "num_steps": 0,
+  "runtime_s": 12.531403303146362,
+  "files": {
+    "initial_geometry": "initial.xyz",
+    "optimized_geometry": "optimized.xyz"
+  }
+}

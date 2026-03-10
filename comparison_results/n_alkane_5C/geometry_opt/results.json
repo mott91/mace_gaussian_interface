@@ -1,0 +1,13 @@
+{
+  "molecule": "n_alkane_5C",
+  "calculator": "mace_omol",
+  "initial_energy_eV": -5356.750670011623,
+  "final_energy_eV": -5379.692616980943,
+  "converged": true,
+  "num_steps": 0,
+  "runtime_s": 39.580429792404175,
+  "files": {
+    "initial_geometry": "initial.xyz",
+    "optimized_geometry": "optimized.xyz"
+  }
+}

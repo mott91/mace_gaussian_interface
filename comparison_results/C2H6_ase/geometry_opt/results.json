@@ -1,0 +1,13 @@
+{
+  "molecule": "C2H6_ase",
+  "calculator": "mace_omol",
+  "initial_energy_eV": -2171.2543355210146,
+  "final_energy_eV": -2171.254946691941,
+  "converged": true,
+  "num_steps": 0,
+  "runtime_s": 5.802314043045044,
+  "files": {
+    "initial_geometry": "initial.xyz",
+    "optimized_geometry": "optimized.xyz"
+  }
+}

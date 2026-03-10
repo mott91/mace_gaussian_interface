@@ -53,10 +53,21 @@ Thumbs.db
 # Jupyter
 .ipynb_checkpoints/
 
-# Results directories (large, generated files - keep local only)
-comparison_results/
-analysis_results/
+# Scratch directories
 testingStuff/
+tom_stuff/
+bak/
+
+# Gaussian intermediate files
+fort.7
+temp_*/
+
+# Large model files
+mace4ir_models/
+
+# Coverage / egg-info
+.coverage
+mace_gaussian_interface.egg-info/
 
 # But keep example test molecules
 !*.xyz

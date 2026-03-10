@@ -1,0 +1,40 @@
+{
+  "molecule": "bh3_nh3",
+  "analysis_date": "2026-02-25T12:36:19.488570",
+  "num_ml_calculators": 4,
+  "dft_method": "b3lyp_6-31Gdp",
+  "comparisons": [
+    {
+      "name": "mace_mp_mace_ml",
+      "mae_freq": 0,
+      "rmse_freq": 0,
+      "r2_freq": 0,
+      "r2_intensity": 0,
+      "speedup": 3.477141694562597
+    },
+    {
+      "name": "mace_omol_espaloma",
+      "mae_freq": 708.2571693121693,
+      "rmse_freq": 1405.0892692151976,
+      "r2_freq": 0.8587757284232302,
+      "r2_intensity": 0.42329439649216305,
+      "speedup": 2.691505018976406
+    },
+    {
+      "name": "mace_mp_espaloma",
+      "mae_freq": 0,
+      "rmse_freq": 0,
+      "r2_freq": 0,
+      "r2_intensity": 0,
+      "speedup": 3.636919393632906
+    },
+    {
+      "name": "mace_omol_mace_ml",
+      "mae_freq": 708.25717989418,
+      "rmse_freq": 1405.089284698019,
+      "r2_freq": 0.8587757298332825,
+      "r2_intensity": 0.46636004844125273,
+      "speedup": 2.44815028918836
+    }
+  ]
+}

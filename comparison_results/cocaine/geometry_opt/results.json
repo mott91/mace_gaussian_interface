@@ -1,0 +1,13 @@
+{
+  "molecule": "cocaine",
+  "calculator": "mace_omol",
+  "initial_energy_eV": -27650.206867997094,
+  "final_energy_eV": -27650.76796985165,
+  "converged": true,
+  "num_steps": 0,
+  "runtime_s": 182.47170901298523,
+  "files": {
+    "initial_geometry": "initial.xyz",
+    "optimized_geometry": "optimized.xyz"
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "molecule": "gly",
+  "energy_calculator": "mace_mp",
+  "dipole_calculator": "mace_ml",
+  "calculator_type": "ml",
+  "timestamp": null,
+  "frequencies": {
+    "harmonic": [
+      {
+        "freq_cm": 241.2913,
+        "ir_intensity": 114.6531
+      },
+      {
+        "freq_cm": 442.1947,
+        "ir_intensity": 16.1194
+      },
+      {
+        "freq_cm": 470.9844,
+        "ir_intensity": 3.8275
+      },
+      {
+        "freq_cm": 571.3427,
+        "ir_intensity": 15.2462
+      },
+      {
+        "freq_cm": 675.1227,
+        "ir_intensity": 190.0745
+      },
+      {
+        "freq_cm": 711.1666,
+        "ir_intensity": 4.1541
+      },
+      {
+        "freq_cm": 863.8526,
+        "ir_intensity": 3.928
+      },
+      {
+        "freq_cm": 924.8057,
+        "ir_intensity": 0.4908
+      },
+      {
+        "freq_cm": 969.2125,
+        "ir_intensity": 12.7375
+      },
+      {
+        "freq_cm": 1028.649,
+        "ir_intensity": 147.7725
+      },
+      {
+        "freq_cm": 1141.7891,
+        "ir_intensity": 20.382
+      },
+      {
+        "freq_cm": 1241.484,
+        "ir_intensity": 0.018
+      },
+      {
+        "freq_cm": 1293.863,
+        "ir_intensity": 13.128
+      },
+      {
+        "freq_cm": 1327.505,
+        "ir_intensity": 8.379
+      },
+      {
+        "freq_cm": 1553.6163,
+        "ir_intensity": 40.7958
+      },
+      {
+        "freq_cm": 1843.4014,
+        "ir_intensity": 191.6566
+      },
+      {
+        "freq_cm": 2983.2428,
+        "ir_intensity": 8.9248
+      },
+      {
+        "freq_cm": 3021.6056,
+        "ir_intensity": 2.7679
+      },
+      {
+        "freq_cm": 3479.8985,
+        "ir_intensity": 0.0819
+      },
+      {
+        "freq_cm": 3570.1312,
+        "ir_intensity": 10.0407
+      },
+      {
+        "freq_cm": 3793.7517,
+        "ir_intensity": 86.8731
+      }
+    ],
+    "anharmonic": [],
+    "overtones": [],
+    "combination_bands": []
+  },
+  "energy_eV": 1.24873051482894,
+  "dipole": null,
+  "runtime_s": 218.63313245773315,
+  "files": {
+    "gaussian_log": "gaussian_freq.log",
+    "gaussian_input": "gaussian_freq.gjf"
+  }
+}

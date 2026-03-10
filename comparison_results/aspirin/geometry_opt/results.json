@@ -1,0 +1,13 @@
+{
+  "molecule": "aspirin",
+  "calculator": "mace_omol",
+  "initial_energy_eV": -17653.281728755886,
+  "final_energy_eV": -17653.5912077067,
+  "converged": true,
+  "num_steps": 0,
+  "runtime_s": 44.228840351104736,
+  "files": {
+    "initial_geometry": "initial.xyz",
+    "optimized_geometry": "optimized.xyz"
+  }
+}

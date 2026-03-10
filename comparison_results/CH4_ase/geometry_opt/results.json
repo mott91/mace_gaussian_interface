@@ -1,0 +1,13 @@
+{
+  "molecule": "CH4_ase",
+  "calculator": "mace_omol",
+  "initial_energy_eV": -1101.818696262786,
+  "final_energy_eV": -1101.8189244103799,
+  "converged": true,
+  "num_steps": 0,
+  "runtime_s": 4.235300779342651,
+  "files": {
+    "initial_geometry": "initial.xyz",
+    "optimized_geometry": "optimized.xyz"
+  }
+}

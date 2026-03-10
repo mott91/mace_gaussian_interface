@@ -1,0 +1,65 @@
+{
+  "molecule": "C2H6_ase",
+  "energy_calculator": "mace_mp",
+  "dipole_calculator": "espaloma",
+  "calculator_type": "ml",
+  "timestamp": null,
+  "frequencies": {
+    "harmonic": [
+      {
+        "freq_cm": 1038.2959,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 1038.6501,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 1257.1601,
+        "ir_intensity": 37.9814
+      },
+      {
+        "freq_cm": 1287.4484,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 1288.5076,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 1336.3301,
+        "ir_intensity": 10.8505
+      },
+      {
+        "freq_cm": 3023.8881,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 3062.573,
+        "ir_intensity": 6.5315
+      },
+      {
+        "freq_cm": 3120.9369,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 3140.1891,
+        "ir_intensity": 20.3363
+      },
+      {
+        "freq_cm": 3140.1891,
+        "ir_intensity": 20.3362
+      }
+    ],
+    "anharmonic": [],
+    "overtones": [],
+    "combination_bands": []
+  },
+  "energy_eV": 1.322555005714338,
+  "dipole": null,
+  "runtime_s": 117.86365985870361,
+  "files": {
+    "gaussian_log": "gaussian_freq.log",
+    "gaussian_input": "gaussian_freq.gjf"
+  }
+}

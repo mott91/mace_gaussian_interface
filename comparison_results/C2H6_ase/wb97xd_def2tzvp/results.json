@@ -1,0 +1,98 @@
+{
+  "molecule": "C2H6_ase",
+  "energy_calculator": "wb97xd_def2tzvp",
+  "dipole_calculator": "wb97xd_def2tzvp",
+  "calculator_type": "dft",
+  "timestamp": null,
+  "frequencies": {
+    "harmonic": [
+      {
+        "freq_cm": 309.154,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 832.6379,
+        "ir_intensity": 4.0074
+      },
+      {
+        "freq_cm": 832.6415,
+        "ir_intensity": 4.0092
+      },
+      {
+        "freq_cm": 1017.97,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 1226.1039,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 1226.1057,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 1411.1216,
+        "ir_intensity": 2.4634
+      },
+      {
+        "freq_cm": 1432.1434,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 1507.8341,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 1507.8348,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 1508.7673,
+        "ir_intensity": 11.4609
+      },
+      {
+        "freq_cm": 1508.7693,
+        "ir_intensity": 11.4666
+      },
+      {
+        "freq_cm": 3053.1429,
+        "ir_intensity": 58.3267
+      },
+      {
+        "freq_cm": 3053.9777,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 3111.4301,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 3111.4327,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 3135.37,
+        "ir_intensity": 61.1141
+      },
+      {
+        "freq_cm": 3135.3723,
+        "ir_intensity": 61.1036
+      }
+    ],
+    "anharmonic": [],
+    "overtones": [],
+    "combination_bands": []
+  },
+  "energy_eV": 1.45825818892314,
+  "dipole": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0,
+    "magnitude": 0.0
+  },
+  "runtime_s": 1736.670151233673,
+  "files": {
+    "gaussian_log": "gaussian_freq.log",
+    "gaussian_input": "gaussian_freq.gjf"
+  }
+}
