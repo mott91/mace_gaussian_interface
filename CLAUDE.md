@@ -4,6 +4,7 @@ MACE-Gaussian Interface: bridges ML potentials (MACE) with Gaussian 16 for molec
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed module architecture and data structures.
 See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for adding calculators, metrics, and testing workflows.
+See [permissions.md](permissions.md) for what requires confirmation vs. auto-approve.
 
 ## Commands
 

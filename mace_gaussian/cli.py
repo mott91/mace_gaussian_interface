@@ -79,7 +79,7 @@ def cli():
 )
 @click.option(
     "--energy-calculators",
-    default="mace_mp,mace_omol",
+    default="mace_mp,mace_omol,mace_anicc,mace_off",
     callback=_validate_energy_calculators,
     help="Comma-separated energy calculators. Choices: mace_mp, mace_omol, mace_off, mace_anicc",
 )
