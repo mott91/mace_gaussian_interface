@@ -1,6 +1,6 @@
 {
   "molecule": "CH4_ase",
-  "analysis_date": "2025-11-14T14:44:54.721219",
+  "analysis_date": "2025-11-19T09:27:06.066330",
   "num_ml_calculators": 4,
   "dft_method": "b3lyp_6-31Gdp",
   "comparisons": [

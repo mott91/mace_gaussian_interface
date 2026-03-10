@@ -3,7 +3,6 @@ import pytest
 import torch
 import torch.nn.functional
 from e3nn import o3
-
 from mace.data import AtomicData, Configuration
 from mace.modules import (
     AtomicEnergiesBlock,

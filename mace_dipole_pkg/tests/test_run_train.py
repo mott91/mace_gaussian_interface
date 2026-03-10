@@ -7,7 +7,6 @@ import ase.io
 import numpy as np
 import pytest
 from ase.atoms import Atoms
-
 from mace_dipole_core.calculators.mace import MACECalculator
 
 run_train = Path(__file__).parent.parent / "mace" / "cli" / "run_train.py"

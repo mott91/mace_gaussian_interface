@@ -8,7 +8,7 @@ version = "0.2.0"
 description = "Interface between MACE ML potentials and Gaussian for molecular calculations with MACE-OMOL-0 support"
 readme = "README.md"
 authors = [
-    {name = "Manuel Ott", email = "your.email@domain.com"}
+    {name = "Manuel Ott", email = "csav4386@student.uibk.ac.at"}
 ]
 keywords = ["quantum-chemistry", "machine-learning", "molecular-simulation", "gaussian", "mace", "mace-omol"]
 classifiers = [
@@ -25,47 +25,65 @@ requires-python = ">=3.9"
 
 dependencies = [
     "numpy>=1.20.0",
-    "pyzmq>=22.0.0", 
+    "pyzmq>=22.0.0",
     "ase>=3.22.0",
     "torch>=1.12.0",
-    "mace-torch>=0.3.14",  # Updated: MACE-OMOL-0 requires >= 0.3.14
+    "mace-torch>=0.3.14", # Updated: MACE-OMOL-0 requires >= 0.3.14
     "rdkit>=2022.03.0",
     "espaloma_charge>=0.0.8",
     "matplotlib>=3.5.0",
+    "seaborn>=0.13.2",
 ]
 
-#[project.optional-dependencies]
-#xtb = ["xtb-python>=22.1.0"]
+[dependency-groups]
 dev = [
     "pytest>=7.0.0",
-    "black>=22.0.0", 
-    "isort>=5.10.0",
-    "flake8>=4.0.0",
-    "mypy>=0.950",
+    "pytest-cov>=4.0",
+    "ruff>=0.9.0",
+    "ty>=0.0.1a1",
 ]
-#all = ["mace-gaussian-interface[xtb,dev]"]
 
 [project.scripts]
-gm-main = "gm_main:main"
-gm-diagnose = "gm_main:diagnose_main"
+mace-gaussian = "mace_gaussian.cli:cli"
 
 [project.urls]
-Homepage = "https://github.com/yourusername/mace-gaussian-interface"
-Repository = "https://github.com/yourusername/mace-gaussian-interface.git" 
-Issues = "https://github.com/yourusername/mace-gaussian-interface/issues"
+Homepage = "https://github.com/mott91/mace_gaussian_interface"
+Repository = "https://github.com/mott91/mace_gaussian_interface.git"
+Issues = "https://github.com/mott91/mace_gaussian_interface/issues"
 
 [tool.hatch.build.targets.wheel]
-packages = ["."]
+packages = ["mace_gaussian"]
 
-[tool.black]
+[tool.ruff]
 line-length = 100
-target-version = ['py39']
+target-version = "py39"
 
-[tool.isort]
-profile = "black"
-line_length = 100
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "PTH", "RUF"]
 
-[tool.mypy]
-python_version = "3.9"
-warn_return_any = true
-warn_unused_configs = true
+[tool.ruff.lint.isort]
+known-first-party = ["mace_gaussian"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "gpu: marks tests that require CUDA GPU",
+    "gaussian: marks tests that require Gaussian 16 (g16/formchk)",
+    "slow: marks tests that take >30 seconds",
+]
+addopts = [
+    "--strict-markers",
+    "-ra",
+]
+
+[tool.coverage.run]
+source = ["mace_gaussian"]
+omit = [
+    "tests/*",
+    "mace_dipole_pkg/*",
+    "mace_ML_pkg/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true

@@ -1,5 +1,4 @@
 from e3nn import o3
-
 from mace_dipole_core.tools import cg
 
 

@@ -11,7 +11,6 @@ from ase import build
 from ase.atoms import Atoms
 from ase.calculators.test import gradient_test
 from ase.constraints import ExpCellFilter
-
 from mace.calculators import mace_mp, mace_off
 from mace.calculators.mace import MACECalculator
 from mace.modules.models import ScaleShiftMACE

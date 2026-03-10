@@ -53,9 +53,6 @@ Thumbs.db
 # Jupyter
 .ipynb_checkpoints/
 
-# uv
-uv.lock
-
 # Results directories (large, generated files - keep local only)
 comparison_results/
 analysis_results/
@@ -63,3 +60,9 @@ testingStuff/
 
 # But keep example test molecules
 !*.xyz
+
+# Allow test fixtures (override *.log, *.fchk, *.json global ignores)
+!tests/fixtures/**
+!tests/fixtures/**/*.log
+!tests/fixtures/**/*.fchk
+!tests/fixtures/**/*.json

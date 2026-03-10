@@ -5,7 +5,6 @@ import pytest
 import torch
 import torch.nn.functional as F
 from e3nn import o3
-
 from mace import data, modules, tools
 from mace.cli.convert_cueq_e3nn import run as run_cueq_to_e3nn
 from mace.cli.convert_e3nn_cueq import run as run_e3nn_to_cueq

@@ -7,11 +7,10 @@ import pytest
 import torch
 import torch.nn.functional as F
 from e3nn import o3
-from torch.testing import assert_close
-
 from mace import data, modules, tools
 from mace.tools import compile as mace_compile
 from mace.tools import torch_geometric
+from torch.testing import assert_close
 
 table = tools.AtomicNumberTable([6])
 atomic_energies = np.array([1.0], dtype=float)

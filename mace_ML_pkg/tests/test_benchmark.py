@@ -1,12 +1,11 @@
+import json
 import os
 from typing import Optional
 
 import pandas as pd
-import json
 import pytest
 import torch
 from ase import build
-
 from mace import data
 from mace.calculators.foundations_models import mace_mp
 from mace.tools import AtomicNumberTable, torch_geometric, torch_tools
@@ -80,7 +79,7 @@ def log_bench_info(benchmark, dtype, compile_mode, batch):
 
 def read_bench_results(files: list[str]) -> pd.DataFrame:
     def read(file):
-        with open(file, "r") as f:
+        with open(file) as f:
             data = json.load(f)
 
         records = []

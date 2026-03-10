@@ -5,7 +5,6 @@ import ase.build
 import h5py
 import numpy as np
 import torch
-
 from mace_dipole_core.data import (
     AtomicData,
     Configuration,

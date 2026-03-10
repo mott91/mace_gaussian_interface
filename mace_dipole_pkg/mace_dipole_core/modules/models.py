@@ -13,7 +13,7 @@ from e3nn.util.jit import compile_mode
 
 from mace_dipole_core.data import AtomicData
 from mace_dipole_core.modules.radial import ZBLBasis
-from mace_dipole_core.tools.scatter import scatter_sum, scatter_mean
+from mace_dipole_core.tools.scatter import scatter_mean, scatter_sum
 from mace_dipole_core.tools.torch_tools import spherical_to_cartesian
 
 from .blocks import (

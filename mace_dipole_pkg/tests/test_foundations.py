@@ -4,14 +4,13 @@ import torch
 import torch.nn.functional
 from ase.build import molecule
 from e3nn import o3
-from scipy.spatial.transform import Rotation as R
-
 from mace_dipole_core import data, modules, tools
 from mace_dipole_core.calculators import mace_mp, mace_off
 from mace_dipole_core.tools import torch_geometric
 from mace_dipole_core.tools.finetuning_utils import load_foundations
 from mace_dipole_core.tools.scripts_utils import extract_config_mace_model
 from mace_dipole_core.tools.utils import AtomicNumberTable
+from scipy.spatial.transform import Rotation as R
 
 torch.set_default_dtype(torch.float64)
 config = data.Configuration(

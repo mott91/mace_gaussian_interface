@@ -12,12 +12,12 @@ import numpy as np
 import torch
 
 from mace_dipole_core import data
+from mace_dipole_core.data import HDF5Dataset
 from mace_dipole_core.tools import (
     torch_geometric,
     torch_tools,
     utils,
 )
-from mace_dipole_core.data import HDF5Dataset
 
 
 def parse_args() -> argparse.Namespace:

@@ -93,7 +93,7 @@ def run(args: argparse.Namespace) -> None:
             print(distr_env)
         torch.distributed.init_process_group(backend="nccl")
     else:
-        rank = int(0)
+        rank = 0
 
     # Setup
     tools.set_seeds(args.seed)
@@ -194,7 +194,7 @@ def run(args: argparse.Namespace) -> None:
         logging.info(f"=============    Processing head {head}     ===========")
         head_config = dict_head_to_dataclass(head_args, head, args)
         if head_config.statistics_file is not None:
-            with open(head_config.statistics_file, "r") as f:  # pylint: disable=W1514
+            with open(head_config.statistics_file) as f:  # pylint: disable=W1514
                 statistics = json.load(f)
             logging.info("Using statistics json file")
             head_config.r_max = (
@@ -208,7 +208,7 @@ def run(args: argparse.Namespace) -> None:
             if isinstance(statistics["atomic_energies"], str) and statistics[
                 "atomic_energies"
             ].endswith(".json"):
-                with open(statistics["atomic_energies"], "r", encoding="utf-8") as f:
+                with open(statistics["atomic_energies"], encoding="utf-8") as f:
                     atomic_energies = json.load(f)
                 head_config.E0s = atomic_energies
                 head_config.atomic_energies_dict = ast.literal_eval(atomic_energies)

@@ -68,7 +68,7 @@ def run(args: argparse.Namespace) -> None:
             print(distr_env)
         torch.distributed.init_process_group(backend="nccl")
     else:
-        rank = int(0)
+        rank = 0
 
     # Setup
     tools.set_seeds(args.seed)
@@ -118,7 +118,7 @@ def run(args: argparse.Namespace) -> None:
         args.r_max = model_foundation.r_max.item()
 
     if args.statistics_file is not None:
-        with open(args.statistics_file, "r") as f:  # pylint: disable=W1514
+        with open(args.statistics_file) as f:  # pylint: disable=W1514
             statistics = json.load(f)
         logging.info("Using statistics json file")
         args.r_max = (
@@ -490,7 +490,7 @@ def run(args: argparse.Namespace) -> None:
         # std_df = modules.scaling_classes["rms_dipoles_scaling"](train_loader)
         assert args.loss == "dipole", "Use dipole loss with AtomicDielectricMACE model"
         assert (
-            args.error_table == "DipoleRMSE" or args.error_table == "DipolePolarRMSE" or args.error_table == "DipoleMAE" 
+            args.error_table == "DipoleRMSE" or args.error_table == "DipolePolarRMSE" or args.error_table == "DipoleMAE"
         ), "Use error_table DipoleRMSE with AtomicDielectricMACE model"
         model = modules.AtomicDielectricMACE(
             **model_config,

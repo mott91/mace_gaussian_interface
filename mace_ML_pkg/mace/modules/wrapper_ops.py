@@ -5,7 +5,8 @@ Wrapper class for o3.Linear that optionally uses cuet.Linear
 import dataclasses
 import itertools
 import types
-from typing import Iterator, List, Optional
+from collections.abc import Iterator
+from typing import List, Optional
 
 import numpy as np
 import torch

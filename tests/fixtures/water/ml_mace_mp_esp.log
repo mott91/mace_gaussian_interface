@@ -1,0 +1,89 @@
+ Entering Gaussian System, Link 0=g16
+ Input=temp_mace_mp_espaloma_20260216_103020.gjf
+ Output=temp_mace_mp_espaloma_20260216_103020.log
+ Initial command:
+ /usr/local/g16-c.02/g16/l1.exe "/scratch/mot/Gau-2575621.inp" -scrdir="/scratch/mot/"
+ Energy=   -0.520130339     NIter=   0.
+ and normal coordinates:
+                      1                      2                      3
+                     A1                     A1                     B2
+ Frequencies --   1462.0634              3852.3150              3975.1301
+ Red. masses --      1.0828                 1.0451                 1.0823
+ Frc consts  --      1.3637                 9.1376                10.0764
+ IR Inten    --    703.0027               361.7028               698.7514
+  Atom  AN      X      Y      Z        X      Y      Z        X      Y      Z
+     1   8    -0.00   0.00  -0.07     0.00  -0.00   0.05    -0.00  -0.07  -0.00
+     2   1     0.00   0.43   0.56     0.00   0.59  -0.40     0.00   0.56  -0.43
+     3   1     0.00  -0.43   0.56    -0.00  -0.59  -0.40     0.00   0.56   0.43
+
+ 
+ Zero-point correction=                           0.021163 (Hartree/Particle)
+ Thermal correction to Energy=                    0.024001
+ Thermal correction to Enthalpy=                  0.024946
+ Thermal correction to Gibbs Free Energy=         0.003521
+ Sum of electronic and zero-point Energies=             -0.498967
+ and normal coordinates:
+                      1                      2                      3
+                     A1                     A1                     B2
+ Frequencies --   1462.0634              3852.3150              3975.1301
+ Red. masses --      1.0828                 1.0451                 1.0823
+ Frc consts  --      1.3637                 9.1376                10.0764
+ IR Inten    --    703.0027               361.7028               698.7514
+  Atom  AN      X      Y      Z        X      Y      Z        X      Y      Z
+     1   8    -0.00   0.00  -0.07     0.00  -0.00   0.05    -0.00  -0.07  -0.00
+     2   1     0.00   0.43   0.56     0.00   0.59  -0.40    -0.00   0.56  -0.43
+     3   1     0.00  -0.43   0.56    -0.00  -0.59  -0.40     0.00   0.56   0.43
+
+     ==================================================
+              Anharmonic Infrared Spectroscopy
+     ==================================================
+
+ Units: Transition energies (E) in cm^-1
+        Integrated intensity (I) in km.mol^-1
+
+ Fundamental Bands
+ -----------------
+   Mode(n)                  E(harm)   E(anharm)        I(harm)       I(anharm)
+      1(1)                  3852.315   3685.083    361.70280880    333.49699713
+      2(1)                  1462.063   1444.608    703.00267908    721.96895411
+      3(1)                  3975.130   3780.360    698.75144900    679.47851349
+
+ Overtones
+ ---------
+   Mode(n)                  E(harm)   E(anharm)                      I(anharm)
+      1(2)                  7704.630   7285.118                      5.09922614
+      2(2)                  2924.127   2880.336                      0.15844732
+      3(2)                  7950.260   7463.408                      5.13412288
+
+ Combination Bands
+ -----------------
+   Mode(n)     Mode(n)      E(harm)   E(anharm)                      I(anharm)
+      2(1)        1(1)      5314.378   5136.390                      0.48328109
+      3(1)        1(1)      7827.445   7294.376                     19.18211509
+      3(1)        2(1)      5437.193   5201.121                      2.40608768
+
+ Units: Transition energies (E) in cm^-1
+        Dipole strengths (DS) in 10^-40 esu^2.cm^2
+
+ Fundamental Bands
+ -----------------
+   Mode(n)                  E(harm)   E(anharm)       DS(harm)      DS(anharm)
+      1(1)                  3852.315   3685.083    374.57388394    361.03729580
+      2(1)                  1462.063   1444.608   1918.21900290   1993.77359185
+      3(1)                  3975.130   3780.360    701.25952691    717.05081605
+
+ Overtones
+ ---------
+   Mode(n)                  E(harm)   E(anharm)                     DS(anharm)
+      1(2)                  7704.630   7285.118                      2.79238362
+      2(2)                  2924.127   2880.336                      0.21945686
+      3(2)                  7950.260   7463.408                      2.74433088
+
+ Combination Bands
+ -----------------
+   Mode(n)     Mode(n)      E(harm)   E(anharm)                     DS(anharm)
+      2(1)        1(1)      5314.378   5136.390                      0.37536109
+      3(1)        1(1)      7827.445   7294.376                     10.49097223
+      3(1)        2(1)      5437.193   5201.121                      1.84553330
+ GTot=-0.5166094\Dipole=0.,0.,-0.8189172\DipoleDeriv=-1.3982151,0.,0.,0
+ Normal termination of Gaussian 16 at Mon Feb 16 10:30:53 2026.
