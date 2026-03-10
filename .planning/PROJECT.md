@@ -1,103 +1,94 @@
-# MACE-Gaussian Interface
+# MACE-Gaussian Presentation (March 2026)
 
 ## What This Is
 
-A bridge between machine learning potentials (MACE) and Gaussian 16 for computing molecular IR spectra. It injects ML-calculated dipole derivatives into Gaussian's anharmonic frequency calculations in real-time via ZMQ, enabling fast spectral predictions without full DFT cost. Built as a research tool for a master thesis in theoretical chemistry. The codebase is now a proper `mace_gaussian/` Python package with CI, tests, and documentation, ready for other researchers to clone and reproduce.
+A 15-minute research group presentation on the MACE-Gaussian interface — a tool that injects ML-calculated dipole derivatives into Gaussian 16 in real-time via ZMQ to produce fast, DFT-quality IR spectra. Built programmatically in Python (python-pptx) with a terminal dark theme. The source of truth is `presentation/generate_pptx_v2.py`; the `.pptx` is a build artifact.
+
+**Audience:** Research group + life science theoretical chemists (good background, not specialist)
+**Length:** ~15 minutes
+**Branch:** `presentation/v2-march2026`
 
 ## Core Value
 
-Reliable, reproducible IR spectral predictions using ML potentials that can be validated against DFT reference data. A researcher can clone the repo, install the package (`pip install -e .`), run `mace-gaussian run water.xyz`, and get trustworthy spectral results.
+A compelling, honest presentation that tells the story of why we built this, how the ZMQ injection works, and what the harmonic benchmark results actually show — clear enough for life scientists, rigorous enough for the research group.
+
+## Narrative Arc
+
+1. **Why:** We want to match DFT IR spectra fast — both frequencies and intensities
+2. **How:** We built a ZMQ bridge that injects ML dipoles into Gaussian in real-time (the novel engineering)
+3. **What we found:** Harmonic benchmark across molecules — best combo, scaling wins, honest limits
+4. **What's next:** Anharmonic treatment is ongoing
+
+## Key Results (Harmonic)
+
+- **Frequencies:** Energy model dominates. mace_omol/mace_anicc → MAE ~10–27 cm⁻¹ (R² > 0.9999). mace_mp → MAE ~100+ cm⁻¹. Dipole model irrelevant for frequencies.
+- **Intensities:** Dipole model dominates. mace_ml → R² 0.72–0.999 (molecule-dependent). espaloma → R² 0.09–0.74 (much worse, especially for larger molecules).
+- **Winner:** mace_omol + mace_ml
+- **Scaling:** ~1× (water) → ~7–10× (glycine) → ~18–29× (aspirin). Grows with molecule size.
+- **Anharmonic:** Explored for water/acoh — ongoing, not the focus of this presentation.
+
+## Deep Dives (2 slides worth of depth)
+
+1. **ZMQ bridge** — the real-time ML injection mechanism; the novel engineering contribution
+2. **Results** — systematic harmonic comparison, model ranking, scaling argument
+
+## Current Slide Structure (12 slides, v2)
+
+| # | Command | Content |
+|---|---------|---------|
+| 0 | `$ ./presentation.sh` | Neofetch-style title |
+| 1 | `$ cat motivation.md` | Problem / solution / impact |
+| 2 | `$ man ir_spectroscopy` | IR basics, harmonic limit |
+| 3 | `$ cat vpt2_theory.md` | Anharmonicity, VPT2, dipole gap |
+| 4 | `$ python3 main.py` | Full pipeline ASCII diagram |
+| 5 | `$ cat dipole_methods.md` | MACE4IR vs Espaloma + energy model table |
+| 6 | `$ cat zmq_bridge.md` | ZMQ flow diagram + engineering |
+| 7 | `$ cat mode_matching.md` | Eigenvector dot product, water example |
+| 8 | `$ cd results/water/` | 8 combos, R²/MAE/RMSE table |
+| 9 | `$ cd results/aspirin/` | 51 modes, scaling, 18× speedup |
+| 10 | `$ git log --graph` | Research journey — physics/chemistry/progress |
+| 11 | `$ ./questions.sh` | Questions |
 
 ## Requirements
 
-### Validated (v1.0)
+### Validated
 
-- ✓ ZMQ-based real-time ML dipole injection into Gaussian external interface — v1.0
-- ✓ Geometry optimization with MACE energy calculators (mace_mp, mace_omol) — v1.0
-- ✓ Harmonic and anharmonic frequency calculations via Gaussian + ML dipoles — v1.0
-- ✓ Four ML model combinations: mace_mp/mace_omol × espaloma/mace_ml — v1.0
-- ✓ DFT baseline calculations (B3LYP/6-31G(d,p)) for reference spectra — v1.0
-- ✓ Mode matching via eigenvector dot product overlap — v1.0
-- ✓ Statistical comparison metrics (MAE, RMSE, R², regression) — v1.0
-- ✓ HTML report generation with embedded plots — v1.0
-- ✓ Harmonic-only analysis mode with mode overlap heatmaps — v1.0
-- ✓ CLI interface (`mace-gaussian`) for running workflows and diagnostics — v1.0
-- ✓ 131-test pytest suite with GPU/Gaussian markers and regression baselines — v1.0
-- ✓ mace_gaussian/ package with proper imports and `mace-gaussian` entry point — v1.0
-- ✓ Safe MACE model loading via mace_loader.py (no sys.modules monkey-patching) — v1.0
-- ✓ gaussian/ subpackage: LINGER=0 ZMQ fix, SIGKILL timeout, context-manager server — v1.0
-- ✓ GitHub Actions CI: ruff ≥0.9.0 + pytest on push — v1.0
-- ✓ User documentation: quickstart, worked water example, thesis methods section — v1.0
-- ✓ calculation_parameters captured in results JSON — v1.0
-- ✓ CUDANotAvailableWarning emitted via warnings.warn — v1.0
-- ✓ Env vars resolved at CLI startup before prerequisite validation — v1.0
+(None yet — ship to validate)
 
-### Active (v1.1)
+### Active
 
-- [ ] Calculator expansion: mace_off and mace_anicc wired into CLI as energy calculator choices
-- [ ] Calculator expansion: xTB registered as energy calculator option
-- [ ] Calculator expansion: xTB dipole unit bug verified and fixed; xTB dipole usable in production
-- [ ] Batch runner: `mace-gaussian batch molecules.txt` runs pipeline over multiple molecules with per-molecule failure isolation and restart-safe manifest
-- [ ] PubChem fetcher: `mace-gaussian fetch <name>` downloads 3D structure as XYZ
-- [ ] HPC/SLURM: DFT baseline can be submitted to cluster via `--dft-on-cluster`, polled, and results retrieved automatically
-- [ ] Batch report: multi-molecule HTML report with aggregated R², RMSE per calculator combination
-- [ ] Benchmark campaign: systematic results for ~25 molecules (size-scaling + functional group series)
-- [ ] Bug fix: acetic acid (acoh) frequency parser corrected and xfail test promoted to passing
-- [ ] Docs update: ARCHITECTURE.md and DEVELOPMENT.md reflect current mace_gaussian/ package layout
+- [ ] Workshopped narrative reviewed and slide structure confirmed
+- [ ] Slides updated/created to match narrative (harmonic focus, ZMQ deep dive, results)
+- [ ] Embedded plot images added (spectrum comparison, regression — from `analysis_results_harmonic/`)
+- [ ] Scaling argument visualised in results slides
+- [ ] Slide 10 rewritten as research journey (physics/chemistry/progress, not git versions)
+- [ ] Speaking notes written for each slide (personal reference)
+- [ ] Final polish pass: font consistency, color-coded tables, slide numbers
 
 ### Out of Scope
 
-- Autograd-based dipole derivatives for MACE-ML — numerical finite differences sufficient for thesis scale; revisit for >100 atom molecules
-- Fixing ML intensity accuracy — research problem, not a code problem
-- ORCA/VPT2 integration — no external hook in ORCA; technically blocked; v2.0 or never
-- Periodic systems — different project (QM engine, dipole model, analysis all need replacing); thesis future-work section
-- Web interface or GUI — CLI is appropriate for research use
-- PyPI distribution — clone-and-reproduce is the target, not pip install from index
-- `compare`/`export` CLI commands — stubs, deferred to v2
-- TorchANI/ANI-2x — defer until zero-effort calculator additions are validated and benchmark molecules chosen
-
-## Current Milestone: v1.1 — Batch Benchmarking & Calculator Expansion
-
-**Goal:** Expand from 4 to 7+ ML calculator combinations and run a systematic ~25-molecule benchmark campaign to answer the thesis question: does energy surface quality or dipole model quality dominate IR accuracy?
-
-**Target features:**
-- mace_off, mace_anicc, xTB as new energy/dipole options (near-zero code effort)
-- `mace-gaussian batch` command for multi-molecule pipelines with SLURM DFT offload
-- `mace-gaussian fetch` for PubChem structure retrieval
-- Systematic benchmark dataset + aggregated multi-molecule HTML report
-- Acoh parser bug fix + ARCHITECTURE/DEVELOPMENT.md doc update
-
-## Context
-
-- **Current state (v1.0):** Distribution-ready Python package. 7,648 LOC source + 2,147 LOC tests. 131 tests pass. CI runs on every push. `mace-gaussian run water.xyz` works end-to-end.
-- **Current state (v1.1 starting):** Calculator expansion and batch tooling in progress. Research complete for all v1.1 features.
-- **Known limitations:** `compare`/`export` CLI stubs. docs/ARCHITECTURE.md references pre-refactor module names. E2E GPU+Gaussian test requires hardware.
-- **Known bug:** Acetic acid (acoh) DFT frequency parsing fails for regression plots (commit a4384c4, xfail test documents it). Targeted for v1.1 fix.
-- **Thesis stage:** Method validated on water/CH4/BH3·NH3/acoh. Expanding to systematic ~25-molecule benchmark. mace_omol/mace_ml is the best-performing combination so far.
-- **Target audience:** Computational chemistry researchers with Gaussian 16 who want ML-augmented spectral predictions.
+- BH3·NH3 results — future-work molecule, not ready
+- Anharmonic deep dive — mentioned briefly as ongoing, not a focus slide
+- Exact word-for-word script — personal reference notes only
+- Mode overlap heatmap for aspirin — nice-to-have, only if time allows
+- Live demo slide — too risky for a 15-minute slot
 
 ## Constraints
 
-- **External dependency**: Gaussian 16 must be installed and licensed — cannot be bundled or replaced
-- **GPU**: CUDA-capable NVIDIA GPU required for practical performance (CPU fallback ~10× slower)
-- **Custom MACE packages**: mace_torch and mace_dipole_core are local packages, not on PyPI
-- **Platform**: Linux only (HPC environment assumed)
-- **Python**: 3.9+ with uv as package manager
+- **Timeline:** This week — days away
+- **Build:** `micromamba activate mace4ir_v2 && python presentation/generate_pptx_v2.py`
+- **Toolchain:** python-pptx only; no external design tools
+- **Design system:** Terminal Dark (Consolas, #0D1117 bg, #58A6FF accent, #3FB950 green, #D29922 yellow)
+- **Plot source:** `analysis_results_harmonic/` for harmonic plots; `analysis_results/` for anharmonic
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Keep all 4 ML model combinations | Comparison across combinations is part of thesis methodology | ✓ Good — clean comparison data |
-| Focus on refactoring before new features | Code quality and reproducibility are prerequisites for distribution | ✓ Good — solid foundation for v1.1 |
-| Use quality model profile for GSD agents | Important project, want thorough analysis and planning | ✓ Good — thorough plans caught wiring gaps early |
-| Reproducibility over pip-installability | Thesis needs clone-and-reproduce, not PyPI distribution | ✓ Good — uv.lock + documented install procedure |
-| Safe MACE loading via pickle_module remapping | Eliminates sys.modules cleanup fragility | ✓ Good — clean, tested, no side effects |
-| SIGKILL (not SIGTERM) for Gaussian timeout | Gaussian ignores SIGTERM | ✓ Good — reliable timeout behavior |
-| LINGER=0 before bind() in ZMQ server | Prevents close() blocking on Gaussian crash | ✓ Good — race condition eliminated |
-| mace_gaussian/ package with relative imports | Enables pip install -e . and entry-point CLI | ✓ Good — works end-to-end |
-| No coverage threshold in CI | Informational only; focus on correctness | ✓ Good — 57% coverage without noise |
-| ruff>=0.9.0 floor (not exact pin) in CI | Removes maintenance burden vs. exact pin | ✓ Good — aligned with dev dep declaration |
+| Harmonic-first narrative | Results are solid and complete; anharmonic is ongoing | — Pending |
+| ZMQ bridge as technical deep dive | Novel engineering contribution, surprising to any audience | — Pending |
+| Model comparison in results, not as narrative spine | Energy→freq, dipole→intensity is physically expected; ranking is the finding | — Pending |
+| BH3·NH3 excluded | Future-work molecule, not ready to present | — Pending |
 
 ---
-*Last updated: 2026-03-03 after v1.1 milestone start*
+*Last updated: 2026-03-06 after initialization*

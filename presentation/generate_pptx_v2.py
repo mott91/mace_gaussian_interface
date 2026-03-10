@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 """
 MACE-Gaussian Interface — Research Presentation v2
-March 2026 · ~15 minutes · 12 slides
+March 2026 · ~15 minutes · 13 slides
 Run: python generate_pptx_v2.py
 Output: presentation_v2.pptx
 """
 
+import json
+import os
+
+import pyfiglet
 from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.enum.text import PP_ALIGN
@@ -21,7 +25,7 @@ DIM    = RGBColor(139, 148, 158)  # #8B949E
 RED    = RGBColor(248, 81,  73)   # #F85149
 FONT   = "Consolas"
 
-DATE   = "Manuel Ott · Hofer Lab · 2026-03-11"
+DATE   = "Manuel Ott · Hofer Lab · 2026-03-10"
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -33,8 +37,11 @@ def blank_slide(prs):
     return slide
 
 
+_slide_counter = 0
+
 def add_footer(slide, text=DATE):
-    box = slide.shapes.add_textbox(Inches(1), Inches(6.85), Inches(8), Inches(0.4))
+    global _slide_counter
+    box = slide.shapes.add_textbox(Inches(1), Inches(6.85), Inches(7), Inches(0.4))
     tf = box.text_frame
     tf.text = text
     p = tf.paragraphs[0]
@@ -42,6 +49,16 @@ def add_footer(slide, text=DATE):
     p.font.name = FONT
     p.font.color.rgb = DIM
     p.alignment = PP_ALIGN.CENTER
+    # Slide number (right-aligned)
+    nbox = slide.shapes.add_textbox(Inches(8.5), Inches(6.85), Inches(1), Inches(0.4))
+    ntf = nbox.text_frame
+    ntf.text = str(_slide_counter)
+    np = ntf.paragraphs[0]
+    np.font.size = Pt(11)
+    np.font.name = FONT
+    np.font.color.rgb = DIM
+    np.alignment = PP_ALIGN.RIGHT
+    _slide_counter += 1
 
 
 def add_prompt(slide, command, y=0.35):
@@ -107,223 +124,174 @@ def two_col_slide(prs, command, left_lines, right_lines, split=4.3):
     return slide
 
 
+# ── Data helpers ──────────────────────────────────────────────────────────────
+
+def load_combo_metrics(molecule):
+    """Load combo results from analysis_results_harmonic/{molecule}/data/metrics_summary.json.
+
+    Data source: pre-aggregated metrics_summary.json (not comparison_results/ directory walk).
+    Sorted by mae_freq ascending so the best-performing combo (lowest error) appears first.
+    Per CONTEXT.md line 28: overrides original comparison_results/ approach from discuss-phase.
+    """
+    summary_path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        "analysis_results_harmonic",
+        molecule,
+        "data",
+        "metrics_summary.json",
+    )
+    if not os.path.isfile(summary_path):
+        return []
+    with open(summary_path) as f:
+        data = json.load(f)
+    combos = []
+    for entry in data.get("comparisons", []):
+        combos.append({
+            "name": entry.get("name", "unknown"),
+            "mae_freq": entry.get("mae_freq", float("inf")),
+            "r2_freq": entry.get("r2_freq", 0.0),
+            "r2_intensity": entry.get("r2_intensity", 0.0),
+            "speedup": entry.get("speedup"),
+        })
+    # Sort by mae_freq ascending (lowest MAE = best = shown first)
+    # Per CONTEXT.md line 26: overrides original "R² descending" from discuss-phase.
+    combos.sort(key=lambda c: c["mae_freq"], reverse=False)
+    return combos
+
+
+def parse_combo_name(name):
+    """Split combo name into (energy_model, dipole_model)."""
+    for suffix in ("_mace_ml", "_espaloma"):
+        if name.endswith(suffix):
+            dipole = "MACE4IR" if suffix == "_mace_ml" else "espaloma"
+            return name[: -len(suffix)], dipole
+    return name, "?"
+
+
 # ── Slides ────────────────────────────────────────────────────────────────────
 
 def slide_title(prs):
-    """Slide 0: neofetch-style title."""
+    """Slide 0: style 9 — block font MACE + GAUSSIAN, centered."""
     slide = blank_slide(prs)
 
-    # ASCII art — left panel (molecule + project logo)
-    ascii_art = [
-        "  __  __   _   ___ ___    ",
-        " |  \\/  | /_\\ / __| __|   ",
-        " | |\\/| |/ _ \\ (__| _|    ",
-        " |_|  |_/_/ \\_\\___|___|   ",
-        "       GAUSSIAN            ",
-        "                           ",
-        "  // ML-accelerated        ",
-        "  // IR spectroscopy       ",
-        "                           ",
-        "     O                     ",
-        "    / \\                    ",
-        "   H   H   H₂O             ",
-        "                           ",
-        "     O   OH                ",
-        "     ‖   |                 ",
-        " CH₃-C-O-C₆H₄-COOH        ",
-        "   aspirin C₉H₈O₄          ",
-    ]
+    # MACE in block font
+    raw = pyfiglet.figlet_format("MACE", font="block")
+    art_lines = [(ln, ACCENT) for ln in raw.splitlines() if ln.strip()]
+    art_lines.append(("              GAUSSIAN", GREEN))
 
-    abox = slide.shapes.add_textbox(Inches(0.4), Inches(1.0), Inches(4.4), Inches(5.6))
-    atf = abox.text_frame
-    for i, line in enumerate(ascii_art):
-        p = atf.paragraphs[i] if i == 0 else atf.add_paragraph()
-        p.text = line
-        p.font.size = Pt(15)
-        p.font.name = FONT
-        p.font.color.rgb = GREEN if i < 5 else (ACCENT if i >= 9 else DIM)
-        p.space_after = Pt(0)
-
-    # Divider
-    div = slide.shapes.add_textbox(Inches(4.9), Inches(1.0), Inches(0.1), Inches(5.6))
-    dtf = div.text_frame
-    for i in range(17):
-        p = dtf.paragraphs[i] if i == 0 else dtf.add_paragraph()
-        p.text = "│"
-        p.font.size = Pt(15)
-        p.font.name = FONT
-        p.font.color.rgb = DIM
-        p.space_after = Pt(0)
-
-    # Info panel — right
-    info = [
-        ("mot@hofer-hpc", ACCENT),
-        ("─" * 28, DIM),
-        ("OS       Hofer Lab · TU München", TEXT),
-        ("Shell    zsh + oh-my-zsh", TEXT),
-        ("─" * 28, DIM),
-        ("Project  mace-gaussian v1.1", GREEN),
-        ("Method   VPT2 + ML Dipoles", TEXT),
-        ("Engine   Gaussian 16", TEXT),
-        ("Bridge   ZMQ (IPC socket)", TEXT),
-        ("─" * 28, DIM),
-        ("ML       MACE-OMOL-0, MACE-MP", TEXT),
-        ("Dipoles  MACE4IR / Espaloma", TEXT),
-        ("Combos   4 energy × 2 dipole", TEXT),
-        ("─" * 28, DIM),
-        ("Tests    131 passing ✓", GREEN),
-        ("CI       GitHub Actions ✓", GREEN),
-        ("─" * 28, DIM),
-        ("▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓", ACCENT),
-    ]
-
-    ibox = slide.shapes.add_textbox(Inches(5.1), Inches(1.0), Inches(4.6), Inches(5.6))
-    itf = ibox.text_frame
-    for i, (line, color) in enumerate(info):
-        p = itf.paragraphs[i] if i == 0 else itf.add_paragraph()
-        p.text = line
-        p.font.size = Pt(14)
+    box = slide.shapes.add_textbox(Inches(0.6), Inches(1.6), Inches(9.2), Inches(3.0))
+    tf = box.text_frame
+    tf.word_wrap = False
+    for i, (text, color) in enumerate(art_lines):
+        p = tf.paragraphs[i] if i == 0 else tf.add_paragraph()
+        p.text = text
+        p.font.size = Pt(16)
         p.font.name = FONT
         p.font.color.rgb = color
-        p.space_after = Pt(1)
+        p.space_after = Pt(0)
+        p.alignment = PP_ALIGN.CENTER
+
+    # Subtitle
+    sub = slide.shapes.add_textbox(Inches(0.8), Inches(5.0), Inches(8.4), Inches(0.6))
+    stf = sub.text_frame
+    stf.text = "// ML-accelerated IR spectrum calculations"
+    sp = stf.paragraphs[0]
+    sp.font.size = Pt(16)
+    sp.font.name = FONT
+    sp.font.color.rgb = DIM
+    sp.alignment = PP_ALIGN.CENTER
 
     add_footer(slide)
 
 
 def slide_motivation(prs):
+    """Slide 1: Why we built this."""
     content_slide(prs, "$ cat motivation.md", [
         ("# Problem", ACCENT),
-        ("  → DFT frequency calculations: slow (minutes to hours per molecule)", TEXT),
-        ("  → Anharmonic VPT2: even more expensive — scales as O(N⁴)", TEXT),
-        ("  → Bottleneck for any systematic benchmark campaign", TEXT),
+        ("  \u2192 DFT frequency calculations: slow", TEXT),
+        ("  \u2192 Minutes to hours per molecule", TEXT),
         ("", DIM),
         ("# Solution", ACCENT),
-        ("  → Hybrid ML-QM approach: ML computes dipole derivatives,", TEXT),
-        ("    Gaussian 16 handles the VPT2 orchestration", TEXT),
-        ("  → Real-time injection via ZMQ bridge — no Gaussian modifications", TEXT),
-        ("  → 10-100× faster than pure DFT for dipole-heavy steps", TEXT),
+        ("  \u2192 Hybrid ML-QM approach", TEXT),
+        ("  \u2192 ML dipoles and energies", TEXT),
+        ("  \u2192 Possibly 10\u2013100\u00d7 faster than pure DFT", TEXT),
         ("", DIM),
         ("# Impact", ACCENT),
-        ("  → Rapid IR spectral predictions across chemical space", TEXT),
-        ("  → Systematic benchmark: which ML model combination works best?", TEXT),
-        ("  → Thesis question: energy surface vs dipole model quality", TEXT),
+        ("  \u2192 Accelerate IR spectral predictions while maintaining DFT-level accuracy", TEXT),
     ])
 
 
 def slide_ir_theory(prs):
-    two_col_slide(prs, "$ man ir_spectroscopy",
-        left_lines=[
-            ("# What is IR spectroscopy?", ACCENT),
-            ("", DIM),
-            ("  Molecules vibrate at specific", TEXT),
-            ("  frequencies determined by:", TEXT),
-            ("  → bond stiffness (k)", TEXT),
-            ("  → atomic masses (m)", TEXT),
-            ("", DIM),
-            ("  ω = √(k/m)         (harmonic)", TEXT),
-            ("", DIM),
-            ("  IR light is absorbed when:", TEXT),
-            ("  → photon frequency = vib. frequency", TEXT),
-            ("  → dipole moment changes (Δμ ≠ 0)", TEXT),
-            ("", DIM),
-            ("# Energy units", ACCENT),
-            ("  1 cm⁻¹  ≈ 0.124 meV", TEXT),
-            ("  kT@300K ≈ 200 cm⁻¹", TEXT),
-            ("  IR range: 400–4000 cm⁻¹", TEXT),
-        ],
-        right_lines=[
-            ("# Why do we care?", ACCENT),
-            ("", DIM),
-            ("  IR spectrum = molecular fingerprint", TEXT),
-            ("  → Identify functional groups", TEXT),
-            ("  → Confirm synthesis products", TEXT),
-            ("  → Study protein conformations", TEXT),
-            ("", DIM),
-            ("# The harmonic limit", ACCENT),
-            ("", DIM),
-            ("  V(x) ≈ V₀ + ½k·x²", TEXT),
-            ("", DIM),
-            ("  Works well for fundamentals.", TEXT),
-            ("  Fails for overtones:", TEXT),
-            ("  → predicts exactly 2×ω₀", TEXT),
-            ("  → reality: slightly less", TEXT),
-            ("  → asymmetric potential well", TEXT),
-        ],
-        split=5.0,
-    )
-
-
-def slide_vpt2(prs):
-    two_col_slide(prs, "$ cat vpt2_theory.md",
-        left_lines=[
-            ("# Beyond the harmonic approximation", ACCENT),
-            ("", DIM),
-            ("  Real potential = anharmonic:", TEXT),
-            ("  V(x) = ½kx² + αx³ + βx⁴ + …", TEXT),
-            ("", DIM),
-            ("  The cubic term (αx³) causes:", TEXT),
-            ("  → overtone at ~2ω (not exactly)", TEXT),
-            ("  → frequency shifts", TEXT),
-            ("  → mode coupling", TEXT),
-            ("", DIM),
-            ("# VPT2 — Vibrational Perturbation Theory", ACCENT),
-            ("  (2nd order)", TEXT),
-            ("", DIM),
-            ("  Treat anharmonicity as a perturbation.", TEXT),
-            ("  Gaussian computes 3rd + 4th derivatives", TEXT),
-            ("  of V and μ numerically (finite diff.).", TEXT),
-            ("  → Overtones, combination bands", TEXT),
-        ],
-        right_lines=[
-            ("# What Gaussian needs from ML", ACCENT),
-            ("", DIM),
-            ("  For each displaced geometry:", TEXT),
-            ("  → energy  (from MACE-OMOL/MP)", TEXT),
-            ("  → dipole  (from MACE4IR/Espaloma)", TEXT),
-            ("", DIM),
-            ("  Gaussian displaces the molecule", TEXT),
-            ("  hundreds of times and asks the", TEXT),
-            ("  external program each time.", TEXT),
-            ("", DIM),
-            ("# The dipole gap", ACCENT),
-            ("", DIM),
-            ("  MACE energy models: good forces,", TEXT),
-            ("  bad dipoles (not trained for it).", TEXT),
-            ("", DIM),
-            ("  → Need a dedicated dipole model", TEXT),
-            ("  → MACE4IR: trained on dipole data,", TEXT),
-            ("    78 elements, E(3)-equivariant", TEXT),
-        ],
-        split=5.0,
-    )
-
-
-def slide_architecture(prs):
-    content_slide(prs, "$ python3 main.py  # system architecture",  [
-        ("  [molecule.xyz]", GREEN),
-        ("       ↓", DIM),
-        ("  ┌─────────────────────────────────────────────────────┐", DIM),
-        ("  │  GEOMETRY OPTIMIZER  (MACE-OMOL-0 + ASE)           │", DIM),
-        ("  └──────────────┬──────────────────────────────────────┘", DIM),
-        ("                 ↓", DIM),
-        ("  ┌──────────────┴──────────────┐", DIM),
-        ("  │ DFT BASELINE                │   ┌─────────────────────────────┐", DIM),
-        ("  │ B3LYP/6-31G(d,p)           │   │ ML FREQ CALC                │", DIM),
-        ("  │ gaussian_freq()             │   │ load_mace_calculator()      │", DIM),
-        ("  │ parse_gaussian()            │   │ get_dipole_calculator()     │", DIM),
-        ("  └──────────────┬──────────────┘   │ setup_zmq_server()          │", DIM),
-        ("                 │                  │ launch_gaussian()           │", DIM),
-        ("                 └──────────────────┤ zmq_dipole_loop()           │", DIM),
-        ("                                    └──────────────┬──────────────┘", DIM),
-        ("                                                   ↓", DIM),
-        ("  ┌─────────────────────────────────────────────────────────────┐", DIM),
-        ("  │ ANALYSIS  eigenvector_match → kde_broaden → metrics → HTML │", DIM),
-        ("  └─────────────────────────────────────────────────────────────┘", DIM),
+    """Slide 2: IR spectroscopy — what Gaussian needs and why."""
+    content_slide(prs, "$ cat ir_spectroscopy.md", [
+        ("# How IR spectra are computed", ACCENT),
+        ("  → Displace each atom in x, y, z  (small nudges around equilibrium)", TEXT),
+        ("  → For each displacement, compute energy + forces", TEXT),
+        ("  → Build Hessian (matrix of force constants) → diagonalise", TEXT),
+        ("  → Eigenvalues = frequencies", GREEN),
+        ("  → Eigenvectors = normal modes", YELLOW),
+        ("  → 3N−6 modes for N atoms  (e.g. water: 3 modes)", TEXT),
+        ("", DIM),
+        ("# Where do intensities come from?", ACCENT),
+        ("  → Dipole μ⃗ = charge distribution of the molecule", TEXT),
+        ("  → When atoms vibrate, μ⃗ changes → molecule absorbs IR light", TEXT),
+        ("  → Intensity ∝ |∂μ/∂Q|²  (how much dipole changes per mode)", TEXT),
+        ("  → Dipole μ⃗ must also be evaluated at every displaced geometry", TEXT),
+        ("", DIM),
+        ("# The bottleneck", ACCENT),
+        ("  → Each displacement requires E, forces F, and dipole μ⃗", TEXT),
+        ("  → DFT: full electronic structure solve per displacement (min–hrs)", TEXT),
+        ("  → ML:  single forward pass per displacement (seconds)", GREEN),
     ])
 
 
+def slide_architecture(prs):
+    slide = blank_slide(prs)
+    add_prompt(slide, "$ python3 workflow.py")
+
+    lines = [
+        ("                              [molecule.xyz]", GREEN),
+        ("                                    ▼", DIM),
+        ("  ┌────────────────────────────────────────────────────────────────────────┐", DIM),
+        ("  │  GEOMETRY OPTIMIZER   • load_geometry()  • mace_omol.optimize()        │", ACCENT),
+        ("  └───────────────────────────────┬────────────────────────────────────────┘", DIM),
+        ("                 ┌────────────────┴─────────────────┐", DIM),
+        ("                 ▼                                  ▼", DIM),
+        ("  ┌────────────────────────────────┐  ┌────────────────────────────────────┐", DIM),
+        ("  │  DFT BASELINE                  │  │  ML FREQ CALC                      │", ACCENT),
+        ("  │  ┌──────────────────┐          │  │  • load_mace_calculator()           │", DIM),
+        ("  │  │ Built-in opt     │          │  │    (MACE-MP / MACE-OMOL)            │", DIM),
+        ("  │  │ B3LYP/6-31G(d,p)│          │  │  • get_dipole_calculator()           │", DIM),
+        ("  │  └──────────────────┘          │  │    (Espaloma / MACE4IR)          │", DIM),
+        ("  │  • gaussian_freq()             │  │  • setup_zmq_server()               │", DIM),
+        ("  │  • gaussian_dipoles()          │  │  • launch_gaussian()                │", DIM),
+        ("  │  • parse_gaussian()            │  │  • zmq_dipole_loop()                │", DIM),
+        ("  └──────────────┬─────────────────┘  └──────────────────┬─────────────────┘", DIM),
+        ("                 └────────────────┬─────────────────────┘", DIM),
+        ("                                  ▼", DIM),
+        ("  ┌────────────────────────────────────────────────────────────────────────┐", DIM),
+        ("  │  ANALYSIS   load_results → eigenvector_matching → kde → metrics → plot │", ACCENT),
+        ("  └───────────────────────────────┬────────────────────────────────────────┘", DIM),
+        ("                                  ▼", DIM),
+        ("                        generate_html_report()", GREEN),
+    ]
+
+    box = slide.shapes.add_textbox(Inches(0.75), Inches(1.15), Inches(8.5), Inches(5.4))
+    tf = box.text_frame
+    tf.word_wrap = False
+    for i, (text, color) in enumerate(lines):
+        p = tf.paragraphs[i] if i == 0 else tf.add_paragraph()
+        p.text = text
+        p.font.size = Pt(14)
+        p.font.name = FONT
+        p.font.color.rgb = color
+        p.space_after = Pt(0)
+
+    add_footer(slide)
+
+
 def slide_dipole_methods(prs):
-    two_col_slide(prs, "$ cat dipole_methods.md",
+    slide = two_col_slide(prs, "$ ls -l calculators/",
         left_lines=[
             ("# MACE4IR (direct dipole)", ACCENT),
             ("", DIM),
@@ -333,8 +301,7 @@ def slide_dipole_methods(prs):
             ("", DIM),
             ("  → Equivariant: respects rotations", TEXT),
             ("  → Trained specifically on dipoles", TEXT),
-            ("  → 78-element coverage", TEXT),
-            ("  → Custom MACE4IR model (78 el.)", TEXT),
+            ("  → Custom MACE4IR model (78 elements)", TEXT),
             ("  → Fast — single forward pass", TEXT),
             ("", DIM),
             ("# Why E(3)-equivariance matters", ACCENT),
@@ -356,218 +323,244 @@ def slide_dipole_methods(prs):
             ("  → Available as pip package", TEXT),
             ("  → No custom model needed", TEXT),
             ("", DIM),
-            ("# Energy calculators", ACCENT),
-            ("  MACE-OMOL-0  molecules, default", TEXT),
-            ("  MACE-MP-0    universal (130 el.)", TEXT),
-            ("  MACE-OFF     organic molecules", TEXT),
-            ("  MACE-ANI     organic H,C,N,O,S,F", TEXT),
+            ("# Energy calculators (PES)", ACCENT),
+            ("", DIM),
+            ("  MACE-OMOL-0   molecules, default", GREEN),
+            ("  MACE-MP-0     universal (130 el.)", GREEN),
+            ("  MACE-OFF      organic molecules", GREEN),
+            ("  MACE-ANI-CC   organic (CC training data)", GREEN),
         ],
         split=5.1,
     )
+    # Centered combo count below both columns
+    cbox = slide.shapes.add_textbox(Inches(1), Inches(6.3), Inches(8), Inches(0.4))
+    ctf = cbox.text_frame
+    ctf.text = "4 energy × 2 dipole = 8 combinations"
+    cp = ctf.paragraphs[0]
+    cp.font.size = Pt(14)
+    cp.font.name = FONT
+    cp.font.color.rgb = ACCENT
+    cp.font.bold = True
+    cp.alignment = PP_ALIGN.CENTER
 
 
 def slide_zmq(prs):
-    two_col_slide(prs, "$ cat zmq_bridge.md",
-        left_lines=[
-            ("# The bridge: how it works", ACCENT),
-            ("", DIM),
-            ("  Gaussian 16: 'External' keyword", TEXT),
-            ("  → calls a helper script for each", TEXT),
-            ("     displaced geometry", TEXT),
-            ("", DIM),
-            ("  ┌──────────────────────────────┐", DIM),
-            ("  │  Gaussian (Fortran)          │", DIM),
-            ("  │  ↓  writes geometry file     │", DIM),
-            ("  │  ↓  calls gm_helper.py       │", DIM),
-            ("  └────────────┬─────────────────┘", DIM),
-            ("               │ ZMQ (IPC socket)", DIM),
-            ("  ┌────────────┴─────────────────┐", DIM),
-            ("  │  gm_main.py  (Python)        │", DIM),
-            ("  │  → MACE energy + forces      │", DIM),
-            ("  │  → dipole calculator         │", DIM),
-            ("  │  ← returns fort.7 format     │", DIM),
-            ("  └──────────────────────────────┘", DIM),
-        ],
-        right_lines=[
-            ("# Key engineering challenges", ACCENT),
-            ("", DIM),
-            ("  LINGER=0:", TEXT),
-            ("  → ZMQ socket must close cleanly", TEXT),
-            ("  → Fixed: explicit SIGKILL timeout", TEXT),
-            ("", DIM),
-            ("  Absolute paths:", TEXT),
-            ("  → Gaussian needs full path to", TEXT),
-            ("    helper script in .gjf files", TEXT),
-            ("  → Resolved at CLI startup via", TEXT),
-            ("    MACE_HELPER_SCRIPT_PATH env var", TEXT),
-            ("", DIM),
-            ("  MACE module loading:", TEXT),
-            ("  → Dipole model saved with different", TEXT),
-            ("    class paths than runtime", TEXT),
-            ("  → mace_loader.py handles remapping", TEXT),
-            ("    via torch.load(pickle_module=…)", TEXT),
-        ],
-        split=5.1,
-    )
+    """Slide 5: ZMQ bridge — ASCII diagram + External keyword."""
+    slide = blank_slide(prs)
+    add_prompt(slide, "$ cat zmq_bridge.md")
+
+    # Brief refresher + External keyword
+    top_lines = [
+        ("# Gaussian needs E, F, μ⃗ at every displaced geometry — how do we inject ML?", ACCENT),
+        ("  → Gaussian 'External' keyword: calls an external script per displacement", TEXT),
+        ("  → We intercept this with a ZMQ bridge — no Gaussian modifications needed", TEXT),
+    ]
+
+    tbox = slide.shapes.add_textbox(Inches(0.5), Inches(1.15), Inches(9.0), Inches(1.2))
+    ttf = tbox.text_frame
+    ttf.word_wrap = True
+    for i, (text, color) in enumerate(top_lines):
+        p = ttf.paragraphs[i] if i == 0 else ttf.add_paragraph()
+        p.text = text
+        p.font.size = Pt(13)
+        p.font.name = FONT
+        p.font.color.rgb = color
+        p.space_after = Pt(2)
+
+    # ASCII flow diagram
+    diagram = [
+        ("  ┌─────────────────────┐                    ┌─────────────────────────────┐", DIM),
+        ("  │                     │  input file        │                             │", DIM),
+        ("  │    GAUSSIAN 16      │  (geometry #n)     │     gm_helper.py            │", ACCENT),
+        ("  │                     │ ──────────────────→│     (External script)       │", DIM),
+        ("  │  freq=anharmonic    │                    │  sends filenames via ZMQ    │", DIM),
+        ("  │  external='...'     │                    └─────────────────────────────┘", DIM),
+        ("  │                     │                            ZMQ ▼ ▲ 'done'", DIM),
+        ("  │  Displaces molecule │                    ┌─────────────────────────────┐", DIM),
+        ("  │  along each coord   │                    │     zmq_server.py           │", ACCENT),
+        ("  │  and calls external │                    │                             │", DIM),
+        ("  │  script each time   │                    │  reads geometry from file   │", DIM),
+        ("  │                     │                    │  MACE energy calc → E, F   │", GREEN),
+        ("  │  reads fort.7 when  │     fort.7         │  MACE dipole calc → μ⃗      │", GREEN),
+        ("  │  helper exits       │ ←──────────────────│  writes results to fort.7  │", DIM),
+        ("  │                     │   E, F, μ⃗          │                             │", GREEN),
+        ("  └─────────────────────┘                    └─────────────────────────────┘", DIM),
+    ]
+
+    dbox = slide.shapes.add_textbox(Inches(0.75), Inches(2.8), Inches(8.5), Inches(4.0))
+    dtf = dbox.text_frame
+    dtf.word_wrap = False
+    for i, (text, color) in enumerate(diagram):
+        p = dtf.paragraphs[i] if i == 0 else dtf.add_paragraph()
+        p.text = text
+        p.font.size = Pt(14)
+        p.font.name = FONT
+        p.font.color.rgb = color
+        p.space_after = Pt(0)
+
+    # Centered repeat line
+    rbox = slide.shapes.add_textbox(Inches(1), Inches(6.3), Inches(8), Inches(0.4))
+    rtf = rbox.text_frame
+    rtf.text = "↻ repeats for every displacement (hundreds per molecule)"
+    rp = rtf.paragraphs[0]
+    rp.font.size = Pt(13)
+    rp.font.name = FONT
+    rp.font.color.rgb = TEXT
+    rp.alignment = PP_ALIGN.CENTER
+
+    add_footer(slide)
 
 
 def slide_mode_matching(prs):
     content_slide(prs, "$ cat mode_matching.md", [
-        ("# Problem: ML and DFT don't output modes in the same order", ACCENT),
+        ("# Problem: ML and DFT modes can be in different order", ACCENT),
         ("", DIM),
-        ("  DFT:  [500, 1200, 1500, 2900, 3100] cm⁻¹", TEXT),
-        ("  ML:   [498, 3095, 1205, 2895, 1498] cm⁻¹   ← different order!", YELLOW),
+        ("  DFT:  [1595, 1610, 2900, 3050, 3100] cm⁻¹", TEXT),
+        ("  ML:   [1608, 1590, 2905, 3048, 3102] cm⁻¹   ← modes 1 & 2 swapped!", YELLOW),
         ("", DIM),
-        ("  → Cannot compare by index. Need to identify which mode is which.", TEXT),
+        ("  → 1595 and 1610 are close but physically different modes", TEXT),
         ("", DIM),
         ("# Solution: Eigenvector dot product", ACCENT),
+        ("  Each mode = eigenvector of the Hessian", TEXT),
+        ("  Same physical motion → parallel eigenvectors", TEXT),
         ("", DIM),
-        ("  Each normal mode has an eigenvector: 3N-dimensional displacement pattern.", TEXT),
-        ("  Modes with the same physical motion will have parallel eigenvectors.", TEXT),
+        ("              similarity(i, j) = |v_ML[i] · v_DFT[j]|", YELLOW),
+        ("              (0 = orthogonal, 1 = identical motion)", DIM),
         ("", DIM),
-        ("  similarity(i, j) = |v_ML[i] · v_DFT[j]|        (0 = orthogonal, 1 = same)", TEXT),
+        ("  → Match by motion, not by frequency or index", TEXT),
         ("", DIM),
-        ("  → Assign each ML mode to its best-matching DFT mode", TEXT),
-        ("  → Robust to reordering, robust to small frequency errors", TEXT),
-        ("", DIM),
-        ("# Example (water)", ACCENT),
-        ("  ML 3095 cm⁻¹ → DFT 1200 cm⁻¹  [overlap: 0.027]   ✗ wrong match", RED),
-        ("  ML 3095 cm⁻¹ → DFT 3100 cm⁻¹  [overlap: 0.989]   ✓ correct", GREEN),
+        ("# Example", ACCENT),
+        ("  ML 1608 cm⁻¹ → DFT 1595 cm⁻¹  [overlap: 0.12]   ✗ closest freq, wrong mode", RED),
+        ("  ML 1608 cm⁻¹ → DFT 1610 cm⁻¹  [overlap: 0.97]   ✓ correct — same motion", GREEN),
     ])
 
 
-def slide_results_water(prs):
-    two_col_slide(prs, "$ cd results/water/ && cat report.md",
-        left_lines=[
-            ("# Molecule: H₂O (water)", ACCENT),
-            ("  3 atoms · 3 normal modes", TEXT),
-            ("  Ref: B3LYP/6-31G(d,p)", DIM),
-            ("  Analysis: anharmonic (VPT2)", DIM),
-            ("", DIM),
-            ("# Calculator combinations (8 total)", ACCENT),
-            ("", DIM),
-            ("  mace_anicc + espaloma", TEXT),
-            ("  → MAE  16.8 cm⁻¹  R² 0.9999", GREEN),
-            ("", DIM),
-            ("  mace_off + espaloma", TEXT),
-            ("  → MAE  33.2 cm⁻¹  R² 0.9999", GREEN),
-            ("", DIM),
-            ("  mace_omol + espaloma", TEXT),
-            ("  → MAE  39.0 cm⁻¹  R² 0.9997", TEXT),
-            ("", DIM),
-            ("  mace_mp + espaloma", TEXT),
-            ("  → MAE 129.9 cm⁻¹  R² 0.9971", YELLOW),
-        ],
-        right_lines=[
-            ("# Key observations", ACCENT),
-            ("", DIM),
-            ("  R² consistently > 0.997 across", GREEN),
-            ("  all combinations — frequency", TEXT),
-            ("  ordering is well-preserved.", TEXT),
-            ("", DIM),
-            ("  Best: MACE-ANI + Espaloma", ACCENT),
-            ("  → MAE only 16.8 cm⁻¹", TEXT),
-            ("  → Trained on organic H,C,N,O,S", TEXT),
-            ("  → Small molecule specialist", TEXT),
-            ("", DIM),
-            ("  Worst: MACE-MP (large universal)", YELLOW),
-            ("  → Jack of all trades,", TEXT),
-            ("    master of none for organics", TEXT),
-            ("", DIM),
-            ("  Intensity (R²) low across all:", YELLOW),
-            ("  → ML dipole magnitudes need work", TEXT),
-            ("  → Active research direction", TEXT),
-        ],
-        split=5.1,
-    )
+def slide_results_overview(prs):
+    """Slide 7: HTML report listing with ASCII molecule art."""
+    content_slide(prs, "$ ls analysis_results_harmonic/", [
+        ("", DIM),
+        ("       O", GREEN),
+        ("      / \\", GREEN),
+        ("     H   H   H₂O", GREEN),
+        ("", DIM),
+        ("  → water/report.html", ACCENT),
+        ("", DIM),
+        ("", DIM),
+        ("     O", GREEN),
+        ("     ‖", GREEN),
+        ("     C-O-C₆H₄-COOH   aspirin C₉H₈O₄", GREEN),
+        ("     |", GREEN),
+        ("     CH₃", GREEN),
+        ("", DIM),
+        ("  → aspirin/report.html", ACCENT),
+    ])
 
 
-def slide_results_aspirin(prs):
-    two_col_slide(prs, "$ cd results/aspirin/ && cat report.md",
-        left_lines=[
-            ("# Molecule: Aspirin (C₉H₈O₄)", ACCENT),
-            ("  acetylsalicylic acid", DIM),
-            ("  19 atoms · 51 normal modes", TEXT),
-            ("  Ref: B3LYP/6-31G(d,p)", DIM),
-            ("  Analysis: harmonic", DIM),
+def slide_results_table(prs):
+    """Slides 8–9: Harmonic benchmark — water and aspirin.
+
+    Data from analysis_results_harmonic/{molecule}/data/metrics_summary.json.
+    Best row (lowest MAE) highlighted in green.
+    """
+    water = load_combo_metrics("water")
+    aspirin = load_combo_metrics("aspirin")
+
+    def table_lines(combos, mol_label, show_speedup=False):
+        hdr_speed = "  Speedup" if show_speedup else ""
+        lines = [
+            (f"# Harmonic benchmark — {mol_label}", ACCENT),
+            ("  Ref: B3LYP/6-31G(d,p)   |   sorted by MAE ascending", DIM),
             ("", DIM),
-            ("# Results (mace_omol + espaloma)", ACCENT),
-            ("", DIM),
-            ("  MAE   41.3 cm⁻¹", TEXT),
-            ("  RMSE  72.7 cm⁻¹", TEXT),
-            ("  R²    0.9984", GREEN),
-            ("  Speedup  ~18×", GREEN),
-            ("", DIM),
-            ("# 17× more modes than water", ACCENT),
-            ("  → Method scales to real molecules", GREEN),
-            ("  → R² stays high (0.9984)", TEXT),
-            ("  → MAE slightly higher than water", TEXT),
-            ("    — expected for complex system", TEXT),
-        ],
-        right_lines=[
-            ("# Why aspirin?", ACCENT),
-            ("", DIM),
-            ("  Pharmacologically relevant molecule.", TEXT),
-            ("  Covers C=O stretch (~1750 cm⁻¹),", TEXT),
-            ("  aromatic ring modes, O-H stretch.", TEXT),
-            ("", DIM),
-            ("  A complete IR identification test.", TEXT),
-            ("", DIM),
-            ("# Scaling behaviour", ACCENT),
-            ("", DIM),
-            ("  H₂O:     3 modes  → ~1× speedup", DIM),
-            ("  Aspirin: 51 modes → ~18× speedup", GREEN),
-            ("", DIM),
-            ("  Gaussian DFT scales badly with size.", TEXT),
-            ("  ML cost grows much more slowly.", TEXT),
-            ("  → Advantage grows with molecule.", TEXT),
-            ("", DIM),
-            ("  Intensity R²: ~0.05 (still poor)", YELLOW),
-            ("  → Frequencies work well,", TEXT),
-            ("    intensities are future work.", TEXT),
-        ],
-        split=5.1,
-    )
+            (f"  Energy        Dipole      MAE(freq)   R²(freq)  R²(int){hdr_speed}", DIM),
+            ("  " + "─" * (68 if show_speedup else 58), DIM),
+        ]
+        best_mae = min(c["mae_freq"] for c in combos) if combos else float("inf")
+        for c in combos:
+            energy, dipole = parse_combo_name(c["name"])
+            row = (
+                f"  {energy:<14}  {dipole:<10}"
+                f"  {c['mae_freq']:>6.1f} cm⁻¹"
+                f"   {c['r2_freq']:.4f}"
+                f"   {c['r2_intensity']:.2f}"
+            )
+            if show_speedup and c.get("speedup"):
+                row += f"    {c['speedup']:>5.1f}×"
+            is_best = abs(c["mae_freq"] - best_mae) < 0.01
+            lines.append((row, GREEN if is_best else TEXT))
+        return lines
+
+    water_lines = table_lines(water, "water (H₂O, 3 modes)")
+    aspirin_lines = table_lines(aspirin, "aspirin (C₉H₈O₄, 57 modes)", show_speedup=True)
+
+    # Water slide
+    content_slide(prs, "$ cat metrics.json | sort-by-mae  # water", water_lines + [
+        ("", DIM),
+        ("  ⚠ R² misleading: only 3 data points — any line fits well", YELLOW),
+        ("    MACE-MP has best R² despite 106 cm⁻¹ MAE (systematic shift)", YELLOW),
+        ("  → MAE is the reliable metric here", TEXT),
+        ("  → MACE4IR consistently beats Espaloma on intensities", TEXT),
+    ])
+
+    # Aspirin slide
+    content_slide(prs, "$ cat metrics.json | sort-by-mae  # aspirin", aspirin_lines + [
+        ("", DIM),
+        ("  → MACE-ANI-CC: best accuracy (7.6 cm⁻¹), trained on coupled cluster", TEXT),
+        ("  → MACE4IR dipole: R²(int) 0.94–0.96 vs Espaloma 0.15–0.26", TEXT),
+    ])
+
+
+def slide_scaling(prs):
+    """Slide 10: ML speedup — best-accuracy combo per molecule."""
+    water = load_combo_metrics("water")
+    aspirin = load_combo_metrics("aspirin")
+
+    # Best accuracy = lowest MAE (already sorted)
+    w = water[0] if water else None
+    a = aspirin[0] if aspirin else None
+    w_speed = w["speedup"] if w else 1.0
+    a_speed = a["speedup"] if a else 1.0
+    w_name = " / ".join(parse_combo_name(w["name"])) if w else ""
+    a_name = " / ".join(parse_combo_name(a["name"])) if a else ""
+
+    BAR_MAX = 12
+    w_bar = max(1, round((w_speed / a_speed) * BAR_MAX))
+    a_bar = BAR_MAX
+
+    content_slide(prs, "$ python benchmark.py --scaling", [
+        ("# ML speedup — best-accuracy combo per molecule", ACCENT),
+        ("  Includes full anharmonic VPT2 calculation", DIM),
+        ("", DIM),
+        ("  molecule    atoms    best combo                  speedup", DIM),
+        ("  " + "─" * 62, DIM),
+        (f"  water        3      {w_name:<28s} |{'=' * w_bar}{' ' * (BAR_MAX - w_bar)}| {w_speed:>5.1f}×", ACCENT),
+        (f"  aspirin     21      {a_name:<28s} |{'=' * a_bar}| {a_speed:>5.1f}×", GREEN),
+        ("", DIM),
+        ("", DIM),
+        ("  → Water too small for ML to outpace DFT overhead", TEXT),
+        ("  → Aspirin: 21 atoms × 3 dirs × 2 = 126 displacements → ML faster", TEXT),
+    ])
 
 
 def slide_status(prs):
-    two_col_slide(prs, "$ git log --oneline --graph",
-        left_lines=[
-            ("# Current status (v1.1 in progress)", ACCENT),
-            ("", DIM),
-            ("  ✓ ZMQ bridge — stable", GREEN),
-            ("  ✓ Anharmonic (VPT2) pipeline", GREEN),
-            ("  ✓ CLI: mace-gaussian run/list", GREEN),
-            ("  ✓ 4 calculator combinations", GREEN),
-            ("  ✓ 131 tests, CI on every push", GREEN),
-            ("  ✓ Aspirin, water, CH₄, acoh, BH₃·NH₃", GREEN),
-            ("  ✓ HTML reports per molecule", GREEN),
-            ("", DIM),
-            ("  ⟳ mace_off + mace_anicc wiring", YELLOW),
-            ("  ⟳ Batch runner (25-mol campaign)", YELLOW),
-            ("  ⟳ PubChem fetcher", YELLOW),
-        ],
-        right_lines=[
-            ("# Thesis question", ACCENT),
-            ("", DIM),
-            ("  Does energy surface quality or", TEXT),
-            ("  dipole model quality dominate", TEXT),
-            ("  IR accuracy?", TEXT),
-            ("", DIM),
-            ("  → Run systematic 25-molecule", TEXT),
-            ("    benchmark across functional", TEXT),
-            ("    groups and molecular sizes", TEXT),
-            ("", DIM),
-            ("# Long-term vision", ACCENT),
-            ("", DIM),
-            ("  Universal ML-QM spectroscopy tool", TEXT),
-            ("  any molecule · any combination ·", TEXT),
-            ("  one command:", DIM),
-            ("", DIM),
-            ("  $ mace-gaussian run molecule.xyz", GREEN),
-        ],
-        split=5.1,
-    )
+    """Slide 11: Built → Preliminary results → Next."""
+    content_slide(prs, "$ git log --oneline --graph", [
+        ("# What we built", ACCENT),
+        ("  → ZMQ bridge: ML dipoles → Gaussian VPT2 (harmonic + anharmonic)", TEXT),
+        ("  → 4 energy × 2 dipole models = 8 calculator combinations", TEXT),
+        ("", DIM),
+        ("# Preliminary results", ACCENT),
+        ("  → Frequencies: R² > 0.999 for best combos", GREEN),
+        ("  → Intensities: MACE4IR >> Espaloma", GREEN),
+        ("  → Speedup: ~36× on aspirin", GREEN),
+        ("", DIM),
+        ("# Next steps", ACCENT),
+        ("  → Systematic benchmark campaign", TEXT),
+        ("    Growing size: CH₄ → C₂H₆ → C₃H₈ → C₄H₁₀ (scaling)", DIM),
+        ("    Molecules with more exotic atoms: S, P, halogens, metals", DIM),
+        ("    Larger systems: peptides, drug-like molecules", DIM),
+        ("  → Batch processing: HPC queue integration for large campaigns", TEXT),
+        ("  → ORCA integration: open-source QM engine as Gaussian alternative", TEXT),
+    ])
 
 
 def slide_questions(prs):
@@ -602,28 +595,29 @@ def main():
     prs.slide_width  = Inches(10)
     prs.slide_height = Inches(7.5)
 
-    slide_title(prs)           # 0 — neofetch header
-    slide_motivation(prs)      # 1 — problem / solution / impact
-    slide_ir_theory(prs)       # 2 — what is IR, harmonic limit (life scientists)
-    slide_vpt2(prs)            # 3 — VPT2, anharmonicity, the dipole gap
-    slide_architecture(prs)    # 4 — system architecture diagram
-    slide_dipole_methods(prs)  # 5 — MACE4IR + Espaloma + energy models
-    slide_zmq(prs)             # 6 — ZMQ bridge + engineering challenges
-    slide_mode_matching(prs)   # 7 — eigenvector dot product
-    slide_results_water(prs)   # 8 — water: 8 calculator combos
-    slide_results_aspirin(prs) # 9 — aspirin: 51 modes, scaling
-    slide_status(prs)          # 10 — current status + next steps
-    slide_questions(prs)       # 11 — questions
+    slide_title(prs)            # 0  — neofetch header
+    slide_motivation(prs)       # 1  — problem / solution / impact
+    slide_ir_theory(prs)        # 2  — what is IR, harmonic limit
+    slide_architecture(prs)     # 3  — system architecture diagram
+    slide_dipole_methods(prs)   # 4  — MACE4IR + Espaloma + energy models
+    slide_zmq(prs)              # 5  — ZMQ bridge — pedagogical flow
+    slide_mode_matching(prs)    # 6  — eigenvector dot product
+    slide_results_overview(prs) # 7  — HTML report listing + ASCII art
+    slide_results_table(prs)    # 8–9 — harmonic table (water + aspirin, 2 slides)
+    slide_scaling(prs)          # 10 — molecule size vs speedup bar chart
+    slide_status(prs)           # 11 — research journey
+    slide_questions(prs)        # 12 — questions
 
-    out = "/home/mot/mace_gaussian/presentation/presentation_v2.pptx"
+    out = "presentation/presentation_v2.pptx"
     prs.save(out)
 
     print(f"✓ Saved: {out}")
-    print(f"  12 slides  (~15 min)")
-    print(f"  Slides: title · motivation · IR theory · VPT2 ·")
-    print(f"          architecture · dipole methods · ZMQ bridge ·")
-    print(f"          mode matching · water results · aspirin results ·")
-    print(f"          status · questions")
+    print(f"  13 slides  (~15 min)")
+    print(f"  Slides: title · motivation · IR theory ·")
+    print(f"          architecture · calculators · ZMQ bridge ·")
+    print(f"          mode matching · results overview ·")
+    print(f"          results table (water) · results table (aspirin) ·")
+    print(f"          scaling · status · questions")
 
 
 if __name__ == "__main__":

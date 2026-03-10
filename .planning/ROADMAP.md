@@ -1,116 +1,60 @@
-# Roadmap: MACE-Gaussian Interface
+# Roadmap: MACE-Gaussian Presentation (March 2026)
 
-## Milestones
+## Overview
 
-- ✅ **v1.0 — Refactoring & Distribution** — Phases 1–12 (shipped 2026-02-28)
-- 🚧 **v1.1 — Batch Benchmarking & Calculator Expansion** — Phases 13–17 (in progress)
+Three phases to take the existing 12-slide deck from rough structure to presentation-ready. Phase 1 locks the narrative shape — no point polishing slides before the story is right. Phase 2 fills the content gaps that make the argument credible (real results, real plots, real diagram). Phase 3 makes it clean and speakable in 15 minutes.
 
 ## Phases
 
-<details>
-<summary>✅ v1.0 — Refactoring & Distribution (Phases 1–12) — SHIPPED 2026-02-28</summary>
-
-- [x] **Phase 1: Testing Infrastructure & Characterization** — 4/4 plans — completed 2026-02-27
-- [x] **Phase 2: Error Handling & Input Validation** — 3/3 plans — completed 2026-02-27
-- [x] **Phase 3: Extract Utilities & Conventions** — 2/2 plans — completed 2026-02-27
-- [x] **Phase 4: Extract Calculator Classes** — 2/2 plans — completed 2026-02-27
-- [x] **Phase 5: Replace MACE Module Monkey-Patching** — 2/2 plans — completed 2026-02-19
-- [x] **Phase 6: Extract Gaussian I/O & ZMQ Server** — 5/5 plans — completed 2026-02-20
-- [x] **Phase 7: Extract Workflow Orchestrator** — 2/2 plans — completed 2026-02-24
-- [x] **Phase 8: Package Structure & Reorganization** — 3/3 plans — completed 2026-02-24
-- [x] **Phase 9: CI/CD & Distribution Prep** — 3/3 plans — completed 2026-02-26
-- [x] **Phase 10: Documentation** — 4/4 plans — completed 2026-02-26
-- [x] **Phase 11: Integration Wiring Fixes (Gap Closure)** — 1/1 plan — completed 2026-02-27
-- [x] **Phase 12: Distribution Polish (Gap Closure)** — 1/1 plan — completed 2026-02-27
-
-Full archive: `.planning/milestones/v1.0-ROADMAP.md`
-
-</details>
-
----
-
-### 🚧 v1.1 — Batch Benchmarking & Calculator Expansion (In Progress)
-
-**Milestone Goal:** Expand from 4 to 7+ ML calculator combinations, add batch and HPC tooling, and run a systematic ~25-molecule benchmark campaign to answer the thesis question: does energy surface quality or dipole model quality dominate IR accuracy?
+- [x] **Phase 1: Narrative & Structure** - Lock the story arc and slide order before any content work (completed 2026-03-07)
+- [x] **Phase 2: Content** - Add the substance: results table, plots, ZMQ diagram, scaling argument (completed 2026-03-07)
+- [ ] **Phase 3: Polish & Speaking Notes** - Make it presentable and speakable
 
 ## Phase Details
 
-### Phase 13: Calculator Expansion & Acoh Bug Fix
-**Goal**: Users can run `mace-gaussian` with two new energy calculators (mace_off, mace_anicc) and the acetic acid frequency parser no longer fails on regression plots. (xTB deferred pending supervisor discussion.)
-**Depends on**: Nothing (all code already partially exists; no new infrastructure required)
-**Requirements**: CALC-01, CALC-02, FIX-01
-**Plans**: 3 plans
+### Phase 1: Narrative & Structure
+**Goal**: The slide deck tells a coherent harmonic-first story — why, how, what we found, what's next — with each slide in the right place
+**Depends on**: Nothing (first phase)
+**Requirements**: NARR-01, NARR-02, NARR-03
+**Success Criteria** (what must be TRUE):
+  1. Slides flow in the narrative arc: motivation → IR basics → ZMQ bridge → results → ongoing/next
+  2. Slide 10 reads as a research journey (physics and chemistry progress) not a git version history
+  3. The VPT2/anharmonic slide frames anharmonicity as context and positions it as ongoing work, not a deep dive
+**Plans**: 2 plans
 
 Plans:
-- [x] 13-01-PLAN.md — CLI validation: add mace_off/mace_anicc to --energy-calculators callback + --optimization-calculator Choice
-- [x] 13-02-PLAN.md — workflow.py: add mace_anicc branch with correct API + element guard at call sites
-- [x] 13-03-PLAN.md — Parser fix: dual-format anharmonic section detection + H/L-prefix regex + xfail removal
+- [ ] 01-01-PLAN.md — Reframe IR theory, cut VPT2 slide, add results slides (ls + table), fix slide order and output path
+- [ ] 01-02-PLAN.md — Rewrite status slide as research journey; tighten motivation slide
 
-### Phase 14: Batch Runner & PubChem Fetcher
-**Goal**: Users can fetch 3D structures by name and run the full pipeline over a list of molecules with per-molecule failure isolation and restart safety.
-**Depends on**: Phase 13 (calculator expansion ensures full set of combinations is available for batch)
-**Requirements**: BATCH-01, BATCH-02, BATCH-03, BATCH-04
+### Phase 2: Content
+**Goal**: Every claim in the deck is backed by a visible artifact — the results table is complete, spectrum results are referenced, the ZMQ diagram is clear, and the scaling argument is explicit
+**Depends on**: Phase 1
+**Requirements**: CONT-01, CONT-02, CONT-03, CONT-04
 **Success Criteria** (what must be TRUE):
-  1. User runs `mace-gaussian fetch aspirin` and receives `aspirin.xyz` with valid 3D coordinates in the current directory.
-  2. User runs `mace-gaussian batch molecules.txt` and the pipeline executes sequentially for each molecule, with per-molecule results written to `batch_results/`.
-  3. If the batch run is interrupted and restarted, already-complete molecules are skipped and the run resumes from the first incomplete molecule.
-  4. `batch_manifest.json` exists after any batch run and records the status of every molecule (complete, failed, pending).
-  5. User can run `mace-gaussian batch molecules.txt --skip-dft-baseline` to execute ML-only calculations without triggering DFT baseline jobs.
-**Plans**: TBD
+  1. Results slide shows all 8 calculator combos ranked by R²_freq descending with frequencies and intensities in separate columns
+  2. A molecule-size vs speedup table or visual exists (water ~1×, glycine ~7–10×, aspirin ~18–29×)
+  3. Spectrum results are referenced via HTML report links with ASCII molecule art for at least water and aspirin (no PNG embedding)
+  4. ZMQ bridge slide contains a flow diagram showing real-time ML dipole injection at the right Gaussian hook point
+**Plans**: 1 plan
 
-### Phase 15: SLURM Integration & Batch Report
-**Goal**: Users can offload DFT baseline calculations to a SLURM cluster automatically, and a multi-molecule HTML report aggregates accuracy across all molecules and calculator combinations.
-**Depends on**: Phase 14 (batch runner must exist before SLURM can extend it; multi-molecule data must exist before batch report has content)
-**Requirements**: HPC-01, HPC-02, BATCH-05
+Plans:
+- [ ] 02-01-PLAN.md — Rewrite ZMQ/architecture slides, add JSON-sourced results tables (water + aspirin), add scaling slide, update overview with ASCII molecule art
+
+### Phase 3: Polish & Speaking Notes
+**Goal**: The deck is visually consistent and the presenter has personal notes for every slide
+**Depends on**: Phase 2
+**Requirements**: POLS-01, POLS-02, POLS-03, SPKR-01
 **Success Criteria** (what must be TRUE):
-  1. User runs `mace-gaussian batch molecules.txt --dft-on-cluster rune03` and DFT jobs are submitted to the SLURM cluster via SSH, polled until complete, and results retrieved without manual intervention.
-  2. The SLURM job script includes `formchk` so `.fchk` files are produced on the cluster without requiring local conversion.
-  3. A SLURM job failure for one molecule (walltime exceeded, Gaussian error) marks that molecule `dft_failed` in the manifest and does not halt the remaining batch.
-  4. After a completed batch run, `batch_report.html` exists and contains aggregated R² and RMSE per calculator combination across all molecules that completed successfully.
+  1. Results table cells are color-coded: green for strong performance, yellow for moderate, red for poor
+  2. Every slide has a visible slide number
+  3. Font, spacing, and accent colors are consistent across all 13 slides (no visual outliers)
+  4. Each slide has 2–4 bullet speaking notes covering what to say and what to emphasise
 **Plans**: TBD
-
-### Phase 16: Benchmark Campaign Execution
-**Goal**: A systematic ~25-molecule benchmark is run through the full pipeline with all 7+ calculator combinations, producing aggregated results that answer the thesis question about energy vs. dipole model dominance.
-**Depends on**: Phase 15 (SLURM offload and batch report required to run benchmark at scale and aggregate results)
-**Requirements**: BENCH-01, BENCH-02, BENCH-03
-**Success Criteria** (what must be TRUE):
-  1. The benchmark dataset of ~25 molecules (size-scaling series CH4→C10H22 + functional group diversity series) has been run through the full pipeline and results exist in `batch_results/`.
-  2. All 7+ calculator combinations (existing 4 + mace_off×espaloma, mace_off×mace_ml, mace_anicc×espaloma, mace_anicc×mace_ml, xtb×xtb) appear in the batch report with populated R² and RMSE values.
-  3. The batch report presents aggregated ML vs. DFT accuracy stratified by calculator combination and by molecule size/functional-group class, sufficient to support thesis conclusions.
-**Plans**: TBD
-
-### Phase 17: Architecture & Development Docs Update
-**Goal**: The two developer-facing documentation files accurately reflect the current `mace_gaussian/` package layout, module names, and workflows — eliminating stale references to pre-refactor structure.
-**Depends on**: Phase 16 (benchmark campaign may surface final architectural decisions; docs should reflect the settled state of the codebase)
-**Requirements**: FIX-02, FIX-03
-**Success Criteria** (what must be TRUE):
-  1. `docs/ARCHITECTURE.md` references only module paths that exist in the current `mace_gaussian/` package (no pre-refactor names remain).
-  2. `docs/DEVELOPMENT.md` correctly describes how to add a new calculator, run tests, and reproduce the benchmark workflow using the current package layout.
-  3. A new contributor could follow `docs/DEVELOPMENT.md` step-by-step to add a new energy calculator without consulting source code directly.
-**Plans**: TBD
-
----
 
 ## Progress
 
-**Execution Order:** 13 → 14 → 15 → 16 → 17
-
-| Phase | Milestone | Plans Complete | Status | Completed |
-|-------|-----------|----------------|--------|-----------|
-| 1. Testing Infrastructure | v1.0 | 4/4 | Complete | 2026-02-27 |
-| 2. Error Handling | v1.0 | 3/3 | Complete | 2026-02-27 |
-| 3. Extract Utilities | v1.0 | 2/2 | Complete | 2026-02-27 |
-| 4. Extract Calculators | v1.0 | 2/2 | Complete | 2026-02-27 |
-| 5. MACE Model Loading | v1.0 | 2/2 | Complete | 2026-02-19 |
-| 6. Gaussian I/O & ZMQ | v1.0 | 5/5 | Complete | 2026-02-20 |
-| 7. Workflow Orchestrator | v1.0 | 2/2 | Complete | 2026-02-24 |
-| 8. Package Structure | v1.0 | 3/3 | Complete | 2026-02-24 |
-| 9. CI/CD & Distribution | v1.0 | 3/3 | Complete | 2026-02-26 |
-| 10. Documentation | v1.0 | 4/4 | Complete | 2026-02-26 |
-| 11. Integration Wiring | v1.0 | 1/1 | Complete | 2026-02-27 |
-| 12. Distribution Polish | v1.0 | 1/1 | Complete | 2026-02-27 |
-| 13. Calculator Expansion & Acoh Fix | v1.1 | Complete    | 2026-03-03 | 2026-03-03 |
-| 14. Batch Runner & PubChem Fetcher | v1.1 | 0/TBD | Not started | - |
-| 15. SLURM Integration & Batch Report | v1.1 | 0/TBD | Not started | - |
-| 16. Benchmark Campaign | v1.1 | 0/TBD | Not started | - |
-| 17. Docs Update | v1.1 | 0/TBD | Not started | - |
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 1. Narrative & Structure | 2/2 | Complete   | 2026-03-07 |
+| 2. Content | 1/1 | Complete    | 2026-03-07 |
+| 3. Polish & Speaking Notes | 0/? | Not started | - |
