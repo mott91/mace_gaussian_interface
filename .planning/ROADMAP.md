@@ -46,6 +46,16 @@ Plans:
 - [x] 13-02-PLAN.md — workflow.py: add mace_anicc branch with correct API + element guard at call sites
 - [x] 13-03-PLAN.md — Parser fix: dual-format anharmonic section detection + H/L-prefix regex + xfail removal
 
+### Phase 13.1: Calculator Acceleration & Polarizability Passthrough (INSERTED)
+
+**Goal:** [Urgent work - to be planned]
+**Requirements**: TBD
+**Depends on:** Phase 13
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 13.1 to break down)
+
 ### Phase 14: Batch Runner & PubChem Fetcher
 **Goal**: Users can fetch 3D structures by name and run the full pipeline over a list of molecules with per-molecule failure isolation and restart safety.
 **Depends on**: Phase 13 (calculator expansion ensures full set of combinations is available for batch)

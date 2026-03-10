@@ -64,6 +64,10 @@ Recent decisions affecting v1.1 work:
 - [13-01]: Use callback= not type=click.Choice for comma-separated options (click.Choice validates atomically, rejecting "mace_mp,mace_omol" as a whole string)
 - [13-01]: VALID_ENERGY_CALCULATORS and VALID_DIPOLE_CALCULATORS exported at module level for test assertions
 
+### Roadmap Evolution
+
+- Phase 13.1 inserted after Phase 13: Calculator Acceleration & Polarizability Passthrough (INSERTED) — autograd dipole derivatives + polarizability passthrough discovered during code exploration 2026-03-10
+
 ### Pending Todos
 
 None yet.
