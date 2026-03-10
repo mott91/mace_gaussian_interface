@@ -56,7 +56,20 @@ Thumbs.db
 # Results directories (large, generated files - keep local only)
 comparison_results/
 analysis_results/
+analysis_results_harmonic/
 testingStuff/
+tom_stuff/
+bak/
+
+# Gaussian scratch / intermediate files
+fort.7
+temp_*/
+
+# Large model files
+mace4ir_models/
+
+# Coverage
+.coverage
 
 # But keep example test molecules
 !*.xyz
