@@ -48,13 +48,14 @@ Plans:
 
 ### Phase 13.1: Calculator Acceleration & Polarizability Passthrough (INSERTED)
 
-**Goal:** [Urgent work - to be planned]
-**Requirements**: TBD
+**Goal**: MACEDipoleCalculator uses autograd (single model call) instead of 2×3N finite-difference passes for dipole derivatives; real polarizability is threaded through the pipeline and written to Gaussian output; dalpha_dr is available in the Python pipeline for future Raman analysis.
 **Depends on:** Phase 13
-**Plans:** 0 plans
+**Requirements**: (implementation-driven, no formal requirement IDs)
+**Plans**: 2 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 13.1 to break down)
+- [ ] 13.1-01-PLAN.md — mace_loader.py: add calculate_dipole_derivatives() autograd override + calculate_polarizability() method + _last_dalpha_dr storage
+- [ ] 13.1-02-PLAN.md — workflow.py + io.py: expand calculate_dipole_properties() to 4-tuple, thread polarizability/dalpha_dr, write real polarizability to Gaussian output
 
 ### Phase 14: Batch Runner & PubChem Fetcher
 **Goal**: Users can fetch 3D structures by name and run the full pipeline over a list of molecules with per-molecule failure isolation and restart safety.
@@ -103,7 +104,7 @@ Plans:
 
 ## Progress
 
-**Execution Order:** 13 → 14 → 15 → 16 → 17
+**Execution Order:** 13 → 13.1 → 14 → 15 → 16 → 17
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -120,6 +121,7 @@ Plans:
 | 11. Integration Wiring | v1.0 | 1/1 | Complete | 2026-02-27 |
 | 12. Distribution Polish | v1.0 | 1/1 | Complete | 2026-02-27 |
 | 13. Calculator Expansion & Acoh Fix | v1.1 | Complete    | 2026-03-03 | 2026-03-03 |
+| 13.1. Calculator Acceleration & Polarizability | v1.1 | 0/2 | In planning | - |
 | 14. Batch Runner & PubChem Fetcher | v1.1 | 0/TBD | Not started | - |
 | 15. SLURM Integration & Batch Report | v1.1 | 0/TBD | Not started | - |
 | 16. Benchmark Campaign | v1.1 | 0/TBD | Not started | - |
