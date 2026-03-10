@@ -20,7 +20,7 @@ wheels/
 .installed.cfg
 *.egg
 
-# Virtual environments  
+# Virtual environments
 .venv/
 venv/
 env/
@@ -53,12 +53,17 @@ Thumbs.db
 # Jupyter
 .ipynb_checkpoints/
 
+# Results directories (large, generated files - keep local only)
+comparison_results/
+analysis_results/
+analysis_results_harmonic/
+
 # Scratch directories
 testingStuff/
 tom_stuff/
 bak/
 
-# Gaussian intermediate files
+# Gaussian scratch / intermediate files
 fort.7
 temp_*/
 
