@@ -3,11 +3,11 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: — Batch Benchmarking & Calculator Expansion
 status: completed
-stopped_at: Completed 13-01-PLAN.md (CLI calculator validation callbacks — Phase 13 fully done)
-last_updated: "2026-03-03T17:44:05.258Z"
+stopped_at: Phase 13.1 context gathered
+last_updated: "2026-03-10T15:49:42.095Z"
 last_activity: 2026-03-03 — Plan 13-01 complete (CLI validation callbacks for mace_off/mace_anicc)
 progress:
-  total_phases: 5
+  total_phases: 6
   completed_phases: 1
   total_plans: 3
   completed_plans: 3
@@ -80,6 +80,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-03T17:37:41Z
-Stopped at: Completed 13-01-PLAN.md (CLI calculator validation callbacks — Phase 13 fully done)
-Resume file: None
+Last session: 2026-03-10T15:49:42.092Z
+Stopped at: Phase 13.1 context gathered
+Resume file: .planning/phases/13.1-calculator-acceleration-polarizability-passthrough/13.1-CONTEXT.md
