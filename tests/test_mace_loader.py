@@ -18,6 +18,8 @@ import sys
 from io import BytesIO
 from unittest.mock import MagicMock, patch
 
+import numpy as np
+
 # ---------------------------------------------------------------------------
 # Pre-mock heavy dependencies before importing the module under test
 # ---------------------------------------------------------------------------
@@ -225,9 +227,6 @@ class TestMACEDipoleCalculatorWrapper:
 # TestMACEDipoleCalculatorAutograd
 # ---------------------------------------------------------------------------
 
-import numpy as np
-
-
 class TestMACEDipoleCalculatorAutograd:
     """Tests for MACEDipoleCalculator.calculate_dipole_derivatives() autograd override."""
 
@@ -335,3 +334,93 @@ class TestMACEDipoleCalculatorAutograd:
         calc = MACEDipoleCalculator(model_path="/fake/model", device="cpu")
         assert hasattr(calc, "_last_dalpha_dr")
         assert calc._last_dalpha_dr is None
+
+
+# ---------------------------------------------------------------------------
+# TestMACEDipoleCalculatorPolarizability
+# ---------------------------------------------------------------------------
+
+
+class TestMACEDipoleCalculatorPolarizability:
+    """Tests for MACEDipoleCalculator.calculate_polarizability() method."""
+
+    def _make_calculator_with_mock(self, use_polarizability=False):
+        """Create a MACEDipoleCalculator with a pre-injected mock calc."""
+        calc = MACEDipoleCalculator(model_path="/fake/model", device="cpu")
+        mock_calc = MagicMock()
+        mock_model = MagicMock(use_polarizability=use_polarizability)
+        mock_calc.models = [mock_model]
+        calc.calc = mock_calc
+        return calc, mock_calc
+
+    def test_returns_zeros_when_no_polarizability(self):
+        """When use_polarizability=False, returns np.zeros((3, 3))."""
+        calc, _mock_calc = self._make_calculator_with_mock(use_polarizability=False)
+        mock_atoms = MagicMock()
+
+        result = calc.calculate_polarizability(mock_atoms)
+
+        assert result.shape == (3, 3)
+        np.testing.assert_array_equal(result, np.zeros((3, 3)))
+
+    def test_extracts_polarizability_from_model(self):
+        """When use_polarizability=True, calls model directly and returns polar[0]."""
+        calc, mock_calc = self._make_calculator_with_mock(use_polarizability=True)
+        mock_atoms = MagicMock()
+
+        polar_tensor = np.array([[[1.0, 0.5, 0.0], [0.5, 2.0, 0.0], [0.0, 0.0, 3.0]]])
+        mock_model = mock_calc.models[0]
+        mock_model.return_value = {"polarizability": polar_tensor}
+
+        mock_batch = MagicMock()
+        mock_calc._atoms_to_batch.return_value = mock_batch
+        mock_cloned = MagicMock()
+        mock_calc._clone_batch.return_value = mock_cloned
+        mock_cloned.to_dict.return_value = {"fake": "data"}
+
+        result = calc.calculate_polarizability(mock_atoms)
+
+        assert result.shape == (3, 3)
+        np.testing.assert_array_equal(result, polar_tensor[0])
+        mock_model.assert_called_once_with(
+            {"fake": "data"},
+            compute_dielectric_derivatives=False,
+            training=False,
+        )
+
+    def test_handles_torch_tensor_output(self):
+        """When model returns a torch-like tensor, detach().cpu().numpy() is called."""
+        calc, mock_calc = self._make_calculator_with_mock(use_polarizability=True)
+        mock_atoms = MagicMock()
+
+        # Simulate a tensor with detach/cpu/numpy chain
+        mock_tensor = MagicMock()
+        mock_tensor.__getitem__ = lambda self, idx: np.eye(3)
+        mock_tensor.detach.return_value.cpu.return_value.numpy.return_value = np.ones((1, 3, 3))
+
+        mock_model = mock_calc.models[0]
+        mock_model.return_value = {"polarizability": mock_tensor}
+
+        mock_batch = MagicMock()
+        mock_calc._atoms_to_batch.return_value = mock_batch
+        mock_cloned = MagicMock()
+        mock_calc._clone_batch.return_value = mock_cloned
+        mock_cloned.to_dict.return_value = {}
+
+        result = calc.calculate_polarizability(mock_atoms)
+
+        mock_tensor.detach.assert_called_once()
+        assert result.shape == (3, 3)
+
+    def test_calls_ensure_calculator(self):
+        """Method calls _ensure_calculator() first."""
+        calc = MACEDipoleCalculator(model_path="/fake/model", device="cpu")
+        calc._ensure_calculator = MagicMock()
+        mock_calc = MagicMock()
+        mock_model = MagicMock(use_polarizability=False)
+        mock_calc.models = [mock_model]
+        calc.calc = mock_calc
+
+        calc.calculate_polarizability(MagicMock())
+
+        calc._ensure_calculator.assert_called_once()

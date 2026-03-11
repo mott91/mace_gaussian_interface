@@ -235,3 +235,32 @@ class MACEDipoleCalculator:
             self._last_dalpha_dr = None
         N_atoms = len(atoms)
         return dmu_dr.transpose(1, 2, 0).reshape(3 * N_atoms, 3)
+
+    def calculate_polarizability(self, atoms) -> np.ndarray:
+        """Extract static polarizability tensor via direct model forward pass.
+
+        Returns
+        -------
+        np.ndarray
+            Static polarizability in Angstrom^3, shape (3, 3).
+            Returns zeros if model lacks use_polarizability.
+
+        Notes
+        -----
+        The standard ASE calculate() path does NOT populate results["polarizability"]
+        (lines 290-292 of mace_dipole_core/calculators/mace.py are commented out).
+        We call the underlying model directly to obtain the tensor.
+        """
+        self._ensure_calculator()
+        if not self.calc.models[0].use_polarizability:
+            return np.zeros((3, 3))
+        batch = self.calc._atoms_to_batch(atoms)
+        output = self.calc.models[0](
+            self.calc._clone_batch(batch).to_dict(),
+            compute_dielectric_derivatives=False,
+            training=False,
+        )
+        polar = output["polarizability"]  # shape (1, 3, 3) -- 1 graph
+        if hasattr(polar, "detach"):
+            polar = polar.detach().cpu().numpy()
+        return polar[0]  # shape (3, 3) in Angstrom^3
