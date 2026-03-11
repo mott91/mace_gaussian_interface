@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: — Batch Benchmarking & Calculator Expansion
 status: completed
-stopped_at: Plan 13.1-01 complete
-last_updated: "2026-03-11T22:43:39Z"
-last_activity: 2026-03-11 — Plan 13.1-01 complete (autograd dipole derivatives + polarizability extraction)
+stopped_at: Phase 13.1 complete
+last_updated: "2026-03-11T22:50:07Z"
+last_activity: 2026-03-11 — Plan 13.1-02 complete (polarizability pipeline threading + Gaussian output)
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 3
-  completed_plans: 4
-  percent: 37
+  completed_plans: 5
+  percent: 39
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 ## Current Position
 
 Phase: 13.1 of 17 (Calculator Acceleration & Polarizability Passthrough)
-Plan: 1 of 2 in current phase
-Status: Plan 13.1-01 complete
-Last activity: 2026-03-11 — Plan 13.1-01 complete (autograd dipole derivatives + polarizability extraction)
+Plan: 2 of 2 in current phase
+Status: Phase 13.1 complete (all plans done)
+Last activity: 2026-03-11 — Plan 13.1-02 complete (polarizability pipeline threading + Gaussian output)
 
-Progress: [███████░░░░░░░░░░░░░] 35% (12/17 phases complete; v1.1 not started)
+Progress: [████████░░░░░░░░░░░░] 39% (12/17 phases complete; Phase 13.1 done)
 
 ## Performance Metrics
 
@@ -66,6 +66,9 @@ Recent decisions affecting v1.1 work:
 - [13.1-01]: No try/except around get_dielectric_derivatives -- loud failure, no silent fallback to finite differences
 - [13.1-01]: dmu_dr reshape via transpose(1,2,0).reshape(3N,3) matches base-class layout
 - [13.1-01]: calculate_polarizability uses direct model forward pass since ASE calculate() path has commented-out polarizability extraction
+- [13.1-02]: Unit conversion (Angstrom^3 -> Bohr^3) in workflow.py, not io.py -- io.py receives pre-converted values
+- [13.1-02]: dalpha_dr stored in mol.info but NOT written to Gaussian output file (Python-only pipeline data)
+- [13.1-02]: Voigt packing order [axx,axy,ayy,axz,ayz,azz] matches Gaussian convention
 
 ### Roadmap Evolution
 
@@ -83,6 +86,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-11T22:43:39Z
-Stopped at: Completed 13.1-01-PLAN.md
-Resume file: .planning/phases/13.1-calculator-acceleration-polarizability-passthrough/13.1-01-SUMMARY.md
+Last session: 2026-03-11T22:50:07Z
+Stopped at: Completed 13.1-02-PLAN.md (Phase 13.1 complete)
+Resume file: .planning/phases/13.1-calculator-acceleration-polarizability-passthrough/13.1-02-SUMMARY.md
