@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: — Batch Benchmarking & Calculator Expansion
 status: completed
-stopped_at: Phase 13.1 context gathered
-last_updated: "2026-03-10T15:49:42.095Z"
-last_activity: 2026-03-03 — Plan 13-01 complete (CLI validation callbacks for mace_off/mace_anicc)
+stopped_at: Plan 13.1-01 complete
+last_updated: "2026-03-11T22:43:39Z"
+last_activity: 2026-03-11 — Plan 13.1-01 complete (autograd dipole derivatives + polarizability extraction)
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 3
-  completed_plans: 3
-  percent: 35
+  completed_plans: 4
+  percent: 37
 ---
 
 # Project State
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 
 ## Current Position
 
-Phase: 13 of 17 (Calculator Expansion & Acoh Bug Fix)
-Plan: 3 of 3 in current phase
-Status: Phase 13 complete — all 3 plans done
-Last activity: 2026-03-03 — Plan 13-01 complete (CLI validation callbacks for mace_off/mace_anicc)
+Phase: 13.1 of 17 (Calculator Acceleration & Polarizability Passthrough)
+Plan: 1 of 2 in current phase
+Status: Plan 13.1-01 complete
+Last activity: 2026-03-11 — Plan 13.1-01 complete (autograd dipole derivatives + polarizability extraction)
 
 Progress: [███████░░░░░░░░░░░░░] 35% (12/17 phases complete; v1.1 not started)
 
@@ -63,6 +63,9 @@ Recent decisions affecting v1.1 work:
 - [13-02]: Element guard placed OUTSIDE try/except in run_frequency_calculation so ValueError propagates instead of being silently caught
 - [13-01]: Use callback= not type=click.Choice for comma-separated options (click.Choice validates atomically, rejecting "mace_mp,mace_omol" as a whole string)
 - [13-01]: VALID_ENERGY_CALCULATORS and VALID_DIPOLE_CALCULATORS exported at module level for test assertions
+- [13.1-01]: No try/except around get_dielectric_derivatives -- loud failure, no silent fallback to finite differences
+- [13.1-01]: dmu_dr reshape via transpose(1,2,0).reshape(3N,3) matches base-class layout
+- [13.1-01]: calculate_polarizability uses direct model forward pass since ASE calculate() path has commented-out polarizability extraction
 
 ### Roadmap Evolution
 
@@ -80,6 +83,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-10T15:49:42.092Z
-Stopped at: Phase 13.1 context gathered
-Resume file: .planning/phases/13.1-calculator-acceleration-polarizability-passthrough/13.1-CONTEXT.md
+Last session: 2026-03-11T22:43:39Z
+Stopped at: Completed 13.1-01-PLAN.md
+Resume file: .planning/phases/13.1-calculator-acceleration-polarizability-passthrough/13.1-01-SUMMARY.md
