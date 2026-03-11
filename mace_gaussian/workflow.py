@@ -39,6 +39,9 @@ from .gaussian.runner import DEFAULT_TIMEOUT_SECONDS, run_gaussian_with_zmq
 from .utils.results import ResultsManager
 from .utils.units import BOHR_TO_ANGSTROM, HARTREE_TO_EV
 
+# Conversion factor for polarizability: Angstrom^3 -> Bohr^3
+ANGSTROM3_TO_BOHR3 = (1.0 / BOHR_TO_ANGSTROM) ** 3
+
 warnings.filterwarnings("ignore", message=".*weights_only=False.*", category=FutureWarning)
 os.environ["PYTHONWARNINGS"] = "ignore::FutureWarning"
 
@@ -104,7 +107,7 @@ def calculate_hessian(atoms, calculator, natoms: int) -> np.ndarray | None:
 
 def calculate_dipole_properties(
     atoms, dipole_calc, deriv: int, calculate_derivatives: bool
-) -> tuple[np.ndarray, np.ndarray, np.ndarray | None]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray | None, np.ndarray]:
     """Calculate dipole moment and optionally its derivatives.
 
     Args:
@@ -114,10 +117,11 @@ def calculate_dipole_properties(
         calculate_derivatives: Whether to calculate dipole derivatives
 
     Returns:
-        Tuple of (dipole, dipole_derivatives, partial_charges)
+        Tuple of (dipole, dipole_derivatives, partial_charges, polarizability_voigt6)
         - dipole: Dipole moment in e*Bohr, shape (3,)
         - dipole_derivatives: Dipole derivatives in e, shape (3*natoms, 3)
         - partial_charges: Partial atomic charges (or None), shape (natoms,)
+        - polarizability_voigt6: shape (6,) in Bohr^3 [axx,axy,ayy,axz,ayz,azz], or zeros
     """
     natoms = len(atoms)
 
@@ -138,8 +142,18 @@ def calculate_dipole_properties(
         else:
             dipole_derivatives = np.zeros((3 * natoms, 3))
 
+        # Extract polarizability if calculator supports it (MACEDipoleCalculator)
+        if hasattr(dipole_calc, "calculate_polarizability"):
+            polar_3x3 = dipole_calc.calculate_polarizability(atoms)  # (3,3) Angstrom^3
+            p = polar_3x3 * ANGSTROM3_TO_BOHR3
+            polarizability_voigt6 = np.array(
+                [p[0, 0], p[0, 1], p[1, 1], p[0, 2], p[1, 2], p[2, 2]]
+            )
+        else:
+            polarizability_voigt6 = np.zeros(6)
+
         logger.info(f"Dipole calculated: {dipole} e*Bohr")
-        return dipole, dipole_derivatives, partial_charges
+        return dipole, dipole_derivatives, partial_charges, polarizability_voigt6
 
     except Exception as e:
         logger.error(f"Dipole calculation failed: {e}")
@@ -148,7 +162,7 @@ def calculate_dipole_properties(
         # Fallback to zeros
         dipole = np.zeros(3)
         dipole_derivatives = np.zeros((3 * natoms, 3))
-        return dipole, dipole_derivatives, None
+        return dipole, dipole_derivatives, None, np.zeros(6)
 
 
 def run_next_calculation(
@@ -192,13 +206,27 @@ def run_next_calculation(
 
     # Step 5: Calculate dipole properties
     dipole_calc = dipole_factory.get_calculator(dipole_method)
-    dipole, dipole_derivatives, _partial_charges = calculate_dipole_properties(
-        mol, dipole_calc, deriv, calculate_derivatives
+    dipole, dipole_derivatives, _partial_charges, polarizability_voigt6 = (
+        calculate_dipole_properties(mol, dipole_calc, deriv, calculate_derivatives)
     )
+
+    # Thread dalpha_dr through pipeline (Python-only; NOT written to Gaussian file)
+    dalpha_dr = getattr(dipole_calc, "_last_dalpha_dr", None)
+    if dalpha_dr is not None:
+        mol.info["dalpha_dr"] = dalpha_dr
+        logger.debug("dalpha_dr shape: %s", dalpha_dr.shape)
 
     # Step 6: Write results to Gaussian output file
     write_gaussian_output(
-        outfile, natoms, energy, gradient, dipole, dipole_derivatives, hessian, deriv
+        outfile,
+        natoms,
+        energy,
+        gradient,
+        dipole,
+        dipole_derivatives,
+        hessian,
+        deriv,
+        polarizability=polarizability_voigt6,
     )
 
 
