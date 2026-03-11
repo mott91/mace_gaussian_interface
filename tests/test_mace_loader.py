@@ -219,3 +219,119 @@ class TestMACEDipoleCalculatorWrapper:
         """Module source must not contain sys.modules["mace string."""
         source = inspect.getsource(importlib.import_module("mace_gaussian.calculators.mace_loader"))
         assert 'sys.modules["mace' not in source
+
+
+# ---------------------------------------------------------------------------
+# TestMACEDipoleCalculatorAutograd
+# ---------------------------------------------------------------------------
+
+import numpy as np
+
+
+class TestMACEDipoleCalculatorAutograd:
+    """Tests for MACEDipoleCalculator.calculate_dipole_derivatives() autograd override."""
+
+    def _make_calculator_with_mock(self, use_polarizability=False):
+        """Create a MACEDipoleCalculator with a pre-injected mock calc."""
+        calc = MACEDipoleCalculator(model_path="/fake/model", device="cpu")
+        mock_calc = MagicMock()
+        mock_model = MagicMock(use_polarizability=use_polarizability)
+        mock_calc.models = [mock_model]
+        calc.calc = mock_calc  # bypass _ensure_calculator
+        return calc, mock_calc
+
+    def _make_mock_atoms(self, n_atoms=3):
+        """Create a mock atoms object with n_atoms."""
+        mock_atoms = MagicMock()
+        mock_atoms.__len__ = lambda self: n_atoms
+        return mock_atoms
+
+    def test_calls_get_dielectric_derivatives(self):
+        """Override calls get_dielectric_derivatives, not base class finite differences."""
+        calc, mock_calc = self._make_calculator_with_mock(use_polarizability=False)
+        mock_atoms = self._make_mock_atoms(3)
+        dmu_dr_raw = np.random.randn(3, 3, 3)
+        mock_calc.get_dielectric_derivatives.return_value = dmu_dr_raw
+
+        calc.calculate_dipole_derivatives(mock_atoms)
+
+        mock_calc.get_dielectric_derivatives.assert_called_once_with(mock_atoms)
+
+    def test_no_polarizability_returns_correct_shape(self):
+        """When use_polarizability=False, result is reshaped to (3*N, 3)."""
+        calc, mock_calc = self._make_calculator_with_mock(use_polarizability=False)
+        mock_atoms = self._make_mock_atoms(3)
+        dmu_dr_raw = np.random.randn(3, 3, 3)  # (dipole_comp, atom, spatial_dir)
+        mock_calc.get_dielectric_derivatives.return_value = dmu_dr_raw
+
+        result = calc.calculate_dipole_derivatives(mock_atoms)
+
+        assert result.shape == (9, 3)
+        assert isinstance(result, np.ndarray)
+
+    def test_polarizability_true_extracts_tuple(self):
+        """When use_polarizability=True, dmu_dr is from index 0 of tuple."""
+        calc, mock_calc = self._make_calculator_with_mock(use_polarizability=True)
+        mock_atoms = self._make_mock_atoms(3)
+        dmu_dr_raw = np.random.randn(3, 3, 3)
+        dalpha_dr_raw = np.random.randn(3, 9, 3)
+        mock_calc.get_dielectric_derivatives.return_value = (dmu_dr_raw, dalpha_dr_raw)
+
+        result = calc.calculate_dipole_derivatives(mock_atoms)
+
+        assert result.shape == (9, 3)
+        assert calc._last_dalpha_dr is dalpha_dr_raw
+
+    def test_no_polarizability_clears_dalpha(self):
+        """When use_polarizability=False, _last_dalpha_dr is set to None."""
+        calc, mock_calc = self._make_calculator_with_mock(use_polarizability=False)
+        mock_atoms = self._make_mock_atoms(3)
+        dmu_dr_raw = np.random.randn(3, 3, 3)
+        mock_calc.get_dielectric_derivatives.return_value = dmu_dr_raw
+
+        calc.calculate_dipole_derivatives(mock_atoms)
+
+        assert calc._last_dalpha_dr is None
+
+    def test_exception_propagates(self):
+        """If get_dielectric_derivatives raises, it propagates (no try/except)."""
+        calc, mock_calc = self._make_calculator_with_mock(use_polarizability=False)
+        mock_atoms = self._make_mock_atoms(3)
+        mock_calc.get_dielectric_derivatives.side_effect = RuntimeError("autograd failed")
+
+        import pytest
+
+        with pytest.raises(RuntimeError, match="autograd failed"):
+            calc.calculate_dipole_derivatives(mock_atoms)
+
+    def test_returned_dtype_is_float64(self):
+        """Returned array dtype is float64-compatible."""
+        calc, mock_calc = self._make_calculator_with_mock(use_polarizability=False)
+        mock_atoms = self._make_mock_atoms(3)
+        dmu_dr_raw = np.random.randn(3, 3, 3).astype(np.float64)
+        mock_calc.get_dielectric_derivatives.return_value = dmu_dr_raw
+
+        result = calc.calculate_dipole_derivatives(mock_atoms)
+
+        assert result.dtype == np.float64
+
+    def test_reshape_is_correct(self):
+        """Verify the transpose+reshape produces correct layout."""
+        calc, mock_calc = self._make_calculator_with_mock(use_polarizability=False)
+        mock_atoms = self._make_mock_atoms(2)
+        # (3, 2, 3) = (dipole_comp, atom, spatial_dir)
+        dmu_dr_raw = np.arange(18).reshape(3, 2, 3).astype(np.float64)
+        mock_calc.get_dielectric_derivatives.return_value = dmu_dr_raw
+
+        result = calc.calculate_dipole_derivatives(mock_atoms)
+
+        # transpose(1,2,0): (2, 3, 3) = (atom, spatial_dir, dipole_comp)
+        # reshape(6, 3): row 3i+j = d(dipole)/d(atom_i, dir_j)
+        expected = dmu_dr_raw.transpose(1, 2, 0).reshape(6, 3)
+        np.testing.assert_array_equal(result, expected)
+
+    def test_init_has_last_dalpha_dr(self):
+        """__init__ initializes _last_dalpha_dr = None."""
+        calc = MACEDipoleCalculator(model_path="/fake/model", device="cpu")
+        assert hasattr(calc, "_last_dalpha_dr")
+        assert calc._last_dalpha_dr is None
