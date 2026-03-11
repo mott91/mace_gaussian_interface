@@ -72,6 +72,7 @@ def write_gaussian_output(
     dipole_derivatives: np.ndarray,
     hessian: np.ndarray | None,
     deriv: int,
+    polarizability: np.ndarray | None = None,
 ):
     """
     Write results to Gaussian external calculation output file.
@@ -85,6 +86,9 @@ def write_gaussian_output(
         dipole_derivatives: Dipole derivatives in e, shape (3*natoms, 3)
         hessian: Hessian in Hartree/Bohr^2, shape (3*natoms, 3*natoms), or None
         deriv: Derivative level (0, 1, or 2)
+        polarizability: Polarizability in Bohr^3, shape (6,) as
+            [axx, axy, ayy, axz, ayz, azz]. Defaults to zeros.
+            Caller must provide values already in Bohr^3 (no unit conversion here).
     """
     # Convert energy from eV to Hartree
     energy_hartree = energy / HARTREE_TO_EV
@@ -92,8 +96,9 @@ def write_gaussian_output(
     # Convert gradient from eV/Angstrom to Hartree/Bohr
     gradient_hartree_bohr = gradient * BOHR_TO_ANGSTROM / HARTREE_TO_EV
 
-    # Polarizability (not implemented, set to zero)
-    polarizability = np.zeros(6)
+    # Polarizability: use caller-provided values or default to zeros
+    if polarizability is None:
+        polarizability = np.zeros(6)
 
     with Path(outfile).open("w") as f:
         # Write energy and dipole (Fortran format with 'D' exponent)
