@@ -3,11 +3,11 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: — Batch Benchmarking & Calculator Expansion
 status: completed
-stopped_at: Completed 13.1-02-PLAN.md (Phase 13.1 complete)
-last_updated: "2026-03-11T23:12:25.312Z"
+stopped_at: Phase 13.2 context gathered
+last_updated: "2026-03-12T18:11:37.757Z"
 last_activity: 2026-03-11 — Plan 13.1-02 complete (polarizability pipeline threading + Gaussian output)
 progress:
-  total_phases: 6
+  total_phases: 7
   completed_phases: 2
   total_plans: 5
   completed_plans: 5
@@ -73,6 +73,7 @@ Recent decisions affecting v1.1 work:
 ### Roadmap Evolution
 
 - Phase 13.1 inserted after Phase 13: Calculator Acceleration & Polarizability Passthrough (INSERTED) — autograd dipole derivatives + polarizability passthrough discovered during code exploration 2026-03-10
+- Phase 13.2 inserted after Phase 13: Temp file cleanup — scratch directory for intermediate Gaussian files (URGENT)
 
 ### Pending Todos
 
@@ -86,6 +87,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-11T22:50:07Z
-Stopped at: Completed 13.1-02-PLAN.md (Phase 13.1 complete)
-Resume file: .planning/phases/13.1-calculator-acceleration-polarizability-passthrough/13.1-02-SUMMARY.md
+Last session: 2026-03-12T18:11:37.754Z
+Stopped at: Phase 13.2 context gathered
+Resume file: .planning/phases/13.2-temp-file-cleanup-scratch-directory-for-intermediate-gaussian-files/13.2-CONTEXT.md
