@@ -23,6 +23,8 @@ from pathlib import Path
 import numpy as np
 import torch
 
+from mace_gaussian.calculators.base import DipoleCalculatorBase
+
 logger = logging.getLogger(__name__)
 
 # Path to mace_dipole_pkg/ for lazy sys.path setup
@@ -138,6 +140,8 @@ class MACEDipoleCalculator:
     cleanup is needed because the safe loader does not mutate global state.
     """
 
+    use_autograd: bool = True
+
     def __init__(self, model_path: str, device: str = "cuda") -> None:
         self.model_path = model_path
         self.device = device
@@ -215,6 +219,9 @@ class MACEDipoleCalculator:
         ~20-60x faster for typical molecules. If the call raises, the exception propagates --
         there is no silent fallback to finite differences.
 
+        Set ``use_autograd = False`` on the instance to fall back to base-class
+        finite differences (useful for benchmarking).
+
         Parameters
         ----------
         atoms : ase.Atoms
@@ -225,6 +232,8 @@ class MACEDipoleCalculator:
         np.ndarray
             Dipole derivatives, shape (3*N_atoms, 3), units e/Angstrom (same as base class).
         """
+        if not self.use_autograd:
+            return DipoleCalculatorBase.calculate_dipole_derivatives(self, atoms, **kwargs)
         self._ensure_calculator()
         use_polar = self.calc.models[0].use_polarizability
         if use_polar:

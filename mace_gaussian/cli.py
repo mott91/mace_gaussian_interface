@@ -95,6 +95,7 @@ def cli():
     help="Force re-optimization even if optimized geometry exists",
 )
 @click.option("--skip-dft-baseline", is_flag=True, help="Skip DFT baseline calculations")
+@click.option("--no-autograd", is_flag=True, help="Disable autograd dipole derivatives (use finite differences, for benchmarking)")
 @click.option(
     "--output-dir",
     default="comparison_results",
@@ -108,6 +109,7 @@ def run(
     dipole_calculators,
     force_optimization,
     skip_dft_baseline,
+    no_autograd,
     output_dir,
 ):
     """
@@ -120,6 +122,12 @@ def run(
         python cli.py run water.xyz --output-dir my_results
     """
     from mace_gaussian.workflow import run_pipeline
+
+    if no_autograd:
+        from mace_gaussian.calculators.mace_loader import MACEDipoleCalculator
+
+        MACEDipoleCalculator.use_autograd = False
+        click.echo("Autograd dipole derivatives DISABLED (using finite differences)")
 
     # Parse calculator lists
     energy_calc_list = [c.strip() for c in energy_calculators.split(",")]

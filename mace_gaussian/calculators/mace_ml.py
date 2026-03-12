@@ -50,3 +50,13 @@ class MACEMLDipoleCalculator(DipoleCalculatorBase):
         if not self.available:
             raise RuntimeError("MACE ML dipole calculator not available")
         return self.mace_calc.calculate_dipole(atoms, **kwargs)
+
+    def calculate_dipole_derivatives(self, atoms, **kwargs):
+        if not self.available:
+            raise RuntimeError("MACE ML dipole calculator not available")
+        return self.mace_calc.calculate_dipole_derivatives(atoms, **kwargs)
+
+    def calculate_polarizability(self, atoms):
+        if not self.available:
+            raise RuntimeError("MACE ML dipole calculator not available")
+        return self.mace_calc.calculate_polarizability(atoms)

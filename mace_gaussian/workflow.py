@@ -128,7 +128,9 @@ def calculate_dipole_properties(
     try:
         # Calculate dipole moment
         logger.info(f"Using dipole calculator: {dipole_calc.name}")
+        td1 = time.perf_counter()
         dipole, partial_charges = dipole_calc.calculate_dipole(atoms)
+        td_dipole = time.perf_counter() - td1
 
         # Store charges in atoms object if available
         if partial_charges is not None:
@@ -136,15 +138,21 @@ def calculate_dipole_properties(
             logger.debug(f"Partial charges sum: {np.sum(partial_charges):.6f}")
 
         # Calculate dipole derivatives for IR intensities
+        td_derivs = 0.0
         if calculate_derivatives and deriv >= 1:
             logger.info("Calculating dipole derivatives for IR intensities...")
+            td1 = time.perf_counter()
             dipole_derivatives = dipole_calc.calculate_dipole_derivatives(atoms, displacement=0.005)
+            td_derivs = time.perf_counter() - td1
         else:
             dipole_derivatives = np.zeros((3 * natoms, 3))
 
         # Extract polarizability if calculator supports it (MACEDipoleCalculator)
+        td_polar = 0.0
         if hasattr(dipole_calc, "calculate_polarizability"):
+            td1 = time.perf_counter()
             polar_3x3 = dipole_calc.calculate_polarizability(atoms)  # (3,3) Angstrom^3
+            td_polar = time.perf_counter() - td1
             p = polar_3x3 * ANGSTROM3_TO_BOHR3
             polarizability_voigt6 = np.array(
                 [p[0, 0], p[0, 1], p[1, 1], p[0, 2], p[1, 2], p[2, 2]]
@@ -153,6 +161,7 @@ def calculate_dipole_properties(
             polarizability_voigt6 = np.zeros(6)
 
         logger.info(f"Dipole calculated: {dipole} e*Bohr")
+        print(f"     [dipole={td_dipole:.2f}s derivs={td_derivs:.2f}s polar={td_polar:.2f}s]")
         return dipole, dipole_derivatives, partial_charges, polarizability_voigt6
 
     except Exception as e:
@@ -186,6 +195,7 @@ def run_next_calculation(
     """
     # Visible progress indicator
     print("  -> Processing Gaussian request...")
+    t0 = time.perf_counter()
 
     # Parse message to get file paths
     infile, outfile = msg.split("|")
@@ -197,18 +207,25 @@ def run_next_calculation(
     update_molecule_geometry(mol, coordinates, charge, spin)
 
     # Step 3: Calculate energy and forces
+    t1 = time.perf_counter()
     energy, gradient = calculate_energy_and_forces(mol, calculator)
+    t_energy = time.perf_counter() - t1
 
     # Step 4: Calculate Hessian if needed
     hessian = None
+    t_hessian = 0.0
     if deriv >= 2:
+        t1 = time.perf_counter()
         hessian = calculate_hessian(mol, calculator, natoms)
+        t_hessian = time.perf_counter() - t1
 
     # Step 5: Calculate dipole properties
+    t1 = time.perf_counter()
     dipole_calc = dipole_factory.get_calculator(dipole_method)
     dipole, dipole_derivatives, _partial_charges, polarizability_voigt6 = (
         calculate_dipole_properties(mol, dipole_calc, deriv, calculate_derivatives)
     )
+    t_dipole = time.perf_counter() - t1
 
     # Thread dalpha_dr through pipeline (Python-only; NOT written to Gaussian file)
     dalpha_dr = getattr(dipole_calc, "_last_dalpha_dr", None)
@@ -227,6 +244,12 @@ def run_next_calculation(
         hessian,
         deriv,
         polarizability=polarizability_voigt6,
+    )
+
+    elapsed = time.perf_counter() - t0
+    print(
+        f"  -> Gaussian call completed in {elapsed:.2f}s (deriv={deriv}) "
+        f"[energy={t_energy:.2f}s hessian={t_hessian:.2f}s dipole={t_dipole:.2f}s]"
     )
 
 
