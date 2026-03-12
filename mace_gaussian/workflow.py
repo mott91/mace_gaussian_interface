@@ -161,7 +161,7 @@ def calculate_dipole_properties(
             polarizability_voigt6 = np.zeros(6)
 
         logger.info(f"Dipole calculated: {dipole} e*Bohr")
-        print(f"     [dipole={td_dipole:.2f}s derivs={td_derivs:.2f}s polar={td_polar:.2f}s]")
+        logger.debug(f"Dipole timing: dipole={td_dipole:.2f}s derivs={td_derivs:.2f}s polar={td_polar:.2f}s")
         return dipole, dipole_derivatives, partial_charges, polarizability_voigt6
 
     except Exception as e:
@@ -247,9 +247,9 @@ def run_next_calculation(
     )
 
     elapsed = time.perf_counter() - t0
-    print(
-        f"  -> Gaussian call completed in {elapsed:.2f}s (deriv={deriv}) "
-        f"[energy={t_energy:.2f}s hessian={t_hessian:.2f}s dipole={t_dipole:.2f}s]"
+    print(f"  -> Gaussian call completed in {elapsed:.2f}s (deriv={deriv})")
+    logger.debug(
+        f"Call timing: energy={t_energy:.2f}s hessian={t_hessian:.2f}s dipole={t_dipole:.2f}s"
     )
 
 
