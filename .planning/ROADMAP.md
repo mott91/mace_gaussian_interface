@@ -51,7 +51,7 @@ Plans:
 **Goal:** All intermediate Gaussian files (.gjf, .log, .chk, IPC socket) are created inside per-run `.scratch/` subdirectories instead of the project root; scratch dirs are auto-cleaned on success, failure, and startup (stale >24h); `--keep-scratch` CLI flag preserves scratch on failure for debugging.
 **Requirements**: SCRATCH-01, SCRATCH-02, SCRATCH-03
 **Depends on:** Phase 13
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] 13.2-01-PLAN.md — ScratchDir utility + low-level Gaussian interface updates (runner.py, gm_helper.py, io.py, dft_baseline.py)
@@ -133,7 +133,7 @@ Plans:
 | 12. Distribution Polish | v1.0 | 1/1 | Complete | 2026-02-27 |
 | 13. Calculator Expansion & Acoh Fix | v1.1 | Complete    | 2026-03-03 | 2026-03-03 |
 | 13.1. Calculator Acceleration & Polarizability | 2/2 | Complete    | 2026-03-11 | - |
-| 13.2. Temp File Cleanup / Scratch Dir | v1.1 | 0/2 | Not started | - |
+| 13.2. Temp File Cleanup / Scratch Dir | 1/2 | In Progress|  | - |
 | 14. Batch Runner & PubChem Fetcher | v1.1 | 0/TBD | Not started | - |
 | 15. SLURM Integration & Batch Report | v1.1 | 0/TBD | Not started | - |
 | 16. Benchmark Campaign | v1.1 | 0/TBD | Not started | - |

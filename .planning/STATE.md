@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: — Batch Benchmarking & Calculator Expansion
-status: completed
-stopped_at: Phase 13.2 context gathered
-last_updated: "2026-03-12T18:11:37.757Z"
-last_activity: 2026-03-11 — Plan 13.1-02 complete (polarizability pipeline threading + Gaussian output)
+status: in-progress
+stopped_at: Plan 13.2-01 complete
+last_updated: "2026-03-14T18:52:33Z"
+last_activity: 2026-03-14 — Plan 13.2-01 complete (ScratchDir utility + interface updates)
 progress:
   total_phases: 7
   completed_phases: 2
-  total_plans: 5
-  completed_plans: 5
-  percent: 39
+  total_plans: 7
+  completed_plans: 6
+  percent: 43
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 
 ## Current Position
 
-Phase: 13.1 of 17 (Calculator Acceleration & Polarizability Passthrough)
-Plan: 2 of 2 in current phase
-Status: Phase 13.1 complete (all plans done)
-Last activity: 2026-03-11 — Plan 13.1-02 complete (polarizability pipeline threading + Gaussian output)
+Phase: 13.2 of 17 (Temp File Cleanup — Scratch Directory for Intermediate Gaussian Files)
+Plan: 1 of 2 in current phase
+Status: Plan 13.2-01 complete, Plan 13.2-02 remaining
+Last activity: 2026-03-14 — Plan 13.2-01 complete (ScratchDir utility + interface updates)
 
-Progress: [████████░░░░░░░░░░░░] 39% (12/17 phases complete; Phase 13.1 done)
+Progress: [████████░░░░░░░░░░░░] 43% (6/7 plans in v1.1 complete)
 
 ## Performance Metrics
 
@@ -69,6 +69,9 @@ Recent decisions affecting v1.1 work:
 - [13.1-02]: Unit conversion (Angstrom^3 -> Bohr^3) in workflow.py, not io.py -- io.py receives pre-converted values
 - [13.1-02]: dalpha_dr stored in mol.info but NOT written to Gaussian output file (Python-only pipeline data)
 - [13.1-02]: Voigt packing order [axx,axy,ayy,axz,ayz,azz] matches Gaussian convention
+- [13.2-01]: scratch_dir uses @contextmanager with try/except BaseException/else pattern for cleanup
+- [13.2-01]: MACE_IPC_PATH env var with .ipc_file fallback in gm_helper.py
+- [13.2-01]: output_dir param uses basename-only %chk paths for Gaussian scratch isolation
 
 ### Roadmap Evolution
 
@@ -87,6 +90,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-12T18:11:37.754Z
-Stopped at: Phase 13.2 context gathered
-Resume file: .planning/phases/13.2-temp-file-cleanup-scratch-directory-for-intermediate-gaussian-files/13.2-CONTEXT.md
+Last session: 2026-03-14T18:52:33Z
+Stopped at: Completed 13.2-01-PLAN.md
+Resume file: .planning/phases/13.2-temp-file-cleanup-scratch-directory-for-intermediate-gaussian-files/13.2-02-PLAN.md
