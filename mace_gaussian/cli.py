@@ -101,6 +101,12 @@ def cli():
     type=click.Path(),
     help="Output directory for results (default: comparison_results)",
 )
+@click.option(
+    "--keep-scratch",
+    is_flag=True,
+    default=False,
+    help="Preserve scratch directory on failure for debugging (also: MACE_KEEP_SCRATCH=1)",
+)
 def run(
     input_file,
     optimization_calculator,
@@ -109,6 +115,7 @@ def run(
     force_optimization,
     skip_dft_baseline,
     output_dir,
+    keep_scratch,
 ):
     """
     Run complete calculation workflow on INPUT_FILE.
@@ -119,7 +126,12 @@ def run(
         python cli.py run water.xyz --energy-calculators mace_mp --dipole-calculators espaloma
         python cli.py run water.xyz --output-dir my_results
     """
+    from mace_gaussian.utils.scratch import cleanup_stale_scratch_dirs
     from mace_gaussian.workflow import run_pipeline
+
+    # Resolve keep_scratch: CLI flag takes precedence over env var
+    if not keep_scratch:
+        keep_scratch = os.environ.get("MACE_KEEP_SCRATCH", "0") == "1"
 
     # Parse calculator lists
     energy_calc_list = [c.strip() for c in energy_calculators.split(",")]
@@ -169,6 +181,11 @@ def run(
     device = detect_device()
     click.echo(f"Device: {device}")
 
+    # Clean up stale scratch directories from previous crashed runs
+    removed = cleanup_stale_scratch_dirs()
+    if removed:
+        click.echo(f"Cleaned up {len(removed)} stale scratch dir(s)")
+
     click.echo(f"\nStarting workflow for: {input_file}")
     click.echo(f"Energy calculators: {energy_calc_list}")
     click.echo(f"Dipole calculators: {dipole_calc_list}")
@@ -183,6 +200,7 @@ def run(
             force_optimization=force_optimization,
             include_dft_baselines=not skip_dft_baseline,
             base_output_dir=output_dir,
+            keep_scratch=keep_scratch,
         )
 
         # Print final summary
@@ -397,6 +415,7 @@ def diagnose():
         python cli.py diagnose
     """
     from mace_gaussian.calculators import dipole_factory
+    from mace_gaussian.utils.scratch import list_stale_scratch_dirs
 
     click.echo("=" * 60)
     click.echo("DIAGNOSTIC MODE")
@@ -405,7 +424,17 @@ def diagnose():
     for name, available in dipole_factory.list_available().items():
         status = "OK" if available else "UNAVAILABLE"
         click.echo(f"  {status}: {name}")
-    click.echo("\n" + "=" * 60)
+
+    # Scratch directory status
+    stale = list_stale_scratch_dirs()
+    if stale:
+        click.echo("\nStale scratch directories (>24h old):")
+        for name, age_hours in stale:
+            click.echo(f"  {name} ({age_hours:.1f}h old)")
+        click.echo("  Run 'mace-gaussian run' to auto-clean, or delete .scratch/ manually")
+    else:
+        click.echo("\nScratch directories: clean")
+    click.echo("=" * 60)
 
 
 if __name__ == "__main__":
