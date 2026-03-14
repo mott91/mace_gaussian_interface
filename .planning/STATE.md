@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: — Batch Benchmarking & Calculator Expansion
 status: in-progress
-stopped_at: Plan 13.2-01 complete
-last_updated: "2026-03-14T18:52:33Z"
-last_activity: 2026-03-14 — Plan 13.2-01 complete (ScratchDir utility + interface updates)
+stopped_at: Phase 13.2 complete
+last_updated: "2026-03-14T19:06:28Z"
+last_activity: 2026-03-14 — Phase 13.2 complete (Scratch directory workflow integration + CLI controls)
 progress:
   total_phases: 7
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 7
-  completed_plans: 6
-  percent: 43
+  completed_plans: 7
+  percent: 100
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 ## Current Position
 
 Phase: 13.2 of 17 (Temp File Cleanup — Scratch Directory for Intermediate Gaussian Files)
-Plan: 1 of 2 in current phase
-Status: Plan 13.2-01 complete, Plan 13.2-02 remaining
-Last activity: 2026-03-14 — Plan 13.2-01 complete (ScratchDir utility + interface updates)
+Plan: 2 of 2 in current phase (COMPLETE)
+Status: Phase 13.2 complete (all plans done)
+Last activity: 2026-03-14 — Phase 13.2 complete (Scratch directory workflow integration + CLI controls)
 
-Progress: [████████░░░░░░░░░░░░] 43% (6/7 plans in v1.1 complete)
+Progress: [████████████████████] 100% (7/7 plans in v1.1 complete)
 
 ## Performance Metrics
 
@@ -72,6 +72,9 @@ Recent decisions affecting v1.1 work:
 - [13.2-01]: scratch_dir uses @contextmanager with try/except BaseException/else pattern for cleanup
 - [13.2-01]: MACE_IPC_PATH env var with .ipc_file fallback in gm_helper.py
 - [13.2-01]: output_dir param uses basename-only %chk paths for Gaussian scratch isolation
+- [13.2-02]: IPC socket path set via MACE_IPC_PATH in env dict passed to Popen, not global os.environ
+- [13.2-02]: keep_scratch resolved from CLI flag first, then MACE_KEEP_SCRATCH env var as fallback
+- [13.2-02]: Stale scratch cleanup runs on every mace-gaussian run invocation before pipeline starts
 
 ### Roadmap Evolution
 
@@ -90,6 +93,5 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-14T18:52:33Z
-Stopped at: Completed 13.2-01-PLAN.md
-Resume file: .planning/phases/13.2-temp-file-cleanup-scratch-directory-for-intermediate-gaussian-files/13.2-02-PLAN.md
+Last session: 2026-03-14T19:06:28Z
+Stopped at: Completed 13.2-02-PLAN.md (Phase 13.2 complete)

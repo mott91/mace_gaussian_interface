@@ -17,7 +17,7 @@
 
 - [x] **SCRATCH-01**: All intermediate Gaussian files (.gjf, .log, .chk, .ipc_file) are created inside `.scratch/` subdirectory, not the project root — both ML frequency and DFT baseline runs
 - [x] **SCRATCH-02**: Scratch directory is auto-deleted on success (after moving files to results) and on failure (unless `--keep-scratch` flag or `MACE_KEEP_SCRATCH=1` env var is set)
-- [ ] **SCRATCH-03**: `mace-gaussian run` auto-cleans stale scratch dirs (>24h) on startup; `mace-gaussian diagnose` reports stale scratch dirs
+- [x] **SCRATCH-03**: `mace-gaussian run` auto-cleans stale scratch dirs (>24h) on startup; `mace-gaussian diagnose` reports stale scratch dirs
 
 ### Batch Workflow
 
@@ -82,7 +82,7 @@
 | CALC-04 | Phase 13 | Pending |
 | SCRATCH-01 | Phase 13.2 | Complete |
 | SCRATCH-02 | Phase 13.2 | Complete |
-| SCRATCH-03 | Phase 13.2 | Pending |
+| SCRATCH-03 | Phase 13.2 | Complete |
 | BATCH-01 | Phase 14 | Pending |
 | BATCH-02 | Phase 14 | Pending |
 | BATCH-03 | Phase 14 | Pending |
@@ -104,4 +104,4 @@
 
 ---
 *Requirements defined: 2026-03-03*
-*Last updated: 2026-03-12 after Phase 13.2 planning (SCRATCH-01/02/03 added)*
+*Last updated: 2026-03-14 after Phase 13.2 completion (SCRATCH-03 complete)*
