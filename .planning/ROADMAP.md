@@ -57,6 +57,36 @@ Plans:
 - [x] 13.2-01-PLAN.md — ScratchDir utility + low-level Gaussian interface updates (runner.py, gm_helper.py, io.py, dft_baseline.py)
 - [x] 13.2-02-PLAN.md — Workflow/DFT integration + CLI wiring (--keep-scratch, startup cleanup, diagnose reporting)
 
+### Phase 13.3: Hungarian Optimal Mode Matching (INSERTED)
+
+**Goal:** Replace greedy mode matching with `scipy.optimize.linear_sum_assignment` for globally optimal 1-to-1 ML↔DFT mode pairing. Fixes correctness bug where two ML modes can claim the same DFT mode; improves all regression plots and metrics before benchmark campaign.
+**Requirements**: TBD
+**Depends on:** Phase 13
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 13.3 to break down)
+
+### Phase 13.4: Frequency Range Coverage Analysis (INSERTED)
+
+**Goal:** Build a diagnostic that splits the IR spectrum into frequency regions, computes per-region ML vs DFT error metrics, flags underrepresented ranges, and cross-references across multiple molecules to identify systematic ML training set gaps. Outputs heatmap/bar chart for thesis.
+**Requirements**: TBD
+**Depends on:** Phase 13.3
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 13.4 to break down)
+
+### Phase 13.5: MACE-POLAR-1 Energy Calculator (INSERTED)
+
+**Goal:** Integrate MACE-POLAR-1 (`polar-1-m`) as a new energy calculator option. It adds long-range electrostatics (trained on OMol25, 100M structures) which may improve geometries for large/polar molecules. Wire into `--energy-calculators` and `--optimization-calculator` CLI options.
+**Requirements**: TBD
+**Depends on:** Phase 13
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 13.5 to break down)
+
 ### Phase 13.1: Calculator Acceleration & Polarizability Passthrough (INSERTED)
 
 **Goal**: MACEDipoleCalculator uses autograd (single model call) instead of 2×3N finite-difference passes for dipole derivatives; real polarizability is threaded through the pipeline and written to Gaussian output; dalpha_dr is available in the Python pipeline for future Raman analysis.
@@ -115,7 +145,7 @@ Plans:
 
 ## Progress
 
-**Execution Order:** 13 → 13.1 → 13.2 → 14 → 15 → 16 → 17
+**Execution Order:** 13 → 13.1 → 13.2 → 13.3 → 13.4 → 13.5 → 14 → 15 → 16 → 17
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -134,6 +164,9 @@ Plans:
 | 13. Calculator Expansion & Acoh Fix | v1.1 | Complete    | 2026-03-03 | 2026-03-03 |
 | 13.1. Calculator Acceleration & Polarizability | 2/2 | Complete    | 2026-03-11 | - |
 | 13.2. Temp File Cleanup / Scratch Dir | 2/2 | Complete    | 2026-03-14 | 2026-03-14 |
+| 13.3. Hungarian Optimal Mode Matching | v1.1 | 0/TBD | Not started | - |
+| 13.4. Frequency Range Coverage Analysis | v1.1 | 0/TBD | Not started | - |
+| 13.5. MACE-POLAR-1 Energy Calculator | v1.1 | 0/TBD | Not started | - |
 | 14. Batch Runner & PubChem Fetcher | v1.1 | 0/TBD | Not started | - |
 | 15. SLURM Integration & Batch Report | v1.1 | 0/TBD | Not started | - |
 | 16. Benchmark Campaign | v1.1 | 0/TBD | Not started | - |

@@ -80,6 +80,9 @@ Recent decisions affecting v1.1 work:
 
 - Phase 13.1 inserted after Phase 13: Calculator Acceleration & Polarizability Passthrough (INSERTED) — autograd dipole derivatives + polarizability passthrough discovered during code exploration 2026-03-10
 - Phase 13.2 inserted after Phase 13: Temp file cleanup — scratch directory for intermediate Gaussian files (URGENT)
+- Phase 13.3 inserted after Phase 13.2: Hungarian Optimal Mode Matching (INSERTED) — fix greedy mode matching correctness bug before benchmark
+- Phase 13.4 inserted after Phase 13.3: Frequency Range Coverage Analysis (INSERTED) — thesis diagnostic for ML training set gaps by frequency region
+- Phase 13.5 inserted after Phase 13.4: MACE-POLAR-1 Energy Calculator (INSERTED) — new energy calculator with long-range electrostatics
 
 ### Pending Todos
 
