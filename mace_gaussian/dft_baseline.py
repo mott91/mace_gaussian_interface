@@ -6,6 +6,7 @@ for comparison with ML-enhanced calculations.
 """
 
 import logging
+import os
 import shutil
 import subprocess
 import time
@@ -16,6 +17,7 @@ from ase import Atoms
 
 from .gaussian.parser import parse_gaussian_log
 from .utils.results import ResultsManager
+from .utils.scratch import scratch_dir
 from .utils.units import HARTREE_TO_EV
 
 logger = logging.getLogger(__name__)
@@ -271,6 +273,7 @@ def run_dft_baseline_calculation(
     charge: int = 0,
     multiplicity: int = 1,
     skip_if_exists: bool = True,
+    keep_scratch: bool = False,
 ) -> bool:
     """
     Run a DFT baseline calculation.
@@ -326,90 +329,95 @@ def run_dft_baseline_calculation(
             molecule_name, calculator_name, calculator_name, timestamp
         )
 
-        # Generate Gaussian input file
-        gjf_file = f"dft_{baseline_name}_{timestamp}.gjf"
-        create_gaussian_dft_input(
-            atoms,
-            gjf_file,
-            method,
-            basis,
-            charge,
-            multiplicity,
-            title=f"DFT baseline: {description}",
-            extra_keywords=extra_keywords,
-        )
+        # Run Gaussian inside an isolated scratch directory
+        run_name = f"run_dft_{baseline_name}_{timestamp}_{os.urandom(2).hex()}"
 
-        print(f"  \u2192 Created input: {gjf_file}")
+        with scratch_dir(run_name, keep_on_failure=keep_scratch) as scratch_path:
+            gjf_basename = "gaussian_dft.gjf"
+            create_gaussian_dft_input(
+                atoms,
+                gjf_basename,
+                method,
+                basis,
+                charge,
+                multiplicity,
+                title=f"DFT baseline: {description}",
+                extra_keywords=extra_keywords,
+                output_dir=scratch_path,
+            )
 
-        # Run Gaussian calculation
-        success, log_file = run_gaussian_dft(
-            gjf_file, timeout=None
-        )  # No timeout - run as long as needed
+            print(f"  \u2192 Created input: {scratch_path / gjf_basename}")
 
-        if not success:
-            print("  \u2717 Calculation failed")
-            print(f"  \u2192 Check log file: {log_file}")
+            # Run Gaussian calculation
+            success, log_file = run_gaussian_dft(
+                gjf_basename, timeout=None, cwd=str(scratch_path),
+            )
 
-            # Check if it's a functional recognition issue
-            if Path(log_file).exists():
-                with Path(log_file).open() as f:
-                    log_content = f.read()
-                    if "Unrecognized" in log_content or "Unknown" in log_content:
-                        print(
-                            f"  \u26a0 Possible issue: Functional '{method}' "
-                            "may not be available in your Gaussian version"
-                        )
-                        print(
-                            "    Check DFT_BASELINES in dft_baseline.py "
-                            "and ensure the functional is supported"
-                        )
+            if not success:
+                print("  \u2717 Calculation failed")
+                print(f"  \u2192 Check log file: {log_file}")
 
-            return False
+                # Check if it's a functional recognition issue
+                if Path(log_file).exists():
+                    with Path(log_file).open() as f:
+                        log_content = f.read()
+                        if "Unrecognized" in log_content or "Unknown" in log_content:
+                            print(
+                                f"  \u26a0 Possible issue: Functional '{method}' "
+                                "may not be available in your Gaussian version"
+                            )
+                            print(
+                                "    Check DFT_BASELINES in dft_baseline.py "
+                                "and ensure the functional is supported"
+                            )
+
+                return False
+
+            # Parse results from scratch dir log
+            print("  \u2192 Parsing results...")
+            try:
+                parsed_data = parse_gaussian_log(log_file)
+            except Exception as e:
+                logger.error(f"Failed to parse log file: {e}")
+                return False
+
+            # Convert energy from Hartree to eV
+            energy_hartree = parsed_data.get("final_energy_hartree")
+            if energy_hartree is not None:
+                energy_ev = energy_hartree * HARTREE_TO_EV
+            else:
+                logger.error("Could not extract energy from log file")
+                return False
+
+            # Move files from scratch to freq_dir (before context manager exits)
+            for src_name, dst_name in [
+                ("gaussian_dft.gjf", "gaussian_dft.gjf"),
+                ("gaussian_dft.log", "gaussian_dft.log"),
+                ("gaussian_dft.chk", "gaussian_dft.chk"),
+            ]:
+                src = scratch_path / src_name
+                if src.exists():
+                    shutil.move(str(src), str(freq_dir / dst_name))
 
         runtime = time.time() - start_time
 
-        # Parse results
-        print("  \u2192 Parsing results...")
-        try:
-            parsed_data = parse_gaussian_log(log_file)
-        except Exception as e:
-            logger.error(f"Failed to parse log file: {e}")
-            return False
-
-        # Convert energy from Hartree to eV
-        energy_hartree = parsed_data.get("final_energy_hartree")
-        if energy_hartree is not None:
-            energy_ev = energy_hartree * HARTREE_TO_EV
-        else:
-            logger.error("Could not extract energy from log file")
-            return False
-
-        # Move Gaussian files to output directory
-        chk_file = gjf_file.replace(".gjf", ".chk")
-
-        # Final paths in output directory
-        final_gjf = freq_dir / "gaussian_dft.gjf"
-        final_log = freq_dir / "gaussian_dft.log"
+        # After scratch dir cleanup, convert .chk to .fchk
         final_chk = freq_dir / "gaussian_dft.chk"
-
-        # Move/copy files
-        if Path(gjf_file).exists():
-            shutil.move(gjf_file, final_gjf)
-        if Path(log_file).exists():
-            shutil.move(log_file, final_log)
-        if Path(chk_file).exists():
-            shutil.move(chk_file, final_chk)
-            # Automatically convert to .fchk for mode matching
+        if final_chk.exists():
             try:
                 from .gaussian.fchk import convert_chk_to_fchk
 
                 final_fchk = freq_dir / "gaussian_dft.fchk"
                 logger.info("Converting .chk to .fchk for mode matching...")
                 convert_chk_to_fchk(str(final_chk), str(final_fchk))
-                logger.info(f"✓ Created {final_fchk}")
+                logger.info(f"Created {final_fchk}")
             except Exception as e:
                 logger.warning(f"Could not convert .chk to .fchk: {e}")
                 logger.warning("Mode matching will not be available for this calculation")
+
+        # Final paths for results saving
+        final_gjf = freq_dir / "gaussian_dft.gjf"
+        final_log = freq_dir / "gaussian_dft.log"
 
         # Save results (point to the final file locations)
         results_mgr.save_frequency_results(
@@ -453,6 +461,7 @@ def run_all_dft_baselines(
     charge: int = 0,
     multiplicity: int = 1,
     skip_if_exists: bool = True,
+    keep_scratch: bool = False,
 ) -> dict[str, bool]:
     """
     Run all DFT baseline calculations.
@@ -487,7 +496,8 @@ def run_all_dft_baselines(
 
     for baseline_name in DFT_BASELINES:
         success = run_dft_baseline_calculation(
-            atoms, molecule_name, baseline_name, results_mgr, charge, multiplicity, skip_if_exists
+            atoms, molecule_name, baseline_name, results_mgr, charge, multiplicity,
+            skip_if_exists, keep_scratch=keep_scratch,
         )
         results[baseline_name] = success
 

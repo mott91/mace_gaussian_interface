@@ -37,6 +37,7 @@ from .gaussian.io import ase_to_gjf, parse_gaussian_input, write_gaussian_output
 from .gaussian.parser import parse_gaussian_log
 from .gaussian.runner import DEFAULT_TIMEOUT_SECONDS, run_gaussian_with_zmq
 from .utils.results import ResultsManager
+from .utils.scratch import scratch_dir
 from .utils.units import BOHR_TO_ANGSTROM, HARTREE_TO_EV
 
 # Conversion factor for polarizability: Angstrom^3 -> Bohr^3
@@ -385,6 +386,7 @@ def run_frequency_calculation(
     results_mgr: ResultsManager,
     charge: int = 0,
     multiplicity: int = 1,
+    keep_scratch: bool = False,
 ):
     """Run frequency calculation with specified calculators.
 
@@ -436,19 +438,7 @@ def run_frequency_calculation(
             molecule_name, energy_calculator_name, dipole_calculator_name, timestamp
         )
 
-        # Generate Gaussian input file in the working directory first
-        # Use a temporary name to avoid conflicts
-        temp_basename = f"temp_{energy_calculator_name}_{dipole_calculator_name}_{timestamp}"
-        gjf_temp = f"{temp_basename}.gjf"
-
-        # Create Gaussian input
-        ase_to_gjf(mol, gjf_temp, charge=charge, multiplicity=multiplicity)
-
-        print(f"  -> Gaussian input: {gjf_temp}")
-
-        # Run Gaussian calculation
-        print("  -> Launching Gaussian...")
-
+        # Define callback before scratch_dir block (captures mol and calc from outer scope)
         def _on_request(msg: str) -> str:
             run_next_calculation(
                 mol,
@@ -459,31 +449,56 @@ def run_frequency_calculation(
             )
             return "ready"
 
-        run_gaussian_with_zmq(
-            gjf_temp,
-            on_request=_on_request,
-            timeout_seconds=DEFAULT_TIMEOUT_SECONDS,
+        # Run Gaussian inside an isolated scratch directory
+        run_name = (
+            f"run_{energy_calculator_name}_{dipole_calculator_name}"
+            f"_{timestamp}_{os.urandom(2).hex()}"
         )
 
-        runtime = time.time() - start_time
+        with scratch_dir(run_name, keep_on_failure=keep_scratch) as scratch_path:
+            gjf_basename = "gaussian_freq.gjf"
+            ase_to_gjf(
+                mol, gjf_basename, charge=charge, multiplicity=multiplicity,
+                output_dir=scratch_path,
+            )
 
-        # Now move the files to the frequency directory
-        log_temp = gjf_temp.replace(".gjf", ".log")
-        chk_temp = gjf_temp.replace(".gjf", ".chk")
+            print(f"  -> Gaussian input: {scratch_path / gjf_basename}")
+
+            # IPC socket — absolute path inside scratch dir
+            ipc_path = str((scratch_path / "zmq.ipc").resolve())
+
+            # Environment for Gaussian subprocess
+            env = os.environ.copy()
+            env["MACE_IPC_PATH"] = ipc_path
+
+            print("  -> Launching Gaussian...")
+            run_gaussian_with_zmq(
+                gjf_basename,
+                on_request=_on_request,
+                timeout_seconds=DEFAULT_TIMEOUT_SECONDS,
+                ipc_file=ipc_path,
+                cwd=str(scratch_path),
+                env=env,
+            )
+
+            # Move files from scratch to freq_dir (before context manager exits)
+            for src_name, dst_name in [
+                ("gaussian_freq.gjf", "gaussian_freq.gjf"),
+                ("gaussian_freq.log", "gaussian_freq.log"),
+                ("gaussian_freq.chk", "gaussian_freq.chk"),
+            ]:
+                src = scratch_path / src_name
+                if src.exists():
+                    shutil.move(str(src), str(freq_dir / dst_name))
+
+        runtime = time.time() - start_time
 
         gjf_final = str(freq_dir / "gaussian_freq.gjf")
         log_final = str(freq_dir / "gaussian_freq.log")
         chk_final = str(freq_dir / "gaussian_freq.chk")
 
-        # Move files (not copy, since they're in different locations)
-        if Path(gjf_temp).exists():
-            shutil.move(gjf_temp, gjf_final)
-        if Path(log_temp).exists():
-            shutil.move(log_temp, log_final)
-        # Save checkpoint file for mode matching
-        if Path(chk_temp).exists():
-            shutil.move(chk_temp, chk_final)
-            # Automatically convert to .fchk for mode matching
+        # Automatically convert .chk to .fchk for mode matching
+        if Path(chk_final).exists():
             try:
                 fchk_final = chk_final.replace(".chk", ".fchk")
                 logger.info("Converting .chk to .fchk for mode matching...")
@@ -559,6 +574,7 @@ def run_dft_baselines(
     results_mgr: ResultsManager,
     charge: int = 0,
     multiplicity: int = 1,
+    keep_scratch: bool = False,
 ) -> dict[str, bool]:
     """Run DFT baseline calculations. Wraps dft_baseline.run_all_dft_baselines().
 
@@ -568,7 +584,8 @@ def run_dft_baselines(
     from .dft_baseline import run_all_dft_baselines
 
     return run_all_dft_baselines(
-        optimized_atoms, molecule_name, results_mgr, charge, multiplicity, skip_if_exists=True
+        optimized_atoms, molecule_name, results_mgr, charge, multiplicity,
+        skip_if_exists=True, keep_scratch=keep_scratch,
     )
 
 
@@ -580,6 +597,7 @@ def run_ml_calculations(
     dipole_calculators: list[str],
     charge: int = 0,
     multiplicity: int = 1,
+    keep_scratch: bool = False,
 ) -> list[dict]:
     """Run all energy+dipole calculator combinations via Gaussian ZMQ interface."""
     print("=" * 60)
@@ -600,6 +618,7 @@ def run_ml_calculations(
                 results_mgr,
                 charge,
                 multiplicity,
+                keep_scratch=keep_scratch,
             )
             results.append({"energy": energy_calc, "dipole": dipole_calc, "success": success})
     return results
@@ -618,6 +637,7 @@ def run_pipeline(
     force_optimization: bool = False,
     include_dft_baselines: bool = True,
     base_output_dir: str = "comparison_results",
+    keep_scratch: bool = False,
 ) -> dict:
     """Run the complete MACE-Gaussian comparison pipeline.
 
@@ -749,7 +769,8 @@ def run_pipeline(
     dft_results = {}
     if include_dft_baselines:
         dft_results = run_dft_baselines(
-            optimized_mol, molecule_name, results_mgr, charge, multiplicity
+            optimized_mol, molecule_name, results_mgr, charge, multiplicity,
+            keep_scratch=keep_scratch,
         )
 
     # ========================================================================
@@ -764,6 +785,7 @@ def run_pipeline(
         dipole_calculators,
         charge,
         multiplicity,
+        keep_scratch=keep_scratch,
     )
 
     # ========================================================================
