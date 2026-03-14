@@ -11,6 +11,7 @@ import logging
 import os
 import subprocess
 import time
+from pathlib import Path
 
 from ..utils.exceptions import GaussianRunError, GaussianTimeoutError
 from .zmq_server import GaussianZMQServer, is_calc_finished
@@ -27,6 +28,8 @@ def run_gaussian_with_zmq(
     on_request: object,
     timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
     ipc_file: str = ".ipc_file",
+    cwd: str | Path | None = None,
+    env: dict[str, str] | None = None,
 ) -> None:
     """Run Gaussian (g16) with ZMQ external interface callback loop.
 
@@ -54,6 +57,10 @@ def run_gaussian_with_zmq(
             DEFAULT_TIMEOUT_SECONDS (GAUSSIAN_TIMEOUT_SECONDS env var or
             86400 = 24h).
         ipc_file: Path to ZMQ IPC socket file. Default: ".ipc_file".
+        cwd: Working directory for the Gaussian subprocess. If None,
+            inherits the current working directory.
+        env: Environment variables for the Gaussian subprocess. If None,
+            inherits the current environment.
 
     Raises:
         GaussianTimeoutError: elapsed > timeout_seconds. Gaussian is
@@ -66,6 +73,8 @@ def run_gaussian_with_zmq(
         ["g16", gjf_file],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
+        cwd=cwd,
+        env=env,
     )
     start = time.time()
 

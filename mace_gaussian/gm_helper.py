@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import os
 import sys
 from contextlib import contextmanager
 from pathlib import Path
@@ -25,7 +26,8 @@ def zmq_client(file):
 ####################################################################
 
 if __name__ == "__main__":
-    with zmq_client(".ipc_file") as socket:
+    ipc_path = os.environ.get("MACE_IPC_PATH", ".ipc_file")
+    with zmq_client(ipc_path) as socket:
         # g16 hands over two filenames namely the input file for the external
         # and the outputfile which is the inputfile for g16.
         # Processing of the files will take place in the main script.

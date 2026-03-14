@@ -135,6 +135,7 @@ def create_gaussian_dft_input(
     multiplicity: int = 1,
     title: str = "DFT baseline calculation",
     extra_keywords: str = "",
+    output_dir: str | Path | None = None,
 ) -> None:
     """
     Create Gaussian input file for pure DFT calculation.
@@ -157,6 +158,9 @@ def create_gaussian_dft_input(
         Title line for Gaussian input
     extra_keywords : str
         Additional keywords for route card
+    output_dir : str or Path, optional
+        Directory to write the file to. When provided, %chk uses
+        basename only and the file is written to output_dir/basename.
     """
     symbols = atoms.get_chemical_symbols()
     positions = atoms.get_positions()  # Angstrom
@@ -167,9 +171,18 @@ def create_gaussian_dft_input(
         route += f" {extra_keywords}"
 
     # Link0 commands
-    link0 = f"%chk={filename[:-4]}.chk\n%mem=4GB\n%NProcShared=4"
+    if output_dir is not None:
+        basename = Path(filename).name
+        chk_name = Path(basename).with_suffix(".chk")
+        output_path = Path(output_dir) / basename
+    else:
+        basename = filename
+        chk_name = f"{filename[:-4]}.chk"
+        output_path = Path(filename)
 
-    with Path(filename).open("w", encoding="utf-8") as f:
+    link0 = f"%chk={chk_name}\n%mem=4GB\n%NProcShared=4"
+
+    with output_path.open("w", encoding="utf-8") as f:
         f.write(f"{link0}\n")
         f.write(f"{route}\n\n")
         f.write(f"{title}\n\n")
@@ -179,7 +192,11 @@ def create_gaussian_dft_input(
         f.write("\n")
 
 
-def run_gaussian_dft(gjf_file: str, timeout: Optional[int] = None) -> tuple[bool, str]:
+def run_gaussian_dft(
+    gjf_file: str,
+    timeout: Optional[int] = None,
+    cwd: str | Path | None = None,
+) -> tuple[bool, str]:
     """
     Run Gaussian calculation and wait for completion.
 
@@ -189,6 +206,9 @@ def run_gaussian_dft(gjf_file: str, timeout: Optional[int] = None) -> tuple[bool
         Path to Gaussian input file
     timeout : int, optional
         Timeout in seconds (None = no timeout)
+    cwd : str or Path, optional
+        Working directory for the Gaussian subprocess. When set,
+        the returned log_file path includes the cwd prefix.
 
     Returns
     -------
@@ -197,13 +217,18 @@ def run_gaussian_dft(gjf_file: str, timeout: Optional[int] = None) -> tuple[bool
     log_file : str
         Path to the log file
     """
-    log_file = gjf_file.replace(".gjf", ".log")
+    if cwd is not None:
+        log_file = str(Path(cwd) / Path(gjf_file).with_suffix(".log").name)
+    else:
+        log_file = gjf_file.replace(".gjf", ".log")
 
     try:
         print("  \u2192 Launching Gaussian calculation...")
 
         # Run Gaussian (g16 executable)
-        proc = subprocess.Popen(["g16", gjf_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        proc = subprocess.Popen(
+            ["g16", gjf_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd
+        )
 
         # Wait for completion
         try:

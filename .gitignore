@@ -66,6 +66,8 @@ bak/
 # Gaussian scratch / intermediate files
 fort.7
 temp_*/
+# Scratch directories for Gaussian intermediate files
+.scratch/
 
 # Large model files
 mace4ir_models/

@@ -147,6 +147,7 @@ def ase_to_gjf(
     title="Gaussian input generated from ASE",
     charge=0,
     multiplicity=1,
+    output_dir=None,
 ):
     # Use default route with configured helper script path if none provided
     if route is None:
@@ -154,8 +155,18 @@ def ase_to_gjf(
 
     symbols = atoms.get_chemical_symbols()
     positions = atoms.get_positions()  # Angstrom by ASE convention
-    link0 = f"%chk={filename[:-3]}chk\n%mem=2GB\n%NProcShared=2"
-    with Path(filename).open("w") as f:
+
+    if output_dir is not None:
+        basename = Path(filename).name
+        chk_name = basename[:-3] + "chk"
+        output_path = Path(output_dir) / basename
+    else:
+        basename = filename
+        chk_name = filename[:-3] + "chk"
+        output_path = Path(filename)
+
+    link0 = f"%chk={chk_name}\n%mem=2GB\n%NProcShared=2"
+    with output_path.open("w") as f:
         f.write(f"{link0}\n")
         f.write(f"{route}\n\n")
         f.write(f"{title}\n\n")
