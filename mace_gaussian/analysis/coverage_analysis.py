@@ -5,11 +5,20 @@ per-region error metrics (RMSE, MAE, mean % error, mode count). Aggregates
 results across molecules for heatmap and bar chart visualization.
 """
 
+import base64
+import json
 import logging
+import math
+from datetime import datetime, timezone
 from pathlib import Path
 
+import matplotlib
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import seaborn as sns
+
+matplotlib.use("Agg")  # Non-interactive backend for headless rendering
 
 logger = logging.getLogger(__name__)
 
@@ -229,3 +238,328 @@ class CoverageAnalyzer:
                 region_counts[label] = 0
 
         return region_means, region_stds, region_counts
+
+    # ------------------------------------------------------------------
+    # Visualization
+    # ------------------------------------------------------------------
+
+    def plot_heatmap(
+        self,
+        heatmap_df: pd.DataFrame,
+        calc_combo: str,
+        save_path: Path,
+    ) -> Path:
+        """Render a molecules x regions RMSE heatmap to PNG.
+
+        Empty cells (NaN) are masked and annotated with "--" in gray.
+        """
+        save_path = Path(save_path)
+        fig, ax = plt.subplots(
+            figsize=(12, max(4, len(heatmap_df) * 0.6 + 2))
+        )
+        mask = heatmap_df.isna()
+        sns.heatmap(
+            heatmap_df,
+            annot=True,
+            fmt=".1f",
+            cmap="YlOrRd",
+            mask=mask,
+            linewidths=0.5,
+            linecolor="white",
+            cbar_kws={"label": r"RMSE (cm$^{-1}$)"},
+            ax=ax,
+        )
+        # Annotate masked (empty) cells with "--"
+        for i in range(heatmap_df.shape[0]):
+            for j in range(heatmap_df.shape[1]):
+                if mask.iloc[i, j]:
+                    ax.text(
+                        j + 0.5,
+                        i + 0.5,
+                        "--",
+                        ha="center",
+                        va="center",
+                        color="gray",
+                        fontsize=10,
+                    )
+        ax.set_title(f"Frequency Region Coverage: {calc_combo}", fontsize=13)
+        ax.set_xlabel("Frequency Region (cm$^{-1}$)")
+        ax.set_ylabel("Molecule")
+        fig.savefig(save_path, dpi=300, bbox_inches="tight")
+        plt.close(fig)
+        return save_path
+
+    def plot_barchart(
+        self,
+        means: dict,
+        stds: dict,
+        counts: dict,
+        calc_combo: str,
+        save_path: Path,
+    ) -> Path:
+        """Render a mean-RMSE-by-region bar chart to PNG."""
+        save_path = Path(save_path)
+        region_labels = list(means.keys())
+        vals = [means[k] for k in region_labels]
+        errs = [stds[k] if not math.isnan(stds.get(k, float("nan"))) else 0 for k in region_labels]
+        cnts = [counts.get(k, 0) for k in region_labels]
+
+        colors = sns.color_palette("colorblind", len(region_labels))
+        fig, ax = plt.subplots(figsize=(10, 5))
+        x = range(len(region_labels))
+        bars = ax.bar(x, vals, yerr=errs, capsize=4, color=colors, edgecolor="white")
+
+        # Annotate mode counts above each bar
+        for idx, bar in enumerate(bars):
+            if not math.isnan(vals[idx]):
+                y_top = vals[idx] + (errs[idx] if errs[idx] else 0)
+                ax.text(
+                    bar.get_x() + bar.get_width() / 2,
+                    y_top + 0.5,
+                    f"n={cnts[idx]}",
+                    ha="center",
+                    va="bottom",
+                    fontsize=9,
+                )
+
+        ax.set_xticks(list(x))
+        ax.set_xticklabels(region_labels, rotation=45, ha="right")
+        ax.set_ylabel(r"RMSE (cm$^{-1}$)")
+        ax.set_title(f"Mean RMSE by Frequency Region: {calc_combo}", fontsize=13)
+        fig.tight_layout()
+        fig.savefig(save_path, dpi=300, bbox_inches="tight")
+        plt.close(fig)
+        return save_path
+
+    # ------------------------------------------------------------------
+    # JSON output
+    # ------------------------------------------------------------------
+
+    def save_metrics_json(self, metrics: dict, save_path: Path) -> Path:
+        """Serialize metrics to JSON, converting NaN to null."""
+        save_path = Path(save_path)
+
+        def _nan_to_none(obj):
+            if isinstance(obj, float) and math.isnan(obj):
+                return None
+            if isinstance(obj, dict):
+                return {k: _nan_to_none(v) for k, v in obj.items()}
+            if isinstance(obj, list):
+                return [_nan_to_none(v) for v in obj]
+            return obj
+
+        clean = _nan_to_none(metrics)
+        save_path.parent.mkdir(parents=True, exist_ok=True)
+        save_path.write_text(json.dumps(clean, indent=2))
+        return save_path
+
+    # ------------------------------------------------------------------
+    # HTML report
+    # ------------------------------------------------------------------
+
+    def generate_html_report(
+        self,
+        output_dir: Path,
+        metrics: dict,
+        plot_paths: dict,
+    ) -> Path:
+        """Generate a self-contained HTML report with embedded images.
+
+        Parameters
+        ----------
+        output_dir : Path
+            Directory to write ``coverage_report.html``.
+        metrics : dict
+            Output of :meth:`analyze`.
+        plot_paths : dict
+            ``{calc_combo: {"heatmap": Path, "barchart": Path}}``.
+        """
+        output_dir = Path(output_dir)
+        html_path = output_dir / "coverage_report.html"
+
+        sections = []
+        for combo in sorted(metrics.keys()):
+            paths = plot_paths.get(combo, {})
+            heatmap_b64 = self._encode_image(paths["heatmap"]) if "heatmap" in paths else ""
+            barchart_b64 = self._encode_image(paths["barchart"]) if "barchart" in paths else ""
+
+            # Summary table rows
+            region_labels = [r[2] for r in FREQUENCY_REGIONS]
+            combo_data = metrics[combo]
+            table_rows = ""
+            for label in region_labels:
+                rmse_vals, mae_vals, pct_vals, total_modes = [], [], [], 0
+                for mol in combo_data:
+                    m = combo_data[mol][label]
+                    if m["mode_count"] > 0:
+                        rmse_vals.append(m["rmse"])
+                        mae_vals.append(m["mae"])
+                        pct_vals.append(m["mean_pct_error"])
+                    total_modes += m["mode_count"]
+                mean_rmse = f"{np.mean(rmse_vals):.1f}" if rmse_vals else "--"
+                mean_mae = f"{np.mean(mae_vals):.1f}" if mae_vals else "--"
+                mean_pct = f"{np.mean(pct_vals):.1f}%" if pct_vals else "--"
+                table_rows += (
+                    f"<tr><td>{label}</td><td>{mean_rmse}</td>"
+                    f"<td>{mean_mae}</td><td>{mean_pct}</td>"
+                    f"<td>{total_modes}</td></tr>\n"
+                )
+
+            heatmap_img = (
+                f'<div class="plot-container"><img src="{heatmap_b64}" alt="Heatmap"></div>'
+                if heatmap_b64
+                else ""
+            )
+            barchart_img = (
+                f'<div class="plot-container"><img src="{barchart_b64}" alt="Bar chart"></div>'
+                if barchart_b64
+                else ""
+            )
+
+            sections.append(f"""
+            <section>
+                <h2>{combo}</h2>
+                {heatmap_img}
+                {barchart_img}
+                <h3>Summary Table</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Region</th>
+                            <th>Mean RMSE</th>
+                            <th>Mean MAE</th>
+                            <th>Mean % Error</th>
+                            <th>Total Modes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {table_rows}
+                    </tbody>
+                </table>
+            </section>
+            """)
+
+        now = datetime.now(tz=timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+        html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frequency Range Coverage Analysis</title>
+<style>
+    * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+    body {{
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        line-height: 1.6; color: #1a1a1a; background: #f5f5f5;
+    }}
+    .container {{ max-width: 100%; background: white; min-height: 100vh; }}
+    header {{
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: white; padding: 3rem 4rem; border-bottom: 3px solid #3498db;
+    }}
+    header h1 {{ font-size: 2.2em; margin-bottom: 0.5rem; font-weight: 600; }}
+    header .subtitle {{ font-size: 1.1em; opacity: 0.85; font-weight: 300; }}
+    .content {{ padding: 3rem 4rem; max-width: 1600px; margin: 0 auto; }}
+    section {{ margin-bottom: 4rem; }}
+    h2 {{
+        color: #1a1a1a; font-size: 1.75em; margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem; border-bottom: 2px solid #e5e7eb; font-weight: 600;
+    }}
+    h3 {{ color: #374151; font-size: 1.3em; margin: 2rem 0 1rem 0; font-weight: 600; }}
+    .plot-container {{
+        background: white; padding: 1.5rem; border-radius: 6px;
+        border: 1px solid #e5e7eb; margin: 1.5rem 0;
+    }}
+    .plot-container img {{ max-width: 100%; height: auto; display: block; margin: 0 auto; }}
+    table {{
+        width: 100%; border-collapse: collapse; margin: 1rem 0;
+        font-size: 0.95rem;
+    }}
+    th, td {{ padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid #e5e7eb; }}
+    th {{ background: #f9fafb; font-weight: 600; color: #374151; }}
+    tr:hover {{ background: #f9fafb; }}
+    footer {{
+        padding: 2rem 4rem; color: #6b7280; font-size: 0.85rem;
+        border-top: 1px solid #e5e7eb; text-align: center;
+    }}
+</style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>Frequency Range Coverage Analysis</h1>
+        <div class="subtitle">ML vs DFT accuracy across spectral regions
+        &mdash; Molecules: {', '.join(self.molecules)}</div>
+    </header>
+    <div class="content">
+        {"".join(sections)}
+    </div>
+    <footer>
+        Generated {now} &mdash; MACE-Gaussian Coverage Analysis
+    </footer>
+</div>
+</body>
+</html>"""
+
+        html_path.write_text(html)
+        return html_path
+
+    @staticmethod
+    def _encode_image(image_path: Path) -> str:
+        """Encode a PNG to a base64 data URI."""
+        with Path(image_path).open("rb") as f:
+            encoded = base64.b64encode(f.read()).decode()
+        return f"data:image/png;base64,{encoded}"
+
+    # ------------------------------------------------------------------
+    # Orchestrator
+    # ------------------------------------------------------------------
+
+    def run(self, output_dir: Path = Path("coverage_analysis")) -> Path:
+        """Run full coverage analysis: analyze, plot, report.
+
+        Creates per-combo subdirectories with heatmap/barchart PNGs and
+        JSON metrics, plus a combined HTML report.
+        """
+        output_dir = Path(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        metrics = self.analyze()
+        plot_paths: dict[str, dict[str, Path]] = {}
+
+        for combo in sorted(metrics.keys()):
+            combo_dir = output_dir / combo
+            combo_dir.mkdir(parents=True, exist_ok=True)
+
+            # Heatmap
+            heatmap_df = self.build_heatmap_data(metrics, combo)
+            heatmap_path = self.plot_heatmap(
+                heatmap_df, combo, combo_dir / f"heatmap_{combo}.png"
+            )
+
+            # Bar chart
+            means, stds, counts = self.build_barchart_data(metrics, combo)
+            barchart_path = self.plot_barchart(
+                means, stds, counts, combo, combo_dir / f"barchart_{combo}.png"
+            )
+
+            plot_paths[combo] = {"heatmap": heatmap_path, "barchart": barchart_path}
+
+            # Per-combo JSON
+            self.save_metrics_json(
+                {combo: metrics[combo]}, combo_dir / f"metrics_{combo}.json"
+            )
+
+        # Combined JSON
+        self.save_metrics_json(metrics, output_dir / "all_metrics.json")
+
+        # HTML report
+        self.generate_html_report(output_dir, metrics, plot_paths)
+
+        # Summary to stdout
+        print("Coverage analysis complete:")
+        print(f"  Molecules: {', '.join(self.molecules)}")
+        print(f"  Calculator combos: {', '.join(sorted(metrics.keys()))}")
+        print(f"  Output: {output_dir}/")
+
+        return output_dir

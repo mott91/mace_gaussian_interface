@@ -1,9 +1,9 @@
 """Tests for frequency range coverage analysis."""
 
+import json
 import math
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 import pytest
 
@@ -11,7 +11,6 @@ from mace_gaussian.analysis.coverage_analysis import (
     FREQUENCY_REGIONS,
     CoverageAnalyzer,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -290,3 +289,99 @@ class TestIntegration:
         # nonexistent_mol should not appear in any combo
         for combo in metrics:
             assert "nonexistent_mol" not in metrics[combo]
+
+
+# ---------------------------------------------------------------------------
+# Smoke tests for visualization + output
+# ---------------------------------------------------------------------------
+
+class TestHeatmapGeneration:
+    def test_heatmap_creates_png(self, tmp_path):
+        """Synthetic heatmap_df with NaN renders to a non-empty PNG."""
+        analyzer = CoverageAnalyzer(molecules=["mol_a", "mol_b"], results_base="/nonexistent")
+        region_labels = [r[2] for r in FREQUENCY_REGIONS]
+        data = {
+            "mol_a": {label: (i + 1) * 5.0 for i, label in enumerate(region_labels)},
+            "mol_b": {label: float("nan") if i % 2 == 0 else (i + 2) * 3.0
+                      for i, label in enumerate(region_labels)},
+        }
+        heatmap_df = pd.DataFrame.from_dict(data, orient="index", columns=region_labels)
+        out = tmp_path / "heatmap.png"
+        result = analyzer.plot_heatmap(heatmap_df, "test_combo", out)
+        assert result == out
+        assert out.exists()
+        assert out.stat().st_size > 0
+
+    def test_single_molecule_heatmap(self, tmp_path):
+        """Heatmap works with a single molecule row."""
+        analyzer = CoverageAnalyzer(molecules=["only"], results_base="/nonexistent")
+        region_labels = [r[2] for r in FREQUENCY_REGIONS]
+        data = {"only": {label: 10.0 for label in region_labels}}
+        heatmap_df = pd.DataFrame.from_dict(data, orient="index", columns=region_labels)
+        out = tmp_path / "heatmap_single.png"
+        analyzer.plot_heatmap(heatmap_df, "combo", out)
+        assert out.exists()
+
+
+class TestBarchartGeneration:
+    def test_barchart_creates_png(self, tmp_path):
+        """Bar chart with means/stds/counts renders to a non-empty PNG."""
+        analyzer = CoverageAnalyzer(molecules=[], results_base="/nonexistent")
+        region_labels = [r[2] for r in FREQUENCY_REGIONS]
+        means = {label: (i + 1) * 8.0 for i, label in enumerate(region_labels)}
+        stds = {label: (i + 1) * 1.5 for i, label in enumerate(region_labels)}
+        counts = {label: (i + 1) * 2 for i, label in enumerate(region_labels)}
+        out = tmp_path / "barchart.png"
+        result = analyzer.plot_barchart(means, stds, counts, "test_combo", out)
+        assert result == out
+        assert out.exists()
+        assert out.stat().st_size > 0
+
+    def test_barchart_handles_nan(self, tmp_path):
+        """Bar chart handles NaN mean values without crashing."""
+        analyzer = CoverageAnalyzer(molecules=[], results_base="/nonexistent")
+        region_labels = [r[2] for r in FREQUENCY_REGIONS]
+        means = {label: float("nan") if i == 0 else 10.0
+                 for i, label in enumerate(region_labels)}
+        stds = {label: float("nan") if i == 0 else 2.0
+                for i, label in enumerate(region_labels)}
+        counts = {label: 0 if i == 0 else 3 for i, label in enumerate(region_labels)}
+        out = tmp_path / "barchart_nan.png"
+        analyzer.plot_barchart(means, stds, counts, "combo", out)
+        assert out.exists()
+
+
+class TestJsonSerialization:
+    def test_nan_converted_to_null(self, tmp_path):
+        """NaN values become null in JSON output."""
+        analyzer = CoverageAnalyzer(molecules=[], results_base="/nonexistent")
+        metrics = {
+            "combo": {
+                "mol": {
+                    "400-700": {"rmse": 10.0, "mae": 8.0, "mean_pct_error": 5.0, "mode_count": 3},
+                    "1800-2800": {"rmse": float("nan"), "mae": float("nan"),
+                                  "mean_pct_error": float("nan"), "mode_count": 0},
+                }
+            }
+        }
+        out = tmp_path / "metrics.json"
+        result = analyzer.save_metrics_json(metrics, out)
+        assert result == out
+        assert out.exists()
+
+        loaded = json.loads(out.read_text())
+        assert loaded["combo"]["mol"]["400-700"]["rmse"] == 10.0
+        assert loaded["combo"]["mol"]["1800-2800"]["rmse"] is None
+        assert loaded["combo"]["mol"]["1800-2800"]["mode_count"] == 0
+
+    def test_json_is_valid(self, tmp_path):
+        """Output is valid JSON with indent=2."""
+        analyzer = CoverageAnalyzer(molecules=[], results_base="/nonexistent")
+        metrics = {"a": {"b": {"c": {"rmse": 1.0, "mode_count": 1}}}}
+        out = tmp_path / "test.json"
+        analyzer.save_metrics_json(metrics, out)
+        text = out.read_text()
+        loaded = json.loads(text)
+        assert loaded == metrics
+        # Check indentation
+        assert "  " in text
