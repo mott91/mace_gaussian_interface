@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: — Batch Benchmarking & Calculator Expansion
 status: completed
-stopped_at: Phase 13.4 context gathered
+stopped_at: Completed 13.4-01-PLAN.md
 last_updated: "2026-03-15T15:26:00.468Z"
 last_activity: 2026-03-15 — Plan 02 complete (Visualization annotations for Hungarian match confidence)
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 9
-  completed_plans: 9
-  percent: 100
+  completed_plans: 10
+  percent: 90
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 
 ## Current Position
 
-Phase: 13.3 of 17 (Hungarian Optimal Mode Matching)
-Plan: 2 of 2 in current phase
-Status: completed
-Last activity: 2026-03-15 — Plan 02 complete (Visualization annotations for Hungarian match confidence)
+Phase: 13.4 of 17 (Frequency Range Coverage Analysis)
+Plan: 1 of 2 in current phase
+Status: in-progress
+Last activity: 2026-03-15 — Plan 01 complete (CoverageAnalyzer core module)
 
-Progress: [████████████████████] 100% (9/9 plans in v1.1 complete)
+Progress: [██████████████████░░] 90% (10/11 plans in v1.1 complete)
 
 ## Performance Metrics
 
@@ -79,6 +79,7 @@ Recent decisions affecting v1.1 work:
 - [13.3-01]: Unmatched calc modes (n_calc > n_ref) get (None, 0.0) in matches dict; downstream filters with `if dft_idx is not None`
 - [13.3-02]: Confidence threshold 0.5 for solid/dashed borders and filled/open markers — matches match_modes logging threshold
 - [13.3-02]: Border color #4a4a4a and POINT_COLOR #5E81AC reused from existing styling for visual coherence
+- [13.4-01]: pd.cut with right=False for left-inclusive region intervals [low, high); NaN metrics for empty regions (mode_count=0)
 
 ### Roadmap Evolution
 
@@ -100,5 +101,5 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T15:26:00.465Z
-Stopped at: Phase 13.4 context gathered
+Last session: 2026-03-15T16:05:29Z
+Stopped at: Completed 13.4-01-PLAN.md
