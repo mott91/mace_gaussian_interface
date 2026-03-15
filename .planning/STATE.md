@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 
 ## Current Position
 
-Phase: 13.2 of 17 (Temp File Cleanup — Scratch Directory for Intermediate Gaussian Files)
-Plan: 2 of 2 in current phase (COMPLETE)
-Status: Phase 13.2 complete (all plans done)
-Last activity: 2026-03-14 — Phase 13.2 complete (Scratch directory workflow integration + CLI controls)
+Phase: 13.3 of 17 (Hungarian Optimal Mode Matching)
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-03-15 — Plan 01 complete (Hungarian bijective mode matching replaces greedy)
 
-Progress: [████████████████████] 100% (7/7 plans in v1.1 complete)
+Progress: [████████████████████] 100% (8/9 plans in v1.1 complete)
 
 ## Performance Metrics
 
@@ -75,6 +75,8 @@ Recent decisions affecting v1.1 work:
 - [13.2-02]: IPC socket path set via MACE_IPC_PATH in env dict passed to Popen, not global os.environ
 - [13.2-02]: keep_scratch resolved from CLI flag first, then MACE_KEEP_SCRATCH env var as fallback
 - [13.2-02]: Stale scratch cleanup runs on every mace-gaussian run invocation before pipeline starts
+- [13.3-01]: Hungarian algorithm (linear_sum_assignment) replaces greedy loop in match_modes() for bijective 1-to-1 mode pairing
+- [13.3-01]: Unmatched calc modes (n_calc > n_ref) get (None, 0.0) in matches dict; downstream filters with `if dft_idx is not None`
 
 ### Roadmap Evolution
 
@@ -96,5 +98,5 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-14T23:58:14.919Z
-Stopped at: Phase 13.3 context gathered
+Last session: 2026-03-15T00:14:12Z
+Stopped at: Completed 13.3-01-PLAN.md (Hungarian mode matching)
