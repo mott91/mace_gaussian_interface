@@ -70,13 +70,14 @@ Plans:
 
 ### Phase 13.4: Frequency Range Coverage Analysis (INSERTED)
 
-**Goal:** Build a diagnostic that splits the IR spectrum into frequency regions, computes per-region ML vs DFT error metrics, flags underrepresented ranges, and cross-references across multiple molecules to identify systematic ML training set gaps. Outputs heatmap/bar chart for thesis.
-**Requirements**: TBD
+**Goal:** Build a diagnostic that splits the IR spectrum into 7 chemically meaningful frequency regions, computes per-region ML vs DFT error metrics (RMSE, MAE, mean % error, mode count), and cross-references across multiple molecules to identify systematic ML training set gaps. Outputs heatmap, bar chart, and standalone HTML report for thesis.
+**Requirements**: COV-01, COV-02, COV-03, COV-04, COV-05
 **Depends on:** Phase 13.3
-**Plans:** 0 plans
+**Plans:** 2 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 13.4 to break down)
+- [ ] 13.4-01-PLAN.md — CoverageAnalyzer core module: region binning, metric computation, CSV loading, cross-molecule aggregation
+- [ ] 13.4-02-PLAN.md — Visualization (heatmap + bar chart), HTML report, JSON output, entry-point script + visual verification
 
 ### Phase 13.5: MACE-POLAR-1 Energy Calculator (INSERTED)
 
@@ -166,7 +167,7 @@ Plans:
 | 13.1. Calculator Acceleration & Polarizability | 2/2 | Complete    | 2026-03-11 | - |
 | 13.2. Temp File Cleanup / Scratch Dir | 2/2 | Complete    | 2026-03-14 | 2026-03-14 |
 | 13.3. Hungarian Optimal Mode Matching | 2/2 | Complete    | 2026-03-15 | - |
-| 13.4. Frequency Range Coverage Analysis | v1.1 | 0/TBD | Not started | - |
+| 13.4. Frequency Range Coverage Analysis | v1.1 | 0/2 | Not started | - |
 | 13.5. MACE-POLAR-1 Energy Calculator | v1.1 | 0/TBD | Not started | - |
 | 14. Batch Runner & PubChem Fetcher | v1.1 | 0/TBD | Not started | - |
 | 15. SLURM Integration & Batch Report | v1.1 | 0/TBD | Not started | - |
