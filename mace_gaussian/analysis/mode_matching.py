@@ -17,6 +17,8 @@ from typing import Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.lines import Line2D
+from matplotlib.patches import Rectangle
 from scipy.optimize import linear_sum_assignment
 
 from ..gaussian.fchk import extract_modes_from_fchk, get_fchk_from_chk
@@ -407,6 +409,46 @@ def plot_mode_overlap_heatmap(
                 family="monospace",
                 weight=weight,
             )
+
+    # Draw borders around Hungarian-matched cells
+    if matches is not None:
+        for calc_idx, (ref_idx, overlap) in matches.items():
+            if ref_idx is None:
+                continue
+            linestyle = "-" if overlap >= 0.5 else "--"
+            border_color = "#4a4a4a"
+            rect = Rectangle(
+                (ref_idx - 0.5, calc_idx - 0.5),
+                1,
+                1,
+                linewidth=2,
+                edgecolor=border_color,
+                facecolor="none",
+                linestyle=linestyle,
+                zorder=5,
+            )
+            ax.add_patch(rect)
+
+        # Legend for border styles
+        legend_elements = [
+            Line2D(
+                [0],
+                [0],
+                color="#4a4a4a",
+                linewidth=2,
+                linestyle="-",
+                label="Confident match ($\\geq$ 0.5)",
+            ),
+            Line2D(
+                [0],
+                [0],
+                color="#4a4a4a",
+                linewidth=2,
+                linestyle="--",
+                label="Uncertain match (< 0.5)",
+            ),
+        ]
+        ax.legend(handles=legend_elements, loc="upper left", fontsize=8, framealpha=0.9)
 
     plt.tight_layout()
 

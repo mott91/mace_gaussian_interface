@@ -617,7 +617,7 @@ class ComparisonWorkflow:
 
                 # Create alignment matrix and match modes
                 alignment_matrix = create_alignment_matrix(modes_ml, modes_dft)
-                match_modes(modes_ml, modes_dft)
+                matches = match_modes(modes_ml, modes_dft)
 
                 # Generate heatmap
                 dft_baseline_name = dft_dir.name
@@ -629,7 +629,7 @@ class ComparisonWorkflow:
                     ref_label="DFT Reference",
                     freqs_calc=freqs_ml,
                     freqs_ref=freqs_dft,
-                    matches=None,  # Don't pass matches to avoid clutter
+                    matches=matches,
                 )
 
                 logger.info(f"  ✓ Saved heatmap: {output_file.name}")
