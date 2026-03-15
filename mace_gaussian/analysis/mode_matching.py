@@ -17,6 +17,7 @@ from typing import Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.optimize import linear_sum_assignment
 
 from ..gaussian.fchk import extract_modes_from_fchk, get_fchk_from_chk
 
@@ -160,12 +161,13 @@ def compute_mode_overlap(mode1: np.ndarray, mode2: np.ndarray) -> float:
 
 def match_modes(
     modes_calc: np.ndarray, modes_ref: np.ndarray, threshold: float = 0.5
-) -> dict[int, tuple[int, float]]:
+) -> dict[int, tuple[int | None, float]]:
     """
-    Match modes between calculation and reference via scalar product.
+    Match modes between calculation and reference via Hungarian algorithm.
 
-    For each mode in the calculation, find the reference mode with
-    maximum overlap (scalar product).
+    Uses globally optimal bijective assignment (linear_sum_assignment) to find
+    the 1-to-1 mode pairing that maximizes total overlap. This prevents the
+    greedy failure where two calc modes claim the same ref mode.
 
     Parameters
     ----------
@@ -174,42 +176,46 @@ def match_modes(
     modes_ref : np.ndarray
         Modes from reference calculation, shape (n_modes_ref, n_atoms, 3)
     threshold : float
-        Minimum overlap threshold for valid match (default: 0.5)
+        Minimum overlap threshold for logging warnings (default: 0.5).
+        Low-overlap pairs are kept in the dict regardless.
 
     Returns
     -------
     matches : dict
-        Maps calc_mode_idx -> (ref_mode_idx, overlap)
+        Maps calc_mode_idx -> (ref_mode_idx | None, overlap).
+        When n_calc > n_ref, unmatched calc modes get (None, 0.0).
     """
     n_modes_calc = modes_calc.shape[0]
     n_modes_ref = modes_ref.shape[0]
 
-    matches = {}
-
     logger.info(f"Matching {n_modes_calc} calculation modes to {n_modes_ref} reference modes")
 
-    for i in range(n_modes_calc):
-        mode_calc = modes_calc[i]
+    # Build full overlap matrix using existing function
+    overlap_matrix = create_alignment_matrix(modes_calc, modes_ref)
 
-        max_overlap = -1.0
-        best_match = -1
+    # Hungarian algorithm: negate overlap for maximization (scipy minimizes)
+    row_ind, col_ind = linear_sum_assignment(-overlap_matrix)
 
-        # Compare against all reference modes
-        for j in range(n_modes_ref):
-            mode_ref = modes_ref[j]
+    # Build matches dict from assignment
+    matches: dict[int, tuple[int | None, float]] = {}
+    assigned_calc = set(row_ind)
 
-            overlap = compute_mode_overlap(mode_calc, mode_ref)
+    for r, c in zip(row_ind, col_ind):
+        overlap = overlap_matrix[r, c]
+        matches[r] = (int(c), float(overlap))
 
-            if overlap > max_overlap:
-                max_overlap = overlap
-                best_match = j
-
-        if max_overlap >= threshold:
-            matches[i] = (best_match, max_overlap)
-            logger.debug(f"Mode {i:3d} -> Ref mode {best_match:3d} (overlap: {max_overlap:.4f})")
+        if overlap >= threshold:
+            logger.debug(f"Mode {r:3d} -> Ref mode {c:3d} (overlap: {overlap:.4f})")
         else:
-            logger.warning(f"Mode {i:3d} -> No good match (best overlap: {max_overlap:.4f})")
-            matches[i] = (best_match, max_overlap)
+            logger.warning(
+                f"Mode {r:3d} -> Ref mode {c:3d} (low overlap: {overlap:.4f})"
+            )
+
+    # Unmatched calc modes (when n_calc > n_ref)
+    for i in range(n_modes_calc):
+        if i not in assigned_calc:
+            matches[i] = (None, 0.0)
+            logger.warning(f"Mode {i:3d} -> No match available (n_calc > n_ref)")
 
     return matches
 
