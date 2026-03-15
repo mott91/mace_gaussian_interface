@@ -477,6 +477,7 @@ class ComparisonWorkflow:
             molecule_name=self.molecule_name,
             save_path=str(regression_plot_path),
             mode_mapping=mode_mapping,
+            mode_overlaps=mode_overlaps,
         )
 
         # Create comparison table (also needs mode mapping and overlaps)

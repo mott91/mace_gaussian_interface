@@ -703,6 +703,7 @@ class SpectrumAnalyzer:
         molecule_name: str | None = None,
         save_path: Optional[str] = None,
         mode_mapping: Optional[dict[int, int]] = None,
+        mode_overlaps: Optional[dict[int, float]] = None,
     ) -> plt.Figure:
         """
         Create regression plot for frequency correlation with modern design
@@ -721,6 +722,8 @@ class SpectrumAnalyzer:
             Path to save figure
         mode_mapping : dict, optional
             Mapping from ML mode index to DFT mode index (from eigenvector matching)
+        mode_overlaps : dict, optional
+            Mapping from ML mode index to eigenvector overlap value (0-1)
 
         Returns
         -------
@@ -739,17 +742,69 @@ class SpectrumAnalyzer:
             dft_spectrum, ml_spectrum, mode_mapping=mode_mapping
         )
 
+        # Build per-point confidence mask from mode_overlaps
+        confident_mask = np.ones(len(dft_freq), dtype=bool)  # default: all confident
+        if mode_overlaps is not None and mode_mapping is not None and len(dft_freq) > 0:
+            # Reconstruct which ML mode indices contributed to each matched point
+            # match_by_mode iterates sorted(matched_modes) where matched_modes = dft_ids & ml_ids
+            ml_mode_ids_remapped = []
+            original_ml_indices = []
+            for mode_id in ml_spectrum.mode_ids:
+                if mode_id.startswith("F"):
+                    ml_mode_num = int(mode_id[1:])
+                    ml_idx = ml_mode_num - 1
+                    if ml_idx in mode_mapping:
+                        dft_idx = mode_mapping[ml_idx]
+                        ml_mode_ids_remapped.append(f"F{dft_idx + 1}")
+                        original_ml_indices.append(ml_idx)
+                    else:
+                        ml_mode_ids_remapped.append(mode_id)
+                        original_ml_indices.append(None)
+                else:
+                    ml_mode_ids_remapped.append(mode_id)
+                    original_ml_indices.append(None)
+
+            dft_modes_set = set(dft_spectrum.mode_ids)
+            ml_modes_set = set(ml_mode_ids_remapped)
+            matched_modes = sorted(dft_modes_set & ml_modes_set)
+
+            # For each matched point, find the original ML mode index and look up overlap
+            ml_mode_dict = {mid: i for i, mid in enumerate(ml_mode_ids_remapped)}
+            for idx, mode_id in enumerate(matched_modes):
+                if mode_id.startswith("F") and mode_id in ml_mode_dict:
+                    ml_list_idx = ml_mode_dict[mode_id]
+                    ml_orig_idx = original_ml_indices[ml_list_idx]
+                    if (
+                        ml_orig_idx is not None
+                        and ml_orig_idx in mode_overlaps
+                        and mode_overlaps[ml_orig_idx] < 0.5
+                    ):
+                        confident_mask[idx] = False
+
         # Panel A: Frequency correlation
-        ax1.scatter(
-            dft_freq,
-            ml_freq,
-            c=POINT_COLOR,
-            s=80,
-            alpha=0.7,
-            edgecolors="white",
-            linewidth=1.5,
-            zorder=3,
-        )
+        if np.any(confident_mask):
+            ax1.scatter(
+                dft_freq[confident_mask],
+                ml_freq[confident_mask],
+                c=POINT_COLOR,
+                s=80,
+                alpha=0.7,
+                edgecolors="white",
+                linewidth=1.5,
+                zorder=3,
+            )
+        if np.any(~confident_mask):
+            ax1.scatter(
+                dft_freq[~confident_mask],
+                ml_freq[~confident_mask],
+                facecolors="none",
+                edgecolors=POINT_COLOR,
+                s=80,
+                alpha=0.7,
+                linewidth=1.5,
+                zorder=3,
+                label="Low-overlap match",
+            )
 
         # Perfect agreement line
         axis_min = self.freq_range[0]
@@ -819,16 +874,29 @@ class SpectrumAnalyzer:
 
         # Panel B: Intensity correlation
         if len(dft_int) > 0 and np.max(dft_int) > 0:
-            ax2.scatter(
-                dft_int,
-                ml_int,
-                c=POINT_COLOR,
-                s=80,
-                alpha=0.7,
-                edgecolors="white",
-                linewidth=1.5,
-                zorder=3,
-            )
+            if np.any(confident_mask):
+                ax2.scatter(
+                    dft_int[confident_mask],
+                    ml_int[confident_mask],
+                    c=POINT_COLOR,
+                    s=80,
+                    alpha=0.7,
+                    edgecolors="white",
+                    linewidth=1.5,
+                    zorder=3,
+                )
+            if np.any(~confident_mask):
+                ax2.scatter(
+                    dft_int[~confident_mask],
+                    ml_int[~confident_mask],
+                    facecolors="none",
+                    edgecolors=POINT_COLOR,
+                    s=80,
+                    alpha=0.7,
+                    linewidth=1.5,
+                    zorder=3,
+                    label="Low-overlap match",
+                )
             ax2.set_aspect("equal", adjustable="box")
 
             # Perfect agreement line
