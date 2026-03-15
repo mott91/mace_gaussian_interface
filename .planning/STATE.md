@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 ## Current Position
 
 Phase: 13.3 of 17 (Hungarian Optimal Mode Matching)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-03-15 — Plan 01 complete (Hungarian bijective mode matching replaces greedy)
+Plan: 2 of 2 in current phase
+Status: completed
+Last activity: 2026-03-15 — Plan 02 complete (Visualization annotations for Hungarian match confidence)
 
-Progress: [████████████████████] 100% (8/9 plans in v1.1 complete)
+Progress: [████████████████████] 100% (9/9 plans in v1.1 complete)
 
 ## Performance Metrics
 
@@ -77,6 +77,8 @@ Recent decisions affecting v1.1 work:
 - [13.2-02]: Stale scratch cleanup runs on every mace-gaussian run invocation before pipeline starts
 - [13.3-01]: Hungarian algorithm (linear_sum_assignment) replaces greedy loop in match_modes() for bijective 1-to-1 mode pairing
 - [13.3-01]: Unmatched calc modes (n_calc > n_ref) get (None, 0.0) in matches dict; downstream filters with `if dft_idx is not None`
+- [13.3-02]: Confidence threshold 0.5 for solid/dashed borders and filled/open markers — matches match_modes logging threshold
+- [13.3-02]: Border color #4a4a4a and POINT_COLOR #5E81AC reused from existing styling for visual coherence
 
 ### Roadmap Evolution
 
@@ -98,5 +100,5 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T00:14:12Z
-Stopped at: Completed 13.3-01-PLAN.md (Hungarian mode matching)
+Last session: 2026-03-15T00:18:44Z
+Stopped at: Completed 13.3-02-PLAN.md (Visualization annotations)

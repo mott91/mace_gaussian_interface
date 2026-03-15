@@ -23,8 +23,8 @@
 
 - [x] **MATCH-01**: `match_modes()` uses Hungarian algorithm (`linear_sum_assignment`) for globally optimal bijective 1-to-1 ML-to-DFT mode pairing — no two ML modes can claim the same DFT mode
 - [x] **MATCH-02**: Unmatched modes (when mode counts differ) appear as `(None, 0.0)` in match results; low-overlap pairs are logged but kept (not dropped)
-- [ ] **MATCH-03**: Mode overlap heatmaps annotate Hungarian-matched cells with borders (solid for confident >= 0.5, dashed for uncertain < 0.5) and include a legend
-- [ ] **MATCH-04**: Regression plots differentiate confident matches (filled markers) from low-overlap matches (open circles)
+- [x] **MATCH-03**: Mode overlap heatmaps annotate Hungarian-matched cells with borders (solid for confident >= 0.5, dashed for uncertain < 0.5) and include a legend
+- [x] **MATCH-04**: Regression plots differentiate confident matches (filled markers) from low-overlap matches (open circles)
 
 ### Batch Workflow
 
@@ -92,8 +92,8 @@
 | SCRATCH-03 | Phase 13.2 | Complete |
 | MATCH-01 | Phase 13.3 | Complete |
 | MATCH-02 | Phase 13.3 | Complete |
-| MATCH-03 | Phase 13.3 | Pending |
-| MATCH-04 | Phase 13.3 | Pending |
+| MATCH-03 | Phase 13.3 | Complete |
+| MATCH-04 | Phase 13.3 | Complete |
 | BATCH-01 | Phase 14 | Pending |
 | BATCH-02 | Phase 14 | Pending |
 | BATCH-03 | Phase 14 | Pending |
