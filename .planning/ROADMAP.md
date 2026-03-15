@@ -59,13 +59,14 @@ Plans:
 
 ### Phase 13.3: Hungarian Optimal Mode Matching (INSERTED)
 
-**Goal:** Replace greedy mode matching with `scipy.optimize.linear_sum_assignment` for globally optimal 1-to-1 ML↔DFT mode pairing. Fixes correctness bug where two ML modes can claim the same DFT mode; improves all regression plots and metrics before benchmark campaign.
-**Requirements**: TBD
+**Goal:** Replace greedy mode matching with `scipy.optimize.linear_sum_assignment` for globally optimal 1-to-1 ML-to-DFT mode pairing. Fixes correctness bug where two ML modes can claim the same DFT mode; improves all regression plots, metrics, and heatmaps before benchmark campaign.
+**Requirements**: MATCH-01, MATCH-02, MATCH-03, MATCH-04
 **Depends on:** Phase 13
-**Plans:** 0 plans
+**Plans:** 2 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 13.3 to break down)
+- [ ] 13.3-01-PLAN.md — Hungarian algorithm in match_modes() + bijection test + downstream None guards
+- [ ] 13.3-02-PLAN.md — Heatmap border annotations + regression marker differentiation + analysis_workflow wiring
 
 ### Phase 13.4: Frequency Range Coverage Analysis (INSERTED)
 
@@ -164,7 +165,7 @@ Plans:
 | 13. Calculator Expansion & Acoh Fix | v1.1 | Complete    | 2026-03-03 | 2026-03-03 |
 | 13.1. Calculator Acceleration & Polarizability | 2/2 | Complete    | 2026-03-11 | - |
 | 13.2. Temp File Cleanup / Scratch Dir | 2/2 | Complete    | 2026-03-14 | 2026-03-14 |
-| 13.3. Hungarian Optimal Mode Matching | v1.1 | 0/TBD | Not started | - |
+| 13.3. Hungarian Optimal Mode Matching | v1.1 | 0/2 | Planned | - |
 | 13.4. Frequency Range Coverage Analysis | v1.1 | 0/TBD | Not started | - |
 | 13.5. MACE-POLAR-1 Energy Calculator | v1.1 | 0/TBD | Not started | - |
 | 14. Batch Runner & PubChem Fetcher | v1.1 | 0/TBD | Not started | - |

@@ -19,6 +19,13 @@
 - [x] **SCRATCH-02**: Scratch directory is auto-deleted on success (after moving files to results) and on failure (unless `--keep-scratch` flag or `MACE_KEEP_SCRATCH=1` env var is set)
 - [x] **SCRATCH-03**: `mace-gaussian run` auto-cleans stale scratch dirs (>24h) on startup; `mace-gaussian diagnose` reports stale scratch dirs
 
+### Mode Matching
+
+- [ ] **MATCH-01**: `match_modes()` uses Hungarian algorithm (`linear_sum_assignment`) for globally optimal bijective 1-to-1 ML-to-DFT mode pairing — no two ML modes can claim the same DFT mode
+- [ ] **MATCH-02**: Unmatched modes (when mode counts differ) appear as `(None, 0.0)` in match results; low-overlap pairs are logged but kept (not dropped)
+- [ ] **MATCH-03**: Mode overlap heatmaps annotate Hungarian-matched cells with borders (solid for confident >= 0.5, dashed for uncertain < 0.5) and include a legend
+- [ ] **MATCH-04**: Regression plots differentiate confident matches (filled markers) from low-overlap matches (open circles)
+
 ### Batch Workflow
 
 - [ ] **BATCH-01**: User can run `mace-gaussian fetch <molecule-name>` to download a 3D XYZ structure from PubChem
@@ -83,6 +90,10 @@
 | SCRATCH-01 | Phase 13.2 | Complete |
 | SCRATCH-02 | Phase 13.2 | Complete |
 | SCRATCH-03 | Phase 13.2 | Complete |
+| MATCH-01 | Phase 13.3 | Pending |
+| MATCH-02 | Phase 13.3 | Pending |
+| MATCH-03 | Phase 13.3 | Pending |
+| MATCH-04 | Phase 13.3 | Pending |
 | BATCH-01 | Phase 14 | Pending |
 | BATCH-02 | Phase 14 | Pending |
 | BATCH-03 | Phase 14 | Pending |
@@ -98,10 +109,10 @@
 | FIX-03 | Phase 17 | Pending |
 
 **Coverage:**
-- v1.1 requirements: 20 total
-- Mapped to phases: 20
+- v1.1 requirements: 24 total
+- Mapped to phases: 24
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-03*
-*Last updated: 2026-03-14 after Phase 13.2 completion (SCRATCH-03 complete)*
+*Last updated: 2026-03-15 after Phase 13.3 planning (MATCH-01 through MATCH-04 added)*
