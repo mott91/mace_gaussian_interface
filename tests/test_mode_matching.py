@@ -154,6 +154,140 @@ class TestNormalizeMode:
 
 
 # ---------------------------------------------------------------------------
+# Hungarian algorithm tests (bijective matching)
+# ---------------------------------------------------------------------------
+
+
+class TestHungarianMatching:
+    """Test that match_modes() uses Hungarian algorithm for globally optimal bijective pairing."""
+
+    def test_hungarian_prevents_duplicate_assignment(self):
+        """Greedy fails here: calc modes 0 and 1 are both closest to ref mode 0.
+
+        Hungarian should produce a bijective (1-to-1) assignment where no two
+        calc modes map to the same ref mode.
+        """
+        # 3 atoms, 3 modes each
+        # Ref mode 0: strong signal on atom 0 x-axis
+        # Ref mode 1: strong signal on atom 1 y-axis
+        # Ref mode 2: strong signal on atom 2 z-axis
+        modes_ref = np.zeros((3, 3, 3))
+        modes_ref[0, 0, 0] = 1.0
+        modes_ref[1, 1, 1] = 1.0
+        modes_ref[2, 2, 2] = 1.0
+
+        # Calc mode 0: very similar to ref mode 0 (overlap ~0.98)
+        modes_calc = np.zeros((3, 3, 3))
+        modes_calc[0, 0, 0] = 0.98
+        modes_calc[0, 0, 1] = 0.2  # small perturbation
+
+        # Calc mode 1: also most similar to ref mode 0 under greedy (overlap ~0.95)
+        # but has secondary overlap with ref mode 1
+        modes_calc[1, 0, 0] = 0.7
+        modes_calc[1, 1, 1] = 0.7  # significant component along ref mode 1
+
+        # Calc mode 2: clearly matches ref mode 2
+        modes_calc[2, 2, 2] = 1.0
+
+        matches = match_modes(modes_calc, modes_ref, threshold=0.1)
+
+        # All 3 calc modes should be matched
+        assert len(matches) == 3
+
+        # Bijection: all assigned ref indices must be unique
+        assigned_refs = [matches[i][0] for i in range(3)]
+        assert len(set(assigned_refs)) == 3, (
+            f"Expected bijective assignment (3 unique refs), got {assigned_refs}"
+        )
+
+        # Calc mode 2 should match ref mode 2 (clear match)
+        assert matches[2][0] == 2
+
+    def test_unmatched_modes_more_calc_than_ref(self):
+        """When n_calc > n_ref, extra calc modes get (None, 0.0)."""
+        # 5 calc modes, 3 ref modes, 1 atom each
+        modes_ref = np.zeros((3, 1, 3))
+        modes_ref[0, 0, 0] = 1.0
+        modes_ref[1, 0, 1] = 1.0
+        modes_ref[2, 0, 2] = 1.0
+
+        modes_calc = np.zeros((5, 1, 3))
+        modes_calc[0, 0, 0] = 1.0  # matches ref 0
+        modes_calc[1, 0, 1] = 1.0  # matches ref 1
+        modes_calc[2, 0, 2] = 1.0  # matches ref 2
+        # Calc modes 3 and 4: no good ref available
+        modes_calc[3, 0, :] = [0.5, 0.5, 0.0]
+        modes_calc[4, 0, :] = [0.0, 0.5, 0.5]
+
+        matches = match_modes(modes_calc, modes_ref, threshold=0.1)
+
+        # All 5 calc modes should have entries
+        assert len(matches) == 5
+
+        # 3 matched pairs should have valid ref indices
+        matched = [(i, matches[i]) for i in range(5) if matches[i][0] is not None]
+        unmatched = [(i, matches[i]) for i in range(5) if matches[i][0] is None]
+
+        assert len(matched) == 3, f"Expected 3 matched pairs, got {len(matched)}"
+        assert len(unmatched) == 2, f"Expected 2 unmatched pairs, got {len(unmatched)}"
+
+        # Unmatched should have overlap 0.0
+        for idx, (ref_idx, overlap) in unmatched:
+            assert ref_idx is None
+            assert overlap == 0.0
+
+    def test_unmatched_modes_more_ref_than_calc(self):
+        """When n_calc < n_ref, all calc modes get valid matches (no None)."""
+        # 3 calc modes, 5 ref modes, 1 atom each
+        modes_ref = np.zeros((5, 1, 3))
+        modes_ref[0, 0, 0] = 1.0
+        modes_ref[1, 0, 1] = 1.0
+        modes_ref[2, 0, 2] = 1.0
+        modes_ref[3, 0, :] = [0.5, 0.5, 0.0]
+        modes_ref[4, 0, :] = [0.0, 0.5, 0.5]
+
+        modes_calc = np.zeros((3, 1, 3))
+        modes_calc[0, 0, 0] = 1.0
+        modes_calc[1, 0, 1] = 1.0
+        modes_calc[2, 0, 2] = 1.0
+
+        matches = match_modes(modes_calc, modes_ref, threshold=0.1)
+
+        # All 3 calc modes matched, no None
+        assert len(matches) == 3
+        for i in range(3):
+            ref_idx, overlap = matches[i]
+            assert ref_idx is not None, f"Calc mode {i} should have a valid match"
+            assert overlap > 0.5
+
+    def test_low_overlap_pairs_kept(self):
+        """Low-overlap pairs should be kept in dict with their overlap value preserved."""
+        # Create nearly orthogonal modes
+        modes_calc = np.zeros((2, 1, 3))
+        modes_calc[0, 0, 0] = 1.0  # x-axis
+        modes_calc[1, 0, 1] = 1.0  # y-axis
+
+        modes_ref = np.zeros((2, 1, 3))
+        modes_ref[0, 0, 0] = 1.0  # x-axis (good match for calc 0)
+        # ref 1: mostly z-axis with tiny y component -> low overlap with calc 1
+        modes_ref[1, 0, :] = [0.0, 0.1, 0.995]
+
+        matches = match_modes(modes_calc, modes_ref, threshold=0.5)
+
+        # Both calc modes should be in dict
+        assert len(matches) == 2
+
+        # Calc mode 0 -> ref 0 with high overlap
+        assert matches[0][0] == 0
+        assert matches[0][1] > 0.9
+
+        # Calc mode 1 -> ref 1 with LOW overlap (kept, not dropped)
+        assert matches[1][0] == 1
+        assert matches[1][1] < 0.5  # below threshold but still present
+        assert matches[1][1] > 0.0  # has some overlap value
+
+
+# ---------------------------------------------------------------------------
 # Real data tests (using .fchk fixtures)
 # ---------------------------------------------------------------------------
 
