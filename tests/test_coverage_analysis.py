@@ -1,6 +1,7 @@
 """Tests for frequency range coverage analysis."""
 
 import math
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -124,3 +125,168 @@ class TestRegionMetrics:
         metrics = analyzer._compute_region_metrics(df)
         # mean_pct_error = mean(|10|, |-5|) = 7.5
         assert abs(metrics["mean_pct_error"] - 7.5) < 0.01
+
+
+# ---------------------------------------------------------------------------
+# Integration tests
+# ---------------------------------------------------------------------------
+
+def _write_csv(path: Path, rows: list[dict]) -> None:
+    """Helper: write a comparison CSV from row dicts."""
+    df = pd.DataFrame(rows)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(path, index=False)
+
+
+class TestIntegration:
+    """Integration tests using synthetic CSV files on disk."""
+
+    @pytest.fixture
+    def synth_dir(self, tmp_path):
+        """Create a temp directory with synthetic molecule comparison CSVs.
+
+        molecule_a has two calc combos (calc_x, calc_y).
+        molecule_b has one calc combo (calc_x).
+        """
+        # molecule_a / calc_x: modes in 400-700 and 2800-4000
+        _write_csv(
+            tmp_path / "molecule_a" / "data" / "comparison_calc_x.csv",
+            [
+                {
+                    "DFT_Frequency_cm": 500.0,
+                    "ML_Frequency_cm": 520.0,
+                    "Freq_Difference_cm": 20.0,
+                    "Percent_Error": 4.0,
+                    "Mode_Overlap": 0.99,
+                    "DFT_Intensity_km_mol": 10.0,
+                    "ML_Intensity_km_mol": 11.0,
+                    "Intensity_Difference": 1.0,
+                },
+                {
+                    "DFT_Frequency_cm": 3000.0,
+                    "ML_Frequency_cm": 3050.0,
+                    "Freq_Difference_cm": 50.0,
+                    "Percent_Error": 1.67,
+                    "Mode_Overlap": 0.95,
+                    "DFT_Intensity_km_mol": 100.0,
+                    "ML_Intensity_km_mol": 95.0,
+                    "Intensity_Difference": -5.0,
+                },
+            ],
+        )
+        # molecule_a / calc_y: mode only in 1500-1800
+        _write_csv(
+            tmp_path / "molecule_a" / "data" / "comparison_calc_y.csv",
+            [
+                {
+                    "DFT_Frequency_cm": 1700.0,
+                    "ML_Frequency_cm": 1680.0,
+                    "Freq_Difference_cm": -20.0,
+                    "Percent_Error": -1.18,
+                    "Mode_Overlap": 0.98,
+                    "DFT_Intensity_km_mol": 50.0,
+                    "ML_Intensity_km_mol": 48.0,
+                    "Intensity_Difference": -2.0,
+                },
+            ],
+        )
+        # molecule_b / calc_x: mode in 400-700
+        _write_csv(
+            tmp_path / "molecule_b" / "data" / "comparison_calc_x.csv",
+            [
+                {
+                    "DFT_Frequency_cm": 600.0,
+                    "ML_Frequency_cm": 610.0,
+                    "Freq_Difference_cm": 10.0,
+                    "Percent_Error": 1.67,
+                    "Mode_Overlap": 0.97,
+                    "DFT_Intensity_km_mol": 20.0,
+                    "ML_Intensity_km_mol": 21.0,
+                    "Intensity_Difference": 1.0,
+                },
+            ],
+        )
+        return tmp_path
+
+    def test_analyze_nested_structure(self, synth_dir):
+        analyzer = CoverageAnalyzer(
+            molecules=["molecule_a", "molecule_b"],
+            results_base=synth_dir,
+        )
+        metrics = analyzer.analyze()
+
+        # calc_x has both molecules
+        assert "calc_x" in metrics
+        assert "molecule_a" in metrics["calc_x"]
+        assert "molecule_b" in metrics["calc_x"]
+
+        # calc_y only has molecule_a
+        assert "calc_y" in metrics
+        assert "molecule_a" in metrics["calc_y"]
+        assert "molecule_b" not in metrics["calc_y"]
+
+        # Check specific metric: molecule_a calc_x region 400-700 has 1 mode, RMSE=20
+        m = metrics["calc_x"]["molecule_a"]["400-700"]
+        assert m["mode_count"] == 1
+        assert abs(m["rmse"] - 20.0) < 0.01
+
+        # molecule_b calc_x region 400-700 has 1 mode, RMSE=10
+        m2 = metrics["calc_x"]["molecule_b"]["400-700"]
+        assert m2["mode_count"] == 1
+        assert abs(m2["rmse"] - 10.0) < 0.01
+
+    def test_build_heatmap_data(self, synth_dir):
+        analyzer = CoverageAnalyzer(
+            molecules=["molecule_a", "molecule_b"],
+            results_base=synth_dir,
+        )
+        metrics = analyzer.analyze()
+        heatmap = analyzer.build_heatmap_data(metrics, "calc_x")
+
+        assert list(heatmap.index) == ["molecule_a", "molecule_b"]
+        assert len(heatmap.columns) == 7
+
+        # molecule_a 400-700 RMSE=20.0
+        assert abs(heatmap.loc["molecule_a", "400-700"] - 20.0) < 0.01
+        # molecule_b 2800-4000 is NaN (no modes there)
+        assert math.isnan(heatmap.loc["molecule_b", "2800-4000"])
+
+    def test_build_barchart_data(self, synth_dir):
+        analyzer = CoverageAnalyzer(
+            molecules=["molecule_a", "molecule_b"],
+            results_base=synth_dir,
+        )
+        metrics = analyzer.analyze()
+        means, stds, counts = analyzer.build_barchart_data(metrics, "calc_x")
+
+        # 400-700: molecule_a RMSE=20, molecule_b RMSE=10 -> mean=15, std~7.07
+        assert abs(means["400-700"] - 15.0) < 0.01
+        assert abs(stds["400-700"] - math.sqrt(50)) < 0.01
+        assert counts["400-700"] == 2
+
+        # 2800-4000: only molecule_a has RMSE=50 -> mean=50, std=0
+        assert abs(means["2800-4000"] - 50.0) < 0.01
+        assert stds["2800-4000"] == 0.0
+        assert counts["2800-4000"] == 1
+
+        # 1000-1300: no molecules have modes -> NaN mean
+        assert math.isnan(means["1000-1300"])
+        assert counts["1000-1300"] == 0
+
+    def test_missing_molecule_warns_and_skips(self, synth_dir, caplog):
+        analyzer = CoverageAnalyzer(
+            molecules=["molecule_a", "nonexistent_mol"],
+            results_base=synth_dir,
+        )
+        with caplog.at_level("WARNING"):
+            metrics = analyzer.analyze()
+
+        # Should have warned about nonexistent_mol
+        assert any("nonexistent_mol" in rec.message for rec in caplog.records)
+
+        # calc_x should still have molecule_a data
+        assert "calc_x" in metrics
+        assert "molecule_a" in metrics["calc_x"]
+        # nonexistent_mol should not appear in any combo
+        for combo in metrics:
+            assert "nonexistent_mol" not in metrics[combo]
