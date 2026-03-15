@@ -232,7 +232,7 @@ class TestHungarianMatching:
         assert len(unmatched) == 2, f"Expected 2 unmatched pairs, got {len(unmatched)}"
 
         # Unmatched should have overlap 0.0
-        for idx, (ref_idx, overlap) in unmatched:
+        for _idx, (ref_idx, overlap) in unmatched:
             assert ref_idx is None
             assert overlap == 0.0
 

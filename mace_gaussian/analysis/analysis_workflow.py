@@ -361,8 +361,16 @@ class ComparisonWorkflow:
             matches = match_modes(modes_ml, modes_dft, threshold=0.5)
 
             # Convert to mapping dicts (ml_idx -> dft_idx) and (ml_idx -> overlap)
-            mode_mapping = {ml_idx: dft_idx for ml_idx, (dft_idx, overlap) in matches.items() if dft_idx is not None}
-            mode_overlaps = {ml_idx: overlap for ml_idx, (dft_idx, overlap) in matches.items() if dft_idx is not None}
+            mode_mapping = {
+                ml_idx: dft_idx
+                for ml_idx, (dft_idx, overlap) in matches.items()
+                if dft_idx is not None
+            }
+            mode_overlaps = {
+                ml_idx: overlap
+                for ml_idx, (dft_idx, overlap) in matches.items()
+                if dft_idx is not None
+            }
 
             logger.info(f"  Extracted mode mapping for {len(mode_mapping)} modes")
             return (mode_mapping, mode_overlaps)
