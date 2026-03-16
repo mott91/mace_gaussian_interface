@@ -81,13 +81,13 @@ Plans:
 
 ### Phase 13.5: MACE-POLAR-1 Energy Calculator (INSERTED)
 
-**Goal:** Integrate MACE-POLAR-1 (`polar-1-m`) as a new energy calculator option. It adds long-range electrostatics (trained on OMol25, 100M structures) which may improve geometries for large/polar molecules. Wire into `--energy-calculators` and `--optimization-calculator` CLI options.
-**Requirements**: TBD
+**Goal:** Wire MACE-POLAR-1 (`mace_polar`) as a new energy calculator option with long-range electrostatics (trained on OMol25, 83 elements). Add `mace_polar` to `--energy-calculators` and `--optimization-calculator` CLI options following established calculator expansion pattern.
+**Requirements**: POLAR-01, POLAR-02, POLAR-03
 **Depends on:** Phase 13
-**Plans:** 0 plans
+**Plans:** 1 plan
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 13.5 to break down)
+- [ ] 13.5-01-PLAN.md — Add mace_polar branch to workflow.py + CLI wiring + DFT baseline config + tests
 
 ### Phase 13.1: Calculator Acceleration & Polarizability Passthrough (INSERTED)
 
@@ -168,7 +168,7 @@ Plans:
 | 13.2. Temp File Cleanup / Scratch Dir | 2/2 | Complete    | 2026-03-14 | 2026-03-14 |
 | 13.3. Hungarian Optimal Mode Matching | 2/2 | Complete    | 2026-03-15 | - |
 | 13.4. Frequency Range Coverage Analysis | 2/2 | Complete   | 2026-03-16 | - |
-| 13.5. MACE-POLAR-1 Energy Calculator | v1.1 | 0/TBD | Not started | - |
+| 13.5. MACE-POLAR-1 Energy Calculator | v1.1 | 0/1 | Not started | - |
 | 14. Batch Runner & PubChem Fetcher | v1.1 | 0/TBD | Not started | - |
 | 15. SLURM Integration & Batch Report | v1.1 | 0/TBD | Not started | - |
 | 16. Benchmark Campaign | v1.1 | 0/TBD | Not started | - |

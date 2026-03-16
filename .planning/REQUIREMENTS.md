@@ -13,6 +13,12 @@
 - [ ] **CALC-03**: User can specify `xtb` as `--energy-calculators` choice in CLI (GFN2-xTB semiempirical)
 - [ ] **CALC-04**: xTB dipole calculator produces correct dipole derivatives (unit bug verified and fixed; `xtb` usable as `--dipole-calculators` choice)
 
+### MACE-POLAR-1 Integration
+
+- [ ] **POLAR-01**: User can specify `mace_polar` as `--energy-calculators` choice in CLI (MACE-POLAR-1 with long-range electrostatics, 83 elements, trained on OMol25)
+- [ ] **POLAR-02**: User can specify `mace_polar` as `--optimization-calculator` choice in CLI
+- [ ] **POLAR-03**: `calculator("mace_polar")` in workflow.py calls `mace_polar(model="polar-1-l", device="cuda", default_dtype="float64")` with no dispersion kwarg, and DFT baseline config exists
+
 ### Scratch Directory Isolation
 
 - [x] **SCRATCH-01**: All intermediate Gaussian files (.gjf, .log, .chk, .ipc_file) are created inside `.scratch/` subdirectory, not the project root — both ML frequency and DFT baseline runs
@@ -95,6 +101,9 @@
 | CALC-02 | Phase 13 | Complete |
 | CALC-03 | Phase 13 | Pending |
 | CALC-04 | Phase 13 | Pending |
+| POLAR-01 | Phase 13.5 | Pending |
+| POLAR-02 | Phase 13.5 | Pending |
+| POLAR-03 | Phase 13.5 | Pending |
 | SCRATCH-01 | Phase 13.2 | Complete |
 | SCRATCH-02 | Phase 13.2 | Complete |
 | SCRATCH-03 | Phase 13.2 | Complete |
@@ -122,10 +131,10 @@
 | FIX-03 | Phase 17 | Pending |
 
 **Coverage:**
-- v1.1 requirements: 29 total
-- Mapped to phases: 29
+- v1.1 requirements: 32 total
+- Mapped to phases: 32
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-03*
-*Last updated: 2026-03-15 after Phase 13.4 planning (COV-01 through COV-05 added)*
+*Last updated: 2026-03-16 after Phase 13.5 planning (POLAR-01 through POLAR-03 added)*
