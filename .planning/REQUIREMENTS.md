@@ -31,8 +31,8 @@
 - [x] **COV-01**: Per-region error metrics (RMSE, MAE, mean % error, mode count) computed for 7 chemically meaningful frequency regions (400-700, 700-1000, 1000-1300, 1300-1500, 1500-1800, 1800-2800, 2800-4000 cm-1) from harmonic comparison data
 - [x] **COV-02**: Cross-molecule heatmap (molecules x regions matrix, colored by RMSE) generated per calculator combination, with gray "--" annotation for empty cells
 - [x] **COV-03**: Cross-molecule bar chart (mean RMSE by region with std dev error bars and mode count annotations) generated per calculator combination
-- [ ] **COV-04**: Standalone self-contained HTML report with embedded heatmap and bar chart plots, summary tables per calculator combination
-- [ ] **COV-05**: Entry-point script `run_coverage_analysis.py` accepting molecule names as CLI arguments, producing PNG plots, JSON metrics, and HTML report in `coverage_analysis/` directory
+- [x] **COV-04**: Standalone self-contained HTML report with embedded heatmap and bar chart plots, summary tables per calculator combination
+- [x] **COV-05**: Entry-point script `run_coverage_analysis.py` accepting molecule names as CLI arguments, producing PNG plots, JSON metrics, and HTML report in `coverage_analysis/` directory
 
 ### Batch Workflow
 
@@ -105,8 +105,8 @@
 | COV-01 | Phase 13.4 | Complete |
 | COV-02 | Phase 13.4 | Complete |
 | COV-03 | Phase 13.4 | Complete |
-| COV-04 | Phase 13.4 | Pending |
-| COV-05 | Phase 13.4 | Pending |
+| COV-04 | Phase 13.4 | Complete |
+| COV-05 | Phase 13.4 | Complete |
 | BATCH-01 | Phase 14 | Pending |
 | BATCH-02 | Phase 14 | Pending |
 | BATCH-03 | Phase 14 | Pending |
