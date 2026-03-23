@@ -10,7 +10,6 @@ import pytest
 from mace_gaussian.batch import (
     STATUS_COMPLETE,
     STATUS_FAILED,
-    STATUS_PENDING,
     _combination_key,
     load_manifest,
     parse_batch_file,
@@ -84,7 +83,7 @@ class TestParseBatchFile:
         assert result[0] == xyz1
 
     def test_resolves_relative_paths(self, tmp_path, monkeypatch):
-        xyz = _write_xyz(tmp_path, "water")
+        _write_xyz(tmp_path, "water")
         monkeypatch.chdir(tmp_path)
         batch = tmp_path / "molecules.txt"
         batch.write_text("water.xyz\n")
@@ -129,7 +128,7 @@ class TestRunBatch:
         xyz2 = _write_xyz(tmp_path, "methane")
         batch_file = _write_batch_file(tmp_path, [xyz1, xyz2])
         output_dir = str(tmp_path / "results")
-        os.makedirs(output_dir, exist_ok=True)
+        Path(output_dir).mkdir(parents=True, exist_ok=True)
 
         summary = run_batch(
             batch_file=batch_file,
@@ -158,7 +157,7 @@ class TestRunBatch:
         xyz1 = _write_xyz(tmp_path, "water")
         batch_file = _write_batch_file(tmp_path, [xyz1])
         output_dir = str(tmp_path / "results")
-        os.makedirs(output_dir, exist_ok=True)
+        Path(output_dir).mkdir(parents=True, exist_ok=True)
 
         # Pre-populate manifest with one complete combination
         manifest_path = Path(output_dir) / "batch_manifest.json"
@@ -213,7 +212,7 @@ class TestRunBatch:
         xyz2 = _write_xyz(tmp_path, "methane")
         batch_file = _write_batch_file(tmp_path, [xyz1, xyz2])
         output_dir = str(tmp_path / "results")
-        os.makedirs(output_dir, exist_ok=True)
+        Path(output_dir).mkdir(parents=True, exist_ok=True)
 
         summary = run_batch(
             batch_file=batch_file,
@@ -249,7 +248,7 @@ class TestRunBatch:
         xyz1 = _write_xyz(tmp_path, "water")
         batch_file = _write_batch_file(tmp_path, [xyz1])
         output_dir = str(tmp_path / "results")
-        os.makedirs(output_dir, exist_ok=True)
+        Path(output_dir).mkdir(parents=True, exist_ok=True)
 
         run_batch(
             batch_file=batch_file,
@@ -279,7 +278,7 @@ class TestRunBatch:
         xyz1 = _write_xyz(tmp_path, "water")
         batch_file = _write_batch_file(tmp_path, [xyz1])
         output_dir = str(tmp_path / "results")
-        os.makedirs(output_dir, exist_ok=True)
+        Path(output_dir).mkdir(parents=True, exist_ok=True)
 
         run_batch(
             batch_file=batch_file,
@@ -305,7 +304,7 @@ class TestRunBatch:
         xyz1 = _write_xyz(tmp_path, "water")
         batch_file = _write_batch_file(tmp_path, [xyz1])
         output_dir = str(tmp_path / "results")
-        os.makedirs(output_dir, exist_ok=True)
+        Path(output_dir).mkdir(parents=True, exist_ok=True)
 
         summary = run_batch(
             batch_file=batch_file,
@@ -336,7 +335,7 @@ class TestRunBatch:
         xyz1 = _write_xyz(tmp_path, "water")
         batch_file = _write_batch_file(tmp_path, [xyz1])
         output_dir = str(tmp_path / "results")
-        os.makedirs(output_dir, exist_ok=True)
+        Path(output_dir).mkdir(parents=True, exist_ok=True)
 
         run_batch(
             batch_file=batch_file,
