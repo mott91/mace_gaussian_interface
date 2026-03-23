@@ -66,6 +66,12 @@ DFT_BASELINES = {
         "description": "B3LYP/6-31G(d,p)",
         "extra_keywords": "",
     },
+    "mace_polar": {
+        "method": "b3lyp",
+        "basis": "6-31G(d,p)",
+        "description": "B3LYP/6-31G(d,p)",
+        "extra_keywords": "",
+    },
 }
 
 # Alternative baselines (e.g., functionals the NNPs were originally trained on)
