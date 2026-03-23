@@ -34,7 +34,9 @@ Reliable, reproducible IR spectral predictions using ML potentials that can be v
 
 ### Active (v1.1)
 
-- [ ] Calculator expansion: mace_off and mace_anicc wired into CLI as energy calculator choices
+- ✓ Calculator expansion: mace_off and mace_anicc wired into CLI as energy calculator choices — v1.1 Phase 13
+- ✓ Calculator expansion: mace_polar wired into CLI as energy calculator option — v1.1 Phase 13.5
+- [ ] Calculator expansion: mace_polar available as optimization calculator choice
 - [ ] Calculator expansion: xTB registered as energy calculator option
 - [ ] Calculator expansion: xTB dipole unit bug verified and fixed; xTB dipole usable in production
 - [ ] Batch runner: `mace-gaussian batch molecules.txt` runs pipeline over multiple molecules with per-molecule failure isolation and restart-safe manifest
@@ -70,7 +72,7 @@ Reliable, reproducible IR spectral predictions using ML potentials that can be v
 ## Context
 
 - **Current state (v1.0):** Distribution-ready Python package. 7,648 LOC source + 2,147 LOC tests. 131 tests pass. CI runs on every push. `mace-gaussian run water.xyz` works end-to-end.
-- **Current state (v1.1 starting):** Calculator expansion and batch tooling in progress. Research complete for all v1.1 features.
+- **Current state (v1.1 in progress):** Calculator expansion done (mace_off, mace_anicc, mace_polar wired). Batch tooling next.
 - **Known limitations:** `compare`/`export` CLI stubs. docs/ARCHITECTURE.md references pre-refactor module names. E2E GPU+Gaussian test requires hardware.
 - **Known bug:** Acetic acid (acoh) DFT frequency parsing fails for regression plots (commit a4384c4, xfail test documents it). Targeted for v1.1 fix.
 - **Thesis stage:** Method validated on water/CH4/BH3·NH3/acoh. Expanding to systematic ~25-molecule benchmark. mace_omol/mace_ml is the best-performing combination so far.
@@ -100,4 +102,4 @@ Reliable, reproducible IR spectral predictions using ML potentials that can be v
 | ruff>=0.9.0 floor (not exact pin) in CI | Removes maintenance burden vs. exact pin | ✓ Good — aligned with dev dep declaration |
 
 ---
-*Last updated: 2026-03-03 after v1.1 milestone start*
+*Last updated: 2026-03-23 after Phase 13.5 completion*
