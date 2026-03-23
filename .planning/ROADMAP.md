@@ -107,7 +107,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 14-01-PLAN.md — PubChem fetcher: pubchem.py module + fetch CLI command + tests + requests dependency
+- [x] 14-01-PLAN.md — PubChem fetcher: pubchem.py module + fetch CLI command + tests + requests dependency
 - [ ] 14-02-PLAN.md — Batch runner: batch.py module + batch CLI command + manifest-driven per-calculator restart + tests
 
 ### Phase 15: SLURM Integration & Batch Report
@@ -167,7 +167,7 @@ Plans:
 | 13.3. Hungarian Optimal Mode Matching | 2/2 | Complete    | 2026-03-15 | - |
 | 13.4. Frequency Range Coverage Analysis | 2/2 | Complete   | 2026-03-16 | - |
 | 13.5. MACE-POLAR-1 Energy Calculator | v1.1 | 0/1 | Complete    | 2026-03-23 |
-| 14. Batch Runner & PubChem Fetcher | v1.1 | 0/2 | Planning complete | - |
+| 14. Batch Runner & PubChem Fetcher | v1.1 | 1/2 | Complete    | 2026-03-23 |
 | 15. SLURM Integration & Batch Report | v1.1 | 0/TBD | Not started | - |
 | 16. Benchmark Campaign | v1.1 | 0/TBD | Not started | - |
 | 17. Docs Update | v1.1 | 0/TBD | Not started | - |

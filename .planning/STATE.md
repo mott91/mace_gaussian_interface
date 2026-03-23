@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: — Batch Benchmarking & Calculator Expansion
 status: Ready to plan
-stopped_at: Phase 14 context gathered
-last_updated: "2026-03-23T11:05:39.007Z"
+stopped_at: Completed 14-02-PLAN.md (batch runner CLI command)
+last_updated: "2026-03-23T12:00:34.538Z"
 progress:
   total_phases: 10
-  completed_phases: 6
-  total_plans: 12
-  completed_plans: 12
+  completed_phases: 7
+  total_plans: 14
+  completed_plans: 14
 ---
 
 # Project State
@@ -19,11 +19,11 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** Reliable, reproducible IR spectral predictions using ML potentials that can be validated against DFT reference data.
-**Current focus:** Phase 13.5 — mace-polar-energy-calculator
+**Current focus:** Phase 14 — batch-runner-pubchem-fetcher
 
 ## Current Position
 
-Phase: 14
+Phase: 15
 Plan: Not started
 
 ## Performance Metrics
@@ -78,6 +78,9 @@ Recent decisions affecting v1.1 work:
 - [13.4-01]: pd.cut with right=False for left-inclusive region intervals [low, high); NaN metrics for empty regions (mode_count=0)
 - [13.4-02]: YlOrRd colormap for heatmaps; empty cells masked then annotated "--" in gray; NaN-to-null JSON via recursive converter
 - [Phase 13.5]: mace-torch upgraded to main (0.3.15) for mace_polar import; model='polar-1-l', no dispersion kwarg, opt-in only
+- [Phase 14]: FileExistsError exits 0 (skip), ValueError exits 1 (not found) per D-03/D-04
+- [Phase 14]: Batch calls three stage functions directly (not run_pipeline) for per-calculator restart granularity
+- [Phase 14]: Atomic manifest write via tempfile.mkstemp + os.replace for crash-safe JSON
 
 ### Roadmap Evolution
 
@@ -99,5 +102,5 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-23T11:05:39.003Z
-Stopped at: Phase 14 context gathered
+Last session: 2026-03-23T11:55:19.800Z
+Stopped at: Completed 14-02-PLAN.md (batch runner CLI command)
