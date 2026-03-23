@@ -104,13 +104,11 @@ Plans:
 **Goal**: Users can fetch 3D structures by name and run the full pipeline over a list of molecules with per-molecule failure isolation and restart safety.
 **Depends on**: Phase 13 (calculator expansion ensures full set of combinations is available for batch)
 **Requirements**: BATCH-01, BATCH-02, BATCH-03, BATCH-04
-**Success Criteria** (what must be TRUE):
-  1. User runs `mace-gaussian fetch aspirin` and receives `aspirin.xyz` with valid 3D coordinates in the current directory.
-  2. User runs `mace-gaussian batch molecules.txt` and the pipeline executes sequentially for each molecule, with per-molecule results written to `batch_results/`.
-  3. If the batch run is interrupted and restarted, already-complete molecules are skipped and the run resumes from the first incomplete molecule.
-  4. `batch_manifest.json` exists after any batch run and records the status of every molecule (complete, failed, pending).
-  5. User can run `mace-gaussian batch molecules.txt --skip-dft-baseline` to execute ML-only calculations without triggering DFT baseline jobs.
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 14-01-PLAN.md — PubChem fetcher: pubchem.py module + fetch CLI command + tests + requests dependency
+- [ ] 14-02-PLAN.md — Batch runner: batch.py module + batch CLI command + manifest-driven per-calculator restart + tests
 
 ### Phase 15: SLURM Integration & Batch Report
 **Goal**: Users can offload DFT baseline calculations to a SLURM cluster automatically, and a multi-molecule HTML report aggregates accuracy across all molecules and calculator combinations.
@@ -169,7 +167,7 @@ Plans:
 | 13.3. Hungarian Optimal Mode Matching | 2/2 | Complete    | 2026-03-15 | - |
 | 13.4. Frequency Range Coverage Analysis | 2/2 | Complete   | 2026-03-16 | - |
 | 13.5. MACE-POLAR-1 Energy Calculator | v1.1 | 0/1 | Complete    | 2026-03-23 |
-| 14. Batch Runner & PubChem Fetcher | v1.1 | 0/TBD | Not started | - |
+| 14. Batch Runner & PubChem Fetcher | v1.1 | 0/2 | Planning complete | - |
 | 15. SLURM Integration & Batch Report | v1.1 | 0/TBD | Not started | - |
 | 16. Benchmark Campaign | v1.1 | 0/TBD | Not started | - |
 | 17. Docs Update | v1.1 | 0/TBD | Not started | - |
