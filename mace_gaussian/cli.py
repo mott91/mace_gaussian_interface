@@ -478,5 +478,97 @@ def diagnose():
     click.echo("=" * 60)
 
 
+@cli.command()
+@click.argument("batch_file", type=click.Path(exists=True))
+@click.option(
+    "--optimization-calculator",
+    default="mace_omol",
+    type=click.Choice(["mace_omol", "mace_off", "mace_mp", "mace_anicc"]),
+    help="Calculator for geometry optimization (default: mace_omol)",
+)
+@click.option(
+    "--energy-calculators",
+    default="mace_mp,mace_omol,mace_anicc,mace_off",
+    callback=_validate_energy_calculators,
+    help="Comma-separated energy calculators. Choices: mace_mp, mace_omol, mace_off, mace_anicc",
+)
+@click.option(
+    "--dipole-calculators",
+    default="espaloma,mace_ml",
+    callback=_validate_dipole_calculators,
+    help="Comma-separated dipole calculators. Choices: espaloma, mace_ml",
+)
+@click.option("--skip-dft-baseline", is_flag=True, help="Skip DFT baseline calculations")
+@click.option(
+    "--output-dir",
+    default="comparison_results",
+    type=click.Path(),
+    help="Output directory for results (default: comparison_results)",
+)
+@click.option(
+    "--keep-scratch",
+    is_flag=True,
+    default=False,
+    help="Preserve scratch directory on failure for debugging (also: MACE_KEEP_SCRATCH=1)",
+)
+def batch(
+    batch_file,
+    optimization_calculator,
+    energy_calculators,
+    dipole_calculators,
+    skip_dft_baseline,
+    output_dir,
+    keep_scratch,
+):
+    """Run pipeline for multiple molecules listed in BATCH_FILE.
+
+    BATCH_FILE is a text file with one .xyz file path per line.
+    Lines starting with # are comments. Blank lines are ignored.
+
+    Reuses the same options as the 'run' command. Every molecule gets
+    the same calculator configuration.
+
+    Results are written to comparison_results/ (same structure as 'run').
+    A manifest file (batch_manifest.json) tracks per-calculator status
+    for restart safety.
+
+    Example:
+        mace-gaussian batch molecules.txt
+        mace-gaussian batch molecules.txt --skip-dft-baseline
+        mace-gaussian batch molecules.txt --energy-calculators mace_mp --dipole-calculators espaloma
+    """
+    from mace_gaussian.batch import run_batch
+
+    # Resolve keep_scratch: CLI flag takes precedence over env var
+    if not keep_scratch:
+        keep_scratch = os.environ.get("MACE_KEEP_SCRATCH", "0") == "1"
+
+    # Parse calculator lists
+    energy_calc_list = [c.strip() for c in energy_calculators.split(",")]
+    dipole_calc_list = [c.strip() for c in dipole_calculators.split(",")]
+
+    try:
+        summary = run_batch(
+            batch_file=Path(batch_file),
+            optimization_calculator=optimization_calculator,
+            energy_calculators=energy_calc_list,
+            dipole_calculators=dipole_calc_list,
+            skip_dft_baseline=skip_dft_baseline,
+            output_dir=output_dir,
+            keep_scratch=keep_scratch,
+        )
+
+        if summary["failed"] > 0:
+            sys.exit(1)
+
+    except FileNotFoundError as e:
+        click.echo(f"Error: {e}", err=True)
+        sys.exit(1)
+    except Exception as e:
+        click.echo(f"Error: Batch failed: {e}", err=True)
+        logger.exception("Batch failed with exception")
+        sys.exit(1)
+
+
 if __name__ == "__main__":
     cli()
