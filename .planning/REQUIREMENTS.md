@@ -15,9 +15,9 @@
 
 ### MACE-POLAR-1 Integration
 
-- [ ] **POLAR-01**: User can specify `mace_polar` as `--energy-calculators` choice in CLI (MACE-POLAR-1 with long-range electrostatics, 83 elements, trained on OMol25)
-- [ ] **POLAR-02**: User can specify `mace_polar` as `--optimization-calculator` choice in CLI
-- [ ] **POLAR-03**: `calculator("mace_polar")` in workflow.py calls `mace_polar(model="polar-1-l", device="cuda", default_dtype="float64")` with no dispersion kwarg, and DFT baseline config exists
+- [x] **POLAR-01**: User can specify `mace_polar` as `--energy-calculators` choice in CLI (MACE-POLAR-1 with long-range electrostatics, 83 elements, trained on OMol25)
+- [x] **POLAR-02**: User can specify `mace_polar` as `--optimization-calculator` choice in CLI
+- [x] **POLAR-03**: `calculator("mace_polar")` in workflow.py calls `mace_polar(model="polar-1-l", device="cuda", default_dtype="float64")` with no dispersion kwarg, and DFT baseline config exists
 
 ### Scratch Directory Isolation
 
@@ -101,9 +101,9 @@
 | CALC-02 | Phase 13 | Complete |
 | CALC-03 | Phase 13 | Pending |
 | CALC-04 | Phase 13 | Pending |
-| POLAR-01 | Phase 13.5 | Pending |
-| POLAR-02 | Phase 13.5 | Pending |
-| POLAR-03 | Phase 13.5 | Pending |
+| POLAR-01 | Phase 13.5 | Complete |
+| POLAR-02 | Phase 13.5 | Complete |
+| POLAR-03 | Phase 13.5 | Complete |
 | SCRATCH-01 | Phase 13.2 | Complete |
 | SCRATCH-02 | Phase 13.2 | Complete |
 | SCRATCH-03 | Phase 13.2 | Complete |

@@ -2,16 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: — Batch Benchmarking & Calculator Expansion
-status: completed
-stopped_at: Phase 13.5 context gathered
-last_updated: "2026-03-16T14:29:02.323Z"
-last_activity: 2026-03-15 — Plan 02 complete (Coverage visualization, HTML report, CLI entry point)
+status: Ready to plan
+stopped_at: Completed 13.5-01-PLAN.md (MACE-POLAR-1 energy calculator wiring)
+last_updated: "2026-03-23T08:14:52.293Z"
 progress:
   total_phases: 10
-  completed_phases: 5
-  total_plans: 11
-  completed_plans: 11
-  percent: 100
+  completed_phases: 6
+  total_plans: 12
+  completed_plans: 12
 ---
 
 # Project State
@@ -21,25 +19,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** Reliable, reproducible IR spectral predictions using ML potentials that can be validated against DFT reference data.
-**Current focus:** v1.1 — Phase 13: Calculator Expansion & Acoh Bug Fix
+**Current focus:** Phase 13.5 — mace-polar-energy-calculator
 
 ## Current Position
 
-Phase: 13.4 of 17 (Frequency Range Coverage Analysis)
-Plan: 2 of 2 in current phase
-Status: completed
-Last activity: 2026-03-15 — Plan 02 complete (Coverage visualization, HTML report, CLI entry point)
-
-Progress: [████████████████████] 100% (11/11 plans in v1.1 complete)
+Phase: 14
+Plan: Not started
 
 ## Performance Metrics
 
 **Velocity (v1.0):**
+
 - Total plans completed: 32
 - Average duration: ~3.9 min
 - Total execution time: ~2.1 hours
 
 **Recent Trend:**
+
 - Last plans were fast (2–7 min each) on well-scoped work
 - v1.1 plans expected similar cadence for Phase 13; Phase 15–16 may be longer (HPC/campaign work)
 
@@ -81,6 +77,7 @@ Recent decisions affecting v1.1 work:
 - [13.3-02]: Border color #4a4a4a and POINT_COLOR #5E81AC reused from existing styling for visual coherence
 - [13.4-01]: pd.cut with right=False for left-inclusive region intervals [low, high); NaN metrics for empty regions (mode_count=0)
 - [13.4-02]: YlOrRd colormap for heatmaps; empty cells masked then annotated "--" in gray; NaN-to-null JSON via recursive converter
+- [Phase 13.5]: mace-torch upgraded to main (0.3.15) for mace_polar import; model='polar-1-l', no dispersion kwarg, opt-in only
 
 ### Roadmap Evolution
 
@@ -102,5 +99,5 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-16T14:29:02.320Z
-Stopped at: Phase 13.5 context gathered
+Last session: 2026-03-23T07:58:22.324Z
+Stopped at: Completed 13.5-01-PLAN.md (MACE-POLAR-1 energy calculator wiring)
