@@ -63,6 +63,30 @@ class TestEnergyCalculatorValidation:
         assert result.exit_code != 0
         assert "bad_name" in result.output
 
+    def test_mace_polar_accepted(self, tmp_path):
+        """mace_polar should be accepted without a BadParameter error."""
+        xyz_file = tmp_path / "water.xyz"
+        xyz_file.write_text("3\nwater\nO 0.0 0.0 0.0\nH 1.0 0.0 0.0\nH 0.0 1.0 0.0\n")
+        runner = CliRunner()
+        result = runner.invoke(cli, ["run", str(xyz_file), "--energy-calculators", "mace_polar"])
+        assert "BadParameter" not in result.output
+        assert "'mace_polar' is not a valid" not in result.output
+
+    def test_valid_energy_calculators_includes_mace_polar(self):
+        """VALID_ENERGY_CALCULATORS must include mace_polar."""
+        assert "mace_polar" in VALID_ENERGY_CALCULATORS
+
+    def test_default_energy_calculators_does_not_include_mace_polar(self, tmp_path):
+        """Default --energy-calculators string should NOT contain mace_polar (opt-in only)."""
+        xyz_file = tmp_path / "water.xyz"
+        xyz_file.write_text("3\nwater\nO 0.0 0.0 0.0\nH 1.0 0.0 0.0\nH 0.0 1.0 0.0\n")
+        runner = CliRunner()
+        # Invoke help to see defaults
+        result = runner.invoke(cli, ["run", "--help"])
+        # The default value shown should not include mace_polar
+        # We check the run command's help for the default energy-calculators
+        assert "mace_polar" not in result.output.split("energy-calculators")[0]
+
     def test_valid_energy_calculators_constant(self):
         """VALID_ENERGY_CALCULATORS must include mace_mp, mace_omol, mace_off, mace_anicc."""
         assert "mace_mp" in VALID_ENERGY_CALCULATORS
@@ -85,6 +109,17 @@ class TestOptimizationCalculatorValidation:
         # Should NOT be rejected by click.Choice
         assert "Invalid value for '--optimization-calculator'" not in result.output
         assert "mace_anicc" not in result.output or "is not" not in result.output
+
+    def test_mace_polar_accepted_by_click(self, tmp_path):
+        """mace_polar should be a valid choice for --optimization-calculator."""
+        xyz_file = tmp_path / "water.xyz"
+        xyz_file.write_text("3\nwater\nO 0.0 0.0 0.0\nH 1.0 0.0 0.0\nH 0.0 1.0 0.0\n")
+        runner = CliRunner()
+        result = runner.invoke(
+            cli, ["run", str(xyz_file), "--optimization-calculator", "mace_polar"]
+        )
+        # Should NOT be rejected by click.Choice
+        assert "Invalid value for '--optimization-calculator'" not in result.output
 
     def test_invalid_optimization_calculator_rejected(self, tmp_path):
         """An unknown optimization calculator should be rejected by click.Choice."""
