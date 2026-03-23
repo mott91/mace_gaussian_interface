@@ -182,6 +182,20 @@ def _make_import_interceptor(mock_mace_anicc):
     return _import
 
 
+def _make_import_interceptor_polar(mock_mace_polar):
+    """Return a side_effect for builtins.__import__ that intercepts mace_polar."""
+    original_import = __builtins__.__import__ if hasattr(__builtins__, "__import__") else __import__
+
+    def _import(name, *args, **kwargs):
+        if name == "mace.calculators":
+            mock_module = MagicMock()
+            mock_module.mace_polar = mock_mace_polar
+            return mock_module
+        return original_import(name, *args, **kwargs)
+
+    return _import
+
+
 def _make_import_interceptor_mp(mock_mace_mp):
     """Return a side_effect for builtins.__import__ that intercepts mace_mp."""
     original_import = __builtins__.__import__ if hasattr(__builtins__, "__import__") else __import__
@@ -365,3 +379,77 @@ class TestElementGuardAtCallSites:
                         pass  # Other errors expected (no real Gaussian)
         finally:
             os.unlink(tmp_path)
+
+
+# ---------------------------------------------------------------------------
+# Tests for calculator("mace_polar")
+# ---------------------------------------------------------------------------
+
+
+class TestCalculatorMacePolar:
+    """Tests for the mace_polar branch in calculator()."""
+
+    def test_mace_polar_branch_calls_correct_api(self):
+        """calculator('mace_polar') calls mace_polar with correct API args."""
+        mock_calc = MagicMock()
+        mock_mace_polar = MagicMock(return_value=mock_calc)
+
+        with patch(
+            "builtins.__import__",
+            side_effect=_make_import_interceptor_polar(mock_mace_polar),
+        ):
+            from mace_gaussian.workflow import calculator
+
+            result = calculator("mace_polar")
+
+        mock_mace_polar.assert_called_once_with(
+            model="polar-1-l", device="cuda", default_dtype="float64"
+        )
+        assert result is mock_calc
+
+    def test_mace_polar_does_not_pass_dispersion(self):
+        """mace_polar is NOT called with dispersion kwarg (unlike mace_mp/mace_off/mace_omol)."""
+        mock_calc = MagicMock()
+        mock_mace_polar = MagicMock(return_value=mock_calc)
+
+        with patch(
+            "builtins.__import__",
+            side_effect=_make_import_interceptor_polar(mock_mace_polar),
+        ):
+            from mace_gaussian.workflow import calculator
+
+            calculator("mace_polar")
+
+        call_kwargs = mock_mace_polar.call_args.kwargs
+        assert "dispersion" not in call_kwargs
+
+    def test_mace_polar_returns_calculator_instance(self):
+        """calculator('mace_polar') returns the calculator object."""
+        mock_calc = MagicMock()
+        mock_mace_polar = MagicMock(return_value=mock_calc)
+
+        with patch(
+            "builtins.__import__",
+            side_effect=_make_import_interceptor_polar(mock_mace_polar),
+        ):
+            from mace_gaussian.workflow import calculator
+
+            result = calculator("mace_polar")
+
+        assert result is mock_calc
+
+    def test_mace_mp_still_works_after_polar(self):
+        """mace_mp branch is unaffected by the new mace_polar branch."""
+        mock_calc = MagicMock()
+        mock_mace_mp = MagicMock(return_value=mock_calc)
+
+        with patch(
+            "builtins.__import__",
+            side_effect=_make_import_interceptor_mp(mock_mace_mp),
+        ):
+            from mace_gaussian.workflow import calculator
+
+            calculator("mace_mp")
+
+        mock_mace_mp.assert_called_once()
+        assert mock_mace_mp.call_args.kwargs.get("model") == "large"

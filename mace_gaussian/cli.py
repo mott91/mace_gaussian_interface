@@ -34,7 +34,7 @@ except ImportError:
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-VALID_ENERGY_CALCULATORS = ["mace_mp", "mace_omol", "mace_off", "mace_anicc"]
+VALID_ENERGY_CALCULATORS = ["mace_mp", "mace_omol", "mace_off", "mace_anicc", "mace_polar"]
 VALID_DIPOLE_CALCULATORS = ["espaloma", "mace_ml"]
 
 
@@ -74,14 +74,15 @@ def cli():
 @click.option(
     "--optimization-calculator",
     default="mace_omol",
-    type=click.Choice(["mace_omol", "mace_off", "mace_mp", "mace_anicc"]),
+    type=click.Choice(["mace_omol", "mace_off", "mace_mp", "mace_anicc", "mace_polar"]),
     help="Calculator for geometry optimization (default: mace_omol)",
 )
 @click.option(
     "--energy-calculators",
     default="mace_mp,mace_omol,mace_anicc,mace_off",
     callback=_validate_energy_calculators,
-    help="Comma-separated energy calculators. Choices: mace_mp, mace_omol, mace_off, mace_anicc",
+    help="Comma-separated energy calculators. "
+    "Choices: mace_mp, mace_omol, mace_off, mace_anicc, mace_polar",
 )
 @click.option(
     "--dipole-calculators",

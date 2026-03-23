@@ -313,6 +313,12 @@ def calculator(nnp):
         calc = mace_anicc(device="cuda")
         return calc
 
+    if nnp == "mace_polar":
+        from mace.calculators import mace_polar
+
+        calc = mace_polar(model="polar-1-l", device="cuda", default_dtype="float64")
+        return calc
+
 
 # ============================================================================
 # STAGE FUNCTIONS
