@@ -102,4 +102,4 @@ Reliable, reproducible IR spectral predictions using ML potentials that can be v
 | ruff>=0.9.0 floor (not exact pin) in CI | Removes maintenance burden vs. exact pin | ✓ Good — aligned with dev dep declaration |
 
 ---
-*Last updated: 2026-03-23 after Phase 13.5 completion*
+*Last updated: 2026-03-23 after Phase 14 completion — batch runner & PubChem fetcher*
