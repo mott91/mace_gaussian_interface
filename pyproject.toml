@@ -33,6 +33,7 @@ dependencies = [
     "espaloma_charge>=0.0.8",
     "matplotlib>=3.5.0",
     "seaborn>=0.13.2",
+    "requests>=2.27.0",
 ]
 
 [dependency-groups]

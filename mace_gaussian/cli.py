@@ -228,6 +228,46 @@ def run(
 
 
 @cli.command()
+@click.argument("molecule_name")
+@click.option("--force", is_flag=True, help="Overwrite existing file")
+@click.option(
+    "--output-dir",
+    default="molecules",
+    type=click.Path(),
+    help="Output directory for XYZ file (default: molecules)",
+)
+def fetch(molecule_name, force, output_dir):
+    """Fetch 3D structure from PubChem by molecule name.
+
+    Downloads a 3D conformer from PubChem PUG REST API and saves it
+    as an XYZ file in the output directory.
+
+    Example:
+        mace-gaussian fetch aspirin
+        mace-gaussian fetch caffeine --force
+        mace-gaussian fetch water --output-dir structures/
+    """
+    from mace_gaussian.pubchem import fetch_3d_structure
+
+    try:
+        output_path = fetch_3d_structure(
+            molecule_name=molecule_name,
+            output_dir=Path(output_dir),
+            force=force,
+        )
+        click.echo(f"Saved: {output_path}")
+    except FileExistsError as e:
+        click.echo(f"Warning: {e}", err=True)
+        sys.exit(0)  # Skip is not an error
+    except ValueError as e:
+        click.echo(f"Error: {e}", err=True)
+        sys.exit(1)
+    except Exception as e:
+        click.echo(f"Error: Failed to fetch '{molecule_name}': {e}", err=True)
+        sys.exit(1)
+
+
+@cli.command()
 @click.argument("molecule", required=False)
 @click.option(
     "--output-dir",
