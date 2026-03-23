@@ -7,8 +7,7 @@ import requests
 from ase.io import read, write
 
 PUBCHEM_3D_URL = (
-    "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{name}/record/SDF"
-    "?record_type=3d"
+    "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{name}/record/SDF?record_type=3d"
 )
 
 
