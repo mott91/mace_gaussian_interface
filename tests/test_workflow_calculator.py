@@ -390,7 +390,7 @@ class TestCalculatorMacePolar:
     """Tests for the mace_polar branch in calculator()."""
 
     def test_mace_polar_branch_calls_correct_api(self):
-        """calculator('mace_polar') calls mace_polar(model='polar-1-l', device='cuda', default_dtype='float64')."""
+        """calculator('mace_polar') calls mace_polar with correct API args."""
         mock_calc = MagicMock()
         mock_mace_polar = MagicMock(return_value=mock_calc)
 
@@ -449,7 +449,7 @@ class TestCalculatorMacePolar:
         ):
             from mace_gaussian.workflow import calculator
 
-            result = calculator("mace_mp")
+            calculator("mace_mp")
 
         mock_mace_mp.assert_called_once()
         assert mock_mace_mp.call_args.kwargs.get("model") == "large"
