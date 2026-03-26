@@ -91,7 +91,7 @@ Plans:
 
 ### Phase 13.1: Calculator Acceleration & Polarizability Passthrough (INSERTED)
 
-**Goal**: MACEDipoleCalculator uses autograd (single model call) instead of 2×3N finite-difference passes for dipole derivatives; real polarizability is threaded through the pipeline and written to Gaussian output; dalpha_dr is available in the Python pipeline for future Raman analysis.
+**Goal**: MACEDipoleCalculator uses autograd (single model call) instead of 2x3N finite-difference passes for dipole derivatives; real polarizability is threaded through the pipeline and written to Gaussian output; dalpha_dr is available in the Python pipeline for future Raman analysis.
 **Depends on:** Phase 13
 **Requirements**: (implementation-driven, no formal requirement IDs)
 **Plans**: 2 plans
@@ -118,8 +118,12 @@ Plans:
   1. User runs `mace-gaussian batch molecules.txt --dft-on-cluster rune03` and DFT jobs are submitted to the SLURM cluster via SSH, polled until complete, and results retrieved without manual intervention.
   2. The SLURM job script includes `formchk` so `.fchk` files are produced on the cluster without requiring local conversion.
   3. A SLURM job failure for one molecule (walltime exceeded, Gaussian error) marks that molecule `dft_failed` in the manifest and does not halt the remaining batch.
-  4. After a completed batch run, `batch_report.html` exists and contains aggregated R² and RMSE per calculator combination across all molecules that completed successfully.
-**Plans**: TBD
+  4. After a completed batch run, `batch_report.html` exists and contains aggregated R^2 and RMSE per calculator combination across all molecules that completed successfully.
+**Plans**: 2 plans
+
+Plans:
+- [ ] 15-01-PLAN.md — SLURM module (slurm.py) + job template + batch.py integration + CLI --dft-on-cluster + tests
+- [ ] 15-02-PLAN.md — Batch report module (batch_report.py) + report CLI command + aggregation + 4 plot types + tests
 
 ### Phase 16: Benchmark Campaign Execution
 **Goal**: A systematic ~25-molecule benchmark is run through the full pipeline with all 7+ calculator combinations, producing aggregated results that answer the thesis question about energy vs. dipole model dominance.
@@ -168,6 +172,6 @@ Plans:
 | 13.4. Frequency Range Coverage Analysis | 2/2 | Complete   | 2026-03-16 | - |
 | 13.5. MACE-POLAR-1 Energy Calculator | v1.1 | 0/1 | Complete    | 2026-03-23 |
 | 14. Batch Runner & PubChem Fetcher | v1.1 | 1/2 | Complete    | 2026-03-23 |
-| 15. SLURM Integration & Batch Report | v1.1 | 0/TBD | Not started | - |
+| 15. SLURM Integration & Batch Report | v1.1 | 0/2 | Planning | - |
 | 16. Benchmark Campaign | v1.1 | 0/TBD | Not started | - |
 | 17. Docs Update | v1.1 | 0/TBD | Not started | - |
