@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: — Batch Benchmarking & Calculator Expansion
-status: completed
-stopped_at: Completed 13-01-PLAN.md (CLI calculator validation callbacks — Phase 13 fully done)
-last_updated: "2026-03-03T17:44:05.258Z"
-last_activity: 2026-03-03 — Plan 13-01 complete (CLI validation callbacks for mace_off/mace_anicc)
+status: verifying
+stopped_at: Completed 15-02-PLAN.md (batch accuracy report)
+last_updated: "2026-03-27T20:00:17.545Z"
+last_activity: 2026-03-27
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 3
-  completed_plans: 3
+  completed_plans: 4
   percent: 35
 ---
 
@@ -27,19 +27,21 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 
 Phase: 13 of 17 (Calculator Expansion & Acoh Bug Fix)
 Plan: 3 of 3 in current phase
-Status: Phase 13 complete — all 3 plans done
-Last activity: 2026-03-03 — Plan 13-01 complete (CLI validation callbacks for mace_off/mace_anicc)
+Status: Phase complete — ready for verification
+Last activity: 2026-03-27
 
 Progress: [███████░░░░░░░░░░░░░] 35% (12/17 phases complete; v1.1 not started)
 
 ## Performance Metrics
 
 **Velocity (v1.0):**
+
 - Total plans completed: 32
 - Average duration: ~3.9 min
 - Total execution time: ~2.1 hours
 
 **Recent Trend:**
+
 - Last plans were fast (2–7 min each) on well-scoped work
 - v1.1 plans expected similar cadence for Phase 13; Phase 15–16 may be longer (HPC/campaign work)
 
@@ -63,6 +65,7 @@ Recent decisions affecting v1.1 work:
 - [13-02]: Element guard placed OUTSIDE try/except in run_frequency_calculation so ValueError propagates instead of being silently caught
 - [13-01]: Use callback= not type=click.Choice for comma-separated options (click.Choice validates atomically, rejecting "mace_mp,mace_omol" as a whole string)
 - [13-01]: VALID_ENERGY_CALCULATORS and VALID_DIPOLE_CALCULATORS exported at module level for test assertions
+- [Phase 15]: CSS extracted to _build_css() helper for line-length compliance; leaderboard uses green/red row highlighting
 
 ### Pending Todos
 
@@ -76,6 +79,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-03T17:37:41Z
-Stopped at: Completed 13-01-PLAN.md (CLI calculator validation callbacks — Phase 13 fully done)
+Last session: 2026-03-27T20:00:17.541Z
+Stopped at: Completed 15-02-PLAN.md (batch accuracy report)
 Resume file: None
