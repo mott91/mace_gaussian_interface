@@ -445,6 +445,50 @@ def export(molecule, format, output, results_dir):
 
 
 @cli.command()
+@click.option(
+    "--results-dir",
+    default="comparison_results",
+    type=click.Path(exists=True),
+    help="Directory containing comparison results (default: comparison_results)",
+)
+@click.option(
+    "--output-dir",
+    default="batch_report",
+    type=click.Path(),
+    help="Output directory for report (default: batch_report)",
+)
+def report(results_dir, output_dir):
+    """Generate multi-molecule batch accuracy report.
+
+    Reads existing comparison results and produces a self-contained HTML
+    report with accuracy leaderboard, heatmaps, box plots, size-scaling
+    trends, and per-molecule spectrum overlays.
+
+    Can be run independently of the batch command -- works any time
+    comparison results exist.
+
+    Example:
+        mace-gaussian report
+        mace-gaussian report --results-dir my_results --output-dir my_report
+    """
+    from mace_gaussian.analysis.batch_report import generate_batch_report
+
+    try:
+        report_path = generate_batch_report(
+            results_dir=results_dir,
+            output_dir=output_dir,
+        )
+        click.echo(f"Report generated: {report_path}")
+    except ValueError as e:
+        click.echo(f"Error: {e}", err=True)
+        sys.exit(1)
+    except Exception as e:
+        click.echo(f"Error: Report generation failed: {e}", err=True)
+        logger.exception("Report generation failed")
+        sys.exit(1)
+
+
+@cli.command()
 def diagnose():
     """
     Run diagnostic checks for available calculators and dependencies.

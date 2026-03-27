@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: — Batch Benchmarking & Calculator Expansion
-status: in-progress
-stopped_at: Completed 15-01-PLAN.md (SLURM DFT offloading module)
-last_updated: "2026-03-27T19:49:39Z"
+status: verifying
+stopped_at: Completed 15-02-PLAN.md (batch accuracy report)
+last_updated: "2026-03-27T20:00:17.545Z"
 progress:
   total_phases: 10
   completed_phases: 7
   total_plans: 16
-  completed_plans: 15
+  completed_plans: 16
 ---
 
 # Project State
@@ -24,9 +24,9 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 ## Current Position
 
 Phase: 15 of 17 (SLURM Integration & Batch Report)
-Plan: 1 of 2 complete
-Status: Plan 15-01 complete (SLURM DFT offloading)
-Last activity: 2026-03-27 -- Plan 15-01 complete (SLURM module, batch integration, 17 tests)
+Plan: 2 of 2 complete
+Status: All plans complete — ready for verification
+Last activity: 2026-03-27 -- Plan 15-02 complete (batch accuracy report)
 
 ## Performance Metrics
 
@@ -86,6 +86,7 @@ Recent decisions affecting v1.1 work:
 - [15-01]: formchk in SLURM template (cluster has g16) with local fallback if cluster formchk fails
 - [15-01]: sacct polling uses 60s sleep increments for Ctrl-C interruptibility
 - [15-01]: SLURM imports lazy inside dft_on_cluster conditional to avoid loading when not needed
+- [Phase 15]: CSS extracted to _build_css() helper for line-length compliance; leaderboard uses green/red row highlighting
 
 ### Roadmap Evolution
 
@@ -107,5 +108,5 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-27T19:49:39Z
-Stopped at: Completed 15-01-PLAN.md (SLURM DFT offloading module)
+Last session: 2026-03-27T20:00:17.541Z
+Stopped at: Completed 15-02-PLAN.md (batch accuracy report)
