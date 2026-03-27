@@ -8,15 +8,15 @@
     "harmonic": [
       {
         "freq_cm": 98.1295,
-        "ir_intensity": 1.2005
+        "ir_intensity": 1.2013
       },
       {
         "freq_cm": 121.8986,
-        "ir_intensity": 0.3802
+        "ir_intensity": 0.3799
       },
       {
         "freq_cm": 135.6775,
-        "ir_intensity": 2.1323
+        "ir_intensity": 2.1313
       },
       {
         "freq_cm": 227.6121,
@@ -24,203 +24,203 @@
       },
       {
         "freq_cm": 272.8767,
-        "ir_intensity": 0.2837
+        "ir_intensity": 0.2832
       },
       {
         "freq_cm": 313.0014,
-        "ir_intensity": 2.9933
+        "ir_intensity": 2.9986
       },
       {
         "freq_cm": 357.822,
-        "ir_intensity": 0.0679
+        "ir_intensity": 0.0677
       },
       {
         "freq_cm": 419.7906,
-        "ir_intensity": 2.9982
+        "ir_intensity": 2.9978
       },
       {
         "freq_cm": 425.5794,
-        "ir_intensity": 4.5585
+        "ir_intensity": 4.5603
       },
       {
         "freq_cm": 510.6628,
-        "ir_intensity": 4.295
+        "ir_intensity": 4.2958
       },
       {
         "freq_cm": 531.0456,
-        "ir_intensity": 8.1732
+        "ir_intensity": 8.1662
       },
       {
         "freq_cm": 559.4482,
-        "ir_intensity": 2.4635
+        "ir_intensity": 2.4652
       },
       {
         "freq_cm": 583.9285,
-        "ir_intensity": 18.2003
+        "ir_intensity": 18.195
       },
       {
         "freq_cm": 631.0411,
-        "ir_intensity": 58.781
+        "ir_intensity": 58.7776
       },
       {
         "freq_cm": 642.9723,
-        "ir_intensity": 35.5023
+        "ir_intensity": 35.5161
       },
       {
         "freq_cm": 671.6631,
-        "ir_intensity": 9.0314
+        "ir_intensity": 9.0309
       },
       {
         "freq_cm": 718.6501,
-        "ir_intensity": 64.7087
+        "ir_intensity": 64.7123
       },
       {
         "freq_cm": 748.8934,
-        "ir_intensity": 63.3811
+        "ir_intensity": 63.3996
       },
       {
         "freq_cm": 779.9918,
-        "ir_intensity": 26.3881
+        "ir_intensity": 26.3811
       },
       {
         "freq_cm": 805.817,
-        "ir_intensity": 0.1681
+        "ir_intensity": 0.1679
       },
       {
         "freq_cm": 848.4139,
-        "ir_intensity": 22.4328
+        "ir_intensity": 22.4224
       },
       {
         "freq_cm": 896.7816,
-        "ir_intensity": 16.0826
+        "ir_intensity": 16.0979
       },
       {
         "freq_cm": 933.7936,
-        "ir_intensity": 43.0998
+        "ir_intensity": 43.0925
       },
       {
         "freq_cm": 984.3469,
-        "ir_intensity": 2.2569
+        "ir_intensity": 2.2565
       },
       {
         "freq_cm": 1018.8189,
-        "ir_intensity": 0.1529
+        "ir_intensity": 0.1518
       },
       {
         "freq_cm": 1030.8397,
-        "ir_intensity": 48.1303
+        "ir_intensity": 48.1409
       },
       {
         "freq_cm": 1069.8425,
-        "ir_intensity": 14.1809
+        "ir_intensity": 14.1947
       },
       {
         "freq_cm": 1071.2709,
-        "ir_intensity": 1.2767
+        "ir_intensity": 1.2794
       },
       {
         "freq_cm": 1094.5004,
-        "ir_intensity": 215.6072
+        "ir_intensity": 215.6442
       },
       {
         "freq_cm": 1159.7271,
-        "ir_intensity": 4.7875
+        "ir_intensity": 4.7639
       },
       {
         "freq_cm": 1179.7675,
-        "ir_intensity": 30.3435
+        "ir_intensity": 30.3665
       },
       {
         "freq_cm": 1223.5709,
-        "ir_intensity": 322.8113
+        "ir_intensity": 322.8713
       },
       {
         "freq_cm": 1244.859,
-        "ir_intensity": 500.4088
+        "ir_intensity": 500.5441
       },
       {
         "freq_cm": 1256.6806,
-        "ir_intensity": 13.2001
+        "ir_intensity": 13.2439
       },
       {
         "freq_cm": 1303.9235,
-        "ir_intensity": 1.1611
+        "ir_intensity": 1.1583
       },
       {
         "freq_cm": 1358.4126,
-        "ir_intensity": 78.3329
+        "ir_intensity": 78.4717
       },
       {
         "freq_cm": 1392.3512,
-        "ir_intensity": 102.672
+        "ir_intensity": 102.6204
       },
       {
         "freq_cm": 1406.5215,
-        "ir_intensity": 61.9127
+        "ir_intensity": 61.9556
       },
       {
         "freq_cm": 1485.1364,
-        "ir_intensity": 8.3756
+        "ir_intensity": 8.3713
       },
       {
         "freq_cm": 1486.4532,
-        "ir_intensity": 16.5097
+        "ir_intensity": 16.5065
       },
       {
         "freq_cm": 1493.5003,
-        "ir_intensity": 8.351
+        "ir_intensity": 8.3838
       },
       {
         "freq_cm": 1535.7741,
-        "ir_intensity": 65.577
+        "ir_intensity": 65.5649
       },
       {
         "freq_cm": 1644.3447,
-        "ir_intensity": 26.0825
+        "ir_intensity": 26.0672
       },
       {
         "freq_cm": 1675.1451,
-        "ir_intensity": 66.2237
+        "ir_intensity": 66.26
       },
       {
         "freq_cm": 1809.8497,
-        "ir_intensity": 357.9053
+        "ir_intensity": 358.0394
       },
       {
         "freq_cm": 1847.4764,
-        "ir_intensity": 292.6971
+        "ir_intensity": 292.8076
       },
       {
         "freq_cm": 3063.0834,
-        "ir_intensity": 27.2113
+        "ir_intensity": 27.3326
       },
       {
         "freq_cm": 3136.6927,
-        "ir_intensity": 2.6742
+        "ir_intensity": 2.6771
       },
       {
         "freq_cm": 3176.9432,
-        "ir_intensity": 1.1347
+        "ir_intensity": 1.1408
       },
       {
         "freq_cm": 3183.4288,
-        "ir_intensity": 3.2319
+        "ir_intensity": 3.2154
       },
       {
         "freq_cm": 3198.8622,
-        "ir_intensity": 0.3766
+        "ir_intensity": 0.3783
       },
       {
         "freq_cm": 3208.9448,
-        "ir_intensity": 9.943
+        "ir_intensity": 9.8764
       },
       {
         "freq_cm": 3225.6837,
-        "ir_intensity": 8.745
+        "ir_intensity": 8.675
       },
       {
         "freq_cm": 3740.8737,
-        "ir_intensity": 80.0833
+        "ir_intensity": 80.1508
       }
     ],
     "anharmonic": [
@@ -577,13 +577,13 @@
     "z": 0.5850083122968001,
     "magnitude": 0.8402661922593687
   },
-  "runtime_s": 1348.6505146026611,
+  "runtime_s": 1090.9052453041077,
   "files": {
     "gaussian_log": "gaussian_freq.log",
     "gaussian_input": "gaussian_freq.gjf"
   },
   "version_info": {
-    "tool_version": "0.1.0",
+    "tool_version": "0.2.0",
     "python_version": "3.10.19 | packaged by conda-forge | (main, Oct 13 2025, 14:08:27) [GCC 14.3.0]",
     "platform": "Linux-5.10.0-37-amd64-x86_64-with-glibc2.31",
     "torch_version": "2.4.0+cu121",

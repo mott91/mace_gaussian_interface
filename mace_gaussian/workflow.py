@@ -88,6 +88,44 @@ def calculate_energy_and_forces(atoms, calculator) -> tuple[float, np.ndarray]:
         raise
 
 
+def _finite_difference_hessian(atoms, calculator, natoms: int, step: float = 1e-3) -> np.ndarray:
+    """Compute Hessian via central finite differences of forces.
+
+    Used as fallback when calculator.get_hessian() is not available
+    (e.g. PolarMACE models).
+    """
+    n3 = 3 * natoms
+    hessian = np.zeros((n3, n3))
+    original_positions = atoms.get_positions().copy()
+
+    for i in range(n3):
+        atom_idx, coord_idx = divmod(i, 3)
+
+        # +step
+        atoms.set_positions(original_positions)
+        pos_plus = original_positions.copy()
+        pos_plus[atom_idx, coord_idx] += step
+        atoms.set_positions(pos_plus)
+        atoms.calc = calculator
+        forces_plus = atoms.get_forces().flatten()
+
+        # -step
+        pos_minus = original_positions.copy()
+        pos_minus[atom_idx, coord_idx] -= step
+        atoms.set_positions(pos_minus)
+        atoms.calc = calculator
+        forces_minus = atoms.get_forces().flatten()
+
+        hessian[i, :] = -(forces_plus - forces_minus) / (2 * step)
+
+    # Restore original positions
+    atoms.set_positions(original_positions)
+
+    # Symmetrize
+    hessian = 0.5 * (hessian + hessian.T)
+    return hessian
+
+
 def calculate_hessian(atoms, calculator, natoms: int) -> np.ndarray | None:
     """Calculate Hessian matrix (second derivatives)."""
     try:
@@ -98,6 +136,21 @@ def calculate_hessian(atoms, calculator, natoms: int) -> np.ndarray | None:
         hessian = hessian.reshape(3 * natoms, 3 * natoms)
 
         return hessian
+    except NotImplementedError:
+        logger.warning(
+            "get_hessian() not available for this model, falling back to finite differences"
+        )
+        try:
+            # Finite differences return eV/Å² — convert to Hartree/Bohr²
+            hessian = _finite_difference_hessian(atoms, calculator, natoms)
+            hessian = hessian * (BOHR_TO_ANGSTROM**2) / HARTREE_TO_EV
+            return hessian
+        except Exception as e:
+            logger.error(f"Finite-difference Hessian also failed: {e}")
+            import traceback
+
+            logger.error(f"Full traceback:\n{traceback.format_exc()}")
+            return None
     except Exception as e:
         logger.error(f"Hessian calculation failed: {e}")
         import traceback
@@ -685,7 +738,7 @@ def run_pipeline(
 
     # Set defaults
     if energy_calculators is None:
-        energy_calculators = ["mace_mp", "mace_omol"]
+        energy_calculators = ["mace_mp", "mace_omol", "mace_anicc", "mace_off", "mace_polar"]
     if dipole_calculators is None:
         dipole_calculators = ["espaloma", "mace_ml"]
 

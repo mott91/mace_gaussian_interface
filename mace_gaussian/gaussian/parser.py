@@ -135,7 +135,9 @@ class GaussianLogParser:
 
             # Check if we're leaving the fundamental section
             if in_fundamental_section and ("Overtones" in line or "Combination Bands" in line):
-                break
+                in_fundamental_section = False
+                in_format_b = False
+                continue
 
             if in_fundamental_section:
                 if in_format_b:
@@ -176,14 +178,18 @@ class GaussianLogParser:
                         freq_anharm = float(match.group(3))
                         # Group 4 is optional harmonic intensity
                         ir_anharm = float(match.group(5))
-                        frequencies.append(
-                            {
-                                "mode": mode,
-                                "freq_cm": freq_anharm,
-                                "ir_intensity": ir_anharm,
-                                "freq_harmonic": freq_harm,
-                            }
-                        )
+                        entry = {
+                            "mode": mode,
+                            "freq_cm": freq_anharm,
+                            "ir_intensity": ir_anharm,
+                            "freq_harmonic": freq_harm,
+                        }
+                        # Update existing entry from Format B, or append new
+                        existing = next((f for f in frequencies if f["mode"] == mode), None)
+                        if existing:
+                            existing.update(entry)
+                        else:
+                            frequencies.append(entry)
 
         if strict and not frequencies:
             raise GaussianParseError(

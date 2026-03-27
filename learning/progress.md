@@ -83,6 +83,40 @@ _Nothing yet — this gets filled in as we go._
 
 ---
 
+### 2026-03-26 — Session 4: Research Landscape Brainstorming
+
+**Covered:**
+- Multi-task loss balancing (weighted sum, uncertainty weighting, GradNorm, Pareto, gradient surgery)
+- Multi-head MACE architecture (shared backbone + multiple output heads)
+- Fine-tuning ML potentials (learning rate, freezing layers, catastrophic forgetting)
+- Foundation model definition (broad data, transferable, fine-tunable, scales)
+- Normal mode displaced geometries (why equilibrium-only training data is insufficient)
+- Why bending modes are harder than stretching (two-body vs three-body interactions)
+- Degenerate modes: subspace overlap vs individual dot products, methane as case study
+- Vacuum vs experiment: solvent shifts by functional group (O-H huge, C=O moderate, C-H negligible)
+- MACE4IR paper details, QCML dataset, MD-DACF approach
+- VPT2 alternatives: PyVPT2 (best), iGVPT2, PyVCI, MULTIMODE
+- NEB and QST transition state methods
+- Active learning for spectroscopy (PALIRS, committee models)
+- PhD directions: inverse spectroscopy, differentiable spectroscopy, anharmonic transfer learning
+- Research groups in central Europe (Vienna, ETH, EPFL, Berlin, Göttingen)
+- UQ and ensemble methods
+
+**User demonstrated understanding of:**
+- Normal mode displacement (explained back correctly)
+- Degenerate mode matching issues (caught centroid problem with eigenvectors independently)
+- Practical tradeoffs of wrapper vs unified model approach
+
+**Full notes:** `learning/topics/2026-03-26-brainstorming-session-research-landscape.md`
+
+**Open gaps from this session:**
+- VPT2 mechanics still not fully covered (from session 1)
+- Overtone argument never closed (from session 2)
+- User should explore PyVPT2 hands-on
+- Bending vs stretching: user gave partial answer, corrected — revisit
+
+---
+
 ## What's Ready for a Quiz
 
 _Topics will move here once we've covered enough ground._

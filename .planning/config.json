@@ -1,6 +1,5 @@
 {
   "mode": "yolo",
-  "depth": "comprehensive",
   "model_profile": "quality",
   "commit_docs": true,
   "search_gitignored": false,
@@ -18,5 +17,6 @@
   "brave_search": false,
   "git": {
     "branching_strategy": "none"
-  }
+  },
+  "granularity": "fine"
 }

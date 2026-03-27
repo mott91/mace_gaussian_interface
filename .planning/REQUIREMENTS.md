@@ -42,10 +42,10 @@
 
 ### Batch Workflow
 
-- [ ] **BATCH-01**: User can run `mace-gaussian fetch <molecule-name>` to download a 3D XYZ structure from PubChem
-- [ ] **BATCH-02**: User can run `mace-gaussian batch molecules.txt` to process multiple molecules sequentially through the full pipeline
-- [ ] **BATCH-03**: Batch run produces a per-molecule status manifest (`batch_manifest.json`) that survives interruption — restarting skips already-complete molecules
-- [ ] **BATCH-04**: User can run `mace-gaussian batch molecules.txt --skip-dft-baseline` to run ML calculations only
+- [x] **BATCH-01**: User can run `mace-gaussian fetch <molecule-name>` to download a 3D XYZ structure from PubChem
+- [x] **BATCH-02**: User can run `mace-gaussian batch molecules.txt` to process multiple molecules sequentially through the full pipeline
+- [x] **BATCH-03**: Batch run produces a per-molecule status manifest (`batch_manifest.json`) that survives interruption — restarting skips already-complete molecules
+- [x] **BATCH-04**: User can run `mace-gaussian batch molecules.txt --skip-dft-baseline` to run ML calculations only
 - [ ] **BATCH-05**: Batch run produces a multi-molecule HTML report with aggregated R² and RMSE per calculator combination across all molecules
 
 ### HPC / SLURM
@@ -116,10 +116,10 @@
 | COV-03 | Phase 13.4 | Complete |
 | COV-04 | Phase 13.4 | Complete |
 | COV-05 | Phase 13.4 | Complete |
-| BATCH-01 | Phase 14 | Pending |
-| BATCH-02 | Phase 14 | Pending |
-| BATCH-03 | Phase 14 | Pending |
-| BATCH-04 | Phase 14 | Pending |
+| BATCH-01 | Phase 14 | Complete |
+| BATCH-02 | Phase 14 | Complete |
+| BATCH-03 | Phase 14 | Complete |
+| BATCH-04 | Phase 14 | Complete |
 | BATCH-05 | Phase 15 | Pending |
 | HPC-01 | Phase 15 | Complete |
 | HPC-02 | Phase 15 | Complete |

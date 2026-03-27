@@ -195,13 +195,17 @@ def run_batch(
         try:
             # Stage 1: Geometry optimization (per-molecule, run once)
             atoms = read(str(xyz_path))
+            atoms.info["charge"] = 0.0
+            atoms.info["spin"] = 1.0
             opt_geom_path = results_mgr.get_optimized_geometry_path(molecule_name)
 
             if opt_geom_path.exists() and mol_manifest.get("geometry_opt") == STATUS_COMPLETE:
                 optimized_atoms = read(str(opt_geom_path))
             else:
-                from .workflow import run_geometry_optimization
+                from .workflow import calculator, run_geometry_optimization
 
+                calc = calculator(optimization_calculator)
+                atoms.calc = calc
                 optimized_atoms = run_geometry_optimization(
                     atoms,
                     molecule_name,
@@ -274,6 +278,22 @@ def run_batch(
                         summary["failed"] += 1
                         mol_failed = True
                     save_manifest(manifest, manifest_path)
+
+            # Stage 4: Harmonic analysis (if any combos succeeded)
+            complete_count = sum(
+                1 for c in mol_manifest["combinations"].values() if c.get("status") == STATUS_COMPLETE
+            )
+            if complete_count > 0:
+                try:
+                    from .analysis import analyze_molecule_harmonic
+
+                    click.echo(f"  Running harmonic analysis for {molecule_name}...")
+                    analyze_molecule_harmonic(molecule_name, base_results_dir=output_dir)
+                    mol_manifest["analysis_harmonic"] = STATUS_COMPLETE
+                except Exception as e:
+                    click.echo(f"  Warning: Harmonic analysis failed: {e}", err=True)
+                    mol_manifest["analysis_harmonic"] = STATUS_FAILED
+                save_manifest(manifest, manifest_path)
 
             mol_runtime = time.time() - mol_start
             status_str = "done" if not mol_failed else "done (with failures)"

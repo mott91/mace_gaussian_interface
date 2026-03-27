@@ -79,7 +79,7 @@ def cli():
 )
 @click.option(
     "--energy-calculators",
-    default="mace_mp,mace_omol,mace_anicc,mace_off",
+    default="mace_mp,mace_omol,mace_anicc,mace_off,mace_polar",
     callback=_validate_energy_calculators,
     help="Comma-separated energy calculators. "
     "Choices: mace_mp, mace_omol, mace_off, mace_anicc, mace_polar",
@@ -228,7 +228,7 @@ def run(
 
 
 @cli.command()
-@click.argument("molecule_name")
+@click.argument("molecule_names", nargs=-1, required=True)
 @click.option("--force", is_flag=True, help="Overwrite existing file")
 @click.option(
     "--output-dir",
@@ -236,34 +236,37 @@ def run(
     type=click.Path(),
     help="Output directory for XYZ file (default: molecules)",
 )
-def fetch(molecule_name, force, output_dir):
-    """Fetch 3D structure from PubChem by molecule name.
+def fetch(molecule_names, force, output_dir):
+    """Fetch 3D structure(s) from PubChem by molecule name.
 
-    Downloads a 3D conformer from PubChem PUG REST API and saves it
-    as an XYZ file in the output directory.
+    Downloads 3D conformers from PubChem PUG REST API and saves them
+    as XYZ files in the output directory.
 
     Example:
         mace-gaussian fetch aspirin
+        mace-gaussian fetch ethane propane butane
         mace-gaussian fetch caffeine --force
-        mace-gaussian fetch water --output-dir structures/
     """
     from mace_gaussian.pubchem import fetch_3d_structure
 
-    try:
-        output_path = fetch_3d_structure(
-            molecule_name=molecule_name,
-            output_dir=Path(output_dir),
-            force=force,
-        )
-        click.echo(f"Saved: {output_path}")
-    except FileExistsError as e:
-        click.echo(f"Warning: {e}", err=True)
-        sys.exit(0)  # Skip is not an error
-    except ValueError as e:
-        click.echo(f"Error: {e}", err=True)
-        sys.exit(1)
-    except Exception as e:
-        click.echo(f"Error: Failed to fetch '{molecule_name}': {e}", err=True)
+    failed = 0
+    for name in molecule_names:
+        try:
+            output_path = fetch_3d_structure(
+                molecule_name=name,
+                output_dir=Path(output_dir),
+                force=force,
+            )
+            click.echo(f"Saved: {output_path}")
+        except FileExistsError as e:
+            click.echo(f"Warning: {e}", err=True)
+        except ValueError as e:
+            click.echo(f"Error: {e}", err=True)
+            failed += 1
+        except Exception as e:
+            click.echo(f"Error: Failed to fetch '{name}': {e}", err=True)
+            failed += 1
+    if failed:
         sys.exit(1)
 
 
@@ -483,14 +486,14 @@ def diagnose():
 @click.option(
     "--optimization-calculator",
     default="mace_omol",
-    type=click.Choice(["mace_omol", "mace_off", "mace_mp", "mace_anicc"]),
+    type=click.Choice(["mace_omol", "mace_off", "mace_mp", "mace_anicc", "mace_polar"]),
     help="Calculator for geometry optimization (default: mace_omol)",
 )
 @click.option(
     "--energy-calculators",
-    default="mace_mp,mace_omol,mace_anicc,mace_off",
+    default="mace_mp,mace_omol,mace_anicc,mace_off,mace_polar",
     callback=_validate_energy_calculators,
-    help="Comma-separated energy calculators. Choices: mace_mp, mace_omol, mace_off, mace_anicc",
+    help="Comma-separated energy calculators. Choices: mace_mp, mace_omol, mace_off, mace_anicc, mace_polar",
 )
 @click.option(
     "--dipole-calculators",
