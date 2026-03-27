@@ -281,7 +281,9 @@ def run_batch(
 
             # Stage 4: Harmonic analysis (if any combos succeeded)
             complete_count = sum(
-                1 for c in mol_manifest["combinations"].values() if c.get("status") == STATUS_COMPLETE
+                1
+                for c in mol_manifest["combinations"].values()
+                if c.get("status") == STATUS_COMPLETE
             )
             if complete_count > 0:
                 try:
