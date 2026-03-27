@@ -39,10 +39,10 @@ Reliable, reproducible IR spectral predictions using ML potentials that can be v
 - [ ] Calculator expansion: mace_polar available as optimization calculator choice
 - [ ] Calculator expansion: xTB registered as energy calculator option
 - [ ] Calculator expansion: xTB dipole unit bug verified and fixed; xTB dipole usable in production
-- [ ] Batch runner: `mace-gaussian batch molecules.txt` runs pipeline over multiple molecules with per-molecule failure isolation and restart-safe manifest
-- [ ] PubChem fetcher: `mace-gaussian fetch <name>` downloads 3D structure as XYZ
-- [ ] HPC/SLURM: DFT baseline can be submitted to cluster via `--dft-on-cluster`, polled, and results retrieved automatically
-- [ ] Batch report: multi-molecule HTML report with aggregated R², RMSE per calculator combination
+- ✓ Batch runner: `mace-gaussian batch molecules.txt` runs pipeline over multiple molecules with per-molecule failure isolation and restart-safe manifest — v1.1 Phase 14
+- ✓ PubChem fetcher: `mace-gaussian fetch <name>` downloads 3D structure as XYZ — v1.1 Phase 14
+- ✓ HPC/SLURM: DFT baseline can be submitted to cluster via `--dft-on-cluster`, polled, and results retrieved automatically — v1.1 Phase 15
+- ✓ Batch report: multi-molecule HTML report with aggregated R², RMSE per calculator combination — v1.1 Phase 15
 - [ ] Benchmark campaign: systematic results for ~25 molecules (size-scaling + functional group series)
 - [ ] Bug fix: acetic acid (acoh) frequency parser corrected and xfail test promoted to passing
 - [ ] Docs update: ARCHITECTURE.md and DEVELOPMENT.md reflect current mace_gaussian/ package layout
@@ -102,4 +102,4 @@ Reliable, reproducible IR spectral predictions using ML potentials that can be v
 | ruff>=0.9.0 floor (not exact pin) in CI | Removes maintenance burden vs. exact pin | ✓ Good — aligned with dev dep declaration |
 
 ---
-*Last updated: 2026-03-23 after Phase 14 completion — batch runner & PubChem fetcher*
+*Last updated: 2026-03-27 after Phase 15 completion — SLURM integration & batch report*
