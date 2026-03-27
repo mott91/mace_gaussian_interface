@@ -511,6 +511,18 @@ def diagnose():
     default=False,
     help="Preserve scratch directory on failure for debugging (also: MACE_KEEP_SCRATCH=1)",
 )
+@click.option(
+    "--dft-on-cluster",
+    default=None,
+    type=str,
+    help="Submit DFT jobs to SLURM cluster via SSH. Value: user@hostname (e.g., user@rune03)",
+)
+@click.option(
+    "--slurm-template",
+    default=None,
+    type=click.Path(exists=True),
+    help="Path to SLURM job template (default: templates/slurm_dft.sh)",
+)
 def batch(
     batch_file,
     optimization_calculator,
@@ -519,6 +531,8 @@ def batch(
     skip_dft_baseline,
     output_dir,
     keep_scratch,
+    dft_on_cluster,
+    slurm_template,
 ):
     """Run pipeline for multiple molecules listed in BATCH_FILE.
 
@@ -556,6 +570,8 @@ def batch(
             skip_dft_baseline=skip_dft_baseline,
             output_dir=output_dir,
             keep_scratch=keep_scratch,
+            dft_on_cluster=dft_on_cluster,
+            slurm_template=slurm_template,
         )
 
         if summary["failed"] > 0:

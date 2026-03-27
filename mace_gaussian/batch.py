@@ -121,6 +121,8 @@ def run_batch(
     skip_dft_baseline: bool,
     output_dir: str = "comparison_results",
     keep_scratch: bool = False,
+    dft_on_cluster: str | None = None,
+    slurm_template: str | None = None,
 ) -> dict:
     """Run the full pipeline for multiple molecules with manifest-based restart.
 
@@ -144,6 +146,13 @@ def run_batch(
         Output directory for results
     keep_scratch : bool
         If True, preserve scratch directories
+    dft_on_cluster : str or None
+        SSH target for SLURM DFT offloading (e.g. ``user@hostname``).
+        When set, DFT baselines are submitted as SLURM jobs instead of
+        running locally.
+    slurm_template : str or None
+        Path to custom SLURM job template. Defaults to
+        ``templates/slurm_dft.sh`` relative to the package root.
 
     Returns
     -------
@@ -204,15 +213,19 @@ def run_batch(
 
             # Stage 2: DFT baselines (per-molecule, run once)
             if not skip_dft_baseline and mol_manifest.get("dft_baseline") != STATUS_COMPLETE:
-                from .workflow import run_dft_baselines
+                if dft_on_cluster:
+                    # SLURM DFT: handled after all molecules' geometry opt
+                    pass
+                else:
+                    from .workflow import run_dft_baselines
 
-                run_dft_baselines(
-                    optimized_atoms,
-                    molecule_name,
-                    results_mgr,
-                )
-                mol_manifest["dft_baseline"] = STATUS_COMPLETE
-                save_manifest(manifest, manifest_path)
+                    run_dft_baselines(
+                        optimized_atoms,
+                        molecule_name,
+                        results_mgr,
+                    )
+                    mol_manifest["dft_baseline"] = STATUS_COMPLETE
+                    save_manifest(manifest, manifest_path)
 
             # Stage 3: ML combinations (per-calculator granularity)
             from .workflow import run_frequency_calculation
@@ -283,6 +296,90 @@ def run_batch(
                         }
                         summary["failed"] += 1
             save_manifest(manifest, manifest_path)
+
+    # SLURM DFT offload: submit all, poll, retrieve (per D-02, D-07)
+    if dft_on_cluster and not skip_dft_baseline:
+        from .gaussian.io import ase_to_gjf
+        from .slurm import TERMINAL_STATES as _SLURM_TERMINAL
+        from .slurm import poll_jobs, retrieve_results, submit_dft_jobs
+
+        # Collect molecules needing DFT
+        need_dft = []
+        for mol_name, mol_data in manifest["molecules"].items():
+            if mol_data.get("dft_baseline") not in (STATUS_COMPLETE, "dft_failed"):
+                slurm_info = mol_data.get("slurm", {})
+                if slurm_info.get("status") not in _SLURM_TERMINAL:
+                    need_dft.append(mol_name)
+
+        if need_dft:
+            # Resolve template path
+            template = (
+                Path(slurm_template)
+                if slurm_template
+                else Path(__file__).parent.parent / "templates" / "slurm_dft.sh"
+            )
+
+            # Generate .gjf files for molecules needing DFT
+            molecules_for_slurm = []
+            for mol_name in need_dft:
+                mol_data = manifest["molecules"][mol_name]
+                opt_geom_path = results_mgr.get_optimized_geometry_path(mol_name)
+                if opt_geom_path.exists():
+                    atoms = read(str(opt_geom_path))
+                    gjf_dir = Path(output_dir) / mol_name / "b3lyp_6-31Gdp"
+                    gjf_dir.mkdir(parents=True, exist_ok=True)
+                    gjf_path = gjf_dir / f"{mol_name}_freq_anharm.gjf"
+                    ase_to_gjf(atoms, str(gjf_path), molecule_name=mol_name)
+                    molecules_for_slurm.append(
+                        {"name": mol_name, "gjf_path": str(gjf_path)}
+                    )
+
+            if molecules_for_slurm:
+                click.echo(
+                    f"\nSubmitting {len(molecules_for_slurm)} DFT job(s) "
+                    f"to {dft_on_cluster}..."
+                )
+                job_ids = submit_dft_jobs(
+                    molecules_for_slurm, dft_on_cluster, template, output_dir
+                )
+
+                # Record job IDs in manifest
+                for mol_name, job_id in job_ids.items():
+                    manifest["molecules"][mol_name]["slurm"] = {
+                        "job_id": job_id,
+                        "host": dft_on_cluster,
+                        "remote_dir": f"~/mace_gaussian_dft/{mol_name}",
+                        "status": "SUBMITTED",
+                    }
+                save_manifest(manifest, manifest_path)
+
+                # Poll until all complete
+                click.echo("Polling SLURM jobs (hourly updates)...")
+                final_states = poll_jobs(dft_on_cluster, job_ids)
+
+                # Update manifest with final states
+                completed_mols = []
+                for mol_name, state in final_states.items():
+                    manifest["molecules"][mol_name]["slurm"]["status"] = state
+                    if state == "COMPLETED":
+                        completed_mols.append(mol_name)
+                    else:
+                        # Per D-17: mark dft_failed, continue
+                        manifest["molecules"][mol_name]["dft_baseline"] = "dft_failed"
+                        click.echo(
+                            f"  SLURM job for {mol_name} ended with state: {state}"
+                        )
+                save_manifest(manifest, manifest_path)
+
+                # Retrieve results for completed molecules
+                if completed_mols:
+                    click.echo(
+                        f"Retrieving results for {len(completed_mols)} molecule(s)..."
+                    )
+                    retrieve_results(dft_on_cluster, completed_mols, output_dir)
+                    for mol_name in completed_mols:
+                        manifest["molecules"][mol_name]["dft_baseline"] = STATUS_COMPLETE
+                    save_manifest(manifest, manifest_path)
 
     # Print summary table
     click.echo("\n" + "=" * 60)
