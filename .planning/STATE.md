@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: — Batch Benchmarking & Calculator Expansion
-status: Ready to plan
-stopped_at: Phase 15 context gathered
-last_updated: "2026-03-26T23:22:22.213Z"
+status: in-progress
+stopped_at: Completed 15-01-PLAN.md (SLURM DFT offloading module)
+last_updated: "2026-03-27T19:49:39Z"
 progress:
   total_phases: 10
   completed_phases: 7
-  total_plans: 14
-  completed_plans: 14
+  total_plans: 16
+  completed_plans: 15
 ---
 
 # Project State
@@ -19,12 +19,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** Reliable, reproducible IR spectral predictions using ML potentials that can be validated against DFT reference data.
-**Current focus:** Phase 14 — batch-runner-pubchem-fetcher
+**Current focus:** Phase 15 — SLURM Integration & Batch Report
 
 ## Current Position
 
-Phase: 15
-Plan: Not started
+Phase: 15 of 17 (SLURM Integration & Batch Report)
+Plan: 1 of 2 complete
+Status: Plan 15-01 complete (SLURM DFT offloading)
+Last activity: 2026-03-27 -- Plan 15-01 complete (SLURM module, batch integration, 17 tests)
 
 ## Performance Metrics
 
@@ -81,6 +83,9 @@ Recent decisions affecting v1.1 work:
 - [Phase 14]: FileExistsError exits 0 (skip), ValueError exits 1 (not found) per D-03/D-04
 - [Phase 14]: Batch calls three stage functions directly (not run_pipeline) for per-calculator restart granularity
 - [Phase 14]: Atomic manifest write via tempfile.mkstemp + os.replace for crash-safe JSON
+- [15-01]: formchk in SLURM template (cluster has g16) with local fallback if cluster formchk fails
+- [15-01]: sacct polling uses 60s sleep increments for Ctrl-C interruptibility
+- [15-01]: SLURM imports lazy inside dft_on_cluster conditional to avoid loading when not needed
 
 ### Roadmap Evolution
 
@@ -102,5 +107,5 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-26T23:22:22.191Z
-Stopped at: Phase 15 context gathered
+Last session: 2026-03-27T19:49:39Z
+Stopped at: Completed 15-01-PLAN.md (SLURM DFT offloading module)

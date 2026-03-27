@@ -122,7 +122,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 15-01-PLAN.md — SLURM module (slurm.py) + job template + batch.py integration + CLI --dft-on-cluster + tests
+- [x] 15-01-PLAN.md — SLURM module (slurm.py) + job template + batch.py integration + CLI --dft-on-cluster + tests
 - [ ] 15-02-PLAN.md — Batch report module (batch_report.py) + report CLI command + aggregation + 4 plot types + tests
 
 ### Phase 16: Benchmark Campaign Execution
@@ -172,6 +172,6 @@ Plans:
 | 13.4. Frequency Range Coverage Analysis | 2/2 | Complete   | 2026-03-16 | - |
 | 13.5. MACE-POLAR-1 Energy Calculator | v1.1 | 0/1 | Complete    | 2026-03-23 |
 | 14. Batch Runner & PubChem Fetcher | v1.1 | 1/2 | Complete    | 2026-03-23 |
-| 15. SLURM Integration & Batch Report | v1.1 | 0/2 | Planning | - |
+| 15. SLURM Integration & Batch Report | v1.1 | 1/2 | In Progress|  |
 | 16. Benchmark Campaign | v1.1 | 0/TBD | Not started | - |
 | 17. Docs Update | v1.1 | 0/TBD | Not started | - |

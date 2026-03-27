@@ -50,8 +50,8 @@
 
 ### HPC / SLURM
 
-- [ ] **HPC-01**: User can run `mace-gaussian batch molecules.txt --dft-on-cluster <host>` to submit DFT baseline jobs to a SLURM cluster via SSH, poll for completion, and retrieve results automatically
-- [ ] **HPC-02**: SLURM submission includes `formchk` in the job script so `.fchk` is produced on the cluster without requiring local conversion
+- [x] **HPC-01**: User can run `mace-gaussian batch molecules.txt --dft-on-cluster <host>` to submit DFT baseline jobs to a SLURM cluster via SSH, poll for completion, and retrieve results automatically
+- [x] **HPC-02**: SLURM submission includes `formchk` in the job script so `.fchk` is produced on the cluster without requiring local conversion
 
 ### Benchmark Campaign
 
@@ -121,8 +121,8 @@
 | BATCH-03 | Phase 14 | Pending |
 | BATCH-04 | Phase 14 | Pending |
 | BATCH-05 | Phase 15 | Pending |
-| HPC-01 | Phase 15 | Pending |
-| HPC-02 | Phase 15 | Pending |
+| HPC-01 | Phase 15 | Complete |
+| HPC-02 | Phase 15 | Complete |
 | BENCH-01 | Phase 16 | Pending |
 | BENCH-02 | Phase 16 | Pending |
 | BENCH-03 | Phase 16 | Pending |
