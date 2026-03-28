@@ -70,8 +70,12 @@ Full archive: `.planning/milestones/v1.1-ROADMAP.md`, `.planning/milestones/v1.1
   2. Analysis report displays both a stick spectrum (discrete lines at each mode frequency) and a broadened Lorentzian spectrum side by side or overlaid
   3. Intensity regression metrics (R-squared, RMSE) exclude modes with DFT IR intensity below 0.1 km/mol, while frequency metrics still include all modes
   4. The mace_polar dipole calculator failure mode is either fixed (produces correct dipole derivatives) or documented with explicit skip logic and a clear error message explaining why it fails
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 18-01-PLAN.md -- Lorentzian broadening, FWHM default change, CLI --fwhm wiring
+- [ ] 18-02-PLAN.md -- Zero-intensity filtering for intensity regression, HTML report methodology update
 **UI hint**: yes
+**Note**: SPEC-03 (stick spectrum) deferred per D-01; PIPE-02 (mace_polar dipole) deferred per user request
 
 ### Phase 19: Degenerate Mode Handling
 **Goal**: Mode matching correctly handles degenerate modes (e.g., methane T2, ammonia E) without systematically pessimistic overlap scores
@@ -185,7 +189,7 @@ Full archive: `.planning/milestones/v1.1-ROADMAP.md`, `.planning/milestones/v1.1
 | 13.5. MACE-POLAR-1 | v1.1 | 1/1 | Complete | 2026-03-23 |
 | 14. Batch Runner & PubChem | v1.1 | 2/2 | Complete | 2026-03-23 |
 | 15. SLURM & Batch Report | v1.1 | 2/2 | Complete | 2026-03-27 |
-| 18. Spectral Quality Foundations | v1.2 | 0/TBD | Not started | - |
+| 18. Spectral Quality Foundations | v1.2 | 0/2 | Planning | - |
 | 19. Degenerate Mode Handling | v1.2 | 0/TBD | Not started | - |
 | 20. Wall-Clock Timing | v1.2 | 0/TBD | Not started | - |
 | 21. NIST Experimental Overlay | v1.2 | 0/TBD | Not started | - |
