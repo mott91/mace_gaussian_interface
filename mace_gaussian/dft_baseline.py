@@ -144,6 +144,8 @@ def create_gaussian_dft_input(
     title: str = "DFT baseline calculation",
     extra_keywords: str = "",
     output_dir: str | Path | None = None,
+    nproc: int = 4,
+    mem: str = "4GB",
 ) -> None:
     """
     Create Gaussian input file for pure DFT calculation.
@@ -169,6 +171,10 @@ def create_gaussian_dft_input(
     output_dir : str or Path, optional
         Directory to write the file to. When provided, %chk uses
         basename only and the file is written to output_dir/basename.
+    nproc : int
+        Number of processors for %NProcShared (default: 4)
+    mem : str
+        Memory for %mem (default: '4GB')
     """
     symbols = atoms.get_chemical_symbols()
     positions = atoms.get_positions()  # Angstrom
@@ -188,7 +194,7 @@ def create_gaussian_dft_input(
         chk_name = f"{filename[:-4]}.chk"
         output_path = Path(filename)
 
-    link0 = f"%chk={chk_name}\n%mem=4GB\n%NProcShared=4"
+    link0 = f"%chk={chk_name}\n%mem={mem}\n%NProcShared={nproc}"
 
     with output_path.open("w", encoding="utf-8") as f:
         f.write(f"{link0}\n")

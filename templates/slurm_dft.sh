@@ -13,14 +13,15 @@
 #SBATCH --job-name=dft_{molecule}
 #SBATCH --output={remote_dir}/slurm_%j.out
 #SBATCH --error={remote_dir}/slurm_%j.err
-#SBATCH --time=48:00:00
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=4
+#SBATCH --cpus-per-task=8
 #SBATCH --mem=8G
-#SBATCH --partition=batch
+#SBATCH --partition=CPU_rune
+#SBATCH --nodelist=rune03
 
-# Load Gaussian -- edit for your cluster's module system
-module load gaussian/g16
+# Load Gaussian
+module load rune/gaussian/g16-c.02
+export OMP_NUM_THREADS=8
 
 cd {remote_dir}
 

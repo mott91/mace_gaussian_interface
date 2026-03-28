@@ -29,8 +29,8 @@ TERMINAL_STATES = frozenset(
     }
 )
 
-DEFAULT_REMOTE_BASE = "~/mace_gaussian_dft"
-DEFAULT_POLL_INTERVAL = 3600  # 1 hour per user request
+DEFAULT_REMOTE_BASE = "/scratch_rune03a/mot/calculations/mace_gaussian"
+DEFAULT_POLL_INTERVAL = 600  # 10 minutes
 
 # Common SSH options: no password prompts, auto-accept new hosts
 _SSH_OPTS = [

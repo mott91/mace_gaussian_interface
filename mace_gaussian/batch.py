@@ -347,11 +347,22 @@ def run_batch(
                 mol_data = manifest["molecules"][mol_name]
                 opt_geom_path = results_mgr.get_optimized_geometry_path(mol_name)
                 if opt_geom_path.exists():
+                    from .dft_baseline import create_gaussian_dft_input
+
                     atoms = read(str(opt_geom_path))
                     gjf_dir = Path(output_dir) / mol_name / "b3lyp_6-31Gdp"
                     gjf_dir.mkdir(parents=True, exist_ok=True)
                     gjf_path = gjf_dir / f"{mol_name}_freq_anharm.gjf"
-                    ase_to_gjf(atoms, str(gjf_path), molecule_name=mol_name)
+                    create_gaussian_dft_input(
+                        atoms,
+                        str(gjf_path),
+                        method="b3lyp",
+                        basis="6-31G(d,p)",
+                        title=mol_name,
+                        output_dir=str(gjf_dir),
+                        nproc=8,
+                        mem="6GB",
+                    )
                     molecules_for_slurm.append(
                         {"name": mol_name, "gjf_path": str(gjf_path)}
                     )
