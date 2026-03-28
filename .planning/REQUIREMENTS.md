@@ -1,7 +1,7 @@
 # Requirements: MACE-Gaussian Interface
 
-**Defined:** 2026-03-03
-**Milestone:** v1.1 — Batch Benchmarking & Calculator Expansion
+**Defined:** 2026-03-28
+**Milestone:** v1.2 — Analysis Quality Overhaul
 **Core Value:** Reliable, reproducible IR spectral predictions using ML potentials that can be validated against DFT reference data.
 
 ## v1.1 Requirements
@@ -65,6 +65,44 @@
 - [ ] **FIX-02**: `docs/ARCHITECTURE.md` updated to reflect current `mace_gaussian/` package layout and module names
 - [ ] **FIX-03**: `docs/DEVELOPMENT.md` updated to reflect current package layout (adding calculators, running tests, etc.)
 
+## v1.2 Requirements
+
+### Spectral Quality
+
+- [ ] **SPEC-01**: Simulated IR spectra use Lorentzian line shapes instead of Gaussian KDE, with configurable FWHM (default 10 cm⁻¹)
+- [ ] **SPEC-02**: Modes with IR intensity below 0.1 km/mol are filtered from intensity regression metrics (but retained in frequency metrics)
+- [ ] **SPEC-03**: Analysis reports display both stick spectrum and broadened Lorentzian spectrum
+
+### Mode Matching (v1.2)
+
+- [ ] **MODE-05**: Degenerate modes (within 5 cm⁻¹ threshold) are detected and grouped; subspace overlap (trace of M^T M / k) is used for matching quality
+- [ ] **MODE-06**: Mode matching statistics correctly handle degenerate groups without double-counting
+
+### Timing
+
+- [ ] **TIME-01**: Wall-clock timing is recorded per molecule per calculator combination (geometry opt, frequency calc, total)
+- [ ] **TIME-02**: Batch report includes ML vs DFT timing comparison table and speedup factors
+
+### Experimental Comparison
+
+- [ ] **NIST-01**: User can fetch experimental IR spectrum from NIST WebBook by molecule name (cached locally)
+- [ ] **NIST-02**: Analysis report overlays experimental spectrum on computed spectra plot when available
+- [ ] **NIST-03**: Quantitative peak position comparison (experimental vs computed) with error metrics
+
+### Pipeline Improvements
+
+- [ ] **PIPE-01**: Batch runner submits DFT jobs to SLURM immediately after each molecule's geometry optimization, not after all ML calcs complete
+- [ ] **PIPE-02**: Mace_polar dipole calculator failure mode investigated and either fixed or documented with skip logic
+
+### Anharmonic Analysis
+
+- [ ] **ANAL-01**: Anharmonic analysis pipeline produces thesis-quality HTML report integrating Lorentzian spectra, experimental overlay, timing, and mode matching
+- [ ] **ANAL-02**: Report includes per-molecule summary cards with key metrics (R², RMSE, speedup, experimental agreement)
+
+### VPT2 Research
+
+- [ ] **VPT2-01**: Time-boxed (2hr) spike evaluates Psience library for VPT2 anharmonic calculations using MACE force constants on water molecule
+
 ## v2 Requirements
 
 ### Open-Source QM Backend
@@ -77,9 +115,6 @@
 - **CALC-05**: TorchANI/ANI-2x wired as energy calculator option
 - **CALC-06**: Autograd-based dipole derivatives for MACE-ML (~10x speedup over finite differences)
 
-### Experimental Validation
-
-- **EXP-01**: NIST WebBook experimental IR spectrum overlay in analysis report (JCAMP-DX parser + HTTP downloader)
 
 ## Out of Scope
 
@@ -137,4 +172,4 @@
 
 ---
 *Requirements defined: 2026-03-03*
-*Last updated: 2026-03-16 after Phase 13.5 planning (POLAR-01 through POLAR-03 added)*
+*Last updated: 2026-03-28 after v1.2 milestone start — Analysis Quality Overhaul*
