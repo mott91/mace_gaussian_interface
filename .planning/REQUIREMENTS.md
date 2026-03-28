@@ -1,7 +1,7 @@
 # Requirements: MACE-Gaussian Interface
 
 **Defined:** 2026-03-28
-**Milestone:** v1.2 — Analysis Quality Overhaul
+**Milestone:** v1.2 -- Analysis Quality Overhaul
 **Core Value:** Reliable, reproducible IR spectral predictions using ML potentials that can be validated against DFT reference data.
 
 ## v1.1 Requirements
@@ -21,13 +21,13 @@
 
 ### Scratch Directory Isolation
 
-- [x] **SCRATCH-01**: All intermediate Gaussian files (.gjf, .log, .chk, .ipc_file) are created inside `.scratch/` subdirectory, not the project root — both ML frequency and DFT baseline runs
+- [x] **SCRATCH-01**: All intermediate Gaussian files (.gjf, .log, .chk, .ipc_file) are created inside `.scratch/` subdirectory, not the project root -- both ML frequency and DFT baseline runs
 - [x] **SCRATCH-02**: Scratch directory is auto-deleted on success (after moving files to results) and on failure (unless `--keep-scratch` flag or `MACE_KEEP_SCRATCH=1` env var is set)
 - [x] **SCRATCH-03**: `mace-gaussian run` auto-cleans stale scratch dirs (>24h) on startup; `mace-gaussian diagnose` reports stale scratch dirs
 
 ### Mode Matching
 
-- [x] **MATCH-01**: `match_modes()` uses Hungarian algorithm (`linear_sum_assignment`) for globally optimal bijective 1-to-1 ML-to-DFT mode pairing — no two ML modes can claim the same DFT mode
+- [x] **MATCH-01**: `match_modes()` uses Hungarian algorithm (`linear_sum_assignment`) for globally optimal bijective 1-to-1 ML-to-DFT mode pairing -- no two ML modes can claim the same DFT mode
 - [x] **MATCH-02**: Unmatched modes (when mode counts differ) appear as `(None, 0.0)` in match results; low-overlap pairs are logged but kept (not dropped)
 - [x] **MATCH-03**: Mode overlap heatmaps annotate Hungarian-matched cells with borders (solid for confident >= 0.5, dashed for uncertain < 0.5) and include a legend
 - [x] **MATCH-04**: Regression plots differentiate confident matches (filled markers) from low-overlap matches (open circles)
@@ -44,9 +44,9 @@
 
 - [x] **BATCH-01**: User can run `mace-gaussian fetch <molecule-name>` to download a 3D XYZ structure from PubChem
 - [x] **BATCH-02**: User can run `mace-gaussian batch molecules.txt` to process multiple molecules sequentially through the full pipeline
-- [x] **BATCH-03**: Batch run produces a per-molecule status manifest (`batch_manifest.json`) that survives interruption — restarting skips already-complete molecules
+- [x] **BATCH-03**: Batch run produces a per-molecule status manifest (`batch_manifest.json`) that survives interruption -- restarting skips already-complete molecules
 - [x] **BATCH-04**: User can run `mace-gaussian batch molecules.txt --skip-dft-baseline` to run ML calculations only
-- [x] **BATCH-05**: Batch run produces a multi-molecule HTML report with aggregated R² and RMSE per calculator combination across all molecules
+- [x] **BATCH-05**: Batch run produces a multi-molecule HTML report with aggregated R-squared and RMSE per calculator combination across all molecules
 
 ### HPC / SLURM
 
@@ -61,7 +61,7 @@
 
 ### Bug Fixes & Docs
 
-- [x] **FIX-01**: Acetic acid (acoh) frequency parser bug fixed — regression plot frequency matching works correctly and xfail test is promoted to passing
+- [x] **FIX-01**: Acetic acid (acoh) frequency parser bug fixed -- regression plot frequency matching works correctly and xfail test is promoted to passing
 - [ ] **FIX-02**: `docs/ARCHITECTURE.md` updated to reflect current `mace_gaussian/` package layout and module names
 - [ ] **FIX-03**: `docs/DEVELOPMENT.md` updated to reflect current package layout (adding calculators, running tests, etc.)
 
@@ -69,13 +69,13 @@
 
 ### Spectral Quality
 
-- [ ] **SPEC-01**: Simulated IR spectra use Lorentzian line shapes instead of Gaussian KDE, with configurable FWHM (default 10 cm⁻¹)
+- [ ] **SPEC-01**: Simulated IR spectra use Lorentzian line shapes instead of Gaussian KDE, with configurable FWHM (default 10 cm-1)
 - [ ] **SPEC-02**: Modes with IR intensity below 0.1 km/mol are filtered from intensity regression metrics (but retained in frequency metrics)
 - [ ] **SPEC-03**: Analysis reports display both stick spectrum and broadened Lorentzian spectrum
 
 ### Mode Matching (v1.2)
 
-- [ ] **MODE-05**: Degenerate modes (within 5 cm⁻¹ threshold) are detected and grouped; subspace overlap (trace of M^T M / k) is used for matching quality
+- [ ] **MODE-05**: Degenerate modes (within 5 cm-1 threshold) are detected and grouped; subspace overlap (trace of M^T M / k) is used for matching quality
 - [ ] **MODE-06**: Mode matching statistics correctly handle degenerate groups without double-counting
 
 ### Timing
@@ -97,7 +97,7 @@
 ### Anharmonic Analysis
 
 - [ ] **ANAL-01**: Anharmonic analysis pipeline produces thesis-quality HTML report integrating Lorentzian spectra, experimental overlay, timing, and mode matching
-- [ ] **ANAL-02**: Report includes per-molecule summary cards with key metrics (R², RMSE, speedup, experimental agreement)
+- [ ] **ANAL-02**: Report includes per-molecule summary cards with key metrics (R-squared, RMSE, speedup, experimental agreement)
 
 ### VPT2 Research
 
@@ -120,8 +120,8 @@
 
 | Feature | Reason |
 |---------|--------|
-| ORCA/VPT2 integration | No external hook in ORCA — technically blocked; requires ORCA developer cooperation |
-| Periodic systems (surfaces, crystals) | Different project — QM engine, dipole model, and analysis pipeline all need replacing simultaneously |
+| ORCA/VPT2 integration | No external hook in ORCA -- technically blocked; requires ORCA developer cooperation |
+| Periodic systems (surfaces, crystals) | Different project -- QM engine, dipole model, and analysis pipeline all need replacing simultaneously |
 | Born effective charge ML models | Research frontier, not packaged; 6+ month research contribution |
 | PyPI distribution | Clone-and-reproduce is the target for thesis |
 | Web interface or GUI | CLI appropriate for research use |
@@ -129,6 +129,8 @@
 | AIMNet2 integration | Installation friction high, marginal benefit over mace_off |
 
 ## Traceability
+
+### v1.1 Requirements
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
@@ -165,11 +167,30 @@
 | FIX-02 | Phase 17 | Pending |
 | FIX-03 | Phase 17 | Pending |
 
+### v1.2 Requirements
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| SPEC-01 | Phase 18 | Pending |
+| SPEC-02 | Phase 18 | Pending |
+| SPEC-03 | Phase 18 | Pending |
+| PIPE-02 | Phase 18 | Pending |
+| MODE-05 | Phase 19 | Pending |
+| MODE-06 | Phase 19 | Pending |
+| TIME-01 | Phase 20 | Pending |
+| TIME-02 | Phase 20 | Pending |
+| NIST-01 | Phase 21 | Pending |
+| NIST-02 | Phase 21 | Pending |
+| NIST-03 | Phase 21 | Pending |
+| PIPE-01 | Phase 22 | Pending |
+| ANAL-01 | Phase 23 | Pending |
+| ANAL-02 | Phase 23 | Pending |
+| VPT2-01 | Phase 24 | Pending |
+
 **Coverage:**
-- v1.1 requirements: 32 total
-- Mapped to phases: 32
-- Unmapped: 0
+- v1.1 requirements: 32 total, 32 mapped, 0 unmapped
+- v1.2 requirements: 15 total, 15 mapped, 0 unmapped
 
 ---
 *Requirements defined: 2026-03-03*
-*Last updated: 2026-03-28 after v1.2 milestone start — Analysis Quality Overhaul*
+*Last updated: 2026-03-28 -- v1.2 roadmap created with phase mappings*
