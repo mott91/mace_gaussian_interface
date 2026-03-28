@@ -1,218 +1,180 @@
 # Project Research Summary
 
-**Project:** MACE-Gaussian Refactoring & Distribution
-**Domain:** Scientific Python Package for Computational Chemistry
-**Researched:** 2026-02-16
-**Confidence:** HIGH
+**Project:** MACE-Gaussian v1.2 Analysis Quality Overhaul
+**Domain:** Computational chemistry IR spectroscopy — ML potential benchmarking pipeline
+**Researched:** 2026-03-28
+**Confidence:** HIGH (stack and architecture based on direct codebase analysis; features and pitfalls verified against spectroscopy literature)
 
 ## Executive Summary
 
-The MACE-Gaussian project is a functional research tool that bridges ML potentials (MACE) with Gaussian 16 for molecular IR spectroscopy. The codebase was built with AI assistance and is currently thesis-ready but not distribution-ready. The primary structural issue is a monolithic main module (gm_main.py, ~1000 lines) that mixes workflow orchestration, I/O, ZMQ server management, and calculator implementations. The highest-risk component is module monkey-patching used to swap MACE implementations at runtime.
+This milestone adds analysis quality features to an existing, working MACE-Gaussian pipeline. The existing foundation (Python/ASE/ZMQ/Gaussian) is sound and unchanged. What v1.2 adds is a set of scientifically expected outputs: physically correct Lorentzian line shapes, degenerate-mode-aware matching, zero-intensity filtering for intensity statistics, wall-clock timing for the cost-benefit thesis argument, and experimental spectra overlay via NIST. These features convert the current "technically correct but presentation-rough" pipeline into thesis-quality output. None of the core four features require new dependencies beyond `nistchempy` and `jcamp` for the NIST experimental overlay.
 
-The recommended approach is **incremental refactoring protected by tests**, not a rewrite. The codebase has good foundations (uv, pyproject.toml, ruff) but lacks the defensive infrastructure (tests, error handling, documentation) needed for distribution. The critical success factor is establishing a comprehensive test suite BEFORE refactoring anything — this protects against silent behavior changes in numerical code and fragile parsers.
+The recommended build order is driven by two constraints: (1) Lorentzian broadening and zero-intensity filtering are upstream of everything visual, so they should land first, and (2) the PyVPT2 alternative VPT2 engine is the one genuinely research-grade item — it requires a QCEngine adapter that does not yet exist, carries Fermi resonance risk, and should be deferred or prototyped in isolation without blocking the other features. All four core features (broadening, filtering, degenerate mode handling, timing) have well-defined scopes and can be implemented in 2-3 focused phases.
 
-Key risks are (1) breaking the working pipeline during refactoring, (2) losing reproducibility of thesis results, and (3) MACE dependency issues when replacing monkey-patching. Mitigation: commit reference outputs before refactoring, maintain backward compatibility throughout, and keep the tool functional at every step.
+The most critical risks are: (a) lineshape normalization confusion when Lorentzian and Gaussian broadening coexist — always store broadening type in metadata and require matching parameters for spectral comparisons; (b) degenerate modes producing misleadingly low overlap scores unless subspace overlap (trace(M^T M)/k) replaces individual dot products; and (c) NIST retrieval fragility — treat as a best-effort cache, never block analysis on it. Fix the acetic acid parser bug and the xTB dipole unit bug before building new features on top of the parser or before any VPT2 work.
 
 ## Key Findings
 
 ### Recommended Stack
 
-The project already uses modern Python packaging tools (uv, pyproject.toml, hatchling) which are the current standard. The main additions needed are testing infrastructure and CI/CD for maintainability.
+Only two new packages are needed for the entire v1.2 feature set: `nistchempy==1.0.5` (unofficial NIST WebBook scraper, MIT license, updated March 2026) and `jcamp==1.3.0` (JCAMP-DX parser, MIT). Everything else — Lorentzian broadening, timing, degenerate mode handling, zero-intensity filtering — is implemented with existing numpy/scipy/stdlib. PyVPT2 is blocked by a Psi4 hard dependency and cannot consume pre-computed force constants; the McCoy Group's Psience library may be able to ingest Gaussian .fchk force constants but needs a 2-hour investigation spike to confirm.
 
 **Core technologies:**
-- **pytest + pytest-cov**: Testing framework with coverage reporting — industry standard for scientific Python, supports fixtures for reference data
-- **pytest-mock + unittest.mock**: Mocking external dependencies (Gaussian, CUDA) — allows testing parsers without installing licensed software
-- **GitHub Actions CI**: Automated linting and unit tests — follows ASE/cclib pattern of running parser tests in CI while excluding integration tests
-- **ruff (expand rules)**: Add B, SIM, PTH, RUF rules for better code quality — fast enough to run manually without pre-commit hooks
-- **MkDocs + mkdocs-material**: User documentation — simpler than Sphinx, easier for non-programmers to maintain
-- **Test fixtures**: Committed Gaussian .log/.fchk snippets — standard pattern for tools with external dependencies (ASE, MDAnalysis, cclib all do this)
-
-**Type checking note:** Current ty (alpha) is acceptable for thesis scope; switch to mypy only if ty causes issues. Don't over-invest in type annotations — focus on critical interfaces (parsers, calculators).
+- `numpy` (existing): Lorentzian broadening — trivial broadcast formula, no library needed
+- `nistchempy==1.0.5`: NIST WebBook scraping — only Python package for this; unofficial but active
+- `jcamp==1.3.0`: JCAMP-DX parsing — mature, MIT, handles NIST's format directly
+- `time.perf_counter` / `contextlib` (stdlib): Pipeline timing — already partially used in `workflow.py`; extend, don't replace
+- `scipy.spatial.distance` (existing): Degenerate mode detection — threshold-based frequency clustering
+- PyVPT2 / Psience (optional spike only): VPT2 alternatives — do not install until spike confirms integration path
 
 ### Expected Features
 
-The tool already implements the core differentiators (automated pipeline, mode matching, multi-model comparison, HTML reports). The main gaps are in table-stakes features that users expect from any distributed scientific tool.
-
 **Must have (table stakes):**
-- **Unit tests with reference data** — users need confidence that parsers and mode matching produce correct results
-- **Explicit failure over silent corruption** — if a parser returns empty data, raise an error with context; never silently return empty results
-- **Prerequisite checking** — validate Gaussian, formchk, CUDA, dipole model exist before starting multi-hour calculations
-- **Documentation** — README with installation + quickstart, worked example, method documentation for papers
-- **CLI experience** — consistent exit codes, progress indication, verbose/quiet modes
-- **Reproducibility metadata** — version, Python version, model versions, config in results.json
+- Lorentzian broadening — every published computed IR spectrum uses it; current Gaussian broadening is physically wrong for IR line shapes
+- Zero-intensity mode filtering — methane R²=0.34 intensity issue is caused by correlating IR-inactive zeros with numerical noise; any reviewer will flag this
+- Degenerate mode handling — without subspace overlap scoring, mode matching is systematically pessimistic for methane, benzene, ammonia (many thesis molecules)
+- Wall-clock timing (ML vs DFT) — "X% accuracy at Y% of the computational cost" is the headline ML benchmarking result; absent timing data, the thesis has no cost-benefit argument
 
-**Should have (competitive):**
-- **Test markers** — `@pytest.mark.gpu`, `@pytest.mark.gaussian` to separate integration tests from unit tests
-- **Config file support** — for HPC job scripts where CLI args are awkward (ConfigArgParse already in dependencies)
-- **Coverage reporting** — pytest-cov to identify untested code paths
+**Should have (differentiators):**
+- NIST experimental spectra overlay — comparing ML vs DFT only tests self-consistency; comparing both against experiment is a substantially stronger thesis result
+- Early SLURM DFT submission — reordering the batch pipeline to submit DFT jobs immediately after geometry optimization saves hours of queue wait during the benchmark campaign
+- Anharmonic pipeline overhaul — integrates all of the above into a polished HTML report with experimental overlay panel, timing breakdown, and degenerate mode confidence indicators
 
-**Defer (v2+):**
-- Web interface, database backend, multi-user support, automatic model training, cloud deployment, plugin system, real-time visualization, support for non-Gaussian QM packages — all explicitly anti-features for thesis scope.
+**Defer (v1.3+):**
+- PyVPT2 integration — research-grade, requires a QCEngine/ASE harness that does not exist; novel (no prior MACE+PyVPT2 work); high risk for a thesis deadline
+- Voigt profile broadening — physically more accurate for gas-phase but overkill for computed spectra comparison; pure Lorentzian is the field standard
+- Interactive Plotly spectrum viewer — significant effort with no improvement to thesis results
+- Delta-ML correction model — insufficient data; premature optimization
+- Automated functional group peak labels — error-prone rabbit hole
 
 ### Architecture Approach
 
-The refactoring goal is to decompose the monolithic gm_main.py into focused modules without breaking the working pipeline. The rest of the codebase (parsers, analysis, reports) is already reasonably modular and just needs reorganization.
+All new features integrate into the existing three-layer architecture (pipeline layer: `workflow.py`/`batch.py`/`slurm.py`; analysis layer: `analysis_workflow.py`/`analyze_spectra.py`/`mode_matching.py`/`html_report_generator.py`; data layer: `results.json`/`.fchk`/`batch_manifest.json`) without restructuring it. The key principle is additive, optional enhancement: every new parameter defaults to preserving current behavior. New modules (`utils/timing.py`, `analysis/nist_spectra.py`) isolate cross-cutting concerns; modifications to existing modules (`analyze_spectra.py`, `mode_matching.py`, `batch.py`) are backward-compatible via new function variants and optional parameters.
 
-**Major components:**
-1. **calculators/** — Extract DipoleCalculator classes (base, espaloma, mace_ml, xtb, factory, mace_loader) from gm_main.py. Replace monkey-patching with lazy import isolation or process isolation.
-2. **gaussian/** — Extract I/O (parse_gaussian_input, write outputs), runner (subprocess management), parser (move GaussianLogParser), fchk (move FCHK parsing), zmq_server (context manager for message loop) from gm_main.py.
-3. **analysis/** — Move existing modules (spectra, mode_matching, comparison, report) into package structure. Already clean, just reorganize.
-4. **utils/** — Extract pure functions (units, validation, results) from gm_main.py.
-5. **workflow.py** — Thin orchestrator that sequences phases by calling modular components. Extract from gm_main.py last.
-
-**Critical constraint:** Each refactoring step must keep the tool functional. Never have a broken state. Pattern: write tests → refactor → verify tests pass → commit.
+**Major components (new or modified):**
+1. `utils/timing.py` (NEW) — `PipelineTimer` context manager; wrap existing `time.perf_counter()` calls in `workflow.py` and `batch.py`
+2. `analysis/analyze_spectra.py` (MODIFY) — add `broaden_spectrum_lorentzian()` parallel to existing Gaussian broadening; add `min_dft_intensity` filter to `calculate_metrics()`
+3. `analysis/mode_matching.py` (MODIFY) — add `detect_degenerate_groups()` and `compute_subspace_overlap()`; new `match_modes_with_degeneracy()` preserves existing callers
+4. `analysis/nist_spectra.py` (NEW) — `NISTFetcher` class: fetch, cache (`~/.cache/mace_gaussian/nist/`), parse JCAMP-DX; returns `SpectrumData | None`; never blocks analysis on absence
+5. `batch.py` (MODIFY) — restructure loop to submit DFT after per-molecule geom-opt rather than after all molecules; add file locking to manifest writes
+6. `vpt2/` subpackage (NEW, deferred) — self-contained PyVPT2 engine, parallel to `gaussian/`; must produce identical `results.json` schema
 
 ### Critical Pitfalls
 
-Research identified 7 pitfalls with varying severity. The top 5 that directly impact roadmap planning:
+1. **Lorentzian/Gaussian normalization mismatch** — Lorentzian tails fall as 1/x² vs Gaussian exp(-x²); the same FWHM value produces different peak heights and spectral overlap scores. Prevention: always store broadening type + FWHM in results metadata; enforce identical broadening when comparing two spectra; add unit test checking peak height normalization.
 
-1. **Refactoring without tests (CRITICAL)** — Silent behavior changes in numerical code and parsers. Mitigation: Add characterization tests with water/CH4 reference outputs BEFORE any refactoring. Use numpy.testing for float comparisons. Run full pipeline after every change.
+2. **Degenerate mode subspace rotation** — Individual eigenvector dot products for degenerate modes can be 0.3-0.5 even when subspaces are identical (any orthogonal rotation within the subspace is valid). Prevention: for groups within the frequency threshold, compute `trace(M^T M) / k` as the overlap metric rather than per-vector dot products. The existing Hungarian assignment still works for 1-to-1 pairing.
 
-2. **Breaking the working pipeline (HIGH)** — ZMQ + Gaussian subprocess integration is complex and hard to debug. Mitigation: Extract from gm_main.py, don't rewrite it. Each extraction: move code → update imports → verify pipeline runs on water. Don't change helper script mechanism until everything else is stable.
+3. **NIST data fragility** — NistChemPy is an unofficial HTML scraper; ~30% of molecules will have no gas-phase IR; JCAMP-DX files mix transmittance (%T) and absorbance and cm-1 vs micron axes. Prevention: treat as best-effort cache; validate units on every retrieval; normalize both spectra to [0,1] before comparison; cache raw JCAMP-DX files locally.
 
-3. **Losing reproducibility (HIGH)** — Thesis results must be reproducible but refactoring can change floating-point accumulation or import order. Mitigation: Commit reference outputs before refactoring. After refactoring, verify outputs match within tolerance. Pin dependencies (uv.lock helps). Record versions in output metadata.
+4. **VPT2 Fermi resonance disasters** — Standard VPT2 denominators approach zero for near-degenerate states; anharmonic frequencies can silently diverge by hundreds of cm-1. Prevention: verify PyVPT2 implements GVPT2 (resonance detection + variational correction); add sanity check flagging anharmonic corrections > 300 cm-1; test on CO2 (textbook Fermi resonance) before any larger molecule.
 
-4. **MACE dependency hell (HIGH)** — Custom local packages have implicit dependencies on import order and CUDA initialization. Monkey-patching exists because of these complexities. Mitigation: Document exact import sequence before changing. Test MACE loading in isolation. Start with lazy imports (less disruptive than process isolation). Keep rollback plan.
-
-5. **Over-engineering (MEDIUM but HIGH likelihood)** — Risk of turning simple file moves into architecture redesigns. Mitigation: Only refactor what's actually broken. If existing code works and isn't fragile, move it but don't redesign it. Three concrete duplications before abstracting. Ask "does this make the thesis easier?" for every change.
-
-**Additional pitfalls:** AI code inconsistencies (different conventions across sessions, inconsistent units/error handling), acetic acid parsing bug (documented but unfixed, needs test case).
+5. **Early SLURM concurrent manifest writes** — With per-molecule DFT submission, two concurrent processes can perform read-modify-write on the batch manifest, causing silent data loss. Prevention: use separate `ml_manifest.json` and `dft_manifest.json`, or add `fcntl.flock` locking around all manifest read-modify-write cycles.
 
 ## Implications for Roadmap
 
 Based on research, suggested phase structure:
 
-### Phase 1: Testing Infrastructure & Characterization
-**Rationale:** Tests are the safety net for all subsequent refactoring. Without tests, refactoring risks silent behavior changes in numerical code. This is the highest priority from pitfalls research.
-**Delivers:** pytest setup, test fixtures (committed Gaussian .log/.fchk snippets), characterization tests for water/CH4 that capture exact current behavior, test markers for gpu/gaussian-dependent tests.
-**Addresses:** Table stakes features (tests), critical pitfall #1 (refactoring without tests), pitfall #5 (losing reproducibility — establishes baseline).
-**Avoids:** Silent breakage during refactoring.
-**Research flag:** Standard pattern — pytest with fixtures is well-documented. No phase-specific research needed.
+### Phase 1: Spectral Quality Foundations
+**Rationale:** Lorentzian broadening and zero-intensity filtering are both low-complexity, have no dependencies on each other or on downstream features, and immediately fix known problems (wrong line shape physics, methane R²=0.34 intensity artifact). Everything visual builds on broadening; all intensity statistics build on filtering. Doing these first unblocks every subsequent phase. The acetic acid parser bug fix belongs here because every subsequent analysis feature depends on the parser.
+**Delivers:** Physically correct IR spectra plots; meaningful intensity R² and RMSE statistics; acoh parser bug fix (prerequisite for reliable analysis on all molecules)
+**Addresses:** Table stakes #1 (Lorentzian broadening), table stakes #2 (zero-intensity filtering), pitfall #12 (acoh parser bug)
+**Avoids:** Pitfall #1 (normalization mismatch) — implement both lineshapes in the same file with matching parameter enforcement
 
-### Phase 2: Error Handling & Input Validation
-**Rationale:** Can be done before structural refactoring. Adds defensive programming that makes refactoring safer. Addresses table stakes features without touching the monolithic structure yet.
-**Delivers:** Explicit failures with context in parsers, prerequisite checking (Gaussian/CUDA/dipole model exist), improved error messages, environment diagnostics expansion.
-**Addresses:** Table stakes features (error handling, prerequisite checking), pitfall #2 (breaking pipeline — better errors make debugging easier).
-**Uses:** Pure additions to existing code, no structural changes yet.
-**Research flag:** Standard patterns — no additional research needed.
+### Phase 2: Degenerate Mode Handling
+**Rationale:** Degenerate mode handling is medium complexity but isolated to `mode_matching.py`. It is needed before the benchmark campaign to avoid systematically pessimistic mode overlap statistics for symmetric molecules. The algorithm (subspace overlap via trace(M^T M)/k) is already specified in the brainstorming notes. It does not depend on Phase 1 but should land before benchmark runs.
+**Delivers:** Correct mode matching for methane (T2, 3-fold), BH3-NH3 (E modes), benzene (E modes); accurate average overlap statistics across the benchmark molecule set
+**Addresses:** Table stakes #4 (degenerate mode handling)
+**Avoids:** Pitfall #3 (subspace rotation ambiguity) — implement subspace overlap, keep per-vector dot products for reporting only
 
-### Phase 3: Extract Utilities & Conventions
-**Rationale:** Pure functions (units, validation) have zero coupling risk. Extracting them first builds confidence in the refactoring process. Also addresses AI code inconsistencies early.
-**Delivers:** utils/units.py (unit conversions), utils/validation.py (input checks), utils/results.py (move ResultsManager), documented conventions for naming/error handling/units.
-**Addresses:** Pitfall #4 (AI code inconsistencies — establishes conventions), architecture goal (decompose gm_main.py).
-**Avoids:** Starting with high-risk refactoring (calculators, MACE loading).
-**Research flag:** No research needed — straightforward extraction.
+### Phase 3: Wall-Clock Timing Instrumentation
+**Rationale:** Timing is partially implemented in `workflow.py` already. Completing it requires adding `utils/timing.py`, wrapping existing stage calls with the context manager, and extending the HTML report and batch report with timing summary and cost-accuracy Pareto plot. Low risk. Needed before benchmark campaign results are finalized for the thesis.
+**Delivers:** Per-stage timing in `results.json`; timing breakdown table and cost-accuracy scatter plot in batch HTML report; speedup factor (DFT_time / ML_time) per molecule
+**Addresses:** Table stakes #3 (wall-clock timing)
+**Avoids:** Pitfall #6 (GPU warmup / CUDA sync) — add warmup calls and `torch.cuda.synchronize()` before timers
 
-### Phase 4: Extract Calculator Classes
-**Rationale:** Calculators are self-contained with a clear factory pattern already in place. Extract before tackling MACE loading complexity.
-**Delivers:** calculators/ package (base, espaloma, mace_ml, xtb, factory), updated imports, tests for calculator factory.
-**Addresses:** Architecture goal (decompose gm_main.py), prepares for next phase (MACE loading).
-**Uses:** Factory pattern already exists, just moving code.
-**Research flag:** No research needed — extraction only, not redesign.
+### Phase 4: NIST Experimental Spectra Overlay
+**Rationale:** Depends on Lorentzian broadening (Phase 1) for visually meaningful comparison. Independent of degenerate mode handling and timing. Can be developed in parallel with Phases 2-3 if resources allow, but should integrate only after Phase 1 is stable. Uses new `nistchempy` + `jcamp` dependencies.
+**Delivers:** `analysis/nist_spectra.py` module with caching; experimental overlay plots in HTML report; peak position comparison table; caveats panel flagging condensed-phase data
+**Addresses:** Differentiator #5 (NIST experimental overlay)
+**Avoids:** Pitfall #4 (NIST fragility) — graceful None return, local cache, unit validation; Pitfall #11 (JCAMP edge cases) — use `jcamp` library, test on multiple NIST files before automating
 
-### Phase 5: Replace MACE Module Monkey-Patching
-**Rationale:** Highest-risk refactoring task. Must be done after tests are in place and calculators are extracted. Start with lazy import isolation (less disruptive than process isolation).
-**Delivers:** calculators/mace_loader.py with lazy import isolation, cleanup of sys.modules manipulation, tests for MACE loading in isolation.
-**Addresses:** Pitfall #7 (MACE dependency hell — the root cause of monkey-patching), architecture fragility (highest-risk component).
-**Avoids:** Breaking MACE imports by testing in isolation first.
-**Research flag:** NEEDS RESEARCH — importlib.util patterns for isolated module loading, CUDA initialization state management, rollback strategies if lazy imports fail.
+### Phase 5: Early SLURM DFT Submission
+**Rationale:** Scheduling optimization that saves hours during the 25-molecule benchmark campaign. Restructures `batch.py` loop with no new logic — just reordering existing calls. The main risk is manifest concurrency, which has a clear prevention strategy. Should land before the benchmark campaign starts.
+**Delivers:** Per-molecule DFT submission immediately after geom-opt; ML calculations run while DFT queues on cluster; net benchmark campaign time reduction proportional to DFT queue wait
+**Addresses:** Differentiator #7 (early SLURM submission)
+**Avoids:** Pitfall #7 (concurrent manifest writes) — add `fcntl.flock`; Pitfall #13 (SSH connection limits) — batch `sacct` queries
 
-### Phase 6: Extract Gaussian I/O & ZMQ Server
-**Rationale:** Tightly coupled components (I/O, subprocess runner, ZMQ server) should be extracted together. Do this after MACE loading is stable.
-**Delivers:** gaussian/ package (io, runner, parser, fchk, zmq_server), moved GaussianLogParser and FCHK parser into package.
-**Addresses:** Architecture goal (decompose gm_main.py), modularizes the Gaussian integration.
-**Uses:** Moves existing modules + extracts I/O from gm_main.py.
-**Research flag:** Standard patterns — no additional research needed.
+### Phase 6: Anharmonic Pipeline Integration and Report Overhaul
+**Rationale:** Integrates all Phase 1-5 features into a polished HTML report. This is the capstone phase: timing panels, experimental overlay sections, degenerate mode confidence indicators, improved regression plot annotations. Depends on all prior phases being stable.
+**Delivers:** Thesis-quality HTML report with all analysis features surfaced; batch report with cost-accuracy Pareto frontier; complete end-to-end pipeline test against all benchmark molecules
+**Addresses:** Differentiator #8 (anharmonic pipeline overhaul)
+**Avoids:** Integration pitfall (analysis pipeline ordering problem) — design full data flow before implementing; test on water + methane + acoh before declaring done
 
-### Phase 7: Extract Workflow Orchestrator
-**Rationale:** Do this last — workflow.py becomes a thin orchestrator calling modular components. By this point, all components are extracted and tested.
-**Delivers:** workflow.py (phase sequencing), updated CLI to use workflow, gm_main.py deprecated or removed.
-**Addresses:** Architecture goal (complete decomposition of gm_main.py).
-**Avoids:** Pitfall #2 (breaking pipeline — workflow is last to change so pipeline stays functional throughout).
-**Research flag:** No research needed — thin wrapper around extracted components.
-
-### Phase 8: Package Structure & Reorganization
-**Rationale:** Final cleanup phase — organize into mace_gaussian/ package, update all imports, reorganize analysis modules.
-**Delivers:** mace_gaussian/ package layout, updated imports everywhere, analysis/ subpackage organized, CLI entry point aligned in pyproject.toml.
-**Addresses:** Architecture goal (final package structure), stack recommendation (entry points).
-**Uses:** Existing modular code, just reorganizing.
-**Research flag:** No research needed — standard package layout.
-
-### Phase 9: CI/CD & Distribution Prep
-**Rationale:** After refactoring is complete, set up automation and distribution infrastructure.
-**Delivers:** GitHub Actions CI (lint + unit tests), expanded ruff rules (B, SIM, PTH, RUF), pytest-cov in CI, install script for custom MACE packages.
-**Addresses:** Stack recommendations (CI/CD), table stakes features (test coverage).
-**Uses:** GitHub Actions (well-documented), ruff (already in use).
-**Research flag:** Standard patterns — no additional research needed.
-
-### Phase 10: Documentation
-**Rationale:** Document after refactoring is stable. Tests provide verified examples for documentation.
-**Delivers:** Updated README with installation + quickstart, worked example (water end-to-end), method documentation, MkDocs setup if desired, improved CLI help text.
-**Addresses:** Table stakes features (documentation), enables distribution.
-**Uses:** MkDocs + mkdocs-material (recommended), Google-style docstrings.
-**Research flag:** No research needed — documentation of working code.
+### Phase 7 (Optional): PyVPT2 Research Integration
+**Rationale:** Research-grade work. The QCEngine/ASE adapter does not exist. Fermi resonance handling and ML numerical noise in force constants are open questions. Should be prototyped as a standalone spike on water only before any pipeline integration. May slip to v1.3 without affecting thesis timeline.
+**Delivers:** Proof-of-concept PyVPT2+MACE on water; comparison against Gaussian+MACE anharmonic frequencies; feasibility assessment for full integration
+**Addresses:** Differentiator #6 (VPT2 alternative)
+**Avoids:** Pitfall #9 (QCEngine adapter gap) — 2-hour spike to assess feasibility first; Pitfall #2 (Fermi resonance) — verify GVPT2 support; Pitfall #10 (ML numerical noise) — test step size convergence
 
 ### Phase Ordering Rationale
 
-- **Tests first (Phase 1)** protects everything else — non-negotiable based on pitfalls research.
-- **Error handling (Phase 2)** can be done early without structural changes — makes refactoring safer.
-- **Low-risk first (Phases 3-4)** builds confidence — utilities and calculator extraction have minimal coupling.
-- **High-risk isolated (Phase 5)** — MACE monkey-patching is the most fragile component, do it after safety net is in place and with dedicated research.
-- **Tightly coupled together (Phase 6)** — Gaussian I/O, runner, ZMQ server are interdependent, extract as a unit.
-- **Orchestrator last (Phase 7)** — workflow touches everything, so do it after components are stable.
-- **Structure after function (Phase 8)** — reorganize into package layout after modular structure is proven.
-- **Automation last (Phases 9-10)** — CI/CD and docs document the refactored codebase, not the work-in-progress.
-
-This ordering avoids pitfall #2 (breaking pipeline) by keeping the tool functional throughout, and addresses pitfall #1 (refactoring without tests) by front-loading testing infrastructure.
+- Phase 1 comes first because Lorentzian broadening is a prerequisite for visually meaningful NIST comparison (Phase 4) and the acoh parser fix unblocks reliable analysis across all molecules.
+- Phases 2 and 3 are independent of each other and of Phase 4; they can be developed in parallel after Phase 1 but must land before the benchmark campaign.
+- Phase 4 is technically independent of Phases 2-3 but benefits from stable broadening (Phase 1).
+- Phase 5 (SLURM reordering) should land before benchmark campaign launch, alongside or after Phase 3.
+- Phase 6 is the capstone integration pass; doing it last ensures stable inputs from all prior phases.
+- Phase 7 is isolated from all other phases by design and carries the highest risk; decouple it from the milestone timeline entirely.
 
 ### Research Flags
 
 Phases likely needing deeper research during planning:
-- **Phase 5 (MACE loading):** Complex integration with custom packages, importlib.util patterns for isolated loading, CUDA device placement, rollback strategies. This is the highest-risk refactoring task.
+- **Phase 4 (NIST Overlay):** NistChemPy is unofficial scraping; real-world coverage and JCAMP-DX format quirks need validation against actual thesis molecules before committing to this in the report. Run a manual test against all 25 benchmark molecules before writing the automated pipeline.
+- **Phase 7 (PyVPT2):** Needs dedicated spike before planning. Key questions unanswered: Can Psience ingest Gaussian .fchk force constants? Does PyVPT2's GVPT2 implementation handle CH stretch Fermi resonances correctly? Budget a full week, not 2-3 days.
 
 Phases with standard patterns (skip research-phase):
-- **Phases 1, 2, 3, 4, 6, 7, 8, 9, 10:** All use well-documented patterns (pytest with fixtures, error handling, package organization, CI with GitHub Actions, MkDocs). No phase-specific research needed.
+- **Phase 1 (Broadening + Filtering):** Textbook spectroscopy formulas. Direct codebase changes are fully specified in ARCHITECTURE.md. No unknowns.
+- **Phase 2 (Degenerate Modes):** Algorithm is fully specified (trace(M^T M)/k). Isolated to `mode_matching.py`. No dependencies.
+- **Phase 3 (Timing):** stdlib only. Context manager pattern is standard. Existing `workflow.py` instrumentation shows the pattern.
+- **Phase 5 (SLURM):** Reordering of existing calls. The `slurm.py` API already supports per-molecule submission.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | pytest + uv + pyproject.toml are industry standards for scientific Python. CI patterns verified with ASE, cclib examples. |
-| Features | HIGH | Table stakes features identified from distributed package norms. Differentiators already implemented. Anti-features clearly scoped. |
-| Architecture | HIGH | Refactoring pattern (extract from monolith incrementally) is well-established. Component boundaries are clear from existing code structure. |
-| Pitfalls | HIGH | Pitfalls are grounded in existing fragility (CLAUDE.md documents monkey-patching issues) and standard scientific code risks (numerical reproducibility). |
+| Stack | HIGH | Two new packages (nistchempy, jcamp) well-understood; all other features use existing deps. PyVPT2 exclusion confirmed by Psi4 hard dependency. |
+| Features | HIGH | Lorentzian, filtering, degenerate modes, timing are textbook spectroscopy practice with clear implementation paths. NIST overlay is MEDIUM due to scraping fragility. |
+| Architecture | HIGH | Based on direct codebase analysis, not external sources. Integration points are specific (file, class, method). Backward-compatibility patterns are clear. |
+| Pitfalls | HIGH | Most verified against codebase (existing `time.time()` pattern, acoh xfail test, manifest atomic write pattern) and literature (Fermi resonance, GVPT2 requirement). |
 
-**Overall confidence:** HIGH
-
-Research is based on established patterns in scientific Python community (ASE, MDAnalysis, cclib, RDKit all follow similar testing/packaging approaches) and analysis of existing codebase fragility points documented in CLAUDE.md.
+**Overall confidence:** HIGH for phases 1-6. MEDIUM for Phase 7 (PyVPT2) due to QCEngine adapter unknown.
 
 ### Gaps to Address
 
-- **MACE loading implementation details** — Phase 5 needs dedicated research on importlib.util patterns for isolated module loading and CUDA initialization state management. This is the only area where standard patterns don't directly apply due to custom package dependencies.
-
-- **Test coverage targets** — Research recommends pytest-cov but doesn't specify coverage targets. During Phase 1, establish pragmatic coverage goals (focus on parsers, mode matching, calculators — not necessarily 100%).
-
-- **Type checking strategy** — Research suggests keeping ty but switching to mypy if issues arise. Decision should be made during Phase 2-3 based on actual experience with ty during refactoring.
-
-- **Acetic acid bug resolution** — Documented in CLAUDE.md (commit a4384c4) but root cause unclear. Should be addressed during Phase 1 (testing) with a dedicated test case, but may need parser-specific research if the fix is non-obvious.
+- **Psience/McCoy Group VPT2 feasibility:** Can it ingest Gaussian .fchk cubic/quartic force constants? Needs a 2-hour hands-on spike before Phase 7 planning. If yes, more promising than PyVPT2 (no Psi4 dependency, pure Python). If no, same fundamental blocker.
+- **NIST coverage for benchmark molecules:** Not all 25 benchmark molecules will have gas-phase IR in NIST. Before committing Phase 4 to the HTML report, manually check coverage for the full molecule set.
+- **xTB dipole unit bug:** Listed as pending in PROJECT.md. Must be fixed before any intensity analysis involving xTB, and before Phase 7 (VPT2 with xTB dipoles). If xTB is not a thesis-critical calculator, block it with an explicit RuntimeError rather than fixing it in v1.2.
+- **Acoh parser bug scope:** Commit a4384c4 documents the failure. Needs a focused investigation at the start of Phase 1 before any new parsing code is layered on top.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- **Existing codebase analysis** — gm_main.py structure, CLAUDE.md documented fragility (monkey-patching, acetic acid bug), pyproject.toml current setup
-- **Scientific Python packaging norms** — ASE, MDAnalysis, cclib, RDKit all use pytest + fixtures + CI patterns documented in research
-- **pytest documentation** — testing strategy with fixtures for external dependencies (Gaussian .log/.fchk files)
-- **uv documentation** — modern Python packaging with pyproject.toml + lockfile
-- **ruff documentation** — rule expansion for code quality
+- Direct codebase analysis: `mace_gaussian/analysis/analyze_spectra.py`, `analysis_workflow.py`, `mode_matching.py`, `batch.py`, `slurm.py`, `workflow.py` — architecture integration points
+- [PyVPT2 paper (J. Chem. Phys. 162, 032501, 2025)](https://pubs.aip.org/aip/jcp/article/162/3/032501/3331711) — PyVPT2 capabilities and QCEngine interface; confirmed Psi4 hard dependency
+- [NIST Standard Reference Database 35](https://www.nist.gov/srd/nist-standard-reference-database-35) — JCAMP format and coverage (~5,228 gas-phase IR spectra)
+- [KTH Computational Chemistry broadening docs](https://kthpanor.github.io/echem/docs/visualize/broadening.html) — Lorentzian vs Gaussian broadening
 
 ### Secondary (MEDIUM confidence)
-- **MkDocs vs Sphinx trade-offs** — MkDocs is gaining ground but Sphinx still dominates scientific Python; either works for thesis scope
-- **Type checker selection** — ty is alpha but may be sufficient; mypy is more battle-tested but slower
+- [NistChemPy GitHub](https://github.com/IvanChernyshov/NistChemPy) — unofficial NIST WebBook scraper; MIT; updated March 2026
+- [jcamp PyPI](https://pypi.org/project/jcamp/) — JCAMP-DX parser v1.3.0
+- [MACE-OFF23 Composite IR (JCTC 2024)](https://pubs.acs.org/doi/10.1021/acs.jctc.4c01157) — ML+IR benchmark methodology and timing reporting conventions
+- [ORCA VPT2/GVPT2 Manual](https://orca-manual.mpi-muelheim.mpg.de/contents/spectroscopyproperties/vpt2.html) — Fermi resonance handling in VPT2
+- [AMS Vibrational Spectroscopy docs](https://www.scm.com/doc/AMS/Vibrational_Spectroscopy.html) — degenerate mode handling reference
 
 ### Tertiary (LOW confidence)
-- **MACE import isolation patterns** — will need Phase 5-specific research; existing research identifies problem but not solution details
-- **Test coverage targets** — no specific research on what coverage percentage is appropriate for scientific code; community practice varies
+- [Psience/VPT2 (McCoy Group)](https://github.com/McCoyGroup/Psience) — pure Python VPT2; may accept external force constants; needs hands-on investigation before relying on it
+- [Theoretical IR Spectra similarity (JCTC 2020)](https://pubs.acs.org/doi/10.1021/acs.jctc.0c00126) — spectral similarity scoring (SID/SIS); useful if quantitative ML-vs-experiment metrics are needed
 
 ---
-*Research completed: 2026-02-16*
+*Research completed: 2026-03-28*
 *Ready for roadmap: yes*
