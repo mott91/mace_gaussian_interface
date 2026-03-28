@@ -24,3 +24,26 @@
 **Archive:** `.planning/milestones/v1.0-ROADMAP.md`, `.planning/milestones/v1.0-REQUIREMENTS.md`, `.planning/milestones/v1.0-MILESTONE-AUDIT.md`
 
 ---
+
+## v1.1 — Batch Benchmarking & Calculator Expansion (Shipped: 2026-03-28)
+
+**Phases completed:** 8 phases (13–15), 16 plans
+**Requirements satisfied:** Core calculator expansion, batch runner, SLURM integration, batch report
+**Timeline:** Mar 2026 (~4 weeks)
+
+**Key accomplishments:**
+1. Added mace_off, mace_anicc, mace_polar as energy calculator options (7+ combos total)
+2. Autograd dipole derivatives + polarizability passthrough in MACEDipoleCalculator
+3. Scratch directory isolation for all Gaussian intermediate files
+4. Hungarian optimal mode matching (bijective 1-to-1 ML-to-DFT pairing)
+5. Frequency range coverage analysis with per-region error metrics
+6. Batch runner with manifest-driven per-calculator restart and PubChem fetcher
+7. SLURM DFT offloading via SSH/SCP with sacct polling
+
+**Deferred to v1.3:**
+- Phase 16: Benchmark campaign (~25 molecules × 7+ calculator combos)
+- Phase 17: Architecture & development docs update
+
+**Archive:** `.planning/milestones/v1.1-ROADMAP.md`, `.planning/milestones/v1.1-REQUIREMENTS.md`
+
+---

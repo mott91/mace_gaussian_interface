@@ -1,33 +1,33 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: — Batch Benchmarking & Calculator Expansion
-status: verifying
-stopped_at: Completed 15-02-PLAN.md (batch accuracy report)
-last_updated: "2026-03-27T20:07:23.005Z"
-last_activity: 2026-03-27
+milestone: v1.2
+milestone_name: — Analysis Quality Overhaul
+status: defining_requirements
+stopped_at: null
+last_updated: "2026-03-28T14:30:00.000Z"
+last_activity: 2026-03-28
 progress:
-  total_phases: 10
-  completed_phases: 8
-  total_plans: 16
-  completed_plans: 16
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-03)
+See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** Reliable, reproducible IR spectral predictions using ML potentials that can be validated against DFT reference data.
-**Current focus:** Phase 15 — SLURM Integration & Batch Report
+**Current focus:** Defining requirements for v1.2 — Analysis Quality Overhaul
 
 ## Current Position
 
-Phase: 16 of 17 (benchmark campaign execution)
-Plan: Not started
-Status: All plans complete — ready for verification
-Last activity: 2026-03-27
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-28 — Milestone v1.2 started
 
 ## Performance Metrics
 

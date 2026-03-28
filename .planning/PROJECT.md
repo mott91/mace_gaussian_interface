@@ -43,9 +43,9 @@ Reliable, reproducible IR spectral predictions using ML potentials that can be v
 - ✓ PubChem fetcher: `mace-gaussian fetch <name>` downloads 3D structure as XYZ — v1.1 Phase 14
 - ✓ HPC/SLURM: DFT baseline can be submitted to cluster via `--dft-on-cluster`, polled, and results retrieved automatically — v1.1 Phase 15
 - ✓ Batch report: multi-molecule HTML report with aggregated R², RMSE per calculator combination — v1.1 Phase 15
-- [ ] Benchmark campaign: systematic results for ~25 molecules (size-scaling + functional group series)
-- [ ] Bug fix: acetic acid (acoh) frequency parser corrected and xfail test promoted to passing
-- [ ] Docs update: ARCHITECTURE.md and DEVELOPMENT.md reflect current mace_gaussian/ package layout
+- [ ] Benchmark campaign: systematic results for ~25 molecules (size-scaling + functional group series) — deferred to v1.3
+- [ ] Bug fix: acetic acid (acoh) frequency parser corrected and xfail test promoted to passing — deferred to v1.3
+- [ ] Docs update: ARCHITECTURE.md and DEVELOPMENT.md reflect current mace_gaussian/ package layout — deferred to v1.3
 
 ### Out of Scope
 
@@ -58,16 +58,19 @@ Reliable, reproducible IR spectral predictions using ML potentials that can be v
 - `compare`/`export` CLI commands — stubs, deferred to v2
 - TorchANI/ANI-2x — defer until zero-effort calculator additions are validated and benchmark molecules chosen
 
-## Current Milestone: v1.1 — Batch Benchmarking & Calculator Expansion
+## Current Milestone: v1.2 — Analysis Quality Overhaul
 
-**Goal:** Expand from 4 to 7+ ML calculator combinations and run a systematic ~25-molecule benchmark campaign to answer the thesis question: does energy surface quality or dipole model quality dominate IR accuracy?
+**Goal:** Overhaul the anharmonic analysis pipeline, add spectral comparison capabilities, and fix data quality issues — so that the benchmark campaign (v1.3) produces thesis-ready results.
 
 **Target features:**
-- mace_off, mace_anicc, xTB as new energy/dipole options (near-zero code effort)
-- `mace-gaussian batch` command for multi-molecule pipelines with SLURM DFT offload
-- `mace-gaussian fetch` for PubChem structure retrieval
-- Systematic benchmark dataset + aggregated multi-molecule HTML report
-- Acoh parser bug fix + ARCHITECTURE/DEVELOPMENT.md doc update
+- Degenerate mode handling and zero-intensity filtering
+- Lorentzian broadening for IR spectra
+- Anharmonic analysis pipeline and report overhaul
+- VPT2 alternative research (PyVPT2 or similar) for comparison data
+- Automated experimental spectra comparison via NIST/SDBS
+- Mace_polar dipole calculator reevaluation
+- Wall-clock timing comparison (ML vs DFT)
+- Early SLURM DFT submission (parallel with local ML calcs)
 
 ## Context
 
@@ -102,4 +105,4 @@ Reliable, reproducible IR spectral predictions using ML potentials that can be v
 | ruff>=0.9.0 floor (not exact pin) in CI | Removes maintenance burden vs. exact pin | ✓ Good — aligned with dev dep declaration |
 
 ---
-*Last updated: 2026-03-27 after Phase 15 completion — SLURM integration & batch report*
+*Last updated: 2026-03-28 after milestone v1.2 start — Analysis Quality Overhaul*
