@@ -66,6 +66,7 @@ class ComparisonMetrics:
     num_dft_only: int  # Number of modes only in DFT (missing in ML)
     num_ml_only: int  # Number of modes only in ML (spurious)
     match_rate: float  # Fraction of DFT modes matched (num_matched / total_dft_modes)
+    num_intensity_filtered: int  # Modes excluded from intensity regression (DFT < 0.1 km/mol)
 
 
 class SpectrumAnalyzer:
@@ -511,6 +512,7 @@ class SpectrumAnalyzer:
                 num_dft_only=match_stats["dft_only"],
                 num_ml_only=match_stats["ml_only"],
                 match_rate=match_stats["match_rate"],
+                num_intensity_filtered=0,
             )
 
         # Frequency metrics
@@ -523,16 +525,30 @@ class SpectrumAnalyzer:
         slope_freq, intercept_freq, r_value_freq, _, _ = linregress(dft_freq, ml_freq)
         r2_freq = r_value_freq**2
 
-        # Intensity metrics
-        int_errors = ml_int - dft_int
-        mae_intensity = np.mean(np.abs(int_errors))
+        # Intensity metrics -- filter near-zero DFT modes per SPEC-02
+        INTENSITY_THRESHOLD = 0.1  # km/mol
+        int_mask = dft_int >= INTENSITY_THRESHOLD
+        num_intensity_filtered = int((~int_mask).sum())
+        dft_int_filtered = dft_int[int_mask]
+        ml_int_filtered = ml_int[int_mask]
 
-        # Regression for intensities (if intensities exist)
-        if len(dft_int) > 0 and np.any(dft_int > 0):
-            _, _, r_value_int, _, _ = linregress(dft_int, ml_int)
+        if len(dft_int_filtered) > 1:
+            int_errors = ml_int_filtered - dft_int_filtered
+            mae_intensity = np.mean(np.abs(int_errors))
+            _, _, r_value_int, _, _ = linregress(dft_int_filtered, ml_int_filtered)
             r2_intensity = r_value_int**2
-        else:
+        elif len(dft_int_filtered) == 1:
+            mae_intensity = float(np.abs(ml_int_filtered[0] - dft_int_filtered[0]))
             r2_intensity = 0.0
+        else:
+            mae_intensity = 0.0
+            r2_intensity = 0.0
+
+        if num_intensity_filtered > 0:
+            logger.info(
+                f"Filtered {num_intensity_filtered} modes with DFT intensity < "
+                f"{INTENSITY_THRESHOLD} km/mol from intensity regression"
+            )
 
         return ComparisonMetrics(
             mae_freq=mae_freq,
@@ -548,6 +564,7 @@ class SpectrumAnalyzer:
             num_dft_only=match_stats["dft_only"],
             num_ml_only=match_stats["ml_only"],
             match_rate=match_stats["match_rate"],
+            num_intensity_filtered=num_intensity_filtered,
         )
 
     def plot_spectra_comparison(
