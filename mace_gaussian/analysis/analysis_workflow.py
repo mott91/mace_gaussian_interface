@@ -70,6 +70,7 @@ class ComparisonWorkflow:
             dir_path.mkdir(parents=True, exist_ok=True)
 
         # Initialize analyzer
+        self.bandwidth_fwhm = 8.0
         self.analyzer = SpectrumAnalyzer(freq_range=(400, 4000), bandwidth_fwhm=8.0, freq_step=0.5)
 
         mode_str = "harmonic" if use_harmonic else "anharmonic"
@@ -780,7 +781,9 @@ class ComparisonWorkflow:
         from .html_report_generator import HTMLReportGenerator
 
         generator = HTMLReportGenerator(
-            molecule_name=self.molecule_name, output_dir=self.output_dir
+            molecule_name=self.molecule_name,
+            output_dir=self.output_dir,
+            bandwidth_fwhm=self.bandwidth_fwhm,
         )
 
         generator.generate_report(analysis_results)

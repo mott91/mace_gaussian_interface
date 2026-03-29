@@ -15,7 +15,7 @@ import pandas as pd
 class HTMLReportGenerator:
     """Generates HTML reports for spectral analysis"""
 
-    def __init__(self, molecule_name: str, output_dir: Path):
+    def __init__(self, molecule_name: str, output_dir: Path, bandwidth_fwhm: float = 10.0):
         """
         Initialize report generator
 
@@ -25,9 +25,12 @@ class HTMLReportGenerator:
             Name of molecule
         output_dir : Path
             Output directory containing plots and data
+        bandwidth_fwhm : float
+            Full width at half maximum used for Lorentzian broadening (cm-1)
         """
         self.molecule_name = molecule_name
         self.output_dir = Path(output_dir)
+        self.bandwidth_fwhm = bandwidth_fwhm
         self.plots_dir = self.output_dir / "plots"
         self.data_dir = self.output_dir / "data"
 
@@ -482,7 +485,10 @@ class HTMLReportGenerator:
                 This report compares machine learning (ML) force fields
                 against density functional theory (DFT) anharmonic calculations for IR spectroscopy.
                 All spectra include anharmonic fundamentals, overtones, and combination bands.
-                Broadening was applied using Gaussian convolution with 8 cm^-1 FWHM.
+                Broadening was applied using Lorentzian line shapes
+                with {self.bandwidth_fwhm} cm<sup>-1</sup> FWHM.
+                Modes with DFT IR intensity below 0.1 km/mol were excluded
+                from intensity regression metrics.
             </p>
         </section>
         """
