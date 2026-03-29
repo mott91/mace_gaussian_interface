@@ -2,7 +2,7 @@
 Comprehensive IR Spectral Analysis Script
 
 Analyzes ML vs DFT frequency calculations with:
-- Gaussian KDE broadening
+- Lorentzian broadening
 - Regression analysis
 - Statistical comparison
 - Beautiful scientific visualizations
@@ -74,7 +74,7 @@ class SpectrumAnalyzer:
     def __init__(
         self,
         freq_range: tuple[float, float] = (400, 4000),
-        bandwidth_fwhm: float = 8.0,
+        bandwidth_fwhm: float = 10.0,
         freq_step: float = 0.5,
     ):
         """
@@ -85,19 +85,13 @@ class SpectrumAnalyzer:
         freq_range : tuple
             Frequency range in cm^-1 (min, max)
         bandwidth_fwhm : float
-            Full width at half maximum for Gaussian broadening in cm^-1
+            Full width at half maximum for Lorentzian broadening in cm^-1
         freq_step : float
             Step size for frequency grid in cm^-1
         """
         self.freq_range = freq_range
         self.bandwidth_fwhm = bandwidth_fwhm
         self.freq_step = freq_step
-
-        # Convert FWHM to Gaussian broadening parameter
-        # FWHM = 2 * sqrt(2 * ln(2)) * sigma
-        # For our exp(-B * (x - x0)^2), B = 1/(2*sigma^2)
-        sigma = bandwidth_fwhm / (2 * np.sqrt(2 * np.log(2)))
-        self.broad_param = 1.0 / (2 * sigma**2)
 
         # Create frequency grid
         self.freq_grid = np.arange(freq_range[0], freq_range[1], freq_step)
@@ -323,7 +317,7 @@ class SpectrumAnalyzer:
 
     def broaden_spectrum(self, spectrum: SpectrumData) -> np.ndarray:
         """
-        Apply Gaussian broadening to discrete spectral lines
+        Apply Lorentzian broadening to discrete spectral lines
 
         Parameters
         ----------
@@ -336,15 +330,12 @@ class SpectrumAnalyzer:
             Broadened spectrum on frequency grid
         """
         broadened = np.zeros_like(self.freq_grid)
+        gamma = self.bandwidth_fwhm / 2.0
+        gamma_sq = gamma**2
 
         for freq, intensity in zip(spectrum.frequencies, spectrum.intensities):
-            # Calculate Gaussian contribution from this line
-            # I(v) = I_0 * exp(-B * (v - v_0)^2)
-            argument = -self.broad_param * (self.freq_grid - freq) ** 2
-
-            # Avoid numerical underflow
-            mask = argument > -50  # exp(-50) ~ 2e-22
-            broadened[mask] += intensity * np.exp(argument[mask])
+            lorentzian = gamma_sq / ((self.freq_grid - freq) ** 2 + gamma_sq)
+            broadened += intensity * lorentzian
 
         return broadened
 
