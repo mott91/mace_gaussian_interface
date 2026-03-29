@@ -36,6 +36,7 @@ class ComparisonWorkflow:
         base_results_dir: str = "comparison_results",
         output_dir: str = "analysis_results",
         use_harmonic: bool = False,
+        bandwidth_fwhm: float = 10.0,
     ):
         """
         Initialize workflow
@@ -70,7 +71,10 @@ class ComparisonWorkflow:
             dir_path.mkdir(parents=True, exist_ok=True)
 
         # Initialize analyzer
-        self.analyzer = SpectrumAnalyzer(freq_range=(400, 4000), bandwidth_fwhm=8.0, freq_step=0.5)
+        self.bandwidth_fwhm = bandwidth_fwhm
+        self.analyzer = SpectrumAnalyzer(
+            freq_range=(400, 4000), bandwidth_fwhm=bandwidth_fwhm, freq_step=0.5
+        )
 
         mode_str = "harmonic" if use_harmonic else "anharmonic"
         logger.info(f"Initialized workflow for {molecule_name} ({mode_str} mode)")
@@ -797,6 +801,7 @@ def analyze_molecule(
     base_results_dir: str = "comparison_results",
     output_dir: str = "analysis_results",
     use_harmonic: bool = False,
+    bandwidth_fwhm: float = 10.0,
 ) -> dict:
     """
     Convenience function to run complete analysis
@@ -822,6 +827,7 @@ def analyze_molecule(
         base_results_dir=base_results_dir,
         output_dir=output_dir,
         use_harmonic=use_harmonic,
+        bandwidth_fwhm=bandwidth_fwhm,
     )
 
     results = workflow.run_full_analysis()
@@ -834,6 +840,7 @@ def analyze_molecule_harmonic(
     molecule_name: str,
     base_results_dir: str = "comparison_results",
     output_dir: str = "analysis_results",
+    bandwidth_fwhm: float = 10.0,
 ) -> dict:
     """
     Convenience function to run harmonic-only analysis.
@@ -861,38 +868,32 @@ def analyze_molecule_harmonic(
         base_results_dir=base_results_dir,
         output_dir=output_dir,
         use_harmonic=True,
+        bandwidth_fwhm=bandwidth_fwhm,
     )
 
 
 def run_analysis_main() -> None:
     """Entry point for anharmonic IR spectral analysis (run_analysis.py shim target)."""
-    import sys
+    import argparse
 
-    if len(sys.argv) < 2:
-        print("=" * 60)
-        print("IR SPECTRAL ANALYSIS FRAMEWORK")
-        print("=" * 60)
-        print("\nUsage:")
-        print("  python run_analysis.py <molecule_name>")
-        print("\nExample:")
-        print("  python run_analysis.py acoh")
-        print("\nThis will:")
-        print("  1. Find DFT anharmonic baseline")
-        print("  2. Find all ML calculation results")
-        print("  3. Generate comparison plots")
-        print("  4. Calculate statistical metrics")
-        print("  5. Create HTML report")
-        print("\n" + "=" * 60)
-        sys.exit(1)
-
-    molecule_name = sys.argv[1]
+    parser = argparse.ArgumentParser(
+        description="IR Spectral Analysis - Anharmonic (fundamentals, overtones, combinations)"
+    )
+    parser.add_argument("molecule_name", help="Name of molecule to analyze")
+    parser.add_argument(
+        "--fwhm",
+        type=float,
+        default=10.0,
+        help="Full width at half maximum for Lorentzian broadening in cm-1 (default: 10.0)",
+    )
+    args = parser.parse_args()
 
     print("\n" + "=" * 60)
-    print(f"ANALYZING: {molecule_name.upper()}")
+    print(f"ANALYZING: {args.molecule_name.upper()}")
     print("=" * 60 + "\n")
 
     try:
-        results = analyze_molecule(molecule_name)
+        results = analyze_molecule(args.molecule_name, bandwidth_fwhm=args.fwhm)
 
         print("\n" + "=" * 60)
         print("SUCCESS!")
@@ -908,10 +909,12 @@ def run_analysis_main() -> None:
         print("=" * 60)
         print(f"\n{e}")
         print("\nMake sure you have:")
-        print(f"  - comparison_results/{molecule_name}/freq_anharm/results.json (DFT baseline)")
-        print(f"  - comparison_results/{molecule_name}/<calculator>/results.json (ML results)")
+        print(
+            f"  - comparison_results/{args.molecule_name}/freq_anharm/results.json (DFT baseline)"
+        )
+        print(f"  - comparison_results/{args.molecule_name}/<calculator>/results.json (ML results)")
         print("=" * 60 + "\n")
-        sys.exit(1)
+        raise SystemExit(1) from e
 
     except Exception as e:
         print("\n" + "=" * 60)
@@ -920,39 +923,31 @@ def run_analysis_main() -> None:
         print(f"\n{e}")
         print("\nCheck the logs above for details.")
         print("=" * 60 + "\n")
-        sys.exit(1)
+        raise SystemExit(1) from e
 
 
 def run_analysis_harmonic_main() -> None:
     """Entry point for harmonic IR spectral analysis (run_analysis_harmonic.py shim target)."""
-    import sys
+    import argparse
 
-    if len(sys.argv) < 2:
-        print("=" * 60)
-        print("HARMONIC-ONLY IR SPECTRAL ANALYSIS")
-        print("=" * 60)
-        print("\nUsage:")
-        print("  python run_analysis_harmonic.py <molecule_name>")
-        print("\nExample:")
-        print("  python run_analysis_harmonic.py water")
-        print("\nThis will:")
-        print("  1. Analyze ONLY harmonic fundamental frequencies")
-        print("  2. Use eigenvector dot product mode matching")
-        print("  3. Generate comparison plots (fundamentals only)")
-        print("  4. Create HTML report")
-        print("  5. Save to analysis_results_harmonic/")
-        print("\nNote: Overtones and combinations are excluded")
-        print("=" * 60)
-        sys.exit(1)
-
-    molecule_name = sys.argv[1]
+    parser = argparse.ArgumentParser(
+        description="IR Spectral Analysis - Harmonic Only (fundamentals with eigenvector matching)"
+    )
+    parser.add_argument("molecule_name", help="Name of molecule to analyze")
+    parser.add_argument(
+        "--fwhm",
+        type=float,
+        default=10.0,
+        help="Full width at half maximum for Lorentzian broadening in cm-1 (default: 10.0)",
+    )
+    args = parser.parse_args()
 
     print("\n" + "=" * 60)
-    print(f"HARMONIC ANALYSIS: {molecule_name.upper()}")
+    print(f"HARMONIC ANALYSIS: {args.molecule_name.upper()}")
     print("=" * 60 + "\n")
 
     try:
-        results = analyze_molecule_harmonic(molecule_name)
+        results = analyze_molecule_harmonic(args.molecule_name, bandwidth_fwhm=args.fwhm)
 
         print("\n" + "=" * 60)
         print("SUCCESS!")
@@ -968,10 +963,10 @@ def run_analysis_harmonic_main() -> None:
         print("=" * 60)
         print(f"\n{e}")
         print("\nMake sure you have:")
-        print(f"  - comparison_results/{molecule_name}/<dft>/results.json (DFT baseline)")
-        print(f"  - comparison_results/{molecule_name}/<calculator>/results.json (ML results)")
+        print(f"  - comparison_results/{args.molecule_name}/<dft>/results.json (DFT baseline)")
+        print(f"  - comparison_results/{args.molecule_name}/<calculator>/results.json (ML results)")
         print("=" * 60 + "\n")
-        sys.exit(1)
+        raise SystemExit(1) from e
 
     except Exception as e:
         print("\n" + "=" * 60)
@@ -980,7 +975,7 @@ def run_analysis_harmonic_main() -> None:
         print(f"\n{e}")
         print("\nCheck the logs above for details.")
         print("=" * 60 + "\n")
-        sys.exit(1)
+        raise SystemExit(1) from e
 
 
 if __name__ == "__main__":

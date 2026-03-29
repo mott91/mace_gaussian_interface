@@ -1327,7 +1327,7 @@ class SpectrumAnalyzer:
 def main():
     """Example usage"""
     # This will be expanded with full analysis workflow
-    SpectrumAnalyzer(freq_range=(400, 4000), bandwidth_fwhm=8.0, freq_step=0.5)
+    SpectrumAnalyzer(freq_range=(400, 4000), bandwidth_fwhm=10.0, freq_step=0.5)
 
     logger.info("Spectrum analyzer initialized successfully")
     print("\nTo use this analyzer, call the analysis functions with your data paths")
