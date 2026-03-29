@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: -- Analysis Quality Overhaul
 status: planning
-stopped_at: Phase 18 context gathered
-last_updated: "2026-03-28T14:52:00.818Z"
+stopped_at: Completed 18-01-PLAN.md
+last_updated: "2026-03-29T16:40:12.037Z"
 last_activity: 2026-03-28 -- v1.2 roadmap created (7 phases, 15 requirements)
 progress:
   total_phases: 7
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 2
+  completed_plans: 1
   percent: 0
 ---
 
@@ -60,6 +60,7 @@ Recent decisions affecting v1.2 work:
 - [v1.2 start]: NIST overlay uses nistchempy + jcamp (two new deps); best-effort, never blocks analysis
 - [v1.2 start]: VPT2 spike uses Psience (McCoy Group), not PyVPT2 (Psi4 hard dep blocks it)
 - [v1.2 start]: Phase numbering starts at 18 (16-17 reserved for deferred v1.3 work)
+- [Phase 18]: Lorentzian uses unnormalized form (peak = intensity) for IR broadening
 
 ### Pending Todos
 
@@ -73,6 +74,6 @@ Recent decisions affecting v1.2 work:
 
 ## Session Continuity
 
-Last session: 2026-03-28T14:52:00.814Z
-Stopped at: Phase 18 context gathered
-Resume file: .planning/phases/18-spectral-quality-foundations/18-CONTEXT.md
+Last session: 2026-03-29T16:40:12.034Z
+Stopped at: Completed 18-01-PLAN.md
+Resume file: None

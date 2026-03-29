@@ -72,7 +72,7 @@ Full archive: `.planning/milestones/v1.1-ROADMAP.md`, `.planning/milestones/v1.1
   4. The mace_polar dipole calculator failure mode is either fixed (produces correct dipole derivatives) or documented with explicit skip logic and a clear error message explaining why it fails
 **Plans**: 2 plans
 Plans:
-- [ ] 18-01-PLAN.md -- Lorentzian broadening, FWHM default change, CLI --fwhm wiring
+- [x] 18-01-PLAN.md -- Lorentzian broadening, FWHM default change, CLI --fwhm wiring
 - [ ] 18-02-PLAN.md -- Zero-intensity filtering for intensity regression, HTML report methodology update
 **UI hint**: yes
 **Note**: SPEC-03 (stick spectrum) deferred per D-01; PIPE-02 (mace_polar dipole) deferred per user request
@@ -189,7 +189,7 @@ Plans:
 | 13.5. MACE-POLAR-1 | v1.1 | 1/1 | Complete | 2026-03-23 |
 | 14. Batch Runner & PubChem | v1.1 | 2/2 | Complete | 2026-03-23 |
 | 15. SLURM & Batch Report | v1.1 | 2/2 | Complete | 2026-03-27 |
-| 18. Spectral Quality Foundations | v1.2 | 0/2 | Planning | - |
+| 18. Spectral Quality Foundations | v1.2 | 1/2 | In Progress|  |
 | 19. Degenerate Mode Handling | v1.2 | 0/TBD | Not started | - |
 | 20. Wall-Clock Timing | v1.2 | 0/TBD | Not started | - |
 | 21. NIST Experimental Overlay | v1.2 | 0/TBD | Not started | - |
