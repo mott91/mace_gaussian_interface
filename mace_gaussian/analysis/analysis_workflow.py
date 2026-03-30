@@ -784,7 +784,9 @@ class ComparisonWorkflow:
         from .html_report_generator import HTMLReportGenerator
 
         generator = HTMLReportGenerator(
-            molecule_name=self.molecule_name, output_dir=self.output_dir
+            molecule_name=self.molecule_name,
+            output_dir=self.output_dir,
+            bandwidth_fwhm=self.bandwidth_fwhm,
         )
 
         generator.generate_report(analysis_results)
