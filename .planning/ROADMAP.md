@@ -51,7 +51,7 @@ Full archive: `.planning/milestones/v1.1-ROADMAP.md`, `.planning/milestones/v1.1
 
 **Milestone Goal:** Overhaul the anharmonic analysis pipeline, add spectral comparison capabilities, and fix data quality issues -- so that the benchmark campaign (v1.3) produces thesis-ready results.
 
-- [ ] **Phase 18: Spectral Quality Foundations** - Lorentzian broadening, zero-intensity filtering, stick+broadened spectra, mace_polar dipole investigation
+- [x] **Phase 18: Spectral Quality Foundations** - Lorentzian broadening, zero-intensity filtering, stick+broadened spectra, mace_polar dipole investigation (completed 2026-03-30)
 - [ ] **Phase 19: Degenerate Mode Handling** - Subspace overlap for degenerate modes, correct statistics without double-counting
 - [ ] **Phase 20: Wall-Clock Timing** - Per-molecule per-calculator timing instrumentation and batch report timing table
 - [ ] **Phase 21: NIST Experimental Overlay** - Fetch, cache, and overlay experimental IR spectra from NIST WebBook
@@ -73,7 +73,7 @@ Full archive: `.planning/milestones/v1.1-ROADMAP.md`, `.planning/milestones/v1.1
 **Plans**: 2 plans
 Plans:
 - [x] 18-01-PLAN.md -- Lorentzian broadening, FWHM default change, CLI --fwhm wiring
-- [ ] 18-02-PLAN.md -- Zero-intensity filtering for intensity regression, HTML report methodology update
+- [x] 18-02-PLAN.md -- Zero-intensity filtering for intensity regression, HTML report methodology update
 **UI hint**: yes
 **Note**: SPEC-03 (stick spectrum) deferred per D-01; PIPE-02 (mace_polar dipole) deferred per user request
 
@@ -189,7 +189,7 @@ Plans:
 | 13.5. MACE-POLAR-1 | v1.1 | 1/1 | Complete | 2026-03-23 |
 | 14. Batch Runner & PubChem | v1.1 | 2/2 | Complete | 2026-03-23 |
 | 15. SLURM & Batch Report | v1.1 | 2/2 | Complete | 2026-03-27 |
-| 18. Spectral Quality Foundations | v1.2 | 1/2 | In Progress|  |
+| 18. Spectral Quality Foundations | v1.2 | 1/2 | Complete    | 2026-03-30 |
 | 19. Degenerate Mode Handling | v1.2 | 0/TBD | Not started | - |
 | 20. Wall-Clock Timing | v1.2 | 0/TBD | Not started | - |
 | 21. NIST Experimental Overlay | v1.2 | 0/TBD | Not started | - |

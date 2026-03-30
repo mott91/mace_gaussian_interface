@@ -70,8 +70,8 @@
 ### Spectral Quality
 
 - [x] **SPEC-01**: Simulated IR spectra use Lorentzian line shapes instead of Gaussian KDE, with configurable FWHM (default 10 cm-1)
-- [ ] **SPEC-02**: Modes with IR intensity below 0.1 km/mol are filtered from intensity regression metrics (but retained in frequency metrics)
-- [ ] **SPEC-03**: Analysis reports display both stick spectrum and broadened Lorentzian spectrum
+- [x] **SPEC-02**: Modes with IR intensity below 0.1 km/mol are filtered from intensity regression metrics (but retained in frequency metrics)
+- [ ] **SPEC-03**: Analysis reports display both stick spectrum and broadened Lorentzian spectrum (deferred per D-01)
 
 ### Mode Matching (v1.2)
 
@@ -172,9 +172,9 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | SPEC-01 | Phase 18 | Complete |
-| SPEC-02 | Phase 18 | Pending |
-| SPEC-03 | Phase 18 | Pending |
-| PIPE-02 | Phase 18 | Pending |
+| SPEC-02 | Phase 18 | Complete |
+| SPEC-03 | Phase 18 | Deferred (D-01) |
+| PIPE-02 | Phase 18 | Deferred (user request) |
 | MODE-05 | Phase 19 | Pending |
 | MODE-06 | Phase 19 | Pending |
 | TIME-01 | Phase 20 | Pending |
