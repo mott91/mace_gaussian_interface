@@ -47,7 +47,7 @@ Full archive: `.planning/milestones/v1.1-ROADMAP.md`, `.planning/milestones/v1.1
 
 ---
 
-### 🚧 v1.2 -- Analysis Quality Overhaul (In Progress)
+### v1.2 -- Analysis Quality Overhaul (In Progress)
 
 **Milestone Goal:** Overhaul the anharmonic analysis pipeline, add spectral comparison capabilities, and fix data quality issues -- so that the benchmark campaign (v1.3) produces thesis-ready results.
 
@@ -85,7 +85,10 @@ Plans:
   1. Degenerate modes (frequencies within 5 cm-1 threshold) are automatically detected and grouped in mode matching output
   2. Degenerate groups use subspace overlap (trace of M^T M / k) instead of individual eigenvector dot products, producing overlap scores that reflect true subspace alignment
   3. Mode matching statistics (average overlap, count of confident matches) correctly account for degenerate groups without double-counting individual modes within a group
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 19-01-PLAN.md -- Degenerate group detection, subspace overlap, group-aware statistics, parser fix
+- [ ] 19-02-PLAN.md -- Collapsed heatmaps, diamond-marker regression plots, HTML report labels
 
 ### Phase 20: Wall-Clock Timing
 **Goal**: Every pipeline run records wall-clock timing per stage, and batch reports include ML vs DFT cost comparison
@@ -141,7 +144,7 @@ Plans:
 
 ---
 
-### 📋 v1.3 -- Benchmark Campaign & Docs (Planned, deferred from v1.1)
+### v1.3 -- Benchmark Campaign & Docs (Planned, deferred from v1.1)
 
 ### Phase 16: Benchmark Campaign Execution
 **Goal**: A systematic ~25-molecule benchmark is run through the full pipeline with all 7+ calculator combinations, producing aggregated results that answer the thesis question about energy vs. dipole model dominance.
@@ -189,8 +192,8 @@ Plans:
 | 13.5. MACE-POLAR-1 | v1.1 | 1/1 | Complete | 2026-03-23 |
 | 14. Batch Runner & PubChem | v1.1 | 2/2 | Complete | 2026-03-23 |
 | 15. SLURM & Batch Report | v1.1 | 2/2 | Complete | 2026-03-27 |
-| 18. Spectral Quality Foundations | v1.2 | 1/2 | Complete    | 2026-03-30 |
-| 19. Degenerate Mode Handling | v1.2 | 0/TBD | Not started | - |
+| 18. Spectral Quality Foundations | v1.2 | 2/2 | Complete    | 2026-03-30 |
+| 19. Degenerate Mode Handling | v1.2 | 0/2 | Not started | - |
 | 20. Wall-Clock Timing | v1.2 | 0/TBD | Not started | - |
 | 21. NIST Experimental Overlay | v1.2 | 0/TBD | Not started | - |
 | 22. Early SLURM Submission | v1.2 | 0/TBD | Not started | - |
