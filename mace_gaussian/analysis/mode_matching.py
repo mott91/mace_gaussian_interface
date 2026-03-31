@@ -692,7 +692,7 @@ def build_degenerate_result(
     matches: dict[int, tuple[int | None, float]],
     alignment_matrix: np.ndarray,
     freqs_ref: np.ndarray,
-    threshold: float = 5.0,
+    threshold: float = 0.5,
 ) -> DegenerateGroupResult:
     """Build a DegenerateGroupResult from Hungarian matches and DFT frequencies.
 
