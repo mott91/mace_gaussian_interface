@@ -75,8 +75,8 @@
 
 ### Mode Matching (v1.2)
 
-- [ ] **MODE-05**: Degenerate modes (within 5 cm-1 threshold) are detected and grouped; subspace overlap (trace of M^T M / k) is used for matching quality
-- [ ] **MODE-06**: Mode matching statistics correctly handle degenerate groups without double-counting
+- [x] **MODE-05**: Degenerate modes (within 5 cm-1 threshold) are detected and grouped; subspace overlap (trace of M^T M / k) is used for matching quality
+- [x] **MODE-06**: Mode matching statistics correctly handle degenerate groups without double-counting
 
 ### Timing
 
@@ -175,8 +175,8 @@
 | SPEC-02 | Phase 18 | Pending |
 | SPEC-03 | Phase 18 | Pending |
 | PIPE-02 | Phase 18 | Pending |
-| MODE-05 | Phase 19 | Pending |
-| MODE-06 | Phase 19 | Pending |
+| MODE-05 | Phase 19 | Complete |
+| MODE-06 | Phase 19 | Complete |
 | TIME-01 | Phase 20 | Pending |
 | TIME-02 | Phase 20 | Pending |
 | NIST-01 | Phase 21 | Pending |
