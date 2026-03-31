@@ -495,6 +495,7 @@ class ComparisonWorkflow:
             save_path=str(regression_plot_path),
             mode_mapping=mode_mapping,
             mode_overlaps=mode_overlaps,
+            deg_result=deg_result,
         )
 
         # Create comparison table (also needs mode mapping and overlaps)
@@ -819,10 +820,32 @@ class ComparisonWorkflow:
         """
         from .html_report_generator import HTMLReportGenerator
 
+        # Collect degenerate group info from comparisons for the report
+        deg_groups_data: list[dict] = []
+        for comp in analysis_results.get("comparisons", []):
+            dr = comp.get("deg_result")
+            if dr is not None and hasattr(dr, "groups") and dr.groups:
+                for g in dr.groups:
+                    group_dict = {
+                        "label": (
+                            f"{g.symmetry_label} "
+                            f"({g.multiplicity}-fold) "
+                            f"at {g.center_frequency:.0f} cm\u207b\u00b9"
+                        ),
+                        "multiplicity": g.multiplicity,
+                        "subspace_overlap": g.subspace_overlap,
+                        "ref_indices": g.ref_indices,
+                    }
+                    # Avoid duplicate groups across comparisons
+                    if group_dict not in deg_groups_data:
+                        deg_groups_data.append(group_dict)
+                break  # Groups come from DFT ref, same across all ML calcs
+
         generator = HTMLReportGenerator(
             molecule_name=self.molecule_name,
             output_dir=self.output_dir,
             bandwidth_fwhm=self.bandwidth_fwhm,
+            degenerate_groups=deg_groups_data if deg_groups_data else None,
         )
 
         generator.generate_report(analysis_results)

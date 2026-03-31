@@ -20,6 +20,8 @@ import numpy as np
 import seaborn as sns
 from scipy.stats import linregress
 
+from .mode_matching import DegenerateGroupResult
+
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -712,6 +714,7 @@ class SpectrumAnalyzer:
         save_path: Optional[str] = None,
         mode_mapping: Optional[dict[int, int]] = None,
         mode_overlaps: Optional[dict[int, float]] = None,
+        deg_result: Optional[DegenerateGroupResult] = None,
     ) -> plt.Figure:
         """
         Create regression plot for frequency correlation with modern design
@@ -732,6 +735,8 @@ class SpectrumAnalyzer:
             Mapping from ML mode index to DFT mode index (from eigenvector matching)
         mode_overlaps : dict, optional
             Mapping from ML mode index to eigenvector overlap value (0-1)
+        deg_result : DegenerateGroupResult, optional
+            Degenerate group analysis result for group-aware markers
 
         Returns
         -------
@@ -740,6 +745,7 @@ class SpectrumAnalyzer:
         """
         # Modern color palette
         POINT_COLOR = "#5E81AC"  # Muted blue
+        DEG_COLOR = "#D08770"  # Warm orange for degenerate groups
         PERFECT_COLOR = "#4C566A"  # Dark gray
         FIT_COLOR = "#BF616A"  # Coral red
 
@@ -750,11 +756,15 @@ class SpectrumAnalyzer:
             dft_spectrum, ml_spectrum, mode_mapping=mode_mapping
         )
 
+        # Check if we have degenerate groups to display
+        has_deg_groups = (
+            deg_result is not None and hasattr(deg_result, "groups") and len(deg_result.groups) > 0
+        )
+
         # Build per-point confidence mask from mode_overlaps
         confident_mask = np.ones(len(dft_freq), dtype=bool)  # default: all confident
         if mode_overlaps is not None and mode_mapping is not None and len(dft_freq) > 0:
             # Reconstruct which ML mode indices contributed to each matched point
-            # match_by_mode iterates sorted(matched_modes) where matched_modes = dft_ids & ml_ids
             ml_mode_ids_remapped = []
             original_ml_indices = []
             for mode_id in ml_spectrum.mode_ids:
@@ -776,7 +786,7 @@ class SpectrumAnalyzer:
             ml_modes_set = set(ml_mode_ids_remapped)
             matched_modes = sorted(dft_modes_set & ml_modes_set)
 
-            # For each matched point, find the original ML mode index and look up overlap
+            # For each matched point, find the original ML mode index
             ml_mode_dict = {mid: i for i, mid in enumerate(ml_mode_ids_remapped)}
             for idx, mode_id in enumerate(matched_modes):
                 if mode_id.startswith("F") and mode_id in ml_mode_dict:
@@ -790,36 +800,73 @@ class SpectrumAnalyzer:
                         confident_mask[idx] = False
 
         # Panel A: Frequency correlation
-        if np.any(confident_mask):
-            ax1.scatter(
-                dft_freq[confident_mask],
-                ml_freq[confident_mask],
-                c=POINT_COLOR,
-                s=80,
-                alpha=0.7,
-                edgecolors="white",
-                linewidth=1.5,
-                zorder=3,
+        if has_deg_groups:
+            # Use group-aware regression data: degenerate groups get diamond markers
+            deg_dft_f, deg_ml_f, deg_dft_i, deg_ml_i, is_deg = deg_result.regression_data(
+                ml_spectrum.frequencies,
+                dft_spectrum.frequencies,
+                ml_spectrum.intensities,
+                dft_spectrum.intensities,
             )
-        if np.any(~confident_mask):
-            ax1.scatter(
-                dft_freq[~confident_mask],
-                ml_freq[~confident_mask],
-                facecolors="none",
-                edgecolors=POINT_COLOR,
-                s=80,
-                alpha=0.7,
-                linewidth=1.5,
-                zorder=3,
-                label="Low-overlap match",
-            )
+            non_deg = ~is_deg
+
+            # Non-degenerate: circles
+            if np.any(non_deg):
+                ax1.scatter(
+                    deg_dft_f[non_deg],
+                    deg_ml_f[non_deg],
+                    c=POINT_COLOR,
+                    s=80,
+                    alpha=0.7,
+                    edgecolors="white",
+                    linewidth=1.5,
+                    zorder=3,
+                )
+            # Degenerate groups: diamond markers
+            if np.any(is_deg):
+                ax1.scatter(
+                    deg_dft_f[is_deg],
+                    deg_ml_f[is_deg],
+                    marker="D",
+                    c=DEG_COLOR,
+                    s=100,
+                    alpha=0.8,
+                    edgecolors="white",
+                    linewidth=1.5,
+                    zorder=4,
+                    label="Degenerate group (avg)",
+                )
+        else:
+            # Standard scatter (no degenerate groups)
+            if np.any(confident_mask):
+                ax1.scatter(
+                    dft_freq[confident_mask],
+                    ml_freq[confident_mask],
+                    c=POINT_COLOR,
+                    s=80,
+                    alpha=0.7,
+                    edgecolors="white",
+                    linewidth=1.5,
+                    zorder=3,
+                )
+            if np.any(~confident_mask):
+                ax1.scatter(
+                    dft_freq[~confident_mask],
+                    ml_freq[~confident_mask],
+                    facecolors="none",
+                    edgecolors=POINT_COLOR,
+                    s=80,
+                    alpha=0.7,
+                    linewidth=1.5,
+                    zorder=3,
+                    label="Low-overlap match",
+                )
 
         # Perfect agreement line
         axis_min = self.freq_range[0]
         axis_max = self.freq_range[1]
         padding = (axis_max - axis_min) * 0.02
 
-        # Perfect agreement line across full range
         ax1.plot(
             [axis_min, axis_max],
             [axis_min, axis_max],
@@ -867,7 +914,11 @@ class SpectrumAnalyzer:
         textstr += f"$n$ = {metrics.num_peaks}"
 
         props = dict(
-            boxstyle="round,pad=0.8", facecolor="white", edgecolor="gray", alpha=0.9, linewidth=1.5
+            boxstyle="round,pad=0.8",
+            facecolor="white",
+            edgecolor="gray",
+            alpha=0.9,
+            linewidth=1.5,
         )
         ax1.text(
             0.05,
@@ -882,29 +933,56 @@ class SpectrumAnalyzer:
 
         # Panel B: Intensity correlation
         if len(dft_int) > 0 and np.max(dft_int) > 0:
-            if np.any(confident_mask):
-                ax2.scatter(
-                    dft_int[confident_mask],
-                    ml_int[confident_mask],
-                    c=POINT_COLOR,
-                    s=80,
-                    alpha=0.7,
-                    edgecolors="white",
-                    linewidth=1.5,
-                    zorder=3,
-                )
-            if np.any(~confident_mask):
-                ax2.scatter(
-                    dft_int[~confident_mask],
-                    ml_int[~confident_mask],
-                    facecolors="none",
-                    edgecolors=POINT_COLOR,
-                    s=80,
-                    alpha=0.7,
-                    linewidth=1.5,
-                    zorder=3,
-                    label="Low-overlap match",
-                )
+            if has_deg_groups:
+                non_deg = ~is_deg
+                if np.any(non_deg):
+                    ax2.scatter(
+                        deg_dft_i[non_deg],
+                        deg_ml_i[non_deg],
+                        c=POINT_COLOR,
+                        s=80,
+                        alpha=0.7,
+                        edgecolors="white",
+                        linewidth=1.5,
+                        zorder=3,
+                    )
+                if np.any(is_deg):
+                    ax2.scatter(
+                        deg_dft_i[is_deg],
+                        deg_ml_i[is_deg],
+                        marker="D",
+                        c=DEG_COLOR,
+                        s=100,
+                        alpha=0.8,
+                        edgecolors="white",
+                        linewidth=1.5,
+                        zorder=4,
+                        label="Degenerate group (avg)",
+                    )
+            else:
+                if np.any(confident_mask):
+                    ax2.scatter(
+                        dft_int[confident_mask],
+                        ml_int[confident_mask],
+                        c=POINT_COLOR,
+                        s=80,
+                        alpha=0.7,
+                        edgecolors="white",
+                        linewidth=1.5,
+                        zorder=3,
+                    )
+                if np.any(~confident_mask):
+                    ax2.scatter(
+                        dft_int[~confident_mask],
+                        ml_int[~confident_mask],
+                        facecolors="none",
+                        edgecolors=POINT_COLOR,
+                        s=80,
+                        alpha=0.7,
+                        linewidth=1.5,
+                        zorder=3,
+                        label="Low-overlap match",
+                    )
             ax2.set_aspect("equal", adjustable="box")
 
             # Perfect agreement line
