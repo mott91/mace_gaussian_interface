@@ -593,7 +593,7 @@ class DegenerateGroupResult:
 
 
 def detect_degenerate_groups(
-    ref_frequencies: np.ndarray, threshold: float = 5.0
+    ref_frequencies: np.ndarray, threshold: float = 0.5
 ) -> list[DegenerateGroup]:
     """Identify groups of nearly-degenerate modes in DFT reference frequencies.
 

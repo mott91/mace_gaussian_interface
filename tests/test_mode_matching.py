@@ -387,6 +387,15 @@ class TestDegenerateDetection:
         groups_out = detect_degenerate_groups(freqs_out, threshold=5.0)
         assert len(groups_out) == 0
 
+        # Exactly 0.5 cm-1 apart -> should form group
+        freqs_in = np.array([1000.0, 1000.5])
+        groups_in = detect_degenerate_groups(freqs_in, threshold=0.5)
+        assert len(groups_in) == 1
+
+        # 0.6 cm-1 apart -> should NOT form group
+        freqs_out = np.array([1000.0, 1000.6])
+        groups_out = detect_degenerate_groups(freqs_out, threshold=0.5)
+        assert len(groups_out) == 0
 
 class TestSubspaceOverlap:
     """Test subspace overlap computation via trace(M^T M) / k."""
