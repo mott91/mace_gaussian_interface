@@ -193,7 +193,7 @@ Plans:
 | 14. Batch Runner & PubChem | v1.1 | 2/2 | Complete | 2026-03-23 |
 | 15. SLURM & Batch Report | v1.1 | 2/2 | Complete | 2026-03-27 |
 | 18. Spectral Quality Foundations | v1.2 | 2/2 | Complete    | 2026-03-30 |
-| 19. Degenerate Mode Handling | v1.2 | 2/2 | Complete   | 2026-03-31 |
+| 19. Degenerate Mode Handling | v1.2 | 2/2 | Complete    | 2026-03-31 |
 | 20. Wall-Clock Timing | v1.2 | 0/TBD | Not started | - |
 | 21. NIST Experimental Overlay | v1.2 | 0/TBD | Not started | - |
 | 22. Early SLURM Submission | v1.2 | 0/TBD | Not started | - |
