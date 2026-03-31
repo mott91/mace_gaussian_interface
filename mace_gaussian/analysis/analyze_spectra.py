@@ -934,10 +934,14 @@ class SpectrumAnalyzer:
         # Panel B: Intensity correlation
         if len(dft_int) > 0 and np.max(dft_int) > 0:
             if has_deg_groups:
-                # Include all points for regression (no intensity filtering
-                # when degenerate groups are active)
-                int_included = np.ones(len(dft_int), dtype=bool)
-                non_deg = ~is_deg
+                # Apply intensity filtering to original arrays (for regression)
+                INTENSITY_THRESHOLD = 0.1
+                int_included = dft_int >= INTENSITY_THRESHOLD
+                # Filter degenerate arrays for scatter plot
+                deg_int_included = deg_dft_i >= INTENSITY_THRESHOLD
+                non_deg = ~is_deg & deg_int_included
+                deg_visible = is_deg & deg_int_included
+                deg_filtered = ~deg_int_included
                 if np.any(non_deg):
                     ax2.scatter(
                         deg_dft_i[non_deg],
@@ -949,10 +953,10 @@ class SpectrumAnalyzer:
                         linewidth=1.5,
                         zorder=3,
                     )
-                if np.any(is_deg):
+                if np.any(deg_visible):
                     ax2.scatter(
-                        deg_dft_i[is_deg],
-                        deg_ml_i[is_deg],
+                        deg_dft_i[deg_visible],
+                        deg_ml_i[deg_visible],
                         marker="D",
                         c=DEG_COLOR,
                         s=100,
@@ -961,6 +965,19 @@ class SpectrumAnalyzer:
                         linewidth=1.5,
                         zorder=4,
                         label="Degenerate group (avg)",
+                    )
+                if np.any(deg_filtered):
+                    ax2.scatter(
+                        deg_dft_i[deg_filtered],
+                        deg_ml_i[deg_filtered],
+                        c="#D8DEE9",
+                        s=50,
+                        alpha=0.5,
+                        edgecolors="#B0B8C4",
+                        linewidth=1.0,
+                        marker="D",
+                        zorder=2,
+                        label=f"Filtered (DFT < {INTENSITY_THRESHOLD} km/mol)",
                     )
             else:
                 # Separate filtered (DFT < 0.1 km/mol) from included points
