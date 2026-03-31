@@ -815,13 +815,21 @@ def collapse_alignment_matrix(
             is_calc_group = len(calc_idxs) > 1
 
             if is_ref_group and is_calc_group:
-                # Both grouped: find matching DegenerateGroup and use
-                # subspace overlap
+                # Both grouped: use precomputed subspace overlap only for
+                # matching groups (same ref indices); cross-group cells
+                # use max of sub-block
                 ref_set = set(ref_idxs)
+                calc_set = set(calc_idxs)
+                matched_group = None
                 for g in groups:
-                    if set(g.ref_indices) == ref_set:
-                        collapsed[ci, ri] = g.subspace_overlap
+                    if set(g.ref_indices) == ref_set and set(g.calc_indices) == calc_set:
+                        matched_group = g
                         break
+                if matched_group is not None:
+                    collapsed[ci, ri] = matched_group.subspace_overlap
+                else:
+                    sub = alignment_matrix[np.ix_(calc_idxs, ref_idxs)]
+                    collapsed[ci, ri] = float(np.max(sub))
             elif not is_ref_group and not is_calc_group:
                 # Both non-degenerate: copy from original
                 collapsed[ci, ri] = alignment_matrix[calc_idxs[0], ref_idxs[0]]
