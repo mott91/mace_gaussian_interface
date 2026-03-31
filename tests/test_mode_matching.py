@@ -12,9 +12,13 @@ import numpy as np
 import pytest
 
 from mace_gaussian.analysis.mode_matching import (
+    DegenerateGroup,
+    DegenerateGroupResult,
     compute_mode_overlap,
     compute_reduced_masses,
+    compute_subspace_overlap,
     create_alignment_matrix,
+    detect_degenerate_groups,
     match_modes,
     normalize_mode,
 )
@@ -322,3 +326,236 @@ class TestRealFchkModeMatching:
         assert good_matches >= 2, (
             f"Expected at least 2 modes with overlap > 0.5, got {good_matches}"
         )
+
+
+# ---------------------------------------------------------------------------
+# Degenerate mode detection tests (Phase 19)
+# ---------------------------------------------------------------------------
+
+
+class TestDegenerateDetection:
+    """Test detection of degenerate mode groups from DFT reference frequencies."""
+
+    def test_no_degenerate_groups(self):
+        """Frequencies well-separated (>5 cm-1) produce no degenerate groups."""
+        freqs = np.array([500.0, 1000.0, 1500.0, 2000.0])
+        groups = detect_degenerate_groups(freqs, threshold=5.0)
+        assert len(groups) == 0
+
+    def test_doubly_degenerate(self):
+        """Two frequencies within 5 cm-1 form a doubly degenerate E group."""
+        freqs = np.array([1000.0, 1003.0, 2000.0])
+        groups = detect_degenerate_groups(freqs, threshold=5.0)
+        assert len(groups) == 1
+        g = groups[0]
+        assert g.multiplicity == 2
+        assert g.symmetry_label == "E"
+        assert g.center_frequency == pytest.approx(1001.5, abs=0.1)
+        assert set(g.ref_indices) == {0, 1}
+
+    def test_triply_degenerate(self):
+        """Three frequencies within 5 cm-1 form a triply degenerate T group."""
+        freqs = np.array([1356.0, 1358.0, 1360.0, 3000.0])
+        groups = detect_degenerate_groups(freqs, threshold=5.0)
+        assert len(groups) == 1
+        g = groups[0]
+        assert g.multiplicity == 3
+        assert g.symmetry_label == "T"
+        assert g.center_frequency == pytest.approx(1358.0, abs=0.1)
+
+    def test_multiple_groups(self):
+        """Multiple degenerate groups detected correctly."""
+        freqs = np.array([500.0, 502.0, 1000.0, 1002.0, 1004.0, 2000.0])
+        groups = detect_degenerate_groups(freqs, threshold=5.0)
+        assert len(groups) == 2
+        # Sort by center frequency
+        groups_sorted = sorted(groups, key=lambda g: g.center_frequency)
+        assert groups_sorted[0].multiplicity == 2  # E at ~501
+        assert groups_sorted[0].symmetry_label == "E"
+        assert groups_sorted[1].multiplicity == 3  # T at ~1002
+        assert groups_sorted[1].symmetry_label == "T"
+
+    def test_threshold_boundary(self):
+        """Frequencies exactly at threshold boundary are included; just beyond are not."""
+        # Exactly 5 cm-1 apart -> should form group
+        freqs_in = np.array([1000.0, 1005.0])
+        groups_in = detect_degenerate_groups(freqs_in, threshold=5.0)
+        assert len(groups_in) == 1
+
+        # 6 cm-1 apart -> should NOT form group
+        freqs_out = np.array([1000.0, 1006.0])
+        groups_out = detect_degenerate_groups(freqs_out, threshold=5.0)
+        assert len(groups_out) == 0
+
+
+class TestSubspaceOverlap:
+    """Test subspace overlap computation via trace(M^T M) / k."""
+
+    def test_perfect_subspace(self):
+        """Identity-like sub-block gives overlap ~1.0."""
+        # 3x3 alignment matrix with perfect 2x2 sub-block for a doubly degenerate group
+        alignment = np.eye(3)
+        overlap = compute_subspace_overlap(alignment, calc_indices=[0, 1], ref_indices=[0, 1])
+        assert overlap == pytest.approx(1.0, abs=1e-10)
+
+    def test_orthogonal_subspace(self):
+        """Zero sub-block gives overlap 0.0."""
+        alignment = np.zeros((3, 3))
+        overlap = compute_subspace_overlap(alignment, calc_indices=[0, 1], ref_indices=[0, 1])
+        assert overlap == pytest.approx(0.0, abs=1e-10)
+
+    def test_partial_overlap(self):
+        """Known sub-block gives trace(M^T M)/k within expected range."""
+        # Create a 2x2 sub-block with known values
+        alignment = np.array(
+            [
+                [0.8, 0.3, 0.0],
+                [0.2, 0.9, 0.0],
+                [0.0, 0.0, 1.0],
+            ]
+        )
+        # Sub-block for indices [0,1] x [0,1]:
+        # M = [[0.8, 0.3], [0.2, 0.9]]
+        # M^T M = [[0.8*0.8+0.2*0.2, 0.8*0.3+0.2*0.9], [0.3*0.8+0.9*0.2, 0.3*0.3+0.9*0.9]]
+        #       = [[0.68, 0.42], [0.42, 0.90]]
+        # trace = 0.68 + 0.90 = 1.58
+        # overlap = 1.58 / 2 = 0.79
+        overlap = compute_subspace_overlap(alignment, calc_indices=[0, 1], ref_indices=[0, 1])
+        assert overlap == pytest.approx(0.79, abs=0.01)
+
+    def test_rotated_degenerate_pair(self):
+        """Two 2D modes rotated 45 deg within degenerate subspace give overlap ~1.0.
+
+        Individual dot products would be ~0.707, but subspace overlap should be ~1.0
+        because the subspace spanned is identical.
+        """
+        # DFT modes: [1,0] and [0,1] (standard basis)
+        # ML modes: [cos45, sin45] and [-sin45, cos45] (rotated 45 deg)
+        # The alignment matrix sub-block is the rotation matrix itself
+        c = np.cos(np.pi / 4)
+        s = np.sin(np.pi / 4)
+        alignment = np.array(
+            [
+                [c, s, 0.0],
+                [-s, c, 0.0],
+                [0.0, 0.0, 1.0],
+            ]
+        )
+        # Sub-block M = [[c, s], [-s, c]] which is orthogonal
+        # M^T M = I, trace = 2, overlap = 2/2 = 1.0
+        overlap = compute_subspace_overlap(alignment, calc_indices=[0, 1], ref_indices=[0, 1])
+        assert overlap == pytest.approx(1.0, abs=1e-10)
+
+    def test_empty_indices(self):
+        """Empty calc_indices returns 0.0."""
+        alignment = np.eye(3)
+        overlap = compute_subspace_overlap(alignment, calc_indices=[], ref_indices=[0, 1])
+        assert overlap == pytest.approx(0.0, abs=1e-10)
+
+
+class TestGroupAwareStatistics:
+    """Test DegenerateGroupResult.statistics() with group-aware counting."""
+
+    def test_statistics_count(self):
+        """5 non-degenerate + 1 triple group = 6 total units (not 8)."""
+        group = DegenerateGroup(
+            ref_indices=[5, 6, 7],
+            calc_indices=[5, 6, 7],
+            center_frequency=1356.0,
+            multiplicity=3,
+            symmetry_label="T",
+            subspace_overlap=0.95,
+        )
+        # Individual matches: 8 total modes (indices 0-7)
+        matches = {i: (i, 0.9) for i in range(8)}
+        result = DegenerateGroupResult(
+            individual_matches=matches,
+            groups=[group],
+            non_degenerate_indices=[0, 1, 2, 3, 4],
+        )
+        stats = result.statistics()
+        assert stats["total_units"] == 6  # 5 non-deg + 1 group
+
+    def test_average_overlap(self):
+        """Average overlap weighted correctly across groups and non-degenerate modes."""
+        group = DegenerateGroup(
+            ref_indices=[2, 3],
+            calc_indices=[2, 3],
+            center_frequency=1000.0,
+            multiplicity=2,
+            symmetry_label="E",
+            subspace_overlap=0.8,
+        )
+        # 2 non-degenerate modes with overlap 1.0 each, 1 group with overlap 0.8
+        matches = {0: (0, 1.0), 1: (1, 1.0), 2: (2, 0.7), 3: (3, 0.7)}
+        result = DegenerateGroupResult(
+            individual_matches=matches,
+            groups=[group],
+            non_degenerate_indices=[0, 1],
+        )
+        stats = result.statistics()
+        # avg = (1.0 + 1.0 + 0.8) / 3 = 0.933...
+        assert stats["avg_overlap"] == pytest.approx(2.8 / 3, abs=0.01)
+        # confident: 1.0 >= 0.5, 1.0 >= 0.5, 0.8 >= 0.5 -> 3
+        assert stats["confident_count"] == 3
+
+
+class TestGroupRegressionData:
+    """Test DegenerateGroupResult.regression_data() for group-averaged data points."""
+
+    def test_group_averaged(self):
+        """Triply degenerate group produces 1 data point with averaged freq/intensity."""
+        group = DegenerateGroup(
+            ref_indices=[0, 1, 2],
+            calc_indices=[0, 1, 2],
+            center_frequency=1358.0,
+            multiplicity=3,
+            symmetry_label="T",
+            subspace_overlap=0.95,
+        )
+        matches = {0: (0, 0.7), 1: (1, 0.7), 2: (2, 0.7), 3: (3, 0.9)}
+        result = DegenerateGroupResult(
+            individual_matches=matches,
+            groups=[group],
+            non_degenerate_indices=[3],
+        )
+        freqs_calc = np.array([1350.0, 1355.0, 1360.0, 3000.0])
+        freqs_ref = np.array([1356.0, 1358.0, 1360.0, 3050.0])
+        ints_calc = np.array([10.0, 12.0, 14.0, 50.0])
+        ints_ref = np.array([11.0, 13.0, 15.0, 55.0])
+
+        dft_f, ml_f, dft_i, ml_i, mask = result.regression_data(
+            freqs_calc, freqs_ref, ints_calc, ints_ref
+        )
+        # 1 group + 1 non-degenerate = 2 data points
+        assert len(dft_f) == 2
+        # The group-averaged point (could be first or second depending on order)
+        # Find which index is the degenerate one
+        deg_idx = np.where(mask)[0][0]
+        assert dft_f[deg_idx] == pytest.approx(np.mean([1356.0, 1358.0, 1360.0]), abs=0.1)
+        assert ml_f[deg_idx] == pytest.approx(np.mean([1350.0, 1355.0, 1360.0]), abs=0.1)
+        assert dft_i[deg_idx] == pytest.approx(np.mean([11.0, 13.0, 15.0]), abs=0.1)
+        assert ml_i[deg_idx] == pytest.approx(np.mean([10.0, 12.0, 14.0]), abs=0.1)
+
+    def test_non_degenerate_unchanged(self):
+        """Non-degenerate modes produce individual data points unchanged."""
+        matches = {0: (0, 0.9), 1: (1, 0.85)}
+        result = DegenerateGroupResult(
+            individual_matches=matches,
+            groups=[],
+            non_degenerate_indices=[0, 1],
+        )
+        freqs_calc = np.array([1000.0, 2000.0])
+        freqs_ref = np.array([1010.0, 2020.0])
+        ints_calc = np.array([30.0, 60.0])
+        ints_ref = np.array([35.0, 65.0])
+
+        dft_f, ml_f, dft_i, ml_i, mask = result.regression_data(
+            freqs_calc, freqs_ref, ints_calc, ints_ref
+        )
+        assert len(dft_f) == 2
+        assert not np.any(mask)  # No degenerate points
+        assert dft_f[0] == pytest.approx(1010.0)
+        assert ml_f[0] == pytest.approx(1000.0)
+        assert dft_i[0] == pytest.approx(35.0)
+        assert ml_i[0] == pytest.approx(30.0)

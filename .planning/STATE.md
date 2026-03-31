@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: -- Analysis Quality Overhaul
 status: planning
-stopped_at: Phase 19 context gathered
-last_updated: "2026-03-30T08:25:26.231Z"
-last_activity: 2026-03-30
+stopped_at: Completed 19-01-PLAN.md
+last_updated: "2026-03-31T09:09:39.573Z"
+last_activity: 2026-03-31
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 2
-  completed_plans: 2
+  completed_plans: 1
   percent: 0
 ---
 
@@ -61,6 +61,8 @@ Recent decisions affecting v1.2 work:
 - [v1.2 start]: VPT2 spike uses Psience (McCoy Group), not PyVPT2 (Psi4 hard dep blocks it)
 - [v1.2 start]: Phase numbering starts at 18 (16-17 reserved for deferred v1.3 work)
 - [Phase 18]: Lorentzian uses unnormalized form (peak = intensity) for IR broadening
+- [Phase 19]: Subspace overlap normalized by min(calc, ref) count for partial Hungarian matches
+- [Phase 19]: Block-level deduplication in parser replaces per-frequency deduplication
 
 ### Pending Todos
 
@@ -74,6 +76,6 @@ Recent decisions affecting v1.2 work:
 
 ## Session Continuity
 
-Last session: 2026-03-30T08:25:26.227Z
-Stopped at: Phase 19 context gathered
-Resume file: .planning/phases/19-degenerate-mode-handling/19-CONTEXT.md
+Last session: 2026-03-31T09:09:39.570Z
+Stopped at: Completed 19-01-PLAN.md
+Resume file: None

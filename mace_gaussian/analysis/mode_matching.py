@@ -12,6 +12,7 @@ Uses .fchk (formatted checkpoint) files from Gaussian for clean parsing.
 """
 
 import logging
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
@@ -209,9 +210,7 @@ def match_modes(
         if overlap >= threshold:
             logger.debug(f"Mode {r:3d} -> Ref mode {c:3d} (overlap: {overlap:.4f})")
         else:
-            logger.warning(
-                f"Mode {r:3d} -> Ref mode {c:3d} (low overlap: {overlap:.4f})"
-            )
+            logger.warning(f"Mode {r:3d} -> Ref mode {c:3d} (low overlap: {overlap:.4f})")
 
     # Unmatched calc modes (when n_calc > n_ref)
     for i in range(n_modes_calc):
@@ -461,6 +460,283 @@ def plot_mode_overlap_heatmap(
 
     plt.close()
     plt.style.use("default")  # Reset style
+
+
+# ---------------------------------------------------------------------------
+# Degenerate mode handling (Phase 19)
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class DegenerateGroup:
+    """A group of nearly-degenerate modes in the DFT reference.
+
+    Modes within a frequency threshold are grouped together. The subspace
+    overlap (trace(M^T M)/k) replaces individual dot-product overlaps for
+    these modes, avoiding misleadingly low scores when eigenvectors are
+    rotated within the degenerate subspace.
+    """
+
+    ref_indices: list[int]
+    calc_indices: list[int] = field(default_factory=list)
+    center_frequency: float = 0.0
+    multiplicity: int = 0
+    symmetry_label: str = ""
+    subspace_overlap: float = 0.0
+
+
+@dataclass
+class DegenerateGroupResult:
+    """Wraps Hungarian match results with degenerate group awareness.
+
+    Provides group-aware statistics and regression data where degenerate
+    groups count as single units (D-06) and produce averaged data points (D-07).
+    """
+
+    individual_matches: dict[int, tuple[int | None, float]]
+    groups: list[DegenerateGroup]
+    non_degenerate_indices: list[int]
+
+    def effective_overlap(self, ref_idx: int) -> float:
+        """Get overlap for a ref mode.
+
+        Returns group subspace overlap if degenerate, individual overlap otherwise.
+        """
+        for group in self.groups:
+            if ref_idx in group.ref_indices:
+                return group.subspace_overlap
+        # Non-degenerate: find the calc mode matched to this ref mode
+        for _calc_idx, (matched_ref, overlap) in self.individual_matches.items():
+            if matched_ref == ref_idx:
+                return overlap
+        return 0.0
+
+    def statistics(self) -> dict:
+        """Group-aware match statistics.
+
+        Returns dict with:
+        - total_units: number of non-degenerate modes + number of groups
+        - avg_overlap: mean of effective overlaps (one per unit)
+        - confident_count: units with effective overlap >= 0.5
+        """
+        overlaps = []
+        # One overlap per non-degenerate mode
+        for ref_idx in self.non_degenerate_indices:
+            overlaps.append(self.effective_overlap(ref_idx))
+        # One overlap per group
+        for group in self.groups:
+            overlaps.append(group.subspace_overlap)
+
+        total_units = len(overlaps)
+        avg_overlap = float(np.mean(overlaps)) if overlaps else 0.0
+        confident_count = sum(1 for o in overlaps if o >= 0.5)
+
+        return {
+            "total_units": total_units,
+            "avg_overlap": avg_overlap,
+            "confident_count": confident_count,
+        }
+
+    def regression_data(
+        self,
+        freqs_calc: np.ndarray,
+        freqs_ref: np.ndarray,
+        ints_calc: np.ndarray,
+        ints_ref: np.ndarray,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        """One data point per non-degenerate mode + one per group (averaged).
+
+        Returns (dft_freqs, ml_freqs, dft_ints, ml_ints, is_degenerate_mask).
+        For degenerate groups: mean of DFT/ML freqs and intensities in group.
+        """
+        dft_freqs_list = []
+        ml_freqs_list = []
+        dft_ints_list = []
+        ml_ints_list = []
+        is_deg_list = []
+
+        # Non-degenerate modes: individual data points
+        for ref_idx in self.non_degenerate_indices:
+            # Find the calc mode matched to this ref
+            calc_idx = None
+            for ci, (ri, _overlap) in self.individual_matches.items():
+                if ri == ref_idx:
+                    calc_idx = ci
+                    break
+            if calc_idx is not None:
+                dft_freqs_list.append(freqs_ref[ref_idx])
+                ml_freqs_list.append(freqs_calc[calc_idx])
+                dft_ints_list.append(ints_ref[ref_idx])
+                ml_ints_list.append(ints_calc[calc_idx])
+                is_deg_list.append(False)
+
+        # Degenerate groups: averaged data points
+        for group in self.groups:
+            if group.calc_indices:
+                dft_freqs_list.append(float(np.mean(freqs_ref[group.ref_indices])))
+                ml_freqs_list.append(float(np.mean(freqs_calc[group.calc_indices])))
+                dft_ints_list.append(float(np.mean(ints_ref[group.ref_indices])))
+                ml_ints_list.append(float(np.mean(ints_calc[group.calc_indices])))
+                is_deg_list.append(True)
+
+        return (
+            np.array(dft_freqs_list),
+            np.array(ml_freqs_list),
+            np.array(dft_ints_list),
+            np.array(ml_ints_list),
+            np.array(is_deg_list, dtype=bool),
+        )
+
+
+def detect_degenerate_groups(
+    ref_frequencies: np.ndarray, threshold: float = 5.0
+) -> list[DegenerateGroup]:
+    """Identify groups of nearly-degenerate modes in DFT reference frequencies.
+
+    Modes are grouped if consecutive frequencies (sorted) differ by <= threshold.
+    Groups of size 1 are non-degenerate and excluded from the result.
+
+    Parameters
+    ----------
+    ref_frequencies : np.ndarray
+        DFT reference frequencies in cm-1.
+    threshold : float
+        Maximum frequency difference (cm-1) to consider modes degenerate.
+
+    Returns
+    -------
+    List of DegenerateGroup with ref_indices, center_frequency, multiplicity,
+    and symmetry_label populated. calc_indices and subspace_overlap are left
+    at defaults (to be filled after Hungarian matching).
+    """
+    if len(ref_frequencies) == 0:
+        return []
+
+    sorted_indices = np.argsort(ref_frequencies)
+    sorted_freqs = ref_frequencies[sorted_indices]
+
+    groups: list[DegenerateGroup] = []
+    current_group = [int(sorted_indices[0])]
+
+    for i in range(1, len(sorted_freqs)):
+        if sorted_freqs[i] - sorted_freqs[i - 1] <= threshold:
+            current_group.append(int(sorted_indices[i]))
+        else:
+            if len(current_group) >= 2:
+                _add_degenerate_group(groups, current_group, ref_frequencies)
+            current_group = [int(sorted_indices[i])]
+
+    # Don't forget the last group
+    if len(current_group) >= 2:
+        _add_degenerate_group(groups, current_group, ref_frequencies)
+
+    return groups
+
+
+def _add_degenerate_group(
+    groups: list[DegenerateGroup],
+    indices: list[int],
+    freqs: np.ndarray,
+) -> None:
+    """Helper to create and append a DegenerateGroup."""
+    k = len(indices)
+    label = {2: "E", 3: "T"}.get(k, f"deg-{k}")
+    groups.append(
+        DegenerateGroup(
+            ref_indices=indices,
+            calc_indices=[],
+            center_frequency=float(np.mean(freqs[indices])),
+            multiplicity=k,
+            symmetry_label=label,
+            subspace_overlap=0.0,
+        )
+    )
+
+
+def compute_subspace_overlap(
+    alignment_matrix: np.ndarray,
+    calc_indices: list[int],
+    ref_indices: list[int],
+) -> float:
+    """Compute subspace overlap for a degenerate group.
+
+    Uses trace(M^T M) / k where M is the sub-block of the alignment matrix
+    and k = min(len(calc_indices), len(ref_indices)).
+
+    Parameters
+    ----------
+    alignment_matrix : np.ndarray
+        Full overlap matrix, shape (n_calc, n_ref).
+    calc_indices : list[int]
+        ML mode indices matched to this group.
+    ref_indices : list[int]
+        DFT mode indices in this group.
+
+    Returns
+    -------
+    Subspace overlap in [0, 1]. Value of 1 means perfect subspace alignment.
+    """
+    k = min(len(calc_indices), len(ref_indices))
+    if k == 0:
+        return 0.0
+
+    M = alignment_matrix[np.ix_(calc_indices, ref_indices)]
+    return float(np.trace(M.T @ M) / k)
+
+
+def build_degenerate_result(
+    matches: dict[int, tuple[int | None, float]],
+    alignment_matrix: np.ndarray,
+    freqs_ref: np.ndarray,
+    threshold: float = 5.0,
+) -> DegenerateGroupResult:
+    """Build a DegenerateGroupResult from Hungarian matches and DFT frequencies.
+
+    Detects degenerate groups, assigns calc indices from matches, computes
+    subspace overlap for each group, and identifies non-degenerate ref indices.
+
+    Parameters
+    ----------
+    matches : dict
+        From match_modes(): calc_idx -> (ref_idx | None, overlap).
+    alignment_matrix : np.ndarray
+        Full overlap matrix, shape (n_calc, n_ref).
+    freqs_ref : np.ndarray
+        DFT reference frequencies in cm-1.
+    threshold : float
+        Frequency threshold for degenerate grouping.
+
+    Returns
+    -------
+    DegenerateGroupResult with groups populated with calc_indices and
+    subspace_overlap values.
+    """
+    groups = detect_degenerate_groups(freqs_ref, threshold=threshold)
+
+    # Build reverse mapping: ref_idx -> calc_idx
+    ref_to_calc: dict[int, int] = {}
+    for calc_idx, (ref_idx, _overlap) in matches.items():
+        if ref_idx is not None:
+            ref_to_calc[ref_idx] = calc_idx
+
+    # Assign calc_indices and compute subspace overlap for each group
+    grouped_ref_indices: set[int] = set()
+    for group in groups:
+        group.calc_indices = [ref_to_calc[ri] for ri in group.ref_indices if ri in ref_to_calc]
+        group.subspace_overlap = compute_subspace_overlap(
+            alignment_matrix, group.calc_indices, group.ref_indices
+        )
+        grouped_ref_indices.update(group.ref_indices)
+
+    # Non-degenerate ref indices
+    all_ref_indices = set(range(len(freqs_ref)))
+    non_degenerate = sorted(all_ref_indices - grouped_ref_indices)
+
+    return DegenerateGroupResult(
+        individual_matches=matches,
+        groups=groups,
+        non_degenerate_indices=non_degenerate,
+    )
 
 
 # Example usage
