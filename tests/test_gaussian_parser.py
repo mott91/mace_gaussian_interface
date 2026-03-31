@@ -72,22 +72,23 @@ class TestParseHarmonicFrequencies:
             assert actual["freq_cm"] == pytest.approx(expected["freq_cm"], abs=0.01)
             assert actual["ir_intensity"] == pytest.approx(expected["ir_intensity"], abs=0.01)
 
-    def test_ch4_harmonic_degenerate_deduplication(self, ch4_dft_log):
-        """CH4 DFT has 9 vibrational modes (3*5-6), but the parser deduplicates
-        degenerate modes with identical (freq, intensity) pairs.
+    def test_ch4_harmonic_degenerate_preserved(self, ch4_dft_log):
+        """CH4 DFT has 9 vibrational modes (3*5-6=9). Degenerate modes are
+        preserved -- the parser deduplicates repeated frequency blocks (Gaussian
+        prints them twice for anharmonic calc) but keeps all modes within a block.
 
         CH4 symmetry (Td) produces:
-          - 3 triply-degenerate modes at 1356.19, 1578.57, 3162.41 cm-1
-          - 1 non-degenerate mode at 3046.54 cm-1
-          - 2 doubly-degenerate modes at 1578.57 cm-1 (IR-inactive, grouped with above)
-
-        The parser's seen_freqs set collapses all to 4 unique (freq, intensity) pairs.
+          - 1 A1 mode at 3046.54 cm-1
+          - 1 E mode (2-fold) at 1578.57 cm-1 (IR-inactive)
+          - 1 T2 mode (3-fold) at 1356.19 cm-1
+          - 1 T2 mode (3-fold) at 3162.41 cm-1
+          Total: 1 + 2 + 3 + 3 = 9 modes
         """
         parser = GaussianLogParser(ch4_dft_log)
         result = parser.parse_harmonic_frequencies()
 
-        # Parser returns 4 unique entries due to degenerate mode deduplication
-        assert len(result) == 4
+        # Parser preserves all 9 vibrational modes including degenerates
+        assert len(result) == 9
 
         # All frequencies must be positive (no imaginary modes)
         for entry in result:
@@ -97,7 +98,7 @@ class TestParseHarmonicFrequencies:
         "molecule,log_fixture,expected_unique_count",
         [
             ("water", "water_dft_log", 3),
-            ("CH4", "ch4_dft_log", 4),  # 9 modes -> 4 unique after dedup
+            ("CH4", "ch4_dft_log", 9),  # 9 modes preserved (degenerate modes kept)
         ],
     )
     def test_harmonic_mode_count_parametrized(
@@ -106,8 +107,8 @@ class TestParseHarmonicFrequencies:
         """Verify harmonic mode count per molecule.
 
         Gaussian logs repeat frequency blocks (initial + anharmonic pre-analysis).
-        The parser deduplicates via seen_freqs set. CH4 degenerate modes further
-        reduce the unique count from 9 to 4.
+        The parser deduplicates repeated blocks but preserves degenerate modes
+        within each block.
         """
         log_path = request.getfixturevalue(log_fixture)
         parser = GaussianLogParser(log_path)

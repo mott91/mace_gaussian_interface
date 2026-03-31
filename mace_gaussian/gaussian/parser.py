@@ -38,21 +38,20 @@ class GaussianLogParser:
         """
         Parse harmonic frequencies and IR intensities.
 
+        Deduplicates repeated frequency blocks (Gaussian prints frequencies twice
+        for anharmonic calculations) while preserving degenerate modes within a
+        single block that share identical (freq, intensity) values.
+
         Returns
         -------
         list of dict
             List of dictionaries with 'freq_cm' and 'ir_intensity' keys
         """
-        frequencies = []
-        seen_freqs = set()  # To avoid duplicates
-
-        # Look for the frequency section
-        # Pattern: "Frequencies --" followed by frequencies
-        # Then "IR Inten    --" followed by intensities
         freq_pattern = r"Frequencies\s+--\s+([\d\.\s]+)"
         ir_pattern = r"IR Inten\s+--\s+([\d\.\s]+)"
 
-        # Find all frequency blocks
+        # Collect all frequency blocks (each "Frequencies --" line is one block)
+        all_blocks: list[list[tuple[float, float]]] = []
         lines = self.content.split("\n")
 
         i = 0
@@ -60,34 +59,39 @@ class GaussianLogParser:
             line = lines[i]
 
             if "Frequencies --" in line:
-                # Extract frequencies from this line
                 freq_match = re.search(freq_pattern, line)
                 if freq_match:
                     freqs = [float(x) for x in freq_match.group(1).split()]
 
-                    # Look for corresponding IR intensities (usually a few lines below)
                     for j in range(i + 1, min(i + 10, len(lines))):
                         if "IR Inten" in lines[j]:
                             ir_match = re.search(ir_pattern, lines[j])
                             if ir_match:
                                 intensities = [float(x) for x in ir_match.group(1).split()]
-
-                                # Pair them up, avoiding duplicates
-                                for freq, intensity in zip(freqs, intensities):
-                                    freq_key = (round(freq, 4), round(intensity, 4))
-                                    if freq_key not in seen_freqs:
-                                        seen_freqs.add(freq_key)
-                                        frequencies.append(
-                                            {"freq_cm": freq, "ir_intensity": intensity}
-                                        )
-                                break
+                                block = list(zip(freqs, intensities))
+                                all_blocks.append(block)
+                            break
 
             i += 1
+
+        # Deduplicate repeated blocks while preserving degenerate modes.
+        # A block is identified by its rounded (freq, intensity) tuples.
+        # Identical blocks from repeated Gaussian output sections are dropped.
+        seen_block_keys: set[tuple[tuple[float, float], ...]] = set()
+        frequencies: list[dict[str, float]] = []
+
+        for block in all_blocks:
+            block_key = tuple((round(f, 4), round(it, 4)) for f, it in block)
+            if block_key not in seen_block_keys:
+                seen_block_keys.add(block_key)
+                for freq, intensity in block:
+                    frequencies.append({"freq_cm": freq, "ir_intensity": intensity})
 
         if not frequencies:
             raise GaussianParseError(
                 f"No harmonic frequencies found in {self.log_file}. "
-                "Check that the calculation completed normally with a frequency calculation."
+                "Check that the calculation completed normally "
+                "with a frequency calculation."
             )
 
         logger.info(f"Parsed {len(frequencies)} harmonic frequencies")
