@@ -17,6 +17,9 @@ import pandas as pd
 
 from .analyze_spectra import SpectrumAnalyzer, SpectrumData
 from .mode_matching import (
+    DegenerateGroupResult,
+    build_degenerate_result,
+    collapse_alignment_matrix,
     create_alignment_matrix,
     extract_mode_data_from_checkpoint,
     match_modes,
@@ -305,9 +308,10 @@ class ComparisonWorkflow:
 
     def extract_mode_mapping(
         self, ml_path: Path, dft_path: Path
-    ) -> Optional[tuple[dict[int, int], dict[int, float]]]:
+    ) -> Optional[tuple[dict[int, int], dict[int, float], DegenerateGroupResult]]:
         """
-        Extract mode mapping between ML and DFT calculations using eigenvector matching.
+        Extract mode mapping between ML and DFT calculations using eigenvector
+        matching, with degenerate group awareness.
 
         Parameters
         ----------
@@ -318,10 +322,11 @@ class ComparisonWorkflow:
 
         Returns
         -------
-        tuple of (dict, dict) or None
-            (mode_mapping, mode_overlaps) where:
+        tuple of (dict, dict, DegenerateGroupResult) or None
+            (mode_mapping, mode_overlaps, deg_result) where:
             - mode_mapping: ML mode index -> DFT mode index
             - mode_overlaps: ML mode index -> overlap value
+            - deg_result: degenerate group analysis result
             Returns None if .fchk files not found
         """
         try:
@@ -345,24 +350,25 @@ class ComparisonWorkflow:
             # Extract modes from checkpoints - USE HARMONIC MODES
             # For mode matching, we use harmonic eigenvectors since they are the
             # fundamental normal modes. Anharmonic modes include coupling/perturbations.
-            modes_ml, _, _, _, n_atoms_ml = extract_mode_data_from_checkpoint(
+            modes_ml, _freqs_ml, _, _, n_atoms_ml = extract_mode_data_from_checkpoint(
                 str(ml_fchk), force_harmonic=True
             )
-            modes_dft, _, _, _, n_atoms_dft = extract_mode_data_from_checkpoint(
+            modes_dft, freqs_dft, _, _, n_atoms_dft = extract_mode_data_from_checkpoint(
                 str(dft_fchk), force_harmonic=True
             )
-
-            # # COMMENTED OUT: Old code that used anharmonic modes (kept for reference)
-            # # This was using whatever modes were available (anharmonic if present)
-            # modes_ml, _, _, _, n_atoms_ml = extract_mode_data_from_checkpoint(str(ml_fchk))
-            # modes_dft, _, _, _, n_atoms_dft = extract_mode_data_from_checkpoint(str(dft_fchk))
 
             if n_atoms_ml != n_atoms_dft:
                 logger.warning(f"  Different number of atoms ({n_atoms_ml} vs {n_atoms_dft})")
                 return None
 
+            # Build alignment matrix (needed for subspace overlap)
+            alignment_matrix = create_alignment_matrix(modes_ml, modes_dft)
+
             # Match modes using eigenvector overlap
             matches = match_modes(modes_ml, modes_dft, threshold=0.5)
+
+            # Build degenerate group result
+            deg_result = build_degenerate_result(matches, alignment_matrix, freqs_dft)
 
             # Convert to mapping dicts (ml_idx -> dft_idx) and (ml_idx -> overlap)
             mode_mapping = {
@@ -376,8 +382,15 @@ class ComparisonWorkflow:
                 if dft_idx is not None
             }
 
-            logger.info(f"  Extracted mode mapping for {len(mode_mapping)} modes")
-            return (mode_mapping, mode_overlaps)
+            n_groups = len(deg_result.groups)
+            if n_groups > 0:
+                logger.info(
+                    f"  Extracted mode mapping for {len(mode_mapping)} modes "
+                    f"({n_groups} degenerate groups)"
+                )
+            else:
+                logger.info(f"  Extracted mode mapping for {len(mode_mapping)} modes")
+            return (mode_mapping, mode_overlaps, deg_result)
 
         except Exception as e:
             logger.warning(f"  Failed to extract mode mapping: {e}")
@@ -406,9 +419,9 @@ class ComparisonWorkflow:
         # Extract mode mapping from eigenvector matching
         mapping_result = self.extract_mode_mapping(ml_path, dft_path)
         if mapping_result is not None:
-            mode_mapping, mode_overlaps = mapping_result
+            mode_mapping, mode_overlaps, deg_result = mapping_result
         else:
-            mode_mapping, mode_overlaps = None, None
+            mode_mapping, mode_overlaps, deg_result = None, None, None
 
         # Extract spectra
         # HARMONIC MODE: Extract directly from .fchk files to get ALL degenerate modes
@@ -482,6 +495,7 @@ class ComparisonWorkflow:
             save_path=str(regression_plot_path),
             mode_mapping=mode_mapping,
             mode_overlaps=mode_overlaps,
+            deg_result=deg_result,
         )
 
         # Create comparison table (also needs mode mapping and overlaps)
@@ -516,6 +530,7 @@ class ComparisonWorkflow:
             "ml_spectrum": ml_spectrum,  # Store for combined plots
             "dft_spectrum": dft_spectrum,
             "mode_mapping": mode_mapping,  # Store mode mapping for combined plots
+            "deg_result": deg_result,  # Degenerate group analysis result
         }
 
     def create_combined_plots(self, comparisons: list[dict], dft_spectrum: SpectrumData):
@@ -624,18 +639,40 @@ class ComparisonWorkflow:
                 alignment_matrix = create_alignment_matrix(modes_ml, modes_dft)
                 matches = match_modes(modes_ml, modes_dft)
 
-                # Generate heatmap
+                # Check for degenerate groups and collapse heatmap if needed
+                deg_result = build_degenerate_result(matches, alignment_matrix, freqs_dft)
+
                 dft_baseline_name = dft_dir.name
                 output_file = self.plots_dir / f"mode_overlap_{ml_name}_vs_{dft_baseline_name}.png"
-                plot_mode_overlap_heatmap(
-                    alignment_matrix,
-                    output_file=str(output_file),
-                    calc_label="ML Calculation",
-                    ref_label="DFT Reference",
-                    freqs_calc=freqs_ml,
-                    freqs_ref=freqs_dft,
-                    matches=matches,
-                )
+
+                if deg_result.groups:
+                    # Collapse matrix for degenerate-aware heatmap
+                    collapsed, calc_labels, ref_labels = collapse_alignment_matrix(
+                        alignment_matrix,
+                        deg_result.groups,
+                        freqs_ml,
+                        freqs_dft,
+                        matches,
+                    )
+                    plot_mode_overlap_heatmap(
+                        collapsed,
+                        output_file=str(output_file),
+                        calc_label="ML Calculation",
+                        ref_label="DFT Reference",
+                        x_labels=ref_labels,
+                        y_labels=calc_labels,
+                    )
+                else:
+                    # No degenerate groups -- standard heatmap
+                    plot_mode_overlap_heatmap(
+                        alignment_matrix,
+                        output_file=str(output_file),
+                        calc_label="ML Calculation",
+                        ref_label="DFT Reference",
+                        freqs_calc=freqs_ml,
+                        freqs_ref=freqs_dft,
+                        matches=matches,
+                    )
 
                 logger.info(f"  ✓ Saved heatmap: {output_file.name}")
 
@@ -783,10 +820,32 @@ class ComparisonWorkflow:
         """
         from .html_report_generator import HTMLReportGenerator
 
+        # Collect degenerate group info from comparisons for the report
+        deg_groups_data: list[dict] = []
+        for comp in analysis_results.get("comparisons", []):
+            dr = comp.get("deg_result")
+            if dr is not None and hasattr(dr, "groups") and dr.groups:
+                for g in dr.groups:
+                    group_dict = {
+                        "label": (
+                            f"{g.symmetry_label} "
+                            f"({g.multiplicity}-fold) "
+                            f"at {g.center_frequency:.0f} cm\u207b\u00b9"
+                        ),
+                        "multiplicity": g.multiplicity,
+                        "subspace_overlap": g.subspace_overlap,
+                        "ref_indices": g.ref_indices,
+                    }
+                    # Avoid duplicate groups across comparisons
+                    if group_dict not in deg_groups_data:
+                        deg_groups_data.append(group_dict)
+                break  # Groups come from DFT ref, same across all ML calcs
+
         generator = HTMLReportGenerator(
             molecule_name=self.molecule_name,
             output_dir=self.output_dir,
             bandwidth_fwhm=self.bandwidth_fwhm,
+            degenerate_groups=deg_groups_data if deg_groups_data else None,
         )
 
         generator.generate_report(analysis_results)

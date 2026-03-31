@@ -15,7 +15,13 @@ import pandas as pd
 class HTMLReportGenerator:
     """Generates HTML reports for spectral analysis"""
 
-    def __init__(self, molecule_name: str, output_dir: Path, bandwidth_fwhm: float = 10.0):
+    def __init__(
+        self,
+        molecule_name: str,
+        output_dir: Path,
+        bandwidth_fwhm: float = 10.0,
+        degenerate_groups: list[dict] | None = None,
+    ):
         """
         Initialize report generator
 
@@ -27,10 +33,14 @@ class HTMLReportGenerator:
             Output directory containing plots and data
         bandwidth_fwhm : float
             Full width at half maximum used for Lorentzian broadening (cm-1)
+        degenerate_groups : list[dict], optional
+            Degenerate group info dicts with keys: label, multiplicity,
+            subspace_overlap, ref_indices
         """
         self.molecule_name = molecule_name
         self.output_dir = Path(output_dir)
         self.bandwidth_fwhm = bandwidth_fwhm
+        self.degenerate_groups = degenerate_groups or []
         self.plots_dir = self.output_dir / "plots"
         self.data_dir = self.output_dir / "data"
 
@@ -368,6 +378,53 @@ class HTMLReportGenerator:
 
         heatmaps_html = "\n".join(heatmap_sections)
 
+        # Build degenerate group summary if groups exist
+        deg_summary = ""
+        if self.degenerate_groups:
+            n_groups = len(self.degenerate_groups)
+            mult_counts: dict[int, int] = {}
+            for g in self.degenerate_groups:
+                m = g["multiplicity"]
+                mult_counts[m] = mult_counts.get(m, 0) + 1
+
+            parts_list = []
+            for m, count in sorted(mult_counts.items()):
+                fold_name = {2: "doubly", 3: "triply"}.get(m, f"{m}-fold")
+                parts_list.append(f"{count} {fold_name}")
+            summary_text = ", ".join(parts_list)
+
+            group_rows = ""
+            for g in self.degenerate_groups:
+                group_rows += (
+                    f"<tr>"
+                    f"<td><strong>{g['label']}</strong></td>"
+                    f"<td>{g['multiplicity']}-fold</td>"
+                    f"<td>{g['subspace_overlap']:.3f}</td>"
+                    f"</tr>\n"
+                )
+
+            deg_summary = f"""
+            <div style="padding: 15px; background: #e8f4fd; border-left: 4px solid #2196F3;
+                        margin-bottom: 20px; margin-top: 20px;">
+                <strong>{n_groups} degenerate group(s) detected</strong>
+                ({summary_text}).
+                Degenerate modes are collapsed into single rows/columns in the heatmap
+                using subspace overlap instead of individual dot products.
+            </div>
+            <table class="data-table" style="margin-bottom: 20px;">
+                <thead>
+                    <tr>
+                        <th>Group</th>
+                        <th>Multiplicity</th>
+                        <th>Subspace Overlap</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {group_rows}
+                </tbody>
+            </table>
+            """
+
         return f"""
         <section id="mode-overlap" class="comparison-section">
             <h2>Mode Matching Analysis</h2>
@@ -380,6 +437,8 @@ class HTMLReportGenerator:
                 <strong>Important:</strong> Off-diagonal red spots indicate mode reordering.
                 Perfect overlap = 1.00 (dark red), orthogonal modes = 0.00 (white).
             </div>
+
+            {deg_summary}
 
             {heatmaps_html}
         </section>

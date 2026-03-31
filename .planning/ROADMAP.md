@@ -52,7 +52,7 @@ Full archive: `.planning/milestones/v1.1-ROADMAP.md`, `.planning/milestones/v1.1
 **Milestone Goal:** Overhaul the anharmonic analysis pipeline, add spectral comparison capabilities, and fix data quality issues -- so that the benchmark campaign (v1.3) produces thesis-ready results.
 
 - [x] **Phase 18: Spectral Quality Foundations** - Lorentzian broadening, zero-intensity filtering, stick+broadened spectra, mace_polar dipole investigation (completed 2026-03-30)
-- [ ] **Phase 19: Degenerate Mode Handling** - Subspace overlap for degenerate modes, correct statistics without double-counting
+- [x] **Phase 19: Degenerate Mode Handling** - Subspace overlap for degenerate modes, correct statistics without double-counting (completed 2026-03-31)
 - [ ] **Phase 20: Wall-Clock Timing** - Per-molecule per-calculator timing instrumentation and batch report timing table
 - [ ] **Phase 21: NIST Experimental Overlay** - Fetch, cache, and overlay experimental IR spectra from NIST WebBook
 - [ ] **Phase 22: Early SLURM Submission** - Submit DFT jobs per-molecule immediately after geometry optimization
@@ -87,8 +87,8 @@ Plans:
   3. Mode matching statistics (average overlap, count of confident matches) correctly account for degenerate groups without double-counting individual modes within a group
 **Plans**: 2 plans
 Plans:
-- [ ] 19-01-PLAN.md -- Degenerate group detection, subspace overlap, group-aware statistics, parser fix
-- [ ] 19-02-PLAN.md -- Collapsed heatmaps, diamond-marker regression plots, HTML report labels
+- [x] 19-01-PLAN.md -- Degenerate group detection, subspace overlap, group-aware statistics, parser fix
+- [x] 19-02-PLAN.md -- Collapsed heatmaps, diamond-marker regression plots, HTML report labels
 
 ### Phase 20: Wall-Clock Timing
 **Goal**: Every pipeline run records wall-clock timing per stage, and batch reports include ML vs DFT cost comparison
@@ -193,7 +193,7 @@ Plans:
 | 14. Batch Runner & PubChem | v1.1 | 2/2 | Complete | 2026-03-23 |
 | 15. SLURM & Batch Report | v1.1 | 2/2 | Complete | 2026-03-27 |
 | 18. Spectral Quality Foundations | v1.2 | 2/2 | Complete    | 2026-03-30 |
-| 19. Degenerate Mode Handling | v1.2 | 0/2 | Not started | - |
+| 19. Degenerate Mode Handling | v1.2 | 2/2 | Complete   | 2026-03-31 |
 | 20. Wall-Clock Timing | v1.2 | 0/TBD | Not started | - |
 | 21. NIST Experimental Overlay | v1.2 | 0/TBD | Not started | - |
 | 22. Early SLURM Submission | v1.2 | 0/TBD | Not started | - |

@@ -258,6 +258,8 @@ def plot_mode_overlap_heatmap(
     freqs_calc: Optional[np.ndarray] = None,
     freqs_ref: Optional[np.ndarray] = None,
     matches: Optional[dict[int, tuple[int, float]]] = None,
+    x_labels: Optional[list[str]] = None,
+    y_labels: Optional[list[str]] = None,
 ) -> None:
     """
     Plot heatmap of mode overlap matrix with elegant pastel styling.
@@ -328,16 +330,18 @@ def plot_mode_overlap_heatmap(
     ax.set_xticks(np.arange(n_modes_ref))
     ax.set_yticks(np.arange(n_modes_calc))
 
-    # Create refined labels with frequencies
-    if freqs_ref is not None:
-        x_labels = [f"{i}\n{freqs_ref[i]:.0f}" for i in range(n_modes_ref)]
-    else:
-        x_labels = [f"{i}" for i in range(n_modes_ref)]
+    # Create refined labels with frequencies (use overrides if provided)
+    if x_labels is None:
+        if freqs_ref is not None:
+            x_labels = [f"{i}\n{freqs_ref[i]:.0f}" for i in range(n_modes_ref)]
+        else:
+            x_labels = [f"{i}" for i in range(n_modes_ref)]
 
-    if freqs_calc is not None:
-        y_labels = [f"{i}: {freqs_calc[i]:.0f}" for i in range(n_modes_calc)]
-    else:
-        y_labels = [f"{i}" for i in range(n_modes_calc)]
+    if y_labels is None:
+        if freqs_calc is not None:
+            y_labels = [f"{i}: {freqs_calc[i]:.0f}" for i in range(n_modes_calc)]
+        else:
+            y_labels = [f"{i}" for i in range(n_modes_calc)]
 
     ax.set_xticklabels(x_labels, fontsize=8.5, color="#4a4a4a", family="sans-serif")
     ax.set_yticklabels(y_labels, fontsize=8.5, color="#4a4a4a", family="sans-serif")
@@ -737,6 +741,99 @@ def build_degenerate_result(
         groups=groups,
         non_degenerate_indices=non_degenerate,
     )
+
+
+def collapse_alignment_matrix(
+    alignment_matrix: np.ndarray,
+    groups: list[DegenerateGroup],
+    freqs_calc: np.ndarray,
+    freqs_ref: np.ndarray,
+    matches: dict[int, tuple[int | None, float]],
+) -> tuple[np.ndarray, list[str], list[str]]:
+    """Collapse alignment matrix by merging degenerate groups into single entries.
+
+    Non-degenerate modes become individual rows/columns labeled by frequency.
+    Degenerate groups become single rows/columns labeled with symmetry and
+    center frequency (e.g. "T2 @1356"). Group cells use subspace overlap;
+    cross cells (one side group, other not) use max overlap from the sub-block.
+
+    Parameters
+    ----------
+    alignment_matrix : np.ndarray
+        Full overlap matrix, shape (n_calc, n_ref).
+    groups : list[DegenerateGroup]
+        Degenerate groups from build_degenerate_result().
+    freqs_calc : np.ndarray
+        ML calculation frequencies.
+    freqs_ref : np.ndarray
+        DFT reference frequencies.
+    matches : dict
+        Hungarian matches: calc_idx -> (ref_idx | None, overlap).
+
+    Returns
+    -------
+    (collapsed_matrix, calc_labels, ref_labels) where collapsed_matrix has
+    one row per calc entry and one column per ref entry.
+    """
+    n_calc = alignment_matrix.shape[0]
+    n_ref = alignment_matrix.shape[1]
+
+    # Build ref entries: (indices_list, label)
+    ref_entries: list[tuple[list[int], str]] = []
+    used_ref: set[int] = set()
+    for g in groups:
+        ref_entries.append((g.ref_indices, f"{g.symmetry_label} @{g.center_frequency:.0f}"))
+        used_ref.update(g.ref_indices)
+    for j in range(n_ref):
+        if j not in used_ref:
+            ref_entries.append(([j], f"{freqs_ref[j]:.0f}"))
+
+    # Build calc entries: (indices_list, label)
+    calc_entries: list[tuple[list[int], str]] = []
+    used_calc: set[int] = set()
+    for g in groups:
+        if g.calc_indices:
+            calc_entries.append(
+                (
+                    g.calc_indices,
+                    f"{g.symmetry_label} @{g.center_frequency:.0f}",
+                )
+            )
+            used_calc.update(g.calc_indices)
+    for i in range(n_calc):
+        if i not in used_calc:
+            calc_entries.append(([i], f"{freqs_calc[i]:.0f}"))
+
+    # Build collapsed matrix
+    n_rows = len(calc_entries)
+    n_cols = len(ref_entries)
+    collapsed = np.zeros((n_rows, n_cols))
+
+    for ri, (ref_idxs, _) in enumerate(ref_entries):
+        for ci, (calc_idxs, _) in enumerate(calc_entries):
+            is_ref_group = len(ref_idxs) > 1
+            is_calc_group = len(calc_idxs) > 1
+
+            if is_ref_group and is_calc_group:
+                # Both grouped: find matching DegenerateGroup and use
+                # subspace overlap
+                ref_set = set(ref_idxs)
+                for g in groups:
+                    if set(g.ref_indices) == ref_set:
+                        collapsed[ci, ri] = g.subspace_overlap
+                        break
+            elif not is_ref_group and not is_calc_group:
+                # Both non-degenerate: copy from original
+                collapsed[ci, ri] = alignment_matrix[calc_idxs[0], ref_idxs[0]]
+            else:
+                # Cross: one side group, other not -- use max of sub-block
+                sub = alignment_matrix[np.ix_(calc_idxs, ref_idxs)]
+                collapsed[ci, ri] = float(np.max(sub))
+
+    calc_labels = [label for _, label in calc_entries]
+    ref_labels = [label for _, label in ref_entries]
+
+    return collapsed, calc_labels, ref_labels
 
 
 # Example usage
