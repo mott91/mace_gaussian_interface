@@ -882,10 +882,18 @@ class SpectrumAnalyzer:
 
         # Panel B: Intensity correlation
         if len(dft_int) > 0 and np.max(dft_int) > 0:
-            if np.any(confident_mask):
+            # Separate filtered (DFT < 0.1 km/mol) from included points
+            INTENSITY_THRESHOLD = 0.1
+            int_included = dft_int >= INTENSITY_THRESHOLD
+            int_filtered = ~int_included
+
+            # Plot included points (solid, split by confidence)
+            included_confident = int_included & confident_mask
+            included_low = int_included & ~confident_mask
+            if np.any(included_confident):
                 ax2.scatter(
-                    dft_int[confident_mask],
-                    ml_int[confident_mask],
+                    dft_int[included_confident],
+                    ml_int[included_confident],
                     c=POINT_COLOR,
                     s=80,
                     alpha=0.7,
@@ -893,10 +901,10 @@ class SpectrumAnalyzer:
                     linewidth=1.5,
                     zorder=3,
                 )
-            if np.any(~confident_mask):
+            if np.any(included_low):
                 ax2.scatter(
-                    dft_int[~confident_mask],
-                    ml_int[~confident_mask],
+                    dft_int[included_low],
+                    ml_int[included_low],
                     facecolors="none",
                     edgecolors=POINT_COLOR,
                     s=80,
@@ -905,6 +913,22 @@ class SpectrumAnalyzer:
                     zorder=3,
                     label="Low-overlap match",
                 )
+
+            # Plot filtered points (gray, smaller, with distinct marker)
+            if np.any(int_filtered):
+                ax2.scatter(
+                    dft_int[int_filtered],
+                    ml_int[int_filtered],
+                    c="#D8DEE9",
+                    s=50,
+                    alpha=0.5,
+                    edgecolors="#B0B8C4",
+                    linewidth=1.0,
+                    marker="D",
+                    zorder=2,
+                    label=f"Filtered (DFT < {INTENSITY_THRESHOLD} km/mol)",
+                )
+
             ax2.set_aspect("equal", adjustable="box")
 
             # Perfect agreement line
@@ -921,6 +945,23 @@ class SpectrumAnalyzer:
                 zorder=1,
             )
 
+            # Regression fit line (on included points only)
+            dft_int_inc = dft_int[int_included]
+            ml_int_inc = ml_int[int_included]
+            if len(dft_int_inc) > 1:
+                slope_int, intercept_int, _, _, _ = linregress(dft_int_inc, ml_int_inc)
+                int_for_line = np.array([lim_min, lim_max])
+                regression_line_int = slope_int * int_for_line + intercept_int
+                ax2.plot(
+                    int_for_line,
+                    regression_line_int,
+                    color=FIT_COLOR,
+                    linewidth=2.5,
+                    alpha=0.8,
+                    label="Linear fit",
+                    zorder=2,
+                )
+
             ax2.set_xlabel("DFT Intensity (km/mol)", fontsize=12, fontweight="600")
             ax2.set_ylabel("ML Intensity (km/mol)", fontsize=12, fontweight="600")
             ax2.set_title("Intensity Correlation", fontsize=12, fontweight="bold", pad=12)
@@ -928,9 +969,13 @@ class SpectrumAnalyzer:
             ax2.spines["top"].set_visible(False)
             ax2.spines["right"].set_visible(False)
 
-            # Add R^2 for intensity
+            # Add statistics text box
+            n_included = int(int_included.sum())
             textstr = f"$R^2$ = {metrics.r2_intensity:.4f}\n"
-            textstr += f"MAE = {metrics.mae_intensity:.1f}"
+            textstr += f"MAE = {metrics.mae_intensity:.1f}\n"
+            textstr += f"$n$ = {n_included}"
+            if metrics.num_intensity_filtered > 0:
+                textstr += f" ({metrics.num_intensity_filtered} filtered)"
             ax2.text(
                 0.05,
                 0.95,
@@ -1270,6 +1315,10 @@ class SpectrumAnalyzer:
         # -----------------------------
         # PANEL B: INTENSITY CORRELATION
         # -----------------------------
+        INTENSITY_THRESHOLD = 0.1
+        all_dft_int_filtered = []
+        all_ml_int_filtered = []
+
         for idx, (ml_spectrum, ml_name, metrics, mode_mapping) in enumerate(
             zip(ml_spectra, ml_names, metrics_list, mode_mappings)
         ):
@@ -1281,23 +1330,64 @@ class SpectrumAnalyzer:
 
             color = colors[idx % len(colors)]
             marker = markers[idx % len(markers)]
-            # Format R² label based on number of peaks
-            if metrics.num_peaks < 3:
-                r2_label = f"{ml_name} (R²=N/A, N={metrics.num_peaks})"
+
+            # Separate included vs filtered points
+            int_included = dft_int >= INTENSITY_THRESHOLD
+            int_filtered = ~int_included
+
+            # Collect included points for fit line
+            all_dft_int_filtered.extend(dft_int[int_included])
+            all_ml_int_filtered.extend(ml_int[int_included])
+
+            n_inc = int(int_included.sum())
+            if n_inc < 3:
+                r2_label = f"{ml_name} (R²=N/A, n={n_inc})"
             else:
                 r2_label = f"{ml_name} (R²={metrics.r2_intensity:.3f})"
-            ax2.scatter(
-                dft_int,
-                ml_int,
-                c=color,
-                marker=marker,
-                s=80,
-                alpha=0.85,
-                edgecolors="white",
-                linewidth=1.2,
-                zorder=3,
-                label=r2_label,
-            )
+
+            # Plot included points
+            if np.any(int_included):
+                ax2.scatter(
+                    dft_int[int_included],
+                    ml_int[int_included],
+                    c=color,
+                    marker=marker,
+                    s=80,
+                    alpha=0.85,
+                    edgecolors="white",
+                    linewidth=1.2,
+                    zorder=3,
+                    label=r2_label,
+                )
+
+            # Plot filtered points (gray diamonds, no per-calculator legend noise)
+            if np.any(int_filtered):
+                ax2.scatter(
+                    dft_int[int_filtered],
+                    ml_int[int_filtered],
+                    c="#D8DEE9",
+                    marker="D",
+                    s=40,
+                    alpha=0.4,
+                    edgecolors="#B0B8C4",
+                    linewidth=0.8,
+                    zorder=2,
+                )
+
+        # Add single "Filtered" legend entry if any were plotted
+        if len(all_dft_int) > 0:
+            has_filtered = any(d < INTENSITY_THRESHOLD for d in all_dft_int)
+            if has_filtered:
+                ax2.scatter(
+                    [],
+                    [],
+                    c="#D8DEE9",
+                    marker="D",
+                    s=40,
+                    edgecolors="#B0B8C4",
+                    linewidth=0.8,
+                    label=f"Filtered (< {INTENSITY_THRESHOLD} km/mol)",
+                )
 
         if len(all_dft_int) > 0 and len(all_ml_int) > 0:
             lim_max = max(max(all_dft_int), max(all_ml_int)) * 1.05
@@ -1310,6 +1400,23 @@ class SpectrumAnalyzer:
                 alpha=0.35,
                 zorder=1,
             )
+
+            # Fit line on included points only
+            dft_inc = np.array(all_dft_int_filtered)
+            ml_inc = np.array(all_ml_int_filtered)
+            if len(dft_inc) > 1:
+                slope_int, intercept_int, _, _, _ = linregress(dft_inc, ml_inc)
+                int_for_line = np.array([0, lim_max])
+                ax2.plot(
+                    int_for_line,
+                    slope_int * int_for_line + intercept_int,
+                    color="#BF616A",
+                    linewidth=2.0,
+                    alpha=0.7,
+                    label="Linear fit",
+                    zorder=2,
+                )
+
             ax2.set_xlim(-lim_max * 0.05, lim_max)
             ax2.set_ylim(-lim_max * 0.05, lim_max)
 

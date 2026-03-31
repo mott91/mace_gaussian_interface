@@ -23,19 +23,19 @@
       {
         "mode": 1,
         "freq_cm": 3618.599,
-        "ir_intensity": 0.0,
+        "ir_intensity": 2.12139928,
         "freq_harmonic": 3780.244
       },
       {
         "mode": 2,
         "freq_cm": 1621.011,
-        "ir_intensity": 0.0,
+        "ir_intensity": 232.36928766,
         "freq_harmonic": 1650.589
       },
       {
         "mode": 3,
         "freq_cm": 3702.754,
-        "ir_intensity": 0.0,
+        "ir_intensity": 36.77542489,
         "freq_harmonic": 3889.003
       }
     ],
@@ -45,14 +45,14 @@
         "overtone_level": 2,
         "freq_harmonic": 7560.488,
         "freq_anharmonic": 7158.377,
-        "ir_intensity": 0.00470824
+        "ir_intensity": 0.00470821
       },
       {
         "mode": 2,
         "overtone_level": 2,
         "freq_harmonic": 3301.178,
         "freq_anharmonic": 3221.57,
-        "ir_intensity": 0.46750222
+        "ir_intensity": 0.46750187
       },
       {
         "mode": 3,
@@ -68,14 +68,14 @@
         "mode2": 1,
         "freq_harmonic": 5430.833,
         "freq_anharmonic": 5242.237,
-        "ir_intensity": 0.38954847
+        "ir_intensity": 0.38954882
       },
       {
         "mode1": 3,
         "mode2": 1,
         "freq_harmonic": 7669.247,
         "freq_anharmonic": 7153.08,
-        "ir_intensity": 6.69836
+        "ir_intensity": 6.69835979
       },
       {
         "mode1": 3,
@@ -89,14 +89,14 @@
         "mode2": 1,
         "freq_harmonic": 5430.833,
         "freq_anharmonic": 5242.237,
-        "ir_intensity": 0.29645052
+        "ir_intensity": 0.29645079
       },
       {
         "mode1": 3,
         "mode2": 1,
         "freq_harmonic": 7669.247,
         "freq_anharmonic": 7153.08,
-        "ir_intensity": 3.73579301
+        "ir_intensity": 3.73579288
       },
       {
         "mode1": 3,
@@ -108,13 +108,8 @@
     ]
   },
   "energy_eV": 0.09771608800934291,
-  "dipole": {
-    "x": 0.0,
-    "y": 0.0,
-    "z": -0.992578336975792,
-    "magnitude": 0.992578336975792
-  },
-  "runtime_s": 12.891903400421143,
+  "dipole": null,
+  "runtime_s": 12.789615154266357,
   "files": {
     "gaussian_log": "gaussian_freq.log",
     "gaussian_input": "gaussian_freq.gjf"
