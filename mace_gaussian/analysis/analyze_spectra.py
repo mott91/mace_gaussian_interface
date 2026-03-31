@@ -934,6 +934,9 @@ class SpectrumAnalyzer:
         # Panel B: Intensity correlation
         if len(dft_int) > 0 and np.max(dft_int) > 0:
             if has_deg_groups:
+                # Include all points for regression (no intensity filtering
+                # when degenerate groups are active)
+                int_included = np.ones(len(dft_int), dtype=bool)
                 non_deg = ~is_deg
                 if np.any(non_deg):
                     ax2.scatter(

@@ -256,8 +256,12 @@ def extract_modes_from_fchk(
     # Each mode has n_atoms * 3 values (x,y,z for each atom)
     modes = vib_modes.reshape(n_modes, n_atoms, 3)
 
-    # If frequencies weren't found, set to None
-    if frequencies is None:
+    # Trim frequencies to n_modes — Vib-E2 packs frequencies, reduced masses,
+    # force constants, IR intensities etc. into one array; only the first
+    # n_modes entries are the actual frequencies.
+    if frequencies is not None and len(frequencies) > n_modes:
+        frequencies = frequencies[:n_modes]
+    elif frequencies is None:
         frequencies = np.zeros(n_modes)
         logger.warning("Frequencies not available in .fchk file")
 
