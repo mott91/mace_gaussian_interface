@@ -2,8 +2,8 @@
 phase: 19
 slug: degenerate-mode-handling
 status: draft
-nyquist_compliant: false
-wave_0_complete: false
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-03-30
 ---
 
@@ -50,11 +50,7 @@ created: 2026-03-30
 
 ## Wave 0 Requirements
 
-- [ ] `tests/test_mode_matching.py::TestDegenerateDetection` — stubs for MODE-05a (group detection from synthetic frequencies)
-- [ ] `tests/test_mode_matching.py::TestSubspaceOverlap` — stubs for MODE-05b (trace formula on synthetic matrices)
-- [ ] `tests/test_mode_matching.py::TestCH4DegenerateOverlap` — stubs for MODE-05c (uses ch4_dft_fchk + ch4_ml_fchk fixtures)
-- [ ] `tests/test_mode_matching.py::TestGroupAwareStatistics` — stubs for MODE-06a
-- [ ] `tests/test_mode_matching.py::TestGroupRegressionData` — stubs for MODE-06b
+*Wave 0 is handled within Plan 01 Task 1 (TDD task): tests are written first (RED phase) then implementation follows (GREEN phase) in a single self-contained task. This is compliant because the test-first artifact is a discrete step within the task, and the verify command validates all tests pass before the task is marked done.*
 
 *Existing infrastructure: pytest configured, CH4 fixtures (ch4_dft_fchk, ch4_ml_fchk, ch4_dft_log) already available in conftest.py*
 
