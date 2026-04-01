@@ -25,6 +25,7 @@ from .mode_matching import (
     match_modes,
     plot_mode_overlap_heatmap,
 )
+from .nist_fetcher import ExperimentalSpectrum, fetch_experimental_spectrum
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -396,7 +397,13 @@ class ComparisonWorkflow:
             logger.warning(f"  Failed to extract mode mapping: {e}")
             return None
 
-    def run_single_comparison(self, ml_name: str, ml_path: Path, dft_path: Path) -> dict:
+    def run_single_comparison(
+        self,
+        ml_name: str,
+        ml_path: Path,
+        dft_path: Path,
+        experimental: ExperimentalSpectrum | None = None,
+    ) -> dict:
         """
         Run complete comparison for one ML calculator
 
@@ -484,6 +491,7 @@ class ComparisonWorkflow:
             ml_name,
             molecule_name=self.molecule_name,
             save_path=str(spectrum_plot_path),
+            experimental=experimental,
         )
 
         self.analyzer.plot_regression(
@@ -531,9 +539,15 @@ class ComparisonWorkflow:
             "dft_spectrum": dft_spectrum,
             "mode_mapping": mode_mapping,  # Store mode mapping for combined plots
             "deg_result": deg_result,  # Degenerate group analysis result
+            "experimental": experimental,
         }
 
-    def create_combined_plots(self, comparisons: list[dict], dft_spectrum: SpectrumData):
+    def create_combined_plots(
+        self,
+        comparisons: list[dict],
+        dft_spectrum: SpectrumData,
+        experimental: ExperimentalSpectrum | None = None,
+    ):
         """
         Create combined plots with all ML methods vs DFT
 
@@ -555,6 +569,7 @@ class ComparisonWorkflow:
             dft_spectrum=dft_spectrum,
             molecule_name=self.molecule_name,
             save_path=str(combined_spectrum_path),
+            experimental=experimental,
         )
 
         # Create extended combined spectrum plot (400-8000 cm⁻¹, includes overtones)
@@ -565,6 +580,7 @@ class ComparisonWorkflow:
             dft_spectrum=dft_spectrum,
             molecule_name=self.molecule_name,
             save_path=str(combined_spectrum_extended_path),
+            experimental=experimental,
         )
 
         # Create combined regression plot with mode mappings
@@ -751,11 +767,22 @@ class ComparisonWorkflow:
                 dft_results, include_overtones=True, include_combinations=True, use_harmonic=False
             )
 
+        # Fetch experimental spectrum from NIST (best-effort, per D-04/D-11)
+        experimental = fetch_experimental_spectrum(self.molecule_name, cache_dir=self.molecule_dir)
+        if experimental is not None:
+            logger.info(
+                f"Loaded experimental spectrum: {experimental.source} ({experimental.cas_number})"
+            )
+        else:
+            logger.info("No experimental spectrum available from NIST")
+
         # Run comparisons
         comparisons = []
         for ml_name, ml_path in ml_results:
             try:
-                result = self.run_single_comparison(ml_name, ml_path, dft_path)
+                result = self.run_single_comparison(
+                    ml_name, ml_path, dft_path, experimental=experimental
+                )
                 comparisons.append(result)
                 logger.info(
                     f"  [OK] {ml_name}: MAE={result['metrics'].mae_freq:.2f} cm^-1, "
@@ -768,7 +795,7 @@ class ComparisonWorkflow:
                 traceback.print_exc()
 
         # Create combined plots
-        self.create_combined_plots(comparisons, dft_spectrum)
+        self.create_combined_plots(comparisons, dft_spectrum, experimental=experimental)
 
         # Generate mode overlap heatmaps using the same DFT path
         self.generate_mode_overlap_heatmaps(ml_results, dft_path)
@@ -807,6 +834,7 @@ class ComparisonWorkflow:
             "comparisons": comparisons,
             "output_dir": self.output_dir,
             "has_combined_plots": True,
+            "experimental": experimental,
         }
 
     def generate_html_report(self, analysis_results: dict):
