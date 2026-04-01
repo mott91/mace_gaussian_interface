@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: -- Analysis Quality Overhaul
-status: completed
-stopped_at: Phase 21 context gathered
-last_updated: "2026-04-01T11:35:10.177Z"
-last_activity: 2026-03-31
+status: executing
+stopped_at: Completed 21-01-PLAN.md
+last_updated: "2026-04-01T13:11:08.230Z"
+last_activity: 2026-04-01
 progress:
   total_phases: 7
   completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
+  total_plans: 6
+  completed_plans: 5
   percent: 29
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** Reliable, reproducible IR spectral predictions using ML potentials that can be validated against DFT reference data.
-**Current focus:** Phase 19 — degenerate-mode-handling
+**Current focus:** Phase 21 — nist-experimental-overlay
 
 ## Current Position
 
-Phase: 20 of 24 (wall clock timing)
-Plan: Not started
-Status: Phase 19 complete
-Last activity: 2026-03-31
+Phase: 21 (nist-experimental-overlay) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-04-01
 
 Progress: [███░░░░░░░] 29%
 
@@ -63,6 +63,7 @@ Recent decisions affecting v1.2 work:
 - [Phase 18]: Lorentzian uses unnormalized form (peak = intensity) for IR broadening
 - [Phase 19]: Subspace overlap normalized by min(calc, ref) count for partial Hungarian matches
 - [Phase 19]: Block-level deduplication in parser replaces per-frequency deduplication
+- [Phase 21]: Gas-phase only NIST filter with first-match selection; raw JDX caching for provenance
 
 ### Pending Todos
 
@@ -76,6 +77,6 @@ Recent decisions affecting v1.2 work:
 
 ## Session Continuity
 
-Last session: 2026-04-01T11:35:10.173Z
-Stopped at: Phase 21 context gathered
-Resume file: .planning/phases/21-nist-experimental-overlay/21-CONTEXT.md
+Last session: 2026-04-01T13:11:08.227Z
+Stopped at: Completed 21-01-PLAN.md
+Resume file: None

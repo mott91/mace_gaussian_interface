@@ -85,7 +85,7 @@
 
 ### Experimental Comparison
 
-- [ ] **NIST-01**: User can fetch experimental IR spectrum from NIST WebBook by molecule name (cached locally)
+- [x] **NIST-01**: User can fetch experimental IR spectrum from NIST WebBook by molecule name (cached locally)
 - [ ] **NIST-02**: Analysis report overlays experimental spectrum on computed spectra plot when available
 - [ ] **NIST-03**: Quantitative peak position comparison (experimental vs computed) with error metrics
 
@@ -179,7 +179,7 @@
 | MODE-06 | Phase 19 | Complete |
 | TIME-01 | Phase 20 | Pending |
 | TIME-02 | Phase 20 | Pending |
-| NIST-01 | Phase 21 | Pending |
+| NIST-01 | Phase 21 | Complete |
 | NIST-02 | Phase 21 | Pending |
 | NIST-03 | Phase 21 | Pending |
 | PIPE-01 | Phase 22 | Pending |

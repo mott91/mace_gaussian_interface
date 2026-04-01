@@ -168,7 +168,7 @@ Plans:
 
 ## Progress
 
-**Execution Order:** 18 -> 19 -> 20 -> 21 -> 22 -> 23 -> 24
+**Execution Order:** 18 -> 19 -> 21 -> 20 -> 22 -> 23 -> 24 (Phase 20 deferred pending prof discussion on timing methodology)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -195,7 +195,7 @@ Plans:
 | 18. Spectral Quality Foundations | v1.2 | 2/2 | Complete    | 2026-03-30 |
 | 19. Degenerate Mode Handling | v1.2 | 2/2 | Complete    | 2026-03-31 |
 | 20. Wall-Clock Timing | v1.2 | 0/TBD | Not started | - |
-| 21. NIST Experimental Overlay | v1.2 | 0/TBD | Not started | - |
+| 21. NIST Experimental Overlay | v1.2 | 1/2 | In Progress|  |
 | 22. Early SLURM Submission | v1.2 | 0/TBD | Not started | - |
 | 23. Anharmonic Pipeline & Report | v1.2 | 0/TBD | Not started | - |
 | 24. VPT2 Research Spike | v1.2 | 0/TBD | Not started | - |
