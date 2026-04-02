@@ -5,11 +5,17 @@ Creates comprehensive, beautiful HTML reports with embedded plots,
 tables, and statistics for IR spectral analysis.
 """
 
+from __future__ import annotations
+
 import base64
 from datetime import datetime
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pandas as pd
+
+if TYPE_CHECKING:
+    from .nist_fetcher import ExperimentalSpectrum
 
 
 class HTMLReportGenerator:
@@ -758,6 +764,32 @@ class HTMLReportGenerator:
         </footer>
         """
 
+    def create_experimental_section(self, experimental: ExperimentalSpectrum | None) -> str:
+        """Create section showing experimental data source info."""
+        if experimental is None:
+            return ""
+        return f"""
+        <section id="experimental" class="comparison-section">
+            <h2>Experimental Reference Data</h2>
+            <div style="padding: 15px; background: #f0f8ff; border-left: 4px solid #2E86C1;
+                        margin-bottom: 20px;">
+                <p><strong>Source:</strong> {experimental.source}</p>
+                <p><strong>Molecule:</strong> {experimental.molecule_name}</p>
+                <p><strong>CAS Number:</strong> {experimental.cas_number}</p>
+                <p style="color: #666; font-size: 0.9em; margin-top: 10px;">
+                    Experimental IR spectrum overlaid as black dashed line on all spectrum
+                    plots above.
+                    Data range: {experimental.wavenumbers[0]:.0f}
+                    - {experimental.wavenumbers[-1]:.0f} cm&#8315;&#185;
+                </p>
+            </div>
+            <p style="color: #888; font-size: 0.85em;">
+                Note: Quantitative peak position comparison (MAE, RMSE) will be added
+                in a future phase.
+            </p>
+        </section>
+        """
+
     def generate_report(self, analysis_results: dict):
         """
         Generate complete HTML report
@@ -768,6 +800,7 @@ class HTMLReportGenerator:
             Results from comparison workflow
         """
         comparisons = analysis_results["comparisons"]
+        experimental = analysis_results.get("experimental")
 
         html_parts = [
             "<!DOCTYPE html>",
@@ -790,6 +823,9 @@ class HTMLReportGenerator:
         # Add comparison sections (now includes mode overlap heatmaps within each section)
         for i, comp in enumerate(comparisons, 1):
             html_parts.append(self.create_comparison_section(comp, i))
+
+        # Add experimental section (after comparisons, before summary)
+        html_parts.append(self.create_experimental_section(experimental))
 
         # Add summary and footer
         html_parts.extend(
