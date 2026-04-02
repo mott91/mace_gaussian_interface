@@ -30,6 +30,8 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
+from .nist_fetcher import fetch_experimental_spectrum
+
 logger = logging.getLogger(__name__)
 
 DPI = 300
@@ -356,6 +358,42 @@ def _plot_spectrum_overlay(
         linefmt="k-", markerfmt="ko", basefmt="k-",
         label="DFT (B3LYP/6-31G(d,p))",
     )
+
+    # Load experimental spectrum if cached (best-effort, per D-13)
+    try:
+        experimental = fetch_experimental_spectrum(molecule, cache_dir=mol_dir)
+    except Exception:
+        experimental = None
+
+    if experimental is not None:
+        # Filter to plot range
+        mask = (experimental.wavenumbers >= 400) & (experimental.wavenumbers <= 4200)
+        if np.sum(mask) > 0:
+            from scipy.interpolate import interp1d
+
+            exp_interp = interp1d(
+                experimental.wavenumbers[mask],
+                experimental.absorbance[mask],
+                kind="linear",
+                bounds_error=False,
+                fill_value=0.0,
+            )
+            # Scale experimental to DFT intensity range for visual comparison
+            dft_int_max = max(dft_ints) if dft_ints else 1.0
+            freq_grid = np.linspace(400, 4200, 1000)
+            exp_on_grid = exp_interp(freq_grid)
+            exp_max = np.max(exp_on_grid)
+            exp_scaled = exp_on_grid * dft_int_max / exp_max if exp_max > 0 else exp_on_grid
+            ax.plot(
+                freq_grid,
+                exp_scaled,
+                color="#000000",
+                linestyle="--",
+                linewidth=1.2,
+                label=f"Experimental ({experimental.source})",
+                alpha=0.6,
+                zorder=3,
+            )
 
     # Plot each ML combo
     color_idx = 0

@@ -664,10 +664,7 @@ class SpectrumAnalyzer:
                 exp_on_grid = exp_interp(self.freq_grid)
                 # Normalize to [0, 1] range (may already be normalized, but ensure)
                 exp_max = np.max(exp_on_grid)
-                if exp_max > 0:
-                    exp_norm = exp_on_grid / exp_max
-                else:
-                    exp_norm = exp_on_grid
+                exp_norm = exp_on_grid / exp_max if exp_max > 0 else exp_on_grid
                 # Plot on DFT baseline (no offset) as black dashed line
                 ax1.plot(
                     self.freq_grid,
