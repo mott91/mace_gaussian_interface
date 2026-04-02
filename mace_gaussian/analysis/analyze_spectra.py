@@ -9,11 +9,13 @@ Analyzes ML vs DFT frequency calculations with:
 - HTML report generation
 """
 
+from __future__ import annotations
+
 import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -21,6 +23,9 @@ import seaborn as sns
 from scipy.stats import linregress
 
 from .mode_matching import DegenerateGroupResult
+
+if TYPE_CHECKING:
+    from .nist_fetcher import ExperimentalSpectrum
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -567,6 +572,7 @@ class SpectrumAnalyzer:
         ml_name: str,
         molecule_name: str | None = None,
         save_path: Optional[str] = None,
+        experimental: ExperimentalSpectrum | None = None,
     ) -> plt.Figure:
         """
         Create comparison plot of broadened spectra with modern design
@@ -638,6 +644,41 @@ class SpectrumAnalyzer:
         # Fill under curves for better visibility
         ax1.fill_between(self.freq_grid, 0, dft_norm, color=DFT_COLOR, alpha=0.1)
         ax1.fill_between(self.freq_grid, offset, ml_norm + offset, color=ML_COLOR, alpha=0.15)
+
+        # Overlay experimental spectrum if available (D-07, D-08, D-09)
+        if experimental is not None:
+            from scipy.interpolate import interp1d
+
+            # Clip to our frequency range
+            mask = (experimental.wavenumbers >= self.freq_range[0]) & (
+                experimental.wavenumbers <= self.freq_range[1]
+            )
+            if np.sum(mask) > 1:
+                exp_interp = interp1d(
+                    experimental.wavenumbers[mask],
+                    experimental.absorbance[mask],
+                    kind="linear",
+                    bounds_error=False,
+                    fill_value=0.0,
+                )
+                exp_on_grid = exp_interp(self.freq_grid)
+                # Normalize to [0, 1] range (may already be normalized, but ensure)
+                exp_max = np.max(exp_on_grid)
+                if exp_max > 0:
+                    exp_norm = exp_on_grid / exp_max
+                else:
+                    exp_norm = exp_on_grid
+                # Plot on DFT baseline (no offset) as black dashed line
+                ax1.plot(
+                    self.freq_grid,
+                    exp_norm,
+                    linewidth=1.5,
+                    color="#000000",
+                    linestyle="--",
+                    label=f"Experimental ({experimental.source})",
+                    alpha=0.7,
+                    zorder=5,
+                )
 
         # Add separation line
         ax1.axhline(y=offset, color="gray", linewidth=0.8, linestyle="--", alpha=0.3)
