@@ -1146,6 +1146,7 @@ class SpectrumAnalyzer:
         dft_spectrum: SpectrumData,
         molecule_name: str | None = None,
         save_path: Optional[str] = None,
+        experimental: ExperimentalSpectrum | None = None,
     ) -> plt.Figure:
         """
         Create combined spectrum plot with all ML methods vs DFT,
@@ -1176,6 +1177,35 @@ class SpectrumAnalyzer:
             alpha=0.9,
             zorder=10,
         )
+
+        # Overlay experimental spectrum if available
+        if experimental is not None:
+            from scipy.interpolate import interp1d
+
+            mask = (experimental.wavenumbers >= self.freq_range[0]) & (
+                experimental.wavenumbers <= self.freq_range[1]
+            )
+            if np.sum(mask) > 1:
+                exp_interp = interp1d(
+                    experimental.wavenumbers[mask],
+                    experimental.absorbance[mask],
+                    kind="linear",
+                    bounds_error=False,
+                    fill_value=0.0,
+                )
+                exp_on_grid = exp_interp(self.freq_grid)
+                exp_max = np.max(exp_on_grid)
+                exp_norm = exp_on_grid / exp_max if exp_max > 0 else exp_on_grid
+                ax.plot(
+                    self.freq_grid,
+                    exp_norm,
+                    linewidth=1.5,
+                    color="#000000",
+                    linestyle="--",
+                    label=f"Experimental ({experimental.source})",
+                    alpha=0.7,
+                    zorder=5,
+                )
 
         # Plot all ML methods with vertical offsets
         # Normalize all ML spectra to DFT maximum (not their own) for comparable peak heights
@@ -1245,6 +1275,7 @@ class SpectrumAnalyzer:
         dft_spectrum: SpectrumData,
         molecule_name: str | None = None,
         save_path: Optional[str] = None,
+        experimental: ExperimentalSpectrum | None = None,
     ) -> plt.Figure:
         """
         Create extended combined spectrum plot (400-8000 cm^-1) with overtones and combinations.
@@ -1285,6 +1316,35 @@ class SpectrumAnalyzer:
             alpha=0.9,
             zorder=10,
         )
+
+        # Overlay experimental spectrum if available
+        if experimental is not None:
+            from scipy.interpolate import interp1d
+
+            mask = (experimental.wavenumbers >= extended_range[0]) & (
+                experimental.wavenumbers <= extended_range[1]
+            )
+            if np.sum(mask) > 1:
+                exp_interp = interp1d(
+                    experimental.wavenumbers[mask],
+                    experimental.absorbance[mask],
+                    kind="linear",
+                    bounds_error=False,
+                    fill_value=0.0,
+                )
+                exp_on_grid = exp_interp(self.freq_grid)
+                exp_max = np.max(exp_on_grid)
+                exp_norm = exp_on_grid / exp_max if exp_max > 0 else exp_on_grid
+                ax.plot(
+                    self.freq_grid,
+                    exp_norm,
+                    linewidth=1.5,
+                    color="#000000",
+                    linestyle="--",
+                    label=f"Experimental ({experimental.source})",
+                    alpha=0.7,
+                    zorder=5,
+                )
 
         # Plot all ML methods with vertical offsets
         offset_step = 1.5
