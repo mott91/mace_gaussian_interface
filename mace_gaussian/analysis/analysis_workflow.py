@@ -523,6 +523,13 @@ class ComparisonWorkflow:
         dft_runtime = dft_results.get("runtime_s", 0)
         speedup = dft_runtime / ml_runtime if ml_runtime > 0 else 0
 
+        # Collect hardware and Gaussian timing metadata
+        ml_version = ml_results.get("version_info", {})
+        dft_version = dft_results.get("version_info", {})
+        ml_gaussian_timing = ml_results.get("gaussian_timing", {})
+        dft_gaussian_timing = dft_results.get("gaussian_timing", {})
+        dft_hardware = dft_results.get("hardware", {})
+
         return {
             "name": ml_name,
             "metrics": metrics,
@@ -540,6 +547,18 @@ class ComparisonWorkflow:
             "mode_mapping": mode_mapping,  # Store mode mapping for combined plots
             "deg_result": deg_result,  # Degenerate group analysis result
             "experimental": experimental,
+            "ml_hardware": {
+                "cpu": ml_version.get("cpu_model", ""),
+                "gpu": ml_version.get("gpu_name", ""),
+                "ram_gb": ml_version.get("ram_gb", 0),
+            },
+            "dft_hardware": {
+                "cpu": dft_hardware.get("cpu_model", dft_version.get("cpu_model", "")),
+                "node": dft_hardware.get("node", ""),
+                "cpus": dft_hardware.get("cpus", ""),
+            },
+            "ml_gaussian_timing": ml_gaussian_timing,
+            "dft_gaussian_timing": dft_gaussian_timing,
         }
 
     def create_combined_plots(

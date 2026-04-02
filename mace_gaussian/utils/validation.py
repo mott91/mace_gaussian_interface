@@ -237,6 +237,54 @@ def detect_device() -> str:
         return "cpu"
 
 
+def _get_cpu_model() -> str:
+    """Read CPU model name from /proc/cpuinfo (Linux) or sysctl (macOS)."""
+    try:
+        cpuinfo = Path("/proc/cpuinfo").read_text()
+        for line in cpuinfo.splitlines():
+            if line.startswith("model name"):
+                return line.split(":", 1)[1].strip()
+    except OSError:
+        pass
+    try:
+        import subprocess
+
+        result = subprocess.run(
+            ["sysctl", "-n", "machdep.cpu.brand_string"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+        if result.returncode == 0:
+            return result.stdout.strip()
+    except (OSError, subprocess.TimeoutExpired):
+        pass
+    return "unknown"
+
+
+def _get_ram_gb() -> float:
+    """Get total system RAM in GB."""
+    try:
+        meminfo = Path("/proc/meminfo").read_text()
+        for line in meminfo.splitlines():
+            if line.startswith("MemTotal"):
+                kb = int(line.split()[1])
+                return round(kb / 1024 / 1024, 1)
+    except OSError:
+        pass
+    try:
+        import subprocess
+
+        result = subprocess.run(
+            ["sysctl", "-n", "hw.memsize"], capture_output=True, text=True, timeout=5
+        )
+        if result.returncode == 0:
+            return round(int(result.stdout.strip()) / 1024**3, 1)
+    except (OSError, subprocess.TimeoutExpired, ValueError):
+        pass
+    return 0.0
+
+
 def collect_version_metadata() -> dict:
     """Collect version information for reproducibility metadata.
 
@@ -250,6 +298,8 @@ def collect_version_metadata() -> dict:
         "tool_version": "0.2.0",
         "python_version": sys.version,
         "platform": platform.platform(),
+        "cpu_model": _get_cpu_model(),
+        "ram_gb": _get_ram_gb(),
     }
 
     # Try to get version from installed package

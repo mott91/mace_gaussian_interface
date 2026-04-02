@@ -87,6 +87,15 @@ def aggregate_results(results_dir: str = "comparison_results") -> pd.DataFrame:
         # Count atoms from optimized geometry
         n_atoms = _count_atoms(mol_dir)
 
+        # Extract DFT timing and hardware
+        dft_timing = dft_data.get("timing", dft_data.get("gaussian_timing", {}))
+        dft_runtime = dft_data.get("runtime_s", 0)
+        dft_gauss_s = dft_timing.get("total_elapsed_s", 0) if dft_timing else 0
+        dft_hw = dft_data.get("hardware", {})
+        dft_version = dft_data.get("version_info", {})
+        dft_cpu = dft_hw.get("cpu_model", dft_version.get("cpu_model", ""))
+        dft_node = dft_hw.get("node", "")
+
         # Process each ML combo
         for combo_dir in sorted(mol_dir.iterdir()):
             if not combo_dir.is_dir():
@@ -97,6 +106,15 @@ def aggregate_results(results_dir: str = "comparison_results") -> pd.DataFrame:
 
             row = _compute_combo_metrics(molecule, combo_name, combo_dir, dft_freqs, n_atoms)
             if row is not None:
+                row["dft_runtime_s"] = dft_runtime
+                row["dft_gaussian_s"] = dft_gauss_s
+                row["dft_cpu"] = dft_cpu
+                row["dft_node"] = dft_node
+                row["speedup"] = (
+                    dft_gauss_s / row["ml_gaussian_s"]
+                    if row.get("ml_gaussian_s")
+                    else 0
+                )
                 rows.append(row)
 
     return pd.DataFrame(rows) if rows else empty
@@ -148,6 +166,16 @@ def _compute_combo_metrics(
     r2 = 1.0 - ss_res / ss_tot if ss_tot > 0 else 0.0
     rmse = float(np.sqrt(np.mean((dft_arr - ml_arr) ** 2)))
 
+    # Extract timing data
+    ml_runtime = ml_data.get("runtime_s", 0)
+    ml_gauss = ml_data.get("gaussian_timing", {})
+    ml_gauss_s = ml_gauss.get("total_elapsed_s", 0) if ml_gauss else 0
+
+    # Hardware
+    version = ml_data.get("version_info", {})
+    gpu = version.get("gpu_name", "")
+    cpu = version.get("cpu_model", "")
+
     return {
         "molecule": molecule,
         "combo": combo_name,
@@ -155,6 +183,10 @@ def _compute_combo_metrics(
         "rmse": rmse,
         "n_atoms": n_atoms,
         "n_freqs": len(dft_freqs),
+        "ml_runtime_s": ml_runtime,
+        "ml_gaussian_s": ml_gauss_s,
+        "ml_gpu": gpu,
+        "ml_cpu": cpu,
     }
 
 
@@ -518,6 +550,7 @@ def _generate_html(df: pd.DataFrame, plot_paths: dict, results_dir: str) -> str:
 
 <nav>
     <a href="#leaderboard">Leaderboard</a>
+    <a href="#timing">Timing</a>
     <a href="#heatmap">Heatmap</a>
     <a href="#boxplots">Box Plots</a>
     <a href="#size-scaling">Size Scaling</a>
@@ -564,6 +597,8 @@ def _generate_html(df: pd.DataFrame, plot_paths: dict, results_dir: str) -> str:
 </tbody>
 </table>
 
+{_build_timing_html(df)}
+
 <h2 id="heatmap">Summary Heatmap</h2>
 <div class="plot-section">
     <div class="plot-card">
@@ -607,6 +642,66 @@ def _generate_html(df: pd.DataFrame, plot_paths: dict, results_dir: str) -> str:
 </html>"""
 
     return html
+
+
+def _build_timing_html(df: pd.DataFrame) -> str:
+    """Build timing comparison table with hardware context."""
+    if "ml_gaussian_s" not in df.columns:
+        return ""
+
+    has_timing = df["ml_gaussian_s"].sum() > 0 or df.get("dft_gaussian_s", pd.Series([0])).sum() > 0
+    if not has_timing:
+        return (
+            '<h2 id="timing">Timing</h2>'
+            "<p>No Gaussian timing data available yet.</p>"
+        )
+
+    rows = []
+    for _, r in df.iterrows():
+        ml_t = r.get("ml_gaussian_s", 0)
+        dft_t = r.get("dft_gaussian_s", 0)
+        speedup = r.get("speedup", 0)
+        ml_hw = r.get("ml_gpu", "") or r.get("ml_cpu", "") or "—"
+        dft_hw = r.get("dft_cpu", "") or "—"
+        if r.get("dft_node"):
+            dft_hw += f" ({r['dft_node']})"
+
+        rows.append(
+            f"<tr>"
+            f"<td>{r['molecule']}</td>"
+            f"<td>{r['combo']}</td>"
+            f"<td>{ml_t:.1f}</td>"
+            f"<td>{dft_t:.1f}</td>"
+            f"<td>{speedup:.1f}x</td>"
+            f"<td style='font-size:0.8em'>{ml_hw}</td>"
+            f"<td style='font-size:0.8em'>{dft_hw}</td>"
+            f"</tr>"
+        )
+
+    return f"""
+<h2 id="timing">Timing &amp; Hardware</h2>
+<p style="color: #666; font-size: 0.9em;">
+    Gaussian wall-clock time (elapsed) as reported in log files.
+    Speedup = DFT time / ML time. Hardware shown for context &mdash;
+    speedup numbers are only meaningful when comparing similar hardware.
+</p>
+<table>
+<thead>
+<tr>
+    <th>Molecule</th>
+    <th>ML Combo</th>
+    <th>ML (s)</th>
+    <th>DFT (s)</th>
+    <th>Speedup</th>
+    <th>ML Hardware</th>
+    <th>DFT Hardware</th>
+</tr>
+</thead>
+<tbody>
+{"".join(rows)}
+</tbody>
+</table>
+"""
 
 
 def _build_leaderboard_html(df: pd.DataFrame) -> str:

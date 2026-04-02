@@ -356,10 +356,81 @@ def poll_jobs(
             slept += 60
 
 
+def query_node_hardware(host: str, job_ids: dict[str, str]) -> dict[str, dict]:
+    """Query SLURM for node hardware info via sacct and SSH.
+
+    Parameters
+    ----------
+    host : str
+        SSH target
+    job_ids : dict[str, str]
+        Mapping of molecule name to SLURM job ID
+
+    Returns
+    -------
+    dict[str, dict]
+        Mapping of molecule name to hardware info dict with keys:
+        ``node``, ``cpus``, ``mem``, ``cpu_model``.
+    """
+    all_ids = ",".join(job_ids.values())
+    sacct_cmd = (
+        f"sacct -j {all_ids} "
+        "--format=JobID,NodeList,AllocCPUS,ReqMem,Elapsed "
+        "--noheader --parsable2"
+    )
+    result = _ssh_run(host, sacct_cmd, timeout=30)
+    if result.returncode != 0:
+        logger.warning("sacct hardware query failed: %s", result.stderr)
+        return {}
+
+    id_to_name = {jid: name for name, jid in job_ids.items()}
+    hardware: dict[str, dict] = {}
+    seen_nodes: dict[str, str] = {}  # node -> cpu_model cache
+
+    for line in result.stdout.strip().splitlines():
+        parts = line.split("|")
+        if len(parts) < 5:
+            continue
+        raw_id = parts[0].split(".")[0]
+        if raw_id not in id_to_name or raw_id in {
+            jid for name, jid in job_ids.items() if name in hardware
+        }:
+            continue
+        name = id_to_name.get(raw_id)
+        if not name or name in hardware:
+            continue
+
+        node = parts[1].strip()
+        hw: dict = {
+            "node": node,
+            "cpus": parts[2].strip(),
+            "mem": parts[3].strip(),
+            "elapsed": parts[4].strip(),
+        }
+
+        # Get CPU model from node (cached per node)
+        if node and node not in seen_nodes:
+            cpu_result = _ssh_run(
+                host,
+                f"ssh {node} 'grep -m1 \"model name\" /proc/cpuinfo' 2>/dev/null",
+                timeout=15,
+            )
+            if cpu_result.returncode == 0 and ":" in cpu_result.stdout:
+                seen_nodes[node] = cpu_result.stdout.split(":", 1)[1].strip()
+            else:
+                seen_nodes[node] = "unknown"
+
+        hw["cpu_model"] = seen_nodes.get(node, "unknown")
+        hardware[name] = hw
+
+    return hardware
+
+
 def retrieve_results(
     host: str,
     molecules: list[str],
     results_dir: str = "comparison_results",
+    hardware: dict[str, dict] | None = None,
 ) -> dict[str, bool]:
     """Retrieve DFT results from the cluster via SCP.
 
@@ -375,6 +446,8 @@ def retrieve_results(
         Molecule names to retrieve
     results_dir : str
         Local base directory for results
+    hardware : dict[str, dict], optional
+        Per-molecule hardware info from ``query_node_hardware()``
 
     Returns
     -------
@@ -440,6 +513,8 @@ def retrieve_results(
                 "host": host,
                 "frequencies": parsed.get("frequencies", {}),
                 "ir_intensities": parsed.get("ir_intensities", {}),
+                "timing": parsed.get("timing", {}),
+                "hardware": (hardware or {}).get(name, {}),
             }
             with results_json_path.open("w") as f:
                 json.dump(results_data, f, indent=2)

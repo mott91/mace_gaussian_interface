@@ -610,6 +610,7 @@ def run_frequency_calculation(
             gaussian_gjf=gjf_final if Path(gjf_final).exists() else None,
             timestamp=timestamp,
             calculation_parameters=calculation_parameters,
+            gaussian_timing=parsed_data.get("timing"),
         )
 
         print(f"  Completed in {runtime:.1f} seconds")

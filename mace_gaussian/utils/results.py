@@ -177,6 +177,7 @@ class ResultsManager:
         gaussian_gjf: str | None = None,
         timestamp: str | None = None,
         calculation_parameters: dict[str, Any] | None = None,
+        gaussian_timing: dict[str, Any] | None = None,
     ):
         """
         Save frequency calculation results with overtones and combination bands.
@@ -205,6 +206,8 @@ class ResultsManager:
             Path to Gaussian input file to copy
         timestamp : str, optional
             Timestamp for directory name
+        gaussian_timing : dict, optional
+            Parsed Gaussian wall-clock timing from log file
         """
         freq_dir = self.create_frequency_directory(
             molecule_name, energy_calculator, dipole_calculator, timestamp
@@ -248,6 +251,7 @@ class ResultsManager:
             "files": files,
             "version_info": version_info,
             "calculation_parameters": calculation_parameters if calculation_parameters else {},
+            "gaussian_timing": gaussian_timing if gaussian_timing else {},
         }
 
         # Save JSON

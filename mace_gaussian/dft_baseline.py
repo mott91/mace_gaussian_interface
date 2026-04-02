@@ -451,6 +451,7 @@ def run_dft_baseline_calculation(
             gaussian_log=str(final_log),
             gaussian_gjf=str(final_gjf),
             timestamp=timestamp,
+            gaussian_timing=parsed_data.get("timing"),
         )
 
         print(f"  \u2713 Completed in {runtime:.1f} seconds")

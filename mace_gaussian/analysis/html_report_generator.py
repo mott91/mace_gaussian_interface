@@ -683,6 +683,8 @@ class HTMLReportGenerator:
                 </div>
             </div>
 
+            {self._create_timing_hardware_section(comparison)}
+
             <h3>Spectral Comparison</h3>
             <div class="plot-container">
                 <img src="{spectrum_img}" alt="Spectrum">
@@ -700,6 +702,79 @@ class HTMLReportGenerator:
             </p>
             {table_html}
         </section>
+        """
+
+    def _create_timing_hardware_section(self, comparison: dict) -> str:
+        """Create timing breakdown and hardware context HTML block."""
+        ml_hw = comparison.get("ml_hardware", {})
+        dft_hw = comparison.get("dft_hardware", {})
+        ml_timing = comparison.get("ml_gaussian_timing", {})
+        dft_timing = comparison.get("dft_gaussian_timing", {})
+
+        # If no hardware or timing data at all, return empty
+        has_data = any([
+            ml_hw.get("cpu"), ml_hw.get("gpu"),
+            dft_hw.get("cpu"), dft_hw.get("node"),
+            ml_timing.get("total_elapsed_s"), dft_timing.get("total_elapsed_s"),
+        ])
+        if not has_data:
+            return ""
+
+        rows = []
+
+        # ML row
+        ml_gpu = ml_hw.get("gpu", "")
+        ml_cpu = ml_hw.get("cpu", "")
+        ml_device = ml_gpu if ml_gpu else ml_cpu if ml_cpu else "—"
+        ml_gauss_s = ml_timing.get("total_elapsed_s", 0)
+        ml_gauss = f"{ml_gauss_s:.1f} s" if ml_gauss_s else "—"
+        rows.append(f"""
+            <tr>
+                <td><strong>ML</strong> ({comparison["name"]})</td>
+                <td>{ml_device}</td>
+                <td>{comparison["ml_runtime"]:.1f} s</td>
+                <td>{ml_gauss}</td>
+            </tr>
+        """)
+
+        # DFT row
+        dft_cpu = dft_hw.get("cpu", "")
+        dft_node = dft_hw.get("node", "")
+        dft_cpus = dft_hw.get("cpus", "")
+        dft_device = dft_cpu if dft_cpu else "—"
+        if dft_node:
+            dft_device += f" ({dft_node})"
+        if dft_cpus:
+            dft_device += f" x{dft_cpus}"
+        dft_gauss_s = dft_timing.get("total_elapsed_s", 0)
+        dft_gauss = f"{dft_gauss_s:.1f} s" if dft_gauss_s else "—"
+        rows.append(f"""
+            <tr>
+                <td><strong>DFT</strong></td>
+                <td>{dft_device}</td>
+                <td>{comparison["dft_runtime"]:.1f} s</td>
+                <td>{dft_gauss}</td>
+            </tr>
+        """)
+
+        return f"""
+            <h3>Timing &amp; Hardware</h3>
+            <table style="font-size: 0.9em;">
+                <thead>
+                    <tr>
+                        <th>Method</th>
+                        <th>Hardware</th>
+                        <th>Pipeline Time</th>
+                        <th>Gaussian Wall Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {"".join(rows)}
+                </tbody>
+            </table>
+            <p style="color: #888; font-size: 0.8em; margin-top: 5px;">
+                Pipeline time = total Python runtime. Gaussian wall time = elapsed time reported by Gaussian in the log file.
+            </p>
         """
 
     def create_summary_table(self, comparisons: list[dict]) -> str:

@@ -391,6 +391,58 @@ class GaussianLogParser:
         logger.warning("Could not find dipole moment in log file")
         return None
 
+    def parse_timing(self) -> list[dict[str, float]]:
+        """Parse wall-clock and CPU timing from Gaussian log file.
+
+        Gaussian prints timing per job step. A DFT opt+freq log has two
+        sections; an ML freq-only log has one.
+
+        Returns
+        -------
+        list[dict]
+            One dict per job step with keys ``cpu_s`` and ``elapsed_s``.
+        """
+        content = self.log_file.read_text()
+        time_re = re.compile(
+            r"(\d+) days\s+(\d+) hours\s+(\d+) minutes\s+([\d.]+) seconds"
+        )
+        sections: list[dict[str, float]] = []
+        current: dict[str, float] = {}
+
+        for line in content.splitlines():
+            m = time_re.search(line)
+            if not m:
+                continue
+            total_s = (
+                int(m.group(1)) * 86400
+                + int(m.group(2)) * 3600
+                + int(m.group(3)) * 60
+                + float(m.group(4))
+            )
+            if "Job cpu time" in line:
+                current["cpu_s"] = total_s
+            elif "Elapsed time" in line:
+                current["elapsed_s"] = total_s
+                sections.append(current)
+                current = {}
+
+        return sections
+
+    def parse_timing_summary(self) -> dict[str, float]:
+        """Parse timing and return a summary with total and per-stage times.
+
+        Returns
+        -------
+        dict
+            Keys: ``total_elapsed_s``, ``total_cpu_s``, and ``stages`` list.
+        """
+        stages = self.parse_timing()
+        return {
+            "total_elapsed_s": sum(s.get("elapsed_s", 0) for s in stages),
+            "total_cpu_s": sum(s.get("cpu_s", 0) for s in stages),
+            "stages": stages,
+        }
+
     def parse_all(self) -> dict:
         """
         Parse all available data from log file.
@@ -407,6 +459,7 @@ class GaussianLogParser:
             "combination_bands": self.parse_combination_bands(),
             "final_energy_hartree": self.parse_final_energy(),
             "dipole_moment": self.parse_dipole_moment(),
+            "timing": self.parse_timing_summary(),
         }
 
 
