@@ -109,7 +109,7 @@
   },
   "energy_eV": 0.09771608800934291,
   "dipole": null,
-  "runtime_s": 12.783002376556396,
+  "runtime_s": 12.67947268486023,
   "files": {
     "gaussian_log": "gaussian_freq.log",
     "gaussian_input": "gaussian_freq.gjf"

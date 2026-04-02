@@ -117,6 +117,44 @@ _Nothing yet — this gets filled in as we go._
 
 ---
 
+### 2026-03-31 — Session 5: Hands-On Bug Fix + Codebase Tour Start
+
+**Covered:**
+- Degenerate mode detection: what degeneracy means physically (symmetry-forced identical frequencies)
+- Why octane's low-frequency modes aren't degenerate (low symmetry, coincidentally close)
+- Sequential clustering algorithm: consecutive comparison → chaining problem
+- Chaining: how comparing neighbors (not group start) can create arbitrarily wide groups
+- Changed threshold from 5.0 to 0.5 cm⁻¹ — physically motivated by DFT numerical noise range
+- Writing tests: boundary testing pattern (at threshold, just above threshold)
+- Variable name bugs from copy-paste — importance of reading what you wrote
+- CLI workflow: grep -rn for searching, piping grep output, vim +linenum, /search in vim, yy/p for yank
+- Git concepts: commit often (one logical change), push on feature branches freely, be careful on shared branches
+- Pull request vs git pull — different things despite the name
+- git checkout history: Swiss army knife → split into git switch + git restore
+- Conventional commits: fix/feat/refactor/test prefix
+- Click CLI library: groups and subcommands pattern
+- Codebase entry: pyproject.toml entry_points → cli.py → run_pipeline in workflow.py
+
+**User demonstrated understanding of:**
+- Why 5 cm⁻¹ was too wide (coincidental proximity ≠ degeneracy)
+- Grep piping to narrow results
+- Test structure (assertions, boundary cases)
+- CLI thin layer pattern (argument parsing → hand off to real logic)
+
+**Stopped at:** About to explore run_pipeline in workflow.py — the core pipeline stages
+
+**Resume checklist for next session:**
+1. Open workflow.py, read run_pipeline
+2. Walk through pipeline stages: geom opt → freq calc → anharmonic → parse → analysis
+3. Discuss where timing instrumentation goes (phase 20 prep)
+
+**Open gaps:**
+- Testing fundamentals (user said "I know nothing about tests" — needs proper intro)
+- VPT2 mechanics still not covered (from session 1)
+- Overtone argument never closed (from session 2)
+
+---
+
 ## What's Ready for a Quiz
 
 _Topics will move here once we've covered enough ground._
