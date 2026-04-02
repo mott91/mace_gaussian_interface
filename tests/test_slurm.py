@@ -73,9 +73,7 @@ def test_ssh_run_builds_correct_command(mock_run):
 
 @patch("mace_gaussian.slurm.subprocess.run")
 def test_scp_to_builds_correct_command(mock_run):
-    mock_run.return_value = subprocess.CompletedProcess(
-        args=[], returncode=0, stdout="", stderr=""
-    )
+    mock_run.return_value = subprocess.CompletedProcess(args=[], returncode=0, stdout="", stderr="")
     _scp_to("user@host", "/local/file.txt", "/remote/file.txt", timeout=60)
     cmd = mock_run.call_args[0][0]
     assert cmd[0] == "scp"
@@ -87,9 +85,7 @@ def test_scp_to_builds_correct_command(mock_run):
 
 @patch("mace_gaussian.slurm.subprocess.run")
 def test_scp_from_builds_correct_command(mock_run):
-    mock_run.return_value = subprocess.CompletedProcess(
-        args=[], returncode=0, stdout="", stderr=""
-    )
+    mock_run.return_value = subprocess.CompletedProcess(args=[], returncode=0, stdout="", stderr="")
     _scp_from("user@host", "/remote/file.txt", "/local/file.txt", timeout=60)
     cmd = mock_run.call_args[0][0]
     assert cmd[0] == "scp"
@@ -173,7 +169,9 @@ def test_submit_dft_jobs(mock_ssh, mock_scp, tmp_path):
     """submit_dft_jobs creates remote dir, SCPs files, and extracts job ID."""
     # Create a template
     template = tmp_path / "slurm_dft.sh"
-    template.write_text("#!/bin/bash\n#SBATCH --job-name=dft_{molecule}\ncd {remote_dir}\ng16 {gjf_filename}\nformchk {chk_filename} {fchk_filename}\n")
+    template.write_text(
+        "#!/bin/bash\n#SBATCH --job-name=dft_{molecule}\ncd {remote_dir}\ng16 {gjf_filename}\nformchk {chk_filename} {fchk_filename}\n"
+    )
 
     # Create a gjf file
     gjf_dir = tmp_path / "water" / "b3lyp_6-31Gdp"
@@ -185,13 +183,10 @@ def test_submit_dft_jobs(mock_ssh, mock_scp, tmp_path):
     mock_ssh.side_effect = [
         subprocess.CompletedProcess(args=[], returncode=0, stdout="", stderr=""),  # mkdir
         subprocess.CompletedProcess(
-            args=[], returncode=0,
-            stdout="Submitted batch job 12345\n", stderr=""
+            args=[], returncode=0, stdout="Submitted batch job 12345\n", stderr=""
         ),  # sbatch
     ]
-    mock_scp.return_value = subprocess.CompletedProcess(
-        args=[], returncode=0, stdout="", stderr=""
-    )
+    mock_scp.return_value = subprocess.CompletedProcess(args=[], returncode=0, stdout="", stderr="")
 
     molecules = [{"name": "water", "gjf_path": str(gjf)}]
     job_ids = submit_dft_jobs(molecules, "user@cluster", template)
@@ -213,12 +208,7 @@ def test_submit_dft_jobs(mock_ssh, mock_scp, tmp_path):
 
 def test_parse_sacct_output_strips_step_suffixes():
     """Parses sacct output and strips .batch step suffix."""
-    output = (
-        "12345|COMPLETED|0:0\n"
-        "12345.batch|COMPLETED|0:0\n"
-        "12346|RUNNING|0:0\n"
-        "12347|FAILED|1:0\n"
-    )
+    output = "12345|COMPLETED|0:0\n12345.batch|COMPLETED|0:0\n12346|RUNNING|0:0\n12347|FAILED|1:0\n"
     job_ids = {"water": "12345", "methane": "12346", "ethanol": "12347"}
     states = _parse_sacct_output(output, job_ids)
     assert states == {
@@ -230,11 +220,7 @@ def test_parse_sacct_output_strips_step_suffixes():
 
 def test_parse_sacct_output_keeps_first_entry_per_job():
     """Only the first row per job ID is kept (main job, not steps)."""
-    output = (
-        "12345|COMPLETED|0:0\n"
-        "12345.batch|FAILED|1:0\n"
-        "12345.extern|COMPLETED|0:0\n"
-    )
+    output = "12345|COMPLETED|0:0\n12345.batch|FAILED|1:0\n12345.extern|COMPLETED|0:0\n"
     job_ids = {"water": "12345"}
     states = _parse_sacct_output(output, job_ids)
     assert states["12345"] == "COMPLETED"
@@ -264,11 +250,7 @@ def test_parse_sacct_output_ignores_unknown_job_ids():
 @patch("mace_gaussian.slurm._ssh_with_backoff")
 def test_poll_jobs_parses_sacct_and_returns_terminal(mock_ssh, mock_sleep):
     """poll_jobs returns molecule->state mapping when all jobs are terminal."""
-    sacct_output = (
-        "12345|COMPLETED|0:0\n"
-        "12345.batch|COMPLETED|0:0\n"
-        "12346|FAILED|1:0\n"
-    )
+    sacct_output = "12345|COMPLETED|0:0\n12345.batch|COMPLETED|0:0\n12346|FAILED|1:0\n"
     mock_ssh.return_value = subprocess.CompletedProcess(
         args=[], returncode=0, stdout=sacct_output, stderr=""
     )
@@ -285,8 +267,7 @@ def test_poll_jobs_treats_empty_sacct_as_pending(mock_ssh, mock_sleep):
     mock_ssh.side_effect = [
         subprocess.CompletedProcess(args=[], returncode=0, stdout="", stderr=""),
         subprocess.CompletedProcess(
-            args=[], returncode=0,
-            stdout="12345|COMPLETED|0:0\n", stderr=""
+            args=[], returncode=0, stdout="12345|COMPLETED|0:0\n", stderr=""
         ),
     ]
     job_ids = {"water": "12345"}

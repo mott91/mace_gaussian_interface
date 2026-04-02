@@ -669,11 +669,11 @@ class SpectrumAnalyzer:
                 ax1.plot(
                     self.freq_grid,
                     exp_norm,
-                    linewidth=1.5,
-                    color="#000000",
+                    linewidth=0.8,
+                    color="#888888",
                     linestyle="--",
                     label=f"Experimental ({experimental.source})",
-                    alpha=0.7,
+                    alpha=0.5,
                     zorder=5,
                 )
 
@@ -1196,11 +1196,11 @@ class SpectrumAnalyzer:
                 ax.plot(
                     self.freq_grid,
                     exp_norm,
-                    linewidth=1.5,
-                    color="#000000",
+                    linewidth=0.8,
+                    color="#888888",
                     linestyle="--",
                     label=f"Experimental ({experimental.source})",
-                    alpha=0.7,
+                    alpha=0.5,
                     zorder=5,
                 )
 
@@ -1335,11 +1335,11 @@ class SpectrumAnalyzer:
                 ax.plot(
                     self.freq_grid,
                     exp_norm,
-                    linewidth=1.5,
-                    color="#000000",
+                    linewidth=0.8,
+                    color="#888888",
                     linestyle="--",
                     label=f"Experimental ({experimental.source})",
-                    alpha=0.7,
+                    alpha=0.5,
                     zorder=5,
                 )
 

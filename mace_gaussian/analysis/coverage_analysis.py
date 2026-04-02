@@ -111,9 +111,7 @@ class CoverageAnalyzer:
         """
         data_dir = self.results_base / molecule / "data"
         if not data_dir.is_dir():
-            logger.warning(
-                "No harmonic results directory for '%s': %s", molecule, data_dir
-            )
+            logger.warning("No harmonic results directory for '%s': %s", molecule, data_dir)
             return []
         csvs = sorted(data_dir.glob("comparison_*.csv"))
         combos = []
@@ -123,13 +121,9 @@ class CoverageAnalyzer:
             combos.append(combo)
         return combos
 
-    def _load_molecule_data(
-        self, molecule: str, calc_combo: str
-    ) -> pd.DataFrame:
+    def _load_molecule_data(self, molecule: str, calc_combo: str) -> pd.DataFrame:
         """Load a comparison CSV and add region binning."""
-        csv_path = (
-            self.results_base / molecule / "data" / f"comparison_{calc_combo}.csv"
-        )
+        csv_path = self.results_base / molecule / "data" / f"comparison_{calc_combo}.csv"
         df = pd.read_csv(csv_path)
         return self._bin_frequencies(df)
 
@@ -164,9 +158,7 @@ class CoverageAnalyzer:
 
         return results
 
-    def build_heatmap_data(
-        self, metrics: dict, calc_combo: str
-    ) -> pd.DataFrame:
+    def build_heatmap_data(self, metrics: dict, calc_combo: str) -> pd.DataFrame:
         """Build a molecules x regions DataFrame of RMSE values for heatmap.
 
         Parameters
@@ -189,17 +181,14 @@ class CoverageAnalyzer:
         for molecule in self.molecules:
             if molecule in combo_data:
                 rows[molecule] = {
-                    label: combo_data[molecule][label]["rmse"]
-                    for label in region_labels
+                    label: combo_data[molecule][label]["rmse"] for label in region_labels
                 }
             else:
                 rows[molecule] = {label: float("nan") for label in region_labels}
 
         return pd.DataFrame.from_dict(rows, orient="index", columns=region_labels)
 
-    def build_barchart_data(
-        self, metrics: dict, calc_combo: str
-    ) -> tuple[dict, dict, dict]:
+    def build_barchart_data(self, metrics: dict, calc_combo: str) -> tuple[dict, dict, dict]:
         """Compute per-region mean/std/count of RMSE across molecules.
 
         Parameters
@@ -254,9 +243,7 @@ class CoverageAnalyzer:
         Empty cells (NaN) are masked and annotated with "--" in gray.
         """
         save_path = Path(save_path)
-        fig, ax = plt.subplots(
-            figsize=(12, max(4, len(heatmap_df) * 0.6 + 2))
-        )
+        fig, ax = plt.subplots(figsize=(12, max(4, len(heatmap_df) * 0.6 + 2)))
         mask = heatmap_df.isna()
         sns.heatmap(
             heatmap_df,
@@ -489,7 +476,7 @@ class CoverageAnalyzer:
     <header>
         <h1>Frequency Range Coverage Analysis</h1>
         <div class="subtitle">ML vs DFT accuracy across spectral regions
-        &mdash; Molecules: {', '.join(self.molecules)}</div>
+        &mdash; Molecules: {", ".join(self.molecules)}</div>
     </header>
     <div class="content">
         {"".join(sections)}
@@ -533,9 +520,7 @@ class CoverageAnalyzer:
 
             # Heatmap
             heatmap_df = self.build_heatmap_data(metrics, combo)
-            heatmap_path = self.plot_heatmap(
-                heatmap_df, combo, combo_dir / f"heatmap_{combo}.png"
-            )
+            heatmap_path = self.plot_heatmap(heatmap_df, combo, combo_dir / f"heatmap_{combo}.png")
 
             # Bar chart
             means, stds, counts = self.build_barchart_data(metrics, combo)
@@ -546,9 +531,7 @@ class CoverageAnalyzer:
             plot_paths[combo] = {"heatmap": heatmap_path, "barchart": barchart_path}
 
             # Per-combo JSON
-            self.save_metrics_json(
-                {combo: metrics[combo]}, combo_dir / f"metrics_{combo}.json"
-            )
+            self.save_metrics_json({combo: metrics[combo]}, combo_dir / f"metrics_{combo}.json")
 
         # Combined JSON
         self.save_metrics_json(metrics, output_dir / "all_metrics.json")

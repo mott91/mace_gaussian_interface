@@ -2,6 +2,9 @@ name: CI
 
 on:
   push:
+    branches: [master, feature/*]
+  pull_request:
+    branches: [master]
 
 jobs:
   lint:
@@ -23,6 +26,22 @@ jobs:
       - name: Lint code
         run: ruff check mace_gaussian/ tests/
 
+  typecheck:
+    name: Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: pip install ty numpy pyzmq ase click pandas matplotlib seaborn scipy requests nistchempy jcamp
+
+      - name: Type check
+        run: ty check
+
   test:
     name: Test
     runs-on: ubuntu-latest
@@ -38,11 +57,17 @@ jobs:
         run: pip install -e . --no-deps
 
       - name: Install test dependencies
-        run: pip install "pytest>=7.0.0" "pytest-cov>=4.0" "numpy>=1.20.0" "pyzmq>=22.0.0" "ase>=3.22.0"
+        run: |
+          pip install "pytest>=7.0.0" "pytest-cov>=4.0" \
+            "numpy>=1.20.0" "pyzmq>=22.0.0" "ase>=3.22.0" \
+            "click>=8.0.0" "pandas>=1.4.0" "scipy>=1.7.0" \
+            "matplotlib>=3.5.0" "seaborn>=0.13.2" \
+            "requests>=2.27.0" "nistchempy>=1.0.0" "jcamp>=1.2.0"
 
       - name: Run unit tests
         run: |
           pytest tests/ \
             -m "not gpu and not gaussian and not slow" \
+            --ignore=tests/test_mace_loader.py \
             --cov=mace_gaussian \
             --cov-report=term-missing

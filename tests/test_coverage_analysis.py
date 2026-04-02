@@ -16,6 +16,7 @@ from mace_gaussian.analysis.coverage_analysis import (
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def analyzer():
     """CoverageAnalyzer with no molecules (for unit-level helpers)."""
@@ -25,21 +26,24 @@ def analyzer():
 @pytest.fixture
 def sample_df():
     """DataFrame mimicking a comparison CSV with known values."""
-    return pd.DataFrame({
-        "DFT_Frequency_cm": [500.0, 1600.0, 3500.0],
-        "ML_Frequency_cm": [510.0, 1620.0, 3490.0],
-        "Freq_Difference_cm": [10.0, 20.0, -10.0],
-        "Percent_Error": [2.0, 1.25, -0.286],
-        "Mode_Overlap": [0.99, 0.98, 0.97],
-        "DFT_Intensity_km_mol": [10.0, 20.0, 30.0],
-        "ML_Intensity_km_mol": [11.0, 22.0, 28.0],
-        "Intensity_Difference": [1.0, 2.0, -2.0],
-    })
+    return pd.DataFrame(
+        {
+            "DFT_Frequency_cm": [500.0, 1600.0, 3500.0],
+            "ML_Frequency_cm": [510.0, 1620.0, 3490.0],
+            "Freq_Difference_cm": [10.0, 20.0, -10.0],
+            "Percent_Error": [2.0, 1.25, -0.286],
+            "Mode_Overlap": [0.99, 0.98, 0.97],
+            "DFT_Intensity_km_mol": [10.0, 20.0, 30.0],
+            "ML_Intensity_km_mol": [11.0, 22.0, 28.0],
+            "Intensity_Difference": [1.0, 2.0, -2.0],
+        }
+    )
 
 
 # ---------------------------------------------------------------------------
 # Unit tests
 # ---------------------------------------------------------------------------
+
 
 class TestFrequencyRegions:
     def test_all_seven_regions_defined(self):
@@ -67,16 +71,18 @@ class TestRegionBinning:
         assert regions[2] == "2800-4000"
 
     def test_out_of_range(self, analyzer):
-        df = pd.DataFrame({
-            "DFT_Frequency_cm": [31.0, 500.0, 4500.0],
-            "ML_Frequency_cm": [30.0, 510.0, 4490.0],
-            "Freq_Difference_cm": [-1.0, 10.0, -10.0],
-            "Percent_Error": [-3.2, 2.0, -0.22],
-            "Mode_Overlap": [0.9, 0.99, 0.95],
-            "DFT_Intensity_km_mol": [1.0, 10.0, 50.0],
-            "ML_Intensity_km_mol": [1.1, 11.0, 48.0],
-            "Intensity_Difference": [0.1, 1.0, -2.0],
-        })
+        df = pd.DataFrame(
+            {
+                "DFT_Frequency_cm": [31.0, 500.0, 4500.0],
+                "ML_Frequency_cm": [30.0, 510.0, 4490.0],
+                "Freq_Difference_cm": [-1.0, 10.0, -10.0],
+                "Percent_Error": [-3.2, 2.0, -0.22],
+                "Mode_Overlap": [0.9, 0.99, 0.95],
+                "DFT_Intensity_km_mol": [1.0, 10.0, 50.0],
+                "ML_Intensity_km_mol": [1.1, 11.0, 48.0],
+                "Intensity_Difference": [0.1, 1.0, -2.0],
+            }
+        )
         result = analyzer._bin_frequencies(df)
         # Only 500.0 should have a valid region
         valid = result.dropna(subset=["region"])
@@ -86,12 +92,14 @@ class TestRegionBinning:
 
 class TestRegionMetrics:
     def test_region_metrics(self, analyzer):
-        df = pd.DataFrame({
-            "DFT_Frequency_cm": [100.0, 200.0, 300.0],
-            "ML_Frequency_cm": [110.0, 220.0, 290.0],
-            "Freq_Difference_cm": [10.0, 20.0, -10.0],
-            "Percent_Error": [10.0, 10.0, -3.33],
-        })
+        df = pd.DataFrame(
+            {
+                "DFT_Frequency_cm": [100.0, 200.0, 300.0],
+                "ML_Frequency_cm": [110.0, 220.0, 290.0],
+                "Freq_Difference_cm": [10.0, 20.0, -10.0],
+                "Percent_Error": [10.0, 10.0, -3.33],
+            }
+        )
         metrics = analyzer._compute_region_metrics(df)
         # RMSE = sqrt((100+400+100)/3) = sqrt(200) ~ 14.14
         assert metrics["mode_count"] == 3
@@ -102,12 +110,14 @@ class TestRegionMetrics:
         assert abs(metrics["mean_pct_error"] - (10 + 10 + 3.33) / 3) < 0.1
 
     def test_empty_region(self, analyzer):
-        df = pd.DataFrame({
-            "DFT_Frequency_cm": pd.Series([], dtype=float),
-            "ML_Frequency_cm": pd.Series([], dtype=float),
-            "Freq_Difference_cm": pd.Series([], dtype=float),
-            "Percent_Error": pd.Series([], dtype=float),
-        })
+        df = pd.DataFrame(
+            {
+                "DFT_Frequency_cm": pd.Series([], dtype=float),
+                "ML_Frequency_cm": pd.Series([], dtype=float),
+                "Freq_Difference_cm": pd.Series([], dtype=float),
+                "Percent_Error": pd.Series([], dtype=float),
+            }
+        )
         metrics = analyzer._compute_region_metrics(df)
         assert metrics["mode_count"] == 0
         assert math.isnan(metrics["rmse"])
@@ -115,12 +125,14 @@ class TestRegionMetrics:
         assert math.isnan(metrics["mean_pct_error"])
 
     def test_percent_error_uses_absolute(self, analyzer):
-        df = pd.DataFrame({
-            "DFT_Frequency_cm": [100.0, 200.0],
-            "ML_Frequency_cm": [110.0, 190.0],
-            "Freq_Difference_cm": [10.0, -10.0],
-            "Percent_Error": [10.0, -5.0],
-        })
+        df = pd.DataFrame(
+            {
+                "DFT_Frequency_cm": [100.0, 200.0],
+                "ML_Frequency_cm": [110.0, 190.0],
+                "Freq_Difference_cm": [10.0, -10.0],
+                "Percent_Error": [10.0, -5.0],
+            }
+        )
         metrics = analyzer._compute_region_metrics(df)
         # mean_pct_error = mean(|10|, |-5|) = 7.5
         assert abs(metrics["mean_pct_error"] - 7.5) < 0.01
@@ -129,6 +141,7 @@ class TestRegionMetrics:
 # ---------------------------------------------------------------------------
 # Integration tests
 # ---------------------------------------------------------------------------
+
 
 def _write_csv(path: Path, rows: list[dict]) -> None:
     """Helper: write a comparison CSV from row dicts."""
@@ -295,6 +308,7 @@ class TestIntegration:
 # Smoke tests for visualization + output
 # ---------------------------------------------------------------------------
 
+
 class TestHeatmapGeneration:
     def test_heatmap_creates_png(self, tmp_path):
         """Synthetic heatmap_df with NaN renders to a non-empty PNG."""
@@ -302,8 +316,10 @@ class TestHeatmapGeneration:
         region_labels = [r[2] for r in FREQUENCY_REGIONS]
         data = {
             "mol_a": {label: (i + 1) * 5.0 for i, label in enumerate(region_labels)},
-            "mol_b": {label: float("nan") if i % 2 == 0 else (i + 2) * 3.0
-                      for i, label in enumerate(region_labels)},
+            "mol_b": {
+                label: float("nan") if i % 2 == 0 else (i + 2) * 3.0
+                for i, label in enumerate(region_labels)
+            },
         }
         heatmap_df = pd.DataFrame.from_dict(data, orient="index", columns=region_labels)
         out = tmp_path / "heatmap.png"
@@ -341,10 +357,8 @@ class TestBarchartGeneration:
         """Bar chart handles NaN mean values without crashing."""
         analyzer = CoverageAnalyzer(molecules=[], results_base="/nonexistent")
         region_labels = [r[2] for r in FREQUENCY_REGIONS]
-        means = {label: float("nan") if i == 0 else 10.0
-                 for i, label in enumerate(region_labels)}
-        stds = {label: float("nan") if i == 0 else 2.0
-                for i, label in enumerate(region_labels)}
+        means = {label: float("nan") if i == 0 else 10.0 for i, label in enumerate(region_labels)}
+        stds = {label: float("nan") if i == 0 else 2.0 for i, label in enumerate(region_labels)}
         counts = {label: 0 if i == 0 else 3 for i, label in enumerate(region_labels)}
         out = tmp_path / "barchart_nan.png"
         analyzer.plot_barchart(means, stds, counts, "combo", out)
@@ -359,8 +373,12 @@ class TestJsonSerialization:
             "combo": {
                 "mol": {
                     "400-700": {"rmse": 10.0, "mae": 8.0, "mean_pct_error": 5.0, "mode_count": 3},
-                    "1800-2800": {"rmse": float("nan"), "mae": float("nan"),
-                                  "mean_pct_error": float("nan"), "mode_count": 0},
+                    "1800-2800": {
+                        "rmse": float("nan"),
+                        "mae": float("nan"),
+                        "mean_pct_error": float("nan"),
+                        "mode_count": 0,
+                    },
                 }
             }
         }

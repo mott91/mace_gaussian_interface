@@ -362,7 +362,9 @@ def run_dft_baseline_calculation(
 
             # Run Gaussian calculation
             success, log_file = run_gaussian_dft(
-                gjf_basename, timeout=None, cwd=str(scratch_path),
+                gjf_basename,
+                timeout=None,
+                cwd=str(scratch_path),
             )
 
             if not success:
@@ -508,8 +510,14 @@ def run_all_dft_baselines(
 
     for baseline_name in DFT_BASELINES:
         success = run_dft_baseline_calculation(
-            atoms, molecule_name, baseline_name, results_mgr, charge, multiplicity,
-            skip_if_exists, keep_scratch=keep_scratch,
+            atoms,
+            molecule_name,
+            baseline_name,
+            results_mgr,
+            charge,
+            multiplicity,
+            skip_if_exists,
+            keep_scratch=keep_scratch,
         )
         results[baseline_name] = success
 

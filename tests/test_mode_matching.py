@@ -397,6 +397,7 @@ class TestDegenerateDetection:
         groups_out = detect_degenerate_groups(freqs_out, threshold=0.5)
         assert len(groups_out) == 0
 
+
 class TestSubspaceOverlap:
     """Test subspace overlap computation via trace(M^T M) / k."""
 

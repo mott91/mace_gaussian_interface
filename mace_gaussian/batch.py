@@ -363,18 +363,13 @@ def run_batch(
                         nproc=8,
                         mem="6GB",
                     )
-                    molecules_for_slurm.append(
-                        {"name": mol_name, "gjf_path": str(gjf_path)}
-                    )
+                    molecules_for_slurm.append({"name": mol_name, "gjf_path": str(gjf_path)})
 
             if molecules_for_slurm:
                 click.echo(
-                    f"\nSubmitting {len(molecules_for_slurm)} DFT job(s) "
-                    f"to {dft_on_cluster}..."
+                    f"\nSubmitting {len(molecules_for_slurm)} DFT job(s) to {dft_on_cluster}..."
                 )
-                job_ids = submit_dft_jobs(
-                    molecules_for_slurm, dft_on_cluster, template, output_dir
-                )
+                job_ids = submit_dft_jobs(molecules_for_slurm, dft_on_cluster, template, output_dir)
 
                 # Record job IDs in manifest
                 for mol_name, job_id in job_ids.items():
@@ -399,16 +394,12 @@ def run_batch(
                     else:
                         # Per D-17: mark dft_failed, continue
                         manifest["molecules"][mol_name]["dft_baseline"] = "dft_failed"
-                        click.echo(
-                            f"  SLURM job for {mol_name} ended with state: {state}"
-                        )
+                        click.echo(f"  SLURM job for {mol_name} ended with state: {state}")
                 save_manifest(manifest, manifest_path)
 
                 # Retrieve results for completed molecules
                 if completed_mols:
-                    click.echo(
-                        f"Retrieving results for {len(completed_mols)} molecule(s)..."
-                    )
+                    click.echo(f"Retrieving results for {len(completed_mols)} molecule(s)...")
                     retrieve_results(dft_on_cluster, completed_mols, output_dir)
                     for mol_name in completed_mols:
                         manifest["molecules"][mol_name]["dft_baseline"] = STATUS_COMPLETE

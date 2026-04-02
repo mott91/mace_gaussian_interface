@@ -208,14 +208,14 @@ def calculate_dipole_properties(
             polar_3x3 = dipole_calc.calculate_polarizability(atoms)  # (3,3) Angstrom^3
             td_polar = time.perf_counter() - td1
             p = polar_3x3 * ANGSTROM3_TO_BOHR3
-            polarizability_voigt6 = np.array(
-                [p[0, 0], p[0, 1], p[1, 1], p[0, 2], p[1, 2], p[2, 2]]
-            )
+            polarizability_voigt6 = np.array([p[0, 0], p[0, 1], p[1, 1], p[0, 2], p[1, 2], p[2, 2]])
         else:
             polarizability_voigt6 = np.zeros(6)
 
         logger.info(f"Dipole calculated: {dipole} e*Bohr")
-        logger.debug(f"Dipole timing: dipole={td_dipole:.2f}s derivs={td_derivs:.2f}s polar={td_polar:.2f}s")
+        logger.debug(
+            f"Dipole timing: dipole={td_dipole:.2f}s derivs={td_derivs:.2f}s polar={td_polar:.2f}s"
+        )
         return dipole, dipole_derivatives, partial_charges, polarizability_voigt6
 
     except Exception as e:
@@ -329,10 +329,7 @@ def _check_mace_anicc_elements(atoms) -> None:
     symbols = set(atoms.get_chemical_symbols())
     unsupported = sorted(symbols - _MACE_ANICC_SUPPORTED_ELEMENTS)
     if unsupported:
-        raise ValueError(
-            f"mace_anicc only supports H/C/N/O — "
-            f"molecule contains: {unsupported}"
-        )
+        raise ValueError(f"mace_anicc only supports H/C/N/O — molecule contains: {unsupported}")
 
 
 def calculator(nnp):
@@ -517,7 +514,10 @@ def run_frequency_calculation(
         with scratch_dir(run_name, keep_on_failure=keep_scratch) as scratch_path:
             gjf_basename = "gaussian_freq.gjf"
             ase_to_gjf(
-                mol, gjf_basename, charge=charge, multiplicity=multiplicity,
+                mol,
+                gjf_basename,
+                charge=charge,
+                multiplicity=multiplicity,
                 output_dir=scratch_path,
             )
 
@@ -643,8 +643,13 @@ def run_dft_baselines(
     from .dft_baseline import run_all_dft_baselines
 
     return run_all_dft_baselines(
-        optimized_atoms, molecule_name, results_mgr, charge, multiplicity,
-        skip_if_exists=True, keep_scratch=keep_scratch,
+        optimized_atoms,
+        molecule_name,
+        results_mgr,
+        charge,
+        multiplicity,
+        skip_if_exists=True,
+        keep_scratch=keep_scratch,
     )
 
 
@@ -828,7 +833,11 @@ def run_pipeline(
     dft_results = {}
     if include_dft_baselines:
         dft_results = run_dft_baselines(
-            optimized_mol, molecule_name, results_mgr, charge, multiplicity,
+            optimized_mol,
+            molecule_name,
+            results_mgr,
+            charge,
+            multiplicity,
             keep_scratch=keep_scratch,
         )
 

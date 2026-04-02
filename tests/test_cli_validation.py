@@ -46,9 +46,7 @@ class TestEnergyCalculatorValidation:
         xyz_file = tmp_path / "water.xyz"
         xyz_file.write_text("3\nwater\nO 0.0 0.0 0.0\nH 1.0 0.0 0.0\nH 0.0 1.0 0.0\n")
         runner = CliRunner()
-        result = runner.invoke(
-            cli, ["run", str(xyz_file), "--energy-calculators", "invalid_calc"]
-        )
+        result = runner.invoke(cli, ["run", str(xyz_file), "--energy-calculators", "invalid_calc"])
         assert result.exit_code != 0
         assert "invalid_calc" in result.output
 
@@ -140,9 +138,7 @@ class TestDipoleCalculatorValidation:
         xyz_file = tmp_path / "water.xyz"
         xyz_file.write_text("3\nwater\nO 0.0 0.0 0.0\nH 1.0 0.0 0.0\nH 0.0 1.0 0.0\n")
         runner = CliRunner()
-        result = runner.invoke(
-            cli, ["run", str(xyz_file), "--dipole-calculators", "espaloma"]
-        )
+        result = runner.invoke(cli, ["run", str(xyz_file), "--dipole-calculators", "espaloma"])
         assert "'espaloma' is not a valid" not in result.output
 
     def test_invalid_dipole_calculator_rejected(self, tmp_path):

@@ -227,6 +227,7 @@ class TestMACEDipoleCalculatorWrapper:
 # TestMACEDipoleCalculatorAutograd
 # ---------------------------------------------------------------------------
 
+
 class TestMACEDipoleCalculatorAutograd:
     """Tests for MACEDipoleCalculator.calculate_dipole_derivatives() autograd override."""
 

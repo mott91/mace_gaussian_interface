@@ -34,9 +34,12 @@ DEFAULT_POLL_INTERVAL = 600  # 10 minutes
 
 # Common SSH options: no password prompts, auto-accept new hosts
 _SSH_OPTS = [
-    "-o", "ConnectTimeout=30",
-    "-o", "BatchMode=yes",
-    "-o", "StrictHostKeyChecking=accept-new",
+    "-o",
+    "ConnectTimeout=30",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=accept-new",
 ]
 
 
@@ -45,9 +48,7 @@ _SSH_OPTS = [
 # ---------------------------------------------------------------------------
 
 
-def _ssh_run(
-    host: str, command: str, timeout: int = 60
-) -> subprocess.CompletedProcess:
+def _ssh_run(host: str, command: str, timeout: int = 60) -> subprocess.CompletedProcess:
     """Run a command on a remote host via SSH.
 
     Parameters
@@ -65,14 +66,10 @@ def _ssh_run(
     """
     cmd = ["ssh", *_SSH_OPTS, host, command]
     logger.debug("SSH: %s", " ".join(cmd))
-    return subprocess.run(
-        cmd, capture_output=True, text=True, timeout=timeout
-    )
+    return subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
 
 
-def _scp_to(
-    host: str, local: str, remote: str, timeout: int = 120
-) -> subprocess.CompletedProcess:
+def _scp_to(host: str, local: str, remote: str, timeout: int = 120) -> subprocess.CompletedProcess:
     """Copy a local file to a remote host via SCP.
 
     Parameters
@@ -92,9 +89,7 @@ def _scp_to(
     """
     cmd = ["scp", *_SSH_OPTS, local, f"{host}:{remote}"]
     logger.debug("SCP ->: %s", " ".join(cmd))
-    return subprocess.run(
-        cmd, capture_output=True, text=True, timeout=timeout
-    )
+    return subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
 
 
 def _scp_from(
@@ -119,14 +114,10 @@ def _scp_from(
     """
     cmd = ["scp", *_SSH_OPTS, f"{host}:{remote}", local]
     logger.debug("SCP <-: %s", " ".join(cmd))
-    return subprocess.run(
-        cmd, capture_output=True, text=True, timeout=timeout
-    )
+    return subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
 
 
-def _ssh_with_backoff(
-    host: str, command: str, max_retries: int = 5
-) -> subprocess.CompletedProcess:
+def _ssh_with_backoff(host: str, command: str, max_retries: int = 5) -> subprocess.CompletedProcess:
     """Run an SSH command with exponential backoff on connection failure.
 
     Retries on SSH connection errors (returncode 255) or subprocess
@@ -161,7 +152,7 @@ def _ssh_with_backoff(
             last_error = f"SSH timed out: {exc}"
 
         if attempt < max_retries:
-            wait = min(2 ** attempt * 30, 600)
+            wait = min(2**attempt * 30, 600)
             logger.warning(
                 "SSH attempt %d/%d failed (%s), retrying in %ds...",
                 attempt + 1,
@@ -230,9 +221,7 @@ def submit_dft_jobs(
         # Create remote directory
         result = _ssh_run(host, f"mkdir -p {remote_dir}")
         if result.returncode != 0:
-            logger.error(
-                "Failed to create remote dir for %s: %s", name, result.stderr
-            )
+            logger.error("Failed to create remote dir for %s: %s", name, result.stderr)
             continue
 
         # SCP the .gjf file
@@ -244,21 +233,15 @@ def submit_dft_jobs(
         # Write filled SLURM script to a temp file and SCP it
         local_script = Path(gjf_path).parent / "slurm_dft.sh"
         local_script.write_text(script)
-        result = _scp_to(
-            host, str(local_script), f"{remote_dir}/slurm_dft.sh"
-        )
+        result = _scp_to(host, str(local_script), f"{remote_dir}/slurm_dft.sh")
         if result.returncode != 0:
-            logger.error(
-                "Failed to SCP slurm script for %s: %s", name, result.stderr
-            )
+            logger.error("Failed to SCP slurm script for %s: %s", name, result.stderr)
             continue
 
         # Submit via sbatch
         result = _ssh_run(host, f"sbatch {remote_dir}/slurm_dft.sh")
         if result.returncode != 0:
-            logger.error(
-                "sbatch failed for %s: %s", name, result.stderr
-            )
+            logger.error("sbatch failed for %s: %s", name, result.stderr)
             continue
 
         # Extract job ID from "Submitted batch job NNNNN"
@@ -269,9 +252,7 @@ def submit_dft_jobs(
     return job_ids
 
 
-def _parse_sacct_output(
-    output: str, job_ids: dict[str, str]
-) -> dict[str, str]:
+def _parse_sacct_output(output: str, job_ids: dict[str, str]) -> dict[str, str]:
     """Parse sacct output into a job-ID-to-state mapping.
 
     Handles step suffixes (e.g. ``12345.batch`` -> ``12345``) and
@@ -334,10 +315,7 @@ def poll_jobs(
     all_ids = ",".join(job_ids.values())
 
     while True:
-        sacct_cmd = (
-            f"sacct -j {all_ids} "
-            f"--format=JobID,State,ExitCode --noheader --parsable2"
-        )
+        sacct_cmd = f"sacct -j {all_ids} --format=JobID,State,ExitCode --noheader --parsable2"
         result = _ssh_with_backoff(host, sacct_cmd)
         states = _parse_sacct_output(result.stdout, job_ids)
 
@@ -369,11 +347,7 @@ def poll_jobs(
 
         if all_terminal:
             # Build final molecule_name -> state mapping
-            return {
-                id_to_name[jid]: state
-                for jid, state in states.items()
-                if jid in id_to_name
-            }
+            return {id_to_name[jid]: state for jid, state in states.items() if jid in id_to_name}
 
         # Sleep in 60-second increments for Ctrl-C interruptibility
         slept = 0
@@ -448,9 +422,7 @@ def retrieve_results(
                     convert_chk_to_fchk(chk_local, fchk_local)
                     logger.info("Converted .chk to .fchk locally for %s", name)
                 except Exception as exc:
-                    logger.error(
-                        "Local formchk failed for %s: %s", name, exc
-                    )
+                    logger.error("Local formchk failed for %s: %s", name, exc)
                     ok = False
             else:
                 logger.warning("No .chk available for local formchk for %s", name)

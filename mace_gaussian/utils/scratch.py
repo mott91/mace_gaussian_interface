@@ -50,9 +50,7 @@ def scratch_dir(
         yield scratch_path
     except BaseException:
         if keep_on_failure:
-            logger.warning(
-                "Keeping scratch directory for debugging: %s", scratch_path
-            )
+            logger.warning("Keeping scratch directory for debugging: %s", scratch_path)
         else:
             shutil.rmtree(scratch_path, ignore_errors=True)
             logger.debug("Cleaned up scratch directory after failure: %s", scratch_path)

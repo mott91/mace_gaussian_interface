@@ -54,9 +54,7 @@ def aggregate_results(results_dir: str = "comparison_results") -> pd.DataFrame:
     """
     results_path = Path(results_dir)
     rows: list[dict] = []
-    empty = pd.DataFrame(
-        columns=["molecule", "combo", "r2", "rmse", "n_atoms", "n_freqs"]
-    )
+    empty = pd.DataFrame(columns=["molecule", "combo", "r2", "rmse", "n_atoms", "n_freqs"])
 
     if not results_path.is_dir():
         return empty
@@ -76,14 +74,11 @@ def aggregate_results(results_dir: str = "comparison_results") -> pd.DataFrame:
             with dft_json.open() as f:
                 dft_data = json.load(f)
         except (json.JSONDecodeError, OSError) as e:
-            logger.warning(
-                "Failed to load DFT results for %s: %s", molecule, e
-            )
+            logger.warning("Failed to load DFT results for %s: %s", molecule, e)
             continue
 
         dft_freqs = sorted(
-            entry["freq_cm"]
-            for entry in dft_data.get("frequencies", {}).get("harmonic", [])
+            entry["freq_cm"] for entry in dft_data.get("frequencies", {}).get("harmonic", [])
         )
         if not dft_freqs:
             logger.debug("No DFT harmonic frequencies for %s", molecule)
@@ -100,9 +95,7 @@ def aggregate_results(results_dir: str = "comparison_results") -> pd.DataFrame:
             if combo_name in ("b3lyp_6-31Gdp", "geometry_opt"):
                 continue
 
-            row = _compute_combo_metrics(
-                molecule, combo_name, combo_dir, dft_freqs, n_atoms
-            )
+            row = _compute_combo_metrics(molecule, combo_name, combo_dir, dft_freqs, n_atoms)
             if row is not None:
                 rows.append(row)
 
@@ -127,19 +120,23 @@ def _compute_combo_metrics(
     except (json.JSONDecodeError, OSError) as e:
         logger.warning(
             "Failed to load ML results for %s/%s: %s",
-            molecule, combo_name, e,
+            molecule,
+            combo_name,
+            e,
         )
         return None
 
     ml_freqs = sorted(
-        entry["freq_cm"]
-        for entry in ml_data.get("frequencies", {}).get("harmonic", [])
+        entry["freq_cm"] for entry in ml_data.get("frequencies", {}).get("harmonic", [])
     )
 
     if len(dft_freqs) != len(ml_freqs) or len(dft_freqs) == 0:
         logger.debug(
             "Frequency count mismatch for %s/%s: DFT=%d ML=%d",
-            molecule, combo_name, len(dft_freqs), len(ml_freqs),
+            molecule,
+            combo_name,
+            len(dft_freqs),
+            len(ml_freqs),
         )
         return None
 
@@ -194,9 +191,7 @@ def _plot_heatmap(df: pd.DataFrame, metric: str = "rmse") -> str:
 
     Returns path to saved PNG file.
     """
-    pivot = df.pivot_table(
-        index="combo", columns="molecule", values=metric, aggfunc="first"
-    )
+    pivot = df.pivot_table(index="combo", columns="molecule", values=metric, aggfunc="first")
 
     if metric == "rmse":
         cmap = "YlOrRd"
@@ -235,12 +230,7 @@ def _plot_boxplots(df: pd.DataFrame) -> str:
 
     Returns path to saved PNG file.
     """
-    combo_order = (
-        df.groupby("combo")["rmse"]
-        .median()
-        .sort_values()
-        .index.tolist()
-    )
+    combo_order = df.groupby("combo")["rmse"].median().sort_values().index.tolist()
 
     height = max(4, 0.5 * len(combo_order) + 2)
     fig, ax = plt.subplots(figsize=(10, height))
@@ -305,9 +295,12 @@ def _plot_size_scaling(df: pd.DataFrame) -> str:
         )
     else:
         ax.text(
-            0.5, 0.5,
+            0.5,
+            0.5,
             "No atom count data available",
-            transform=ax.transAxes, ha="center", va="center",
+            transform=ax.transAxes,
+            ha="center",
+            va="center",
         )
 
     ax.set_title(
@@ -322,9 +315,7 @@ def _plot_size_scaling(df: pd.DataFrame) -> str:
     return _save_figure(fig)
 
 
-def _plot_spectrum_overlay(
-    molecule: str, results_dir: str
-) -> str | None:
+def _plot_spectrum_overlay(molecule: str, results_dir: str) -> str | None:
     """Create per-molecule spectrum overlay (ML combos vs DFT).
 
     Returns path to saved PNG file, or None if DFT data is missing.
@@ -354,8 +345,11 @@ def _plot_spectrum_overlay(
     dft_freqs = [e["freq_cm"] for e in dft_harmonic]
     dft_ints = [e.get("ir_intensity", 1.0) for e in dft_harmonic]
     ax.stem(
-        dft_freqs, dft_ints,
-        linefmt="k-", markerfmt="ko", basefmt="k-",
+        dft_freqs,
+        dft_ints,
+        linefmt="k-",
+        markerfmt="ko",
+        basefmt="k-",
         label="DFT (B3LYP/6-31G(d,p))",
     )
 
@@ -387,11 +381,11 @@ def _plot_spectrum_overlay(
             ax.plot(
                 freq_grid,
                 exp_scaled,
-                color="#000000",
+                color="#888888",
                 linestyle="--",
-                linewidth=1.2,
+                linewidth=0.8,
                 label=f"Experimental ({experimental.source})",
-                alpha=0.6,
+                alpha=0.5,
                 zorder=3,
             )
 
@@ -422,8 +416,11 @@ def _plot_spectrum_overlay(
 
         color = palette[color_idx % len(palette)]
         markerline, stemlines, baseline = ax.stem(
-            ml_freqs, ml_ints,
-            linefmt="-", markerfmt="o", basefmt="-",
+            ml_freqs,
+            ml_ints,
+            linefmt="-",
+            markerfmt="o",
+            basefmt="-",
             label=combo_dir.name,
         )
         plt.setp(stemlines, color=color, alpha=0.7)
@@ -433,7 +430,8 @@ def _plot_spectrum_overlay(
 
     ax.set_title(
         f"Spectrum Overlay: {molecule}",
-        fontsize=14, fontfamily="sans-serif",
+        fontsize=14,
+        fontfamily="sans-serif",
     )
     ax.set_xlabel("Frequency (cm$^{-1}$)")
     ax.set_ylabel("IR Intensity")
@@ -451,9 +449,7 @@ def _encode_plot(path: str) -> str:
     return f"data:image/png;base64,{encoded}"
 
 
-def _generate_html(
-    df: pd.DataFrame, plot_paths: dict, results_dir: str
-) -> str:
+def _generate_html(df: pd.DataFrame, plot_paths: dict, results_dir: str) -> str:
     """Build self-contained HTML report with embedded base64 plots.
 
     Parameters
@@ -497,15 +493,9 @@ def _generate_html(
     )
 
     # Embed summary plots
-    heatmap_img = _embed_or_fallback(
-        embedded, "heatmap_rmse", "RMSE Heatmap", "No heatmap data."
-    )
-    heatmap_r2_img = _embed_or_fallback(
-        embedded, "heatmap_r2", "R2 Heatmap", ""
-    )
-    boxplot_img = _embed_or_fallback(
-        embedded, "boxplots", "Box Plots", "No box plot data."
-    )
+    heatmap_img = _embed_or_fallback(embedded, "heatmap_rmse", "RMSE Heatmap", "No heatmap data.")
+    heatmap_r2_img = _embed_or_fallback(embedded, "heatmap_r2", "R2 Heatmap", "")
+    boxplot_img = _embed_or_fallback(embedded, "boxplots", "Box Plots", "No box plot data.")
     size_scaling_img = _embed_or_fallback(
         embedded, "size_scaling", "Size Scaling", "No size scaling data."
     )
@@ -655,9 +645,7 @@ def _build_leaderboard_html(df: pd.DataFrame) -> str:
     return "\n".join(rows)
 
 
-def _embed_or_fallback(
-    embedded: dict, key: str, alt: str, fallback_text: str
-) -> str:
+def _embed_or_fallback(embedded: dict, key: str, alt: str, fallback_text: str) -> str:
     """Return an <img> tag or fallback <p> for an embedded plot."""
     if key in embedded:
         return f'<img src="{embedded[key]}" alt="{alt}">'
@@ -776,9 +764,7 @@ def generate_batch_report(
     """
     df = aggregate_results(results_dir)
     if df.empty:
-        raise ValueError(
-            f"No comparison results found in {results_dir}"
-        )
+        raise ValueError(f"No comparison results found in {results_dir}")
 
     logger.info(
         "Aggregated %d results across %d molecules and %d combos",

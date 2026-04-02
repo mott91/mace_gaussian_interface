@@ -301,9 +301,7 @@ class TestElementGuardAtCallSites:
         import os
 
         xyz_content = "2\n\nH 0.0 0.0 0.0\nF 1.0 0.0 0.0\n"
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".xyz", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".xyz", delete=False) as f:
             f.write(xyz_content)
             tmp_path = f.name
 
@@ -343,9 +341,7 @@ class TestElementGuardAtCallSites:
         import os
 
         xyz_content = "3\n\nO 0.0 0.0 0.0\nH 0.96 0.0 0.0\nH -0.24 0.93 0.0\n"
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".xyz", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".xyz", delete=False) as f:
             f.write(xyz_content)
             tmp_path = f.name
 
