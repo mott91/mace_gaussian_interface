@@ -53,7 +53,7 @@ Full archive: `.planning/milestones/v1.1-ROADMAP.md`, `.planning/milestones/v1.1
 
 - [x] **Phase 18: Spectral Quality Foundations** - Lorentzian broadening, zero-intensity filtering, stick+broadened spectra, mace_polar dipole investigation (completed 2026-03-30)
 - [x] **Phase 19: Degenerate Mode Handling** - Subspace overlap for degenerate modes, correct statistics without double-counting (completed 2026-03-31)
-- [ ] **Phase 20: Wall-Clock Timing** - Per-molecule per-calculator timing instrumentation and batch report timing table
+- [x] **Phase 20: Wall-Clock Timing** - Per-molecule per-calculator timing instrumentation and batch report timing table (completed 2026-04-02)
 - [x] **Phase 21: NIST Experimental Overlay** - Fetch, cache, and overlay experimental IR spectra from NIST WebBook (completed 2026-04-02)
 - [ ] **Phase 22: Early SLURM Submission** - Submit DFT jobs per-molecule immediately after geometry optimization
 - [ ] **Phase 23: Anharmonic Pipeline & Report Overhaul** - Thesis-quality HTML report integrating all v1.2 features
@@ -194,10 +194,10 @@ Plans:
 | 15. SLURM & Batch Report | v1.1 | 2/2 | Complete | 2026-03-27 |
 | 18. Spectral Quality Foundations | v1.2 | 2/2 | Complete    | 2026-03-30 |
 | 19. Degenerate Mode Handling | v1.2 | 2/2 | Complete    | 2026-03-31 |
-| 20. Wall-Clock Timing | v1.2 | 0/TBD | Not started | - |
+| 20. Wall-Clock Timing | v1.2 | 1/1 | Complete    | 2026-04-02 |
 | 21. NIST Experimental Overlay | v1.2 | 2/2 | Complete   | 2026-04-02 |
 | 22. Early SLURM Submission | v1.2 | 0/TBD | Not started | - |
 | 23. Anharmonic Pipeline & Report | v1.2 | 0/TBD | Not started | - |
 | 24. VPT2 Research Spike | v1.2 | 0/TBD | Not started | - |
 | 16. Benchmark Campaign | v1.3 | 0/TBD | Not started | - |
-| 17. Docs Update | v1.3 | 0/TBD | Not started | - |
+| 17. Docs Update | v1.3 | 1/1 | Complete    | 2026-04-02 |
