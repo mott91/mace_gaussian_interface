@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: -- Analysis Quality Overhaul
-status: executing
-stopped_at: Completed 21-01-PLAN.md
-last_updated: "2026-04-01T13:11:08.230Z"
-last_activity: 2026-04-01
+status: verifying
+stopped_at: Completed 21-02-PLAN.md
+last_updated: "2026-04-02T08:18:55.758Z"
+last_activity: 2026-04-02
 progress:
   total_phases: 7
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 6
-  completed_plans: 5
+  completed_plans: 6
   percent: 29
 ---
 
@@ -27,8 +27,8 @@ See: .planning/PROJECT.md (updated 2026-03-28)
 
 Phase: 21 (nist-experimental-overlay) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
-Last activity: 2026-04-01
+Status: Phase complete — ready for verification
+Last activity: 2026-04-02
 
 Progress: [███░░░░░░░] 29%
 
@@ -64,6 +64,7 @@ Recent decisions affecting v1.2 work:
 - [Phase 19]: Subspace overlap normalized by min(calc, ref) count for partial Hungarian matches
 - [Phase 19]: Block-level deduplication in parser replaces per-frequency deduplication
 - [Phase 21]: Gas-phase only NIST filter with first-match selection; raw JDX caching for provenance
+- [Phase 21]: Experimental trace on DFT baseline as black dashed line; TYPE_CHECKING guard for nist_fetcher imports
 
 ### Pending Todos
 
@@ -77,6 +78,6 @@ Recent decisions affecting v1.2 work:
 
 ## Session Continuity
 
-Last session: 2026-04-01T13:11:08.227Z
-Stopped at: Completed 21-01-PLAN.md
+Last session: 2026-04-02T08:18:55.754Z
+Stopped at: Completed 21-02-PLAN.md
 Resume file: None
