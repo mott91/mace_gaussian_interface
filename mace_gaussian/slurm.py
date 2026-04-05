@@ -511,8 +511,14 @@ def retrieve_results(
                 "method": "B3LYP/6-31G(d,p)",
                 "source": "slurm_cluster",
                 "host": host,
-                "frequencies": parsed.get("frequencies", {}),
-                "ir_intensities": parsed.get("ir_intensities", {}),
+                "frequencies": {
+                    "harmonic": parsed.get("harmonic", []),
+                    "anharmonic": parsed.get("anharmonic", []),
+                    "overtones": parsed.get("overtones", []),
+                    "combination_bands": parsed.get("combination_bands", []),
+                },
+                "energy_hartree": parsed.get("final_energy_hartree"),
+                "dipole_moment": parsed.get("dipole_moment"),
                 "timing": parsed.get("timing", {}),
                 "hardware": (hardware or {}).get(name, {}),
             }

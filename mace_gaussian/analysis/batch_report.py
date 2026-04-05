@@ -111,8 +111,8 @@ def aggregate_results(results_dir: str = "comparison_results") -> pd.DataFrame:
                 row["dft_cpu"] = dft_cpu
                 row["dft_node"] = dft_node
                 row["speedup"] = (
-                    dft_gauss_s / row["ml_gaussian_s"]
-                    if row.get("ml_gaussian_s")
+                    dft_gauss_s / row["ml_runtime_s"]
+                    if row.get("ml_runtime_s")
                     else 0
                 )
                 rows.append(row)

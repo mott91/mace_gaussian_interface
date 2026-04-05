@@ -14,14 +14,14 @@
 #SBATCH --output={remote_dir}/slurm_%j.out
 #SBATCH --error={remote_dir}/slurm_%j.err
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=8
-#SBATCH --mem=8G
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=4G
 #SBATCH --partition=CPU_rune
 #SBATCH --nodelist=rune03
 
 # Load Gaussian
 module load rune/gaussian/g16-c.02
-export OMP_NUM_THREADS=8
+export OMP_NUM_THREADS=4
 
 cd {remote_dir}
 

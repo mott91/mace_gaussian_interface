@@ -521,13 +521,16 @@ class ComparisonWorkflow:
         # Get runtime info
         ml_runtime = ml_results.get("runtime_s", 0)
         dft_runtime = dft_results.get("runtime_s", 0)
-        speedup = dft_runtime / ml_runtime if ml_runtime > 0 else 0
 
         # Collect hardware and Gaussian timing metadata
         ml_version = ml_results.get("version_info", {})
         dft_version = dft_results.get("version_info", {})
         ml_gaussian_timing = ml_results.get("gaussian_timing", {})
-        dft_gaussian_timing = dft_results.get("gaussian_timing", {})
+        dft_gaussian_timing = dft_results.get("gaussian_timing", dft_results.get("timing", {}))
+
+        # Speedup: DFT Gaussian elapsed time vs ML pipeline time
+        dft_gauss_s = dft_gaussian_timing.get("total_elapsed_s", 0) if dft_gaussian_timing else 0
+        speedup = dft_gauss_s / ml_runtime if ml_runtime > 0 and dft_gauss_s > 0 else 0
         dft_hardware = dft_results.get("hardware", {})
 
         return {

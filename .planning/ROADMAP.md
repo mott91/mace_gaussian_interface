@@ -53,9 +53,9 @@ Full archive: `.planning/milestones/v1.1-ROADMAP.md`, `.planning/milestones/v1.1
 
 - [x] **Phase 18: Spectral Quality Foundations** - Lorentzian broadening, zero-intensity filtering, stick+broadened spectra, mace_polar dipole investigation (completed 2026-03-30)
 - [x] **Phase 19: Degenerate Mode Handling** - Subspace overlap for degenerate modes, correct statistics without double-counting (completed 2026-03-31)
-- [x] **Phase 20: Wall-Clock Timing** - Per-molecule per-calculator timing instrumentation and batch report timing table (completed 2026-04-02)
+- [x] **Phase 20: Wall-Clock Timing** - Per-molecule per-calculator timing instrumentation and batch report timing table (completed 2026-04-02, verified 2026-04-05)
 - [x] **Phase 21: NIST Experimental Overlay** - Fetch, cache, and overlay experimental IR spectra from NIST WebBook (completed 2026-04-02)
-- [ ] **Phase 22: Early SLURM Submission** - Submit DFT jobs per-molecule immediately after geometry optimization
+- [x] **Phase 22: Early SLURM Submission** - Submit DFT jobs per-molecule immediately after geometry optimization (completed 2026-04-05)
 - [ ] **Phase 23: Anharmonic Pipeline & Report Overhaul** - Thesis-quality HTML report integrating all v1.2 features
 - [ ] **Phase 24: VPT2 Research Spike** - Time-boxed Psience/VPT2 feasibility evaluation on water
 
@@ -120,7 +120,14 @@ Plans:
   1. During `mace-gaussian batch molecules.txt --dft-on-cluster host`, each molecule's DFT job is submitted to SLURM immediately after its geometry optimization completes, not after all molecules' ML calculations finish
   2. ML frequency calculations for subsequent molecules proceed in parallel with DFT queue time on the cluster
   3. The batch manifest correctly tracks both ML and DFT status per molecule without race conditions (concurrent manifest access is safe)
-**Plans**: TBD
+**Plans**: 1 plan (implemented directly, no GSD plan file)
+**Verified**: 2026-04-05 with hydrogen_chloride on mot@tci5/rune03
+**Bugs fixed during verification**:
+  - SLURM `retrieve_results` saved empty frequencies (parser key mismatch)
+  - Per-molecule report missing DFT timing (`timing` vs `gaussian_timing` key)
+  - Speedup was 0 for SLURM DFT (no `runtime_s`; now uses DFT Gaussian elapsed / ML pipeline time)
+  - HTML report unicode crash (added utf-8 encoding)
+  - Re-run harmonic analysis after DFT retrieval (was running before DFT results available)
 
 ### Phase 23: Anharmonic Pipeline & Report Overhaul
 **Goal**: The anharmonic analysis pipeline produces a thesis-quality HTML report that integrates all v1.2 features into a polished presentation
@@ -168,7 +175,7 @@ Plans:
 
 ## Progress
 
-**Execution Order:** 18 -> 19 -> 21 -> 20 -> 22 -> 23 -> 24 (Phase 20 deferred pending prof discussion on timing methodology)
+**Execution Order:** 18 -> 19 -> 21 -> 20 -> 22 -> 23 -> 24
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -194,9 +201,9 @@ Plans:
 | 15. SLURM & Batch Report | v1.1 | 2/2 | Complete | 2026-03-27 |
 | 18. Spectral Quality Foundations | v1.2 | 2/2 | Complete    | 2026-03-30 |
 | 19. Degenerate Mode Handling | v1.2 | 2/2 | Complete    | 2026-03-31 |
-| 20. Wall-Clock Timing | v1.2 | 1/1 | Complete    | 2026-04-02 |
+| 20. Wall-Clock Timing | v1.2 | 1/1 | Complete (verified) | 2026-04-02 |
 | 21. NIST Experimental Overlay | v1.2 | 2/2 | Complete   | 2026-04-02 |
-| 22. Early SLURM Submission | v1.2 | 0/TBD | Not started | - |
+| 22. Early SLURM Submission | v1.2 | 1/1 | Complete (verified) | 2026-04-05 |
 | 23. Anharmonic Pipeline & Report | v1.2 | 0/TBD | Not started | - |
 | 24. VPT2 Research Spike | v1.2 | 0/TBD | Not started | - |
 | 16. Benchmark Campaign | v1.3 | 0/TBD | Not started | - |

@@ -218,8 +218,49 @@ def run_batch(
             # Stage 2: DFT baselines (per-molecule, run once)
             if not skip_dft_baseline and mol_manifest.get("dft_baseline") != STATUS_COMPLETE:
                 if dft_on_cluster:
-                    # SLURM DFT: handled after all molecules' geometry opt
-                    pass
+                    # Submit DFT to SLURM immediately after geom opt
+                    slurm_info = mol_manifest.get("slurm", {})
+                    if slurm_info.get("status") not in ("SUBMITTED", "RUNNING", "COMPLETED"):
+                        from .dft_baseline import create_gaussian_dft_input
+                        from .slurm import submit_dft_jobs
+
+                        template = (
+                            Path(slurm_template)
+                            if slurm_template
+                            else Path(__file__).parent.parent / "templates" / "slurm_dft.sh"
+                        )
+
+                        gjf_dir = Path(output_dir) / molecule_name / "b3lyp_6-31Gdp"
+                        gjf_dir.mkdir(parents=True, exist_ok=True)
+                        gjf_path = gjf_dir / f"{molecule_name}_freq_anharm.gjf"
+                        create_gaussian_dft_input(
+                            optimized_atoms,
+                            str(gjf_path),
+                            method="b3lyp",
+                            basis="6-31G(d,p)",
+                            title=molecule_name,
+                            output_dir=str(gjf_dir),
+                            nproc=4,
+                            mem="4GB",
+                        )
+                        job_ids = submit_dft_jobs(
+                            [{"name": molecule_name, "gjf_path": str(gjf_path)}],
+                            dft_on_cluster,
+                            template,
+                            output_dir,
+                        )
+                        if molecule_name in job_ids:
+                            mol_manifest["slurm"] = {
+                                "job_id": job_ids[molecule_name],
+                                "host": dft_on_cluster,
+                                "remote_dir": f"~/mace_gaussian_dft/{molecule_name}",
+                                "status": "SUBMITTED",
+                            }
+                            click.echo(
+                                f"  Submitted DFT for {molecule_name} "
+                                f"(job {job_ids[molecule_name]})"
+                            )
+                        save_manifest(manifest, manifest_path)
                 else:
                     from .workflow import run_dft_baselines
 
@@ -319,91 +360,56 @@ def run_batch(
                         summary["failed"] += 1
             save_manifest(manifest, manifest_path)
 
-    # SLURM DFT offload: submit all, poll, retrieve (per D-02, D-07)
+    # SLURM DFT offload: poll submitted jobs, retrieve results
     if dft_on_cluster and not skip_dft_baseline:
-        from .gaussian.io import ase_to_gjf
         from .slurm import TERMINAL_STATES as _SLURM_TERMINAL
-        from .slurm import poll_jobs, retrieve_results, submit_dft_jobs
+        from .slurm import poll_jobs, retrieve_results
 
-        # Collect molecules needing DFT
-        need_dft = []
+        # Collect submitted jobs that haven't reached a terminal state
+        pending_jobs: dict[str, str] = {}
         for mol_name, mol_data in manifest["molecules"].items():
-            if mol_data.get("dft_baseline") not in (STATUS_COMPLETE, "dft_failed"):
-                slurm_info = mol_data.get("slurm", {})
-                if slurm_info.get("status") not in _SLURM_TERMINAL:
-                    need_dft.append(mol_name)
+            slurm_info = mol_data.get("slurm", {})
+            job_id = slurm_info.get("job_id")
+            if job_id and slurm_info.get("status") not in _SLURM_TERMINAL:
+                pending_jobs[mol_name] = job_id
 
-        if need_dft:
-            # Resolve template path
-            template = (
-                Path(slurm_template)
-                if slurm_template
-                else Path(__file__).parent.parent / "templates" / "slurm_dft.sh"
+        if pending_jobs:
+            click.echo(
+                f"\nWaiting for {len(pending_jobs)} DFT job(s) on {dft_on_cluster}..."
             )
+            final_states = poll_jobs(dft_on_cluster, pending_jobs)
 
-            # Generate .gjf files for molecules needing DFT
-            molecules_for_slurm = []
-            for mol_name in need_dft:
-                mol_data = manifest["molecules"][mol_name]
-                opt_geom_path = results_mgr.get_optimized_geometry_path(mol_name)
-                if opt_geom_path.exists():
-                    from .dft_baseline import create_gaussian_dft_input
+            # Update manifest with final states
+            completed_mols = []
+            for mol_name, state in final_states.items():
+                manifest["molecules"][mol_name]["slurm"]["status"] = state
+                if state == "COMPLETED":
+                    completed_mols.append(mol_name)
+                else:
+                    manifest["molecules"][mol_name]["dft_baseline"] = "dft_failed"
+                    click.echo(f"  SLURM job for {mol_name} ended with state: {state}")
+            save_manifest(manifest, manifest_path)
 
-                    atoms = read(str(opt_geom_path))
-                    gjf_dir = Path(output_dir) / mol_name / "b3lyp_6-31Gdp"
-                    gjf_dir.mkdir(parents=True, exist_ok=True)
-                    gjf_path = gjf_dir / f"{mol_name}_freq_anharm.gjf"
-                    create_gaussian_dft_input(
-                        atoms,
-                        str(gjf_path),
-                        method="b3lyp",
-                        basis="6-31G(d,p)",
-                        title=mol_name,
-                        output_dir=str(gjf_dir),
-                        nproc=8,
-                        mem="6GB",
-                    )
-                    molecules_for_slurm.append({"name": mol_name, "gjf_path": str(gjf_path)})
-
-            if molecules_for_slurm:
-                click.echo(
-                    f"\nSubmitting {len(molecules_for_slurm)} DFT job(s) to {dft_on_cluster}..."
-                )
-                job_ids = submit_dft_jobs(molecules_for_slurm, dft_on_cluster, template, output_dir)
-
-                # Record job IDs in manifest
-                for mol_name, job_id in job_ids.items():
-                    manifest["molecules"][mol_name]["slurm"] = {
-                        "job_id": job_id,
-                        "host": dft_on_cluster,
-                        "remote_dir": f"~/mace_gaussian_dft/{mol_name}",
-                        "status": "SUBMITTED",
-                    }
+            # Retrieve results for completed molecules
+            if completed_mols:
+                click.echo(f"Retrieving results for {len(completed_mols)} molecule(s)...")
+                retrieve_results(dft_on_cluster, completed_mols, output_dir)
+                for mol_name in completed_mols:
+                    manifest["molecules"][mol_name]["dft_baseline"] = STATUS_COMPLETE
                 save_manifest(manifest, manifest_path)
 
-                # Poll until all complete
-                click.echo("Polling SLURM jobs (hourly updates)...")
-                final_states = poll_jobs(dft_on_cluster, job_ids)
+                # Re-run harmonic analysis now that DFT baseline is available
+                from .analysis import analyze_molecule_harmonic
 
-                # Update manifest with final states
-                completed_mols = []
-                for mol_name, state in final_states.items():
-                    manifest["molecules"][mol_name]["slurm"]["status"] = state
-                    if state == "COMPLETED":
-                        completed_mols.append(mol_name)
-                    else:
-                        # Per D-17: mark dft_failed, continue
-                        manifest["molecules"][mol_name]["dft_baseline"] = "dft_failed"
-                        click.echo(f"  SLURM job for {mol_name} ended with state: {state}")
+                for mol_name in completed_mols:
+                    try:
+                        click.echo(f"  Re-running harmonic analysis for {mol_name}...")
+                        analyze_molecule_harmonic(mol_name, base_results_dir=output_dir)
+                        manifest["molecules"][mol_name]["analysis_harmonic"] = STATUS_COMPLETE
+                    except Exception as e:
+                        click.echo(f"  Warning: Harmonic analysis failed for {mol_name}: {e}", err=True)
+                        manifest["molecules"][mol_name]["analysis_harmonic"] = STATUS_FAILED
                 save_manifest(manifest, manifest_path)
-
-                # Retrieve results for completed molecules
-                if completed_mols:
-                    click.echo(f"Retrieving results for {len(completed_mols)} molecule(s)...")
-                    retrieve_results(dft_on_cluster, completed_mols, output_dir)
-                    for mol_name in completed_mols:
-                        manifest["molecules"][mol_name]["dft_baseline"] = STATUS_COMPLETE
-                    save_manifest(manifest, manifest_path)
 
     # Print summary table
     click.echo("\n" + "=" * 60)

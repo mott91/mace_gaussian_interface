@@ -916,7 +916,7 @@ class HTMLReportGenerator:
 
         # Write to file
         output_path = self.output_dir / "report.html"
-        with output_path.open("w") as f:
+        with output_path.open("w", encoding="utf-8") as f:
             f.write("\n".join(html_parts))
 
         print(f"\n{'=' * 60}")
