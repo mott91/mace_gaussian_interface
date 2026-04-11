@@ -511,23 +511,29 @@ class HTMLReportGenerator:
 | A5 | Adding `plotly>=5.20` to `pyproject.toml` `[project].dependencies` is acceptable | Standard Stack | Very low — already installed in active env, just declaring what's there |
 | A6 | Experimental agreement = Pearson correlation on common grid is an acceptable metric (vs., e.g., peak-position MAE from Phase 21) | Code Examples | Medium — Phase 21 already defined a peak-position metric. Prefer to REUSE Phase 21's metric if it's exposed. Plan should check `mace_gaussian/analysis/nist_fetcher.py` and `analyze_spectra.py` for an existing `compare_experimental_peaks` method before inventing a new one. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Does Phase 21 already expose a quantitative experimental-agreement number?**
-   - What we know: `create_experimental_section` (html_report_generator.py:862) currently says "Quantitative peak position comparison (MAE, RMSE) will be added in a future phase." — so apparently no.
-   - What's unclear: NIST-03 is marked complete in REQUIREMENTS.md; the metric may exist elsewhere but isn't surfaced.
-   - Recommendation: Plan should grep for `experimental` in `analyze_spectra.py` (specifically around `calculate_metrics`) before inventing a new `compute_experimental_agreement`. If a peak-position MAE exists, use it and add Pearson correlation as a secondary metric. `[ASSUMED]` that it doesn't — needs verification in plan phase.
+1. **RESOLVED: Phase 21 does NOT expose a quantitative experimental-agreement metric.**
+   - Verified 2026-04-11 via `grep -n "experimental" mace_gaussian/analysis/analyze_spectra.py mace_gaussian/analysis/nist_fetcher.py | grep -iE "agreement|metric|compare|score|distance"` — zero matches.
+   - `create_experimental_section` (html_report_generator.py:862) TODO comment stands: "Quantitative peak position comparison (MAE, RMSE) will be added in a future phase."
+   - **Decision**: Plan 03 will invent `compute_experimental_agreement` as Pearson correlation on the common frequency grid. Plan 03 Task 1 `<read_first>` already includes `analyze_spectra.py` and `nist_fetcher.py`; executor will confirm absence via grep at implementation time before writing the new function.
 
-2. **Should the executive summary aggregate across ALL methods or show one card per method?**
-   - What we know: D-02 says "per-molecule summary cards" — plural cards, one per method, with "best-performing method highlighted".
-   - Rec: Render N cards (one per method), visually highlight the composite-best, plus one top-level "verdict" line above.
+2. **RESOLVED: One card per method, plus a top-level verdict line.**
+   - D-02 says "per-molecule summary cards" (plural) with "best-performing method highlighted".
+   - **Decision**: Executive summary renders N method cards (one per ML+FF combo) with composite-best highlighted via `.best-method` class, plus a single top-line verdict string like "mace_off + espaloma is closest to experiment".
 
-3. **Does the user want to keep `spectrum_combined.png` at all?**
-   - What we know: D-03 says "executive summary → **combined plots** → per-method detail". So yes, keep a combined overview.
-   - Rec: Plotly combined plot with one trace per ML method + DFT + experimental. Same figure builder, just more traces.
+3. **RESOLVED: Keep a combined-overview spectrum plot.**
+   - D-03 explicitly sequences "executive summary → combined plots → per-method detail".
+   - **Decision**: `build_combined_spectrum_figure` renders one Plotly figure with DFT + all ML methods + experimental trace on a shared axis. No separate `spectrum_combined.png` — Plotly replaces it.
 
-4. **UI phase (`/gsd-ui-phase 23`) will produce a formal visual design contract.**
-   - User explicitly plans to run `/gsd-ui-phase 23` before implementation. The planner should NOT fix colors, fonts, spacing. Leave a placeholder layer for the UI contract to fill.
+4. **RESOLVED: UI phase deferred — planner uses a placeholder palette.**
+   - User declined `/gsd-ui-phase 23` on 2026-04-11 (captured in plan-phase workflow conversation). Reasoning: static read-only report with no interaction design, components, or flows — full UI contract is overhead for a single-page HTML artifact.
+   - **Decision**: Planner uses project-standard defaults and treats them as Claude discretion:
+     - Palette: seaborn colorblind (established in Phase 21) — DFT `#0173B2`, ML `#DE8F05`, experimental `#000000` dashed
+     - Font: system-ui stack (`-apple-system, BlinkMacSystemFont, "Segoe UI", ...`)
+     - Layout: max-width 1200px centered, card-based per-molecule summaries
+     - Spectroscopic convention: high wavenumber on left (x-axis reversed) per A4
+   - These are locked in `_shared_css.py` and `plotly_builders.py`. If the user wants a different visual direction after seeing the first water-report smoke test, a follow-up phase can retune the palette without re-architecting.
 
 ## Environment Availability
 
@@ -802,11 +808,11 @@ This is a **local-only CLI tool** producing files opened in the user's browser. 
 | Pitfalls | HIGH | All pitfalls derive from actual code reads (dedup loop, CSS duplication, heatmap coupling) or empirical measurement (bundle sizes) |
 | Verdict algorithm | MEDIUM | Scoring weights are a judgment call; documented as assumption A2 for user review |
 
-### Open Questions (Flagged for Planner)
-1. Does Phase 21 already expose a quantitative experimental-agreement metric? (Plan step: grep `analyze_spectra.py` for `experimental` in `calculate_metrics` before reinventing.)
-2. Composite scoring weights (40/30/20/10) need user sign-off — recommend surfacing in UI phase.
-3. Spectroscopic convention (high wavenumber on left) should be flipped from current ascending — confirm in UI phase.
-4. UI phase (`/gsd-ui-phase 23`) runs after research. Planner should leave colors/fonts/spacing as placeholders for the UI contract.
+### Open Questions (RESOLVED 2026-04-11)
+1. **RESOLVED**: No existing experimental-agreement metric in Phase 21 code. Verified via grep on `analyze_spectra.py` and `nist_fetcher.py` — zero matches. Plan 03 will introduce `compute_experimental_agreement` as Pearson correlation on the common frequency grid.
+2. **RESOLVED**: Composite scoring weights default 40/30/20/10 (freq R², intensity R², RMSE, experimental agreement). Claude discretion; user can tune after first smoke test. No UI phase gate needed.
+3. **RESOLVED**: Spectroscopic convention (high wavenumber on left) — Plotly `xaxis.autorange="reversed"` on all spectrum figures. Standard IR convention, doesn't require UI sign-off.
+4. **RESOLVED**: UI phase deferred by user decision (2026-04-11). Planner uses project-standard defaults (seaborn colorblind palette, system-ui font, 1200px max-width) — see §Open Questions upstream for full rationale.
 
 ### Ready for Planning
 Research complete. Planner has:
