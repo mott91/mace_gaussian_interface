@@ -1,5 +1,8 @@
 """Tests for batch report generation."""
 
+import json
+from pathlib import Path
+
 from click.testing import CliRunner
 
 from mace_gaussian.analysis.batch_report import (
@@ -47,3 +50,72 @@ def test_aggregate_results_empty_dir(tmp_path):
     """Aggregating an empty directory returns empty DataFrame."""
     df = aggregate_results(str(tmp_path))
     assert df.empty
+
+
+# ---- Phase 23 T-23-01 batch-path XSS mitigation RED test ----
+# This test is RED until Plan 05 Task 1 wraps batch_report.py's f-string
+# interpolations of molecule/combo/hardware strings with html.escape.
+# It builds a minimal fake comparison_results/ tree with a malicious
+# molecule directory name, runs generate_batch_report, and asserts the
+# raw <script> tag is NOT present in the rendered HTML.
+
+def _write_min_results_json(path: Path, freqs: list[float]) -> None:
+    """Write a minimal Phase 21 results.json schema with harmonic freqs."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(
+            {
+                "frequencies": {
+                    "harmonic": [{"freq_cm": f, "ir_intensity": 1.0} for f in freqs],
+                },
+                "runtime_s": 1.0,
+                "gaussian_timing": {"total_elapsed_s": 1.0},
+                "version_info": {"cpu_model": "TestCPU", "gpu_name": ""},
+                "hardware": {"cpu_model": "TestCPU", "node": "testnode"},
+            }
+        )
+    )
+
+
+def test_batch_report_escapes_molecule_name(tmp_path):
+    """T-23-01 mitigation: batch report must HTML-escape malicious molecule names."""
+    malicious = "<script>alert(1)</script>"
+    results_dir = tmp_path / "comparison_results"
+    mol_dir = results_dir / malicious
+    freqs = [1600.0, 3700.0, 3800.0]
+
+    # DFT reference
+    _write_min_results_json(mol_dir / "b3lyp_6-31Gdp" / "results.json", freqs)
+    # One ML combo
+    _write_min_results_json(mol_dir / "mace_off_espaloma" / "results.json", freqs)
+
+    out_dir = tmp_path / "batch_report_out"
+    try:
+        report_file = generate_batch_report(
+            results_dir=str(results_dir),
+            output_dir=str(out_dir),
+        )
+    except OSError:
+        # Some filesystems reject '<' '>' in directory names. Fall back to
+        # a combo-level XSS test using a safe molecule dir but malicious
+        # combo dir -- the same _esc requirement applies.
+        safe_mol = results_dir / "water"
+        _write_min_results_json(safe_mol / "b3lyp_6-31Gdp" / "results.json", freqs)
+        _write_min_results_json(safe_mol / malicious / "results.json", freqs)
+        report_file = generate_batch_report(
+            results_dir=str(results_dir),
+            output_dir=str(out_dir),
+        )
+
+    html = Path(report_file).read_text()
+
+    # Raw script tag must NOT appear unescaped
+    assert "<script>alert(1)</script>" not in html, (
+        "batch_report did not escape malicious molecule/combo name -- "
+        "T-23-01 mitigation missing. Expected html.escape wrapping in "
+        "mace_gaussian/analysis/batch_report.py."
+    )
+    # Escaped form should appear instead
+    assert "&lt;script&gt;" in html, (
+        "Expected HTML-escaped form '&lt;script&gt;' in batch report output"
+    )
