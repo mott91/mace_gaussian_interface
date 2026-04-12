@@ -1,927 +1,691 @@
-"""
-HTML Report Generator
+"""HTML Report Generator -- Plotly-powered, mode-aware, executive-summary-first.
 
-Creates comprehensive, beautiful HTML reports with embedded plots,
-tables, and statistics for IR spectral analysis.
+Phase 23 overhaul: replaces old matplotlib-base64 approach with interactive Plotly
+figures, shared CSS from _shared_css, executive summary ranking, and structured
+data export.  Mode flag ('harmonic' | 'anharmonic') controls overtones section.
 """
 
 from __future__ import annotations
 
 import base64
-from datetime import datetime
+import html
+import math
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import Any, Literal
 
-import pandas as pd
+import numpy as np
 
-if TYPE_CHECKING:
-    from .nist_fetcher import ExperimentalSpectrum
+from ._shared_css import build_css
+from .analyze_spectra import SpectrumAnalyzer
+from .executive_summary import (
+    build_verdict,
+    compute_experimental_agreement,
+    rank_methods,
+)
+from .plotly_builders import (
+    build_combined_spectrum_figure,
+    build_regression_figure,
+    build_spectrum_figure,
+    experimental_on_grid,
+)
+from .report_data import export_report_data
 
 
 class HTMLReportGenerator:
-    """Generates HTML reports for spectral analysis"""
+    """Generates HTML reports for spectral analysis with Plotly interactive figures."""
 
     def __init__(
         self,
         molecule_name: str,
         output_dir: Path,
+        mode: Literal["harmonic", "anharmonic"] = "anharmonic",
+        plotly_js: Any = "cdn",
         bandwidth_fwhm: float = 10.0,
-        degenerate_groups: list[dict] | None = None,
+        degenerate_groups: list | None = None,
     ):
-        """
-        Initialize report generator
+        """Initialize report generator.
 
         Parameters
         ----------
         molecule_name : str
-            Name of molecule
+            Name of molecule.
         output_dir : Path
-            Output directory containing plots and data
+            Output directory containing plots and data.
+        mode : str
+            Report mode -- ``'harmonic'`` or ``'anharmonic'``.
+        plotly_js : str or False
+            How to include plotly.js: ``'cdn'``, ``'inline'``, or ``False``.
         bandwidth_fwhm : float
-            Full width at half maximum used for Lorentzian broadening (cm-1)
-        degenerate_groups : list[dict], optional
-            Degenerate group info dicts with keys: label, multiplicity,
-            subspace_overlap, ref_indices
+            Full width at half maximum for Lorentzian broadening (cm-1).
+        degenerate_groups : list, optional
+            Degenerate group info dicts.
         """
         self.molecule_name = molecule_name
         self.output_dir = Path(output_dir)
+        self.mode = mode
+        self.plotly_js: Any = plotly_js
         self.bandwidth_fwhm = bandwidth_fwhm
         self.degenerate_groups = degenerate_groups or []
-        self.plots_dir = self.output_dir / "plots"
-        self.data_dir = self.output_dir / "data"
+        self._plotlyjs_emitted = False
+        self._analyzer = SpectrumAnalyzer(bandwidth_fwhm=bandwidth_fwhm)
 
-    def encode_image(self, image_path: Path) -> str:
-        """Encode image to base64 for embedding"""
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
+
+    def generate_report(self, analysis_results: dict) -> None:
+        """Generate complete HTML report.
+
+        Parameters
+        ----------
+        analysis_results : dict
+            Results from comparison workflow.
+        """
+        self._enrich_with_broadened_spectra(analysis_results)
+        self._compute_and_attach_experimental_agreement(analysis_results)
+
+        comparisons = analysis_results["comparisons"]
+        ranked = rank_methods(comparisons)
+        has_exp = analysis_results.get("experimental") is not None
+        verdict = build_verdict(ranked, has_experimental=has_exp)
+        analysis_results["executive_summary"] = {
+            "verdict": verdict,
+            "ranked": ranked,
+        }
+
+        sections = [
+            self._create_head(),
+            self._create_header(),
+            self._create_navigation(comparisons),
+            self._create_executive_summary(ranked, verdict),
+            self._create_combined_plots(analysis_results),
+        ]
+        for i, comp in enumerate(comparisons, 1):
+            sections.append(self._create_comparison_section(comp, i, analysis_results))
+        sections.append(self._create_experimental_info_section(analysis_results))
+        sections.append(self._create_summary_table(comparisons))
+        if self.mode == "anharmonic":
+            sections.append(self._create_overtones_section(analysis_results))
+        sections.append(self._create_footer())
+
+        html_out = "\n".join(sections) + "\n</body></html>\n"
+
+        # Defensive emit-once check (T-23-05)
+        cdn_count = html_out.count("cdn.plot.ly/plotly")
+        if cdn_count > 1:
+            raise RuntimeError(f"Plotly CDN referenced {cdn_count} times; expected at most 1.")
+
+        out_path = self.output_dir / "report.html"
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(html_out, encoding="utf-8")
+
+        export_report_data(analysis_results, self.output_dir / "report_data.json")
+
+    # ------------------------------------------------------------------
+    # Helpers
+    # ------------------------------------------------------------------
+
+    def _esc(self, s: Any) -> str:
+        """HTML-escape a value (T-23-01 mitigation)."""
+        return html.escape(str(s), quote=True)
+
+    @staticmethod
+    def encode_image(image_path: Path) -> str:
+        """Encode image to base64 for embedding."""
         with Path(image_path).open("rb") as f:
             encoded = base64.b64encode(f.read()).decode()
         return f"data:image/png;base64,{encoded}"
 
-    def create_css(self) -> str:
-        """Create CSS styling"""
-        return """
-        <style>
-            * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-            }
+    def _fig_to_div(self, fig: Any, div_id: str) -> str:
+        """Convert a Plotly figure to an HTML div string.
 
-            body {
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-                line-height: 1.6;
-                color: #1a1a1a;
-                background: #f5f5f5;
-                padding: 0;
-            }
-
-            .container {
-                max-width: 100%;
-                margin: 0;
-                background: white;
-                min-height: 100vh;
-            }
-
-            header {
-                background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-                color: white;
-                padding: 3rem 4rem;
-                border-bottom: 3px solid #3498db;
-            }
-
-            header h1 {
-                font-size: 2.2em;
-                margin-bottom: 0.5rem;
-                font-weight: 600;
-                letter-spacing: -0.5px;
-            }
-
-            header .subtitle {
-                font-size: 1.1em;
-                opacity: 0.85;
-                font-weight: 300;
-            }
-
-            nav {
-                background: white;
-                padding: 1rem 4rem;
-                border-bottom: 1px solid #e5e7eb;
-                position: sticky;
-                top: 0;
-                z-index: 100;
-                box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            }
-
-            nav a {
-                color: #374151;
-                text-decoration: none;
-                margin-right: 2rem;
-                font-weight: 500;
-                font-size: 0.95rem;
-                transition: all 0.2s;
-                padding-bottom: 0.25rem;
-                border-bottom: 2px solid transparent;
-            }
-
-            nav a:hover {
-                color: #3498db;
-                border-bottom-color: #3498db;
-            }
-
-            .content {
-                padding: 3rem 4rem;
-                max-width: 1600px;
-                margin: 0 auto;
-            }
-
-            section {
-                margin-bottom: 4rem;
-            }
-
-            h2 {
-                color: #1a1a1a;
-                font-size: 1.75em;
-                margin-bottom: 1.5rem;
-                padding-bottom: 0.75rem;
-                border-bottom: 2px solid #e5e7eb;
-                font-weight: 600;
-                letter-spacing: -0.3px;
-            }
-
-            h3 {
-                color: #374151;
-                font-size: 1.3em;
-                margin: 2rem 0 1rem 0;
-                font-weight: 600;
-            }
-
-            .summary-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-                gap: 1.5rem;
-                margin: 2rem 0;
-            }
-
-            .summary-card {
-                background: white;
-                border: 1px solid #e5e7eb;
-                padding: 1.5rem;
-                border-radius: 8px;
-                transition: all 0.2s;
-            }
-
-            .summary-card:hover {
-                box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-                transform: translateY(-2px);
-            }
-
-            .summary-card .value {
-                font-size: 2.2em;
-                font-weight: 600;
-                margin: 0.5rem 0;
-                color: #1a1a1a;
-            }
-
-            .summary-card .label {
-                font-size: 0.85rem;
-                color: #6b7280;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                font-weight: 500;
-            }
-
-            .comparison-section {
-                background: #fafafa;
-                padding: 2rem;
-                border-radius: 8px;
-                margin-bottom: 2.5rem;
-                border: 1px solid #e5e7eb;
-            }
-
-            .plot-container {
-                background: white;
-                padding: 1.5rem;
-                border-radius: 6px;
-                border: 1px solid #e5e7eb;
-                margin: 1.5rem 0;
-            }
-
-            .plot-container img {
-                width: 100%;
-                height: auto;
-                display: block;
-                border-radius: 4px;
-            }
-
-            table {
-                width: 100%;
-                border-collapse: collapse;
-                margin: 1.5rem 0;
-                background: white;
-                border: 1px solid #e5e7eb;
-                border-radius: 6px;
-                overflow: hidden;
-                font-size: 0.9rem;
-            }
-
-            thead {
-                background: #f9fafb;
-                border-bottom: 2px solid #e5e7eb;
-            }
-
-            th, td {
-                padding: 0.875rem 1rem;
-                text-align: left;
-                border-bottom: 1px solid #f3f4f6;
-            }
-
-            th {
-                font-weight: 600;
-                color: #374151;
-                font-size: 0.85rem;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-            }
-
-            td {
-                color: #4b5563;
-            }
-
-            tbody tr:hover {
-                background: #f9fafb;
-            }
-
-            .metric-good {
-                color: #059669;
-                font-weight: 600;
-            }
-
-            .metric-warning {
-                color: #d97706;
-                font-weight: 600;
-            }
-
-            .metric-bad {
-                color: #dc2626;
-                font-weight: 600;
-            }
-
-            .stats-box {
-                background: white;
-                padding: 1.5rem;
-                border-radius: 6px;
-                border: 1px solid #e5e7eb;
-                margin: 1.5rem 0;
-            }
-
-            .stats-box h4 {
-                color: #374151;
-                margin-bottom: 1rem;
-                font-weight: 600;
-                font-size: 1.1rem;
-            }
-
-            .stats-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-                gap: 1rem;
-            }
-
-            .stat-item {
-                padding: 1rem;
-                background: #f9fafb;
-                border-radius: 6px;
-                border: 1px solid #f3f4f6;
-            }
-
-            .stat-label {
-                font-size: 0.8rem;
-                color: #6b7280;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                margin-bottom: 0.25rem;
-                font-weight: 500;
-            }
-
-            .stat-value {
-                font-size: 1.5em;
-                font-weight: 600;
-                color: #1a1a1a;
-            }
-
-            .warning-box {
-                background: #fef3c7;
-                border-left: 3px solid #f59e0b;
-                padding: 1rem;
-                margin: 1.5rem 0;
-                border-radius: 4px;
-                color: #92400e;
-            }
-
-            footer {
-                background: #f9fafb;
-                padding: 2rem;
-                text-align: center;
-                color: #6b7280;
-                border-top: 1px solid #e5e7eb;
-                font-size: 0.9rem;
-            }
-
-            .timestamp {
-                font-style: italic;
-                color: #9ca3af;
-                margin-top: 0.5rem;
-            }
-        </style>
+        Uses the emit-once pattern: first call includes plotly.js (per
+        ``self.plotly_js``), subsequent calls use ``include_plotlyjs=False``.
         """
+        import plotly.io as pio
 
-    def create_header(self) -> str:
-        """Create HTML header"""
-        return f"""
-        <header>
-            <h1>IR Spectral Analysis Report</h1>
-            <div class="subtitle">{self.molecule_name.upper()}</div>
-            <div class="subtitle">ML vs DFT Comparison</div>
-        </header>
+        include: Any = self.plotly_js if not self._plotlyjs_emitted else False
+        self._plotlyjs_emitted = True
+        return pio.to_html(
+            fig,
+            include_plotlyjs=include,
+            full_html=False,
+            div_id=div_id,
+            config={"displaylogo": False, "responsive": True},
+        )
+
+    # ------------------------------------------------------------------
+    # Broadening / experimental enrichment
+    # ------------------------------------------------------------------
+
+    def _enrich_with_broadened_spectra(self, analysis_results: dict) -> None:
+        """Broaden ML and DFT spectra onto the shared frequency grid."""
+        freq_grid = self._analyzer.freq_grid
+        analysis_results["freq_grid"] = freq_grid
+        for comp in analysis_results["comparisons"]:
+            ml_br = self._analyzer.broaden_spectrum(comp["ml_spectrum"])
+            dft_br = self._analyzer.broaden_spectrum(comp["dft_spectrum"])
+            comp["_ml_broadened"] = self._normalize(ml_br)
+            comp["_dft_broadened"] = self._normalize(dft_br)
+
+    @staticmethod
+    def _normalize(arr: np.ndarray) -> np.ndarray:
+        """Normalize an array to [0, 1]."""
+        peak = float(np.max(arr)) if arr.size else 0.0
+        return arr / peak if peak > 0 else arr
+
+    def _compute_and_attach_experimental_agreement(self, analysis_results: dict) -> None:
+        """Compute per-method experimental agreement and stash on comparisons."""
+        exp = analysis_results.get("experimental")
+        freq_grid = analysis_results["freq_grid"]
+        exp_on = experimental_on_grid(exp, freq_grid) if exp is not None else None
+        analysis_results["_exp_on_grid"] = exp_on
+        for comp in analysis_results["comparisons"]:
+            agree = compute_experimental_agreement(comp["_ml_broadened"], exp_on)
+            comp["experimental_agreement"] = agree
+
+    # ------------------------------------------------------------------
+    # Section builders
+    # ------------------------------------------------------------------
+
+    def _create_head(self) -> str:
+        """Create the ``<!DOCTYPE>`` preamble, ``<head>`` with shared CSS, and open ``<body>``.
+
+        The ``<style>`` block is sourced from ``_shared_css.build_css()`` so that
+        harmonic and anharmonic reports share byte-identical CSS.
         """
+        mol = self._esc(self.molecule_name)
+        return (
+            '<!DOCTYPE html>\n<html lang="en">\n<head>\n'
+            '<meta charset="utf-8">\n'
+            f"<title>{mol} -- {self.mode} report</title>\n"
+            f"{build_css()}\n"
+            "</head>\n<body>"
+        )
 
-    def create_navigation(self, comparisons: list[dict]) -> str:
-        """Create navigation menu"""
-        nav_items = ['<a href="#overview">Overview</a>', '<a href="#combined">Combined</a>']
+    def _create_header(self) -> str:
+        """Create the page header with molecule name and analysis mode.
+
+        Molecule name is HTML-escaped to mitigate T-23-01.
+        """
+        mol = self._esc(self.molecule_name).upper()
+        mode = self.mode.title()
+        return f"<header>\n<h1>{mol} -- {mode} IR Analysis</h1>\n</header>"
+
+    def _create_navigation(self, comparisons: list[dict]) -> str:
+        """Create sticky navigation bar with anchor links.
+
+        Links: executive summary, combined plots, per-method sections,
+        summary table, and (if anharmonic) overtones section.
+        """
+        links = ['<a href="#executive-summary">Summary</a>']
+        links.append('<a href="#combined">Combined</a>')
         for i, comp in enumerate(comparisons, 1):
-            nav_items.append(f'<a href="#comp{i}">{comp["name"]}</a>')
-        nav_items.append('<a href="#summary">Summary</a>')
+            name = self._esc(comp["name"])
+            links.append(f'<a href="#comparison-{i}">{name}</a>')
+        links.append('<a href="#summary-table">Table</a>')
+        if self.mode == "anharmonic":
+            links.append('<a href="#overtones">Overtones</a>')
+        return f"<nav>{''.join(links)}</nav>"
 
-        return f"<nav>{' '.join(nav_items)}</nav>"
+    def _create_executive_summary(self, ranked: list[dict], verdict: str) -> str:
+        """Build the executive summary section (D-01, D-02).
 
-    def create_mode_overlap_section(self) -> str:
-        """Create section with mode overlap heatmaps"""
-        # Find all mode overlap heatmap files
-        mode_overlap_files = list(self.plots_dir.glob("mode_overlap_*.png"))
+        Renders a verdict line followed by one card per ranked method.
+        The first card (best composite score) gets the ``best-method`` CSS class
+        so it is visually highlighted.
 
-        if not mode_overlap_files:
-            return ""
-
-        # Build heatmap sections
-        heatmap_sections = []
-        for heatmap_file in sorted(mode_overlap_files):
-            filename = heatmap_file.name
-            # Extract method names from filename (e.g., mode_overlap_mace_mp_espaloma_vs_wb97xd.png)
-            parts = filename.replace("mode_overlap_", "").replace(".png", "").split("_vs_")
-            ml_method = parts[0] if len(parts) > 0 else "ML"
-            dft_method = parts[1] if len(parts) > 1 else "DFT"
-
-            heatmap_sections.append(f"""
-            <h3>Mode Overlap: {ml_method.upper().replace("_", " ")} vs {dft_method.upper()}</h3>
-            <div class="plot-container">
-                <img src="plots/{filename}" alt="Mode overlap" style="width: 100%;">
-            </div>
-            <p style="color: #666; font-size: 0.9em; margin-bottom: 30px;">
-                Heatmap shows the overlap (dot product) between vibrational modes.
-                Red = high overlap (modes match),
-                Blue = weak overlap, White = no overlap (modes are orthogonal).
-            </p>
-            """)
-
-        heatmaps_html = "\n".join(heatmap_sections)
-
-        # Build degenerate group summary if groups exist
-        deg_summary = ""
-        if self.degenerate_groups:
-            n_groups = len(self.degenerate_groups)
-            mult_counts: dict[int, int] = {}
-            for g in self.degenerate_groups:
-                m = g["multiplicity"]
-                mult_counts[m] = mult_counts.get(m, 0) + 1
-
-            parts_list = []
-            for m, count in sorted(mult_counts.items()):
-                fold_name = {2: "doubly", 3: "triply"}.get(m, f"{m}-fold")
-                parts_list.append(f"{count} {fold_name}")
-            summary_text = ", ".join(parts_list)
-
-            group_rows = ""
-            for g in self.degenerate_groups:
-                group_rows += (
-                    f"<tr>"
-                    f"<td><strong>{g['label']}</strong></td>"
-                    f"<td>{g['multiplicity']}-fold</td>"
-                    f"<td>{g['subspace_overlap']:.3f}</td>"
-                    f"</tr>\n"
-                )
-
-            deg_summary = f"""
-            <div style="padding: 15px; background: #e8f4fd; border-left: 4px solid #2196F3;
-                        margin-bottom: 20px; margin-top: 20px;">
-                <strong>{n_groups} degenerate group(s) detected</strong>
-                ({summary_text}).
-                Degenerate modes are collapsed into single rows/columns in the heatmap
-                using subspace overlap instead of individual dot products.
-            </div>
-            <table class="data-table" style="margin-bottom: 20px;">
-                <thead>
-                    <tr>
-                        <th>Group</th>
-                        <th>Multiplicity</th>
-                        <th>Subspace Overlap</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {group_rows}
-                </tbody>
-            </table>
-            """
-
-        return f"""
-        <section id="mode-overlap" class="comparison-section">
-            <h2>Mode Matching Analysis</h2>
-            <p style="color: #666; margin-bottom: 20px;">
-                Vibrational modes can change order between DFT and ML calculations.
-                Mode matching via normal mode overlap ensures we compare the correct physical modes.
-            </p>
-
-            <div style="padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107;">
-                <strong>Important:</strong> Off-diagonal red spots indicate mode reordering.
-                Perfect overlap = 1.00 (dark red), orthogonal modes = 0.00 (white).
-            </div>
-
-            {deg_summary}
-
-            {heatmaps_html}
-        </section>
+        Parameters
+        ----------
+        ranked : list[dict]
+            Methods sorted by composite score from :func:`rank_methods`.
+        verdict : str
+            Human-readable one-liner from :func:`build_verdict`.
         """
-
-    def create_combined_plots_section(self) -> str:
-        """Create section with combined plots showing all ML methods"""
-        combined_spectrum = self.plots_dir / "spectrum_combined.png"
-        combined_spectrum_extended = self.plots_dir / "spectrum_combined_extended.png"
-        combined_regression = self.plots_dir / "regression_combined.png"
-
-        # Check if combined plots exist
-        if not combined_spectrum.exists() or not combined_regression.exists():
-            return ""
-
-        # Encode images as base64
-        spectrum_img = self.encode_image(combined_spectrum)
-        regression_img = self.encode_image(combined_regression)
-
-        # Build extended spectrum section if it exists
-        extended_section = ""
-        if combined_spectrum_extended.exists():
-            extended_img = self.encode_image(combined_spectrum_extended)
-            extended_section = f"""
-            <h3>Extended IR Spectrum (400-8000 cm⁻¹, includes overtones)</h3>
-            <div class="plot-container">
-                <img src="{extended_img}" alt="Extended spectrum" style="width: 100%;">
-            </div>
-            <p style="color: #666; font-size: 0.9em; margin-bottom: 30px;">
-                Extended frequency range shows fundamental modes, overtones, and combination bands.
-            </p>
-            """
-
-        return f"""
-        <section id="combined" class="comparison-section">
-            <h2>Combined Analysis: All Methods</h2>
-            <p style="color: #666; margin-bottom: 20px;">
-                Direct comparison of all ML methods against the DFT baseline in a single view.
-            </p>
-
-            <h3>Combined IR Spectrum (Fundamentals)</h3>
-            <div class="plot-container">
-                <img src="{spectrum_img}" alt="Combined spectrum" style="width: 100%;">
-            </div>
-
-            {extended_section}
-
-            <h3>Combined Regression Analysis</h3>
-            <div class="plot-container">
-                <img src="{regression_img}" alt="Combined regression" style="width: 100%;">
-            </div>
-
-            <p style="margin-top: 20px; padding: 15px; background: #f8f9fa;">
-                <strong>Note:</strong> Combined plots compare ML methods vs DFT reference.
-                R² values of "N/A" indicate insufficient data points (N&lt;3).
-            </p>
-        </section>
-        """
-
-    def create_overview(self, comparisons: list[dict]) -> str:
-        """Create overview section"""
-        # FIXED: Check list length instead of truthy value
-        if len(comparisons) == 0:
-            return """
-            <section id="overview">
-                <h2>Overview</h2>
-                <div class="warning-box">
-                    <strong>No successful comparisons found.</strong>
-                    <p>All ML calculators either failed or produced no matching peaks.</p>
-                </div>
-            </section>
-            """
-
-        num_comparisons = len(comparisons)
-        avg_mae = sum(c["metrics"].mae_freq for c in comparisons) / num_comparisons
-        best_r2 = max(c["metrics"].r2_freq for c in comparisons)
-        avg_speedup = sum(c["speedup"] for c in comparisons) / num_comparisons
-
-        return f"""
-        <section id="overview">
-            <h2>Overview</h2>
-            <div class="summary-grid">
-                <div class="summary-card">
-                    <div class="label">ML Calculators Tested</div>
-                    <div class="value">{num_comparisons}</div>
-                </div>
-                <div class="summary-card">
-                    <div class="label">Average MAE</div>
-                    <div class="value">{avg_mae:.1f}</div>
-                    <div class="label">cm^-1</div>
-                </div>
-                <div class="summary-card">
-                    <div class="label">Best R^2</div>
-                    <div class="value">{best_r2:.4f}</div>
-                </div>
-                <div class="summary-card">
-                    <div class="label">Avg Speedup</div>
-                    <div class="value">{avg_speedup:.1f}x</div>
-                </div>
-            </div>
-
-            <p style="margin-top: 30px; font-size: 1.1em; line-height: 1.8;">
-                This report compares machine learning (ML) force fields
-                against density functional theory (DFT) anharmonic calculations for IR spectroscopy.
-                All spectra include anharmonic fundamentals, overtones, and combination bands.
-                Broadening was applied using Lorentzian line shapes
-                with {self.bandwidth_fwhm} cm<sup>-1</sup> FWHM.
-                Modes with DFT IR intensity below 0.1 km/mol were excluded
-                from intensity regression metrics.
-            </p>
-        </section>
-        """
-
-    def create_comparison_section(
-        self, comparison: dict, index: int, dft_method: str = "DFT"
-    ) -> str:
-        """Create detailed comparison section for one ML calculator"""
-        m = comparison["metrics"]
-        ml_name = comparison["name"]
-
-        # Determine quality coloring
-        r2_class = (
-            "metric-good"
-            if m.r2_freq > 0.95
-            else "metric-warning"
-            if m.r2_freq > 0.90
-            else "metric-bad"
-        )
-        mae_class = (
-            "metric-good"
-            if m.mae_freq < 10
-            else "metric-warning"
-            if m.mae_freq < 20
-            else "metric-bad"
+        cards: list[str] = []
+        for idx, entry in enumerate(ranked):
+            cls = "method-card best-method" if idx == 0 else "method-card"
+            name = self._esc(entry["name"])
+            exp_val = entry.get("experimental_agreement")
+            exp_str = f"{exp_val:.2f}" if exp_val is not None else "\u2014"
+            cards.append(
+                f'<div class="{cls}">'
+                f"<h3>{name}</h3>"
+                f'<div class="metric">'
+                f'<span class="metric-label">R\u00b2 (freq)</span>'
+                f'<span class="metric-value">{entry["r2_freq"]:.3f}</span></div>'
+                f'<div class="metric">'
+                f'<span class="metric-label">R\u00b2 (intensity)</span>'
+                f'<span class="metric-value">{entry["r2_intensity"]:.3f}</span></div>'
+                f'<div class="metric">'
+                f'<span class="metric-label">RMSE</span>'
+                f'<span class="metric-value">{entry["rmse_freq"]:.1f} cm\u207b\u00b9</span></div>'
+                f'<div class="metric">'
+                f'<span class="metric-label">Speedup</span>'
+                f'<span class="metric-value">{entry["speedup"]:.1f}\u00d7</span></div>'
+                f'<div class="metric">'
+                f'<span class="metric-label">Exp. agreement</span>'
+                f'<span class="metric-value">{exp_str}</span></div>'
+                "</div>"
+            )
+        return (
+            '<section class="executive-summary" id="executive-summary">'
+            f'<div class="verdict">{self._esc(verdict)}</div>'
+            f'<div class="method-cards">{"".join(cards)}</div>'
+            "</section>"
         )
 
-        # Find corresponding mode overlap heatmap
-        mode_overlap_files = list(self.plots_dir.glob(f"mode_overlap_{ml_name}_*.png"))
-        heatmap_section = ""
-        if mode_overlap_files:
-            heatmap_file = mode_overlap_files[0]
-            heatmap_img = self.encode_image(heatmap_file)
-            heatmap_section = f"""
-            <h3>Mode Overlap Matrix</h3>
-            <div class="plot-container">
-                <img src="{heatmap_img}" alt="Mode overlap heatmap" style="width: 100%;">
-            </div>
-            <p style="color: #666; font-size: 0.9em; margin-bottom: 20px;">
-                Heatmap shows the eigenvector overlap between vibrational modes.
-                Red = high overlap, White = no overlap. Perfect overlap = 1.00, orthogonal = 0.00.
-                Off-diagonal red spots indicate mode reordering between ML and DFT.
-            </p>
-            """
+    def _create_combined_plots(self, analysis_results: dict) -> str:
+        """Build combined spectrum section with all ML methods overlaid.
 
-        # Read comparison table - FIXED: Handle empty DataFrames properly
-        table_path = self.data_dir / comparison["table_file"]
-
-        # FIXED: Use proper pandas empty check
-        try:
-            df = pd.read_csv(table_path)
-            if not df.empty:
-                # Custom formatter for Mode_Overlap column
-                formatters = {}
-                if "Mode_Overlap" in df.columns:
-                    formatters["Mode_Overlap"] = lambda x: f"{x:.3f}" if pd.notna(x) else "N/A"
-
-                table_html = df.head(20).to_html(
-                    index=False,
-                    float_format=lambda x: f"{x:.2f}",
-                    formatters=formatters,
-                    classes="data-table",
-                    na_rep="N/A",
-                )
-            else:
-                table_html = (
-                    '<p class="warning-box">No matched peaks found for this calculator.</p>'
-                )
-        except Exception as e:
-            table_html = f'<p class="warning-box">Error loading comparison table: {e}</p>'
-
-        spectrum_img = self.encode_image(self.plots_dir / comparison["spectrum_plot"])
-        regression_img = self.encode_image(self.plots_dir / comparison["regression_plot"])
-        return f"""
-        <section id="comp{index}" class="comparison-section">
-            <h2>{comparison["name"]}</h2>
-
-            {heatmap_section}
-
-            <div class="stats-box">
-                <h4>Statistical Metrics</h4>
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <div class="stat-label">R^2 (Frequency)</div>
-                        <div class="stat-value {r2_class}">{m.r2_freq:.4f}</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">MAE</div>
-                        <div class="stat-value {mae_class}">{m.mae_freq:.2f} cm^-1</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">RMSE</div>
-                        <div class="stat-value">{m.rmse_freq:.2f} cm^-1</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Max Error</div>
-                        <div class="stat-value">{m.max_error_freq:.2f} cm^-1</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Matched Modes</div>
-                        <div class="stat-value">{m.num_matched}</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Match Rate</div>
-                        <div class="stat-value">{m.match_rate:.1%}</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Missing Modes (DFT only)</div>
-                        <div class="stat-value">{m.num_dft_only}</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Spurious Modes (ML only)</div>
-                        <div class="stat-value">{m.num_ml_only}</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Speedup</div>
-                        <div class="stat-value">{comparison["speedup"]:.1f}x</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">ML Runtime</div>
-                        <div class="stat-value">{comparison["ml_runtime"]:.1f} s</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">DFT Runtime</div>
-                        <div class="stat-value">{comparison["dft_runtime"]:.1f} s</div>
-                    </div>
-                </div>
-            </div>
-
-            {self._create_timing_hardware_section(comparison)}
-
-            <h3>Spectral Comparison</h3>
-            <div class="plot-container">
-                <img src="{spectrum_img}" alt="Spectrum">
-            </div>
-
-            <h3>Regression Analysis</h3>
-            <div class="plot-container">
-                <img src="{regression_img}" alt="Regression">
-            </div>
-
-            <h3>Detailed Frequency Comparison</h3>
-            <p>First 20 matched peaks (full table: data/{comparison["table_file"]})</p>
-            <p style="color: #666; font-size: 0.9em; margin-bottom: 10px;">
-                <strong>Mode_Overlap</strong>: eigenvector dot product (1.0=perfect, 0.0=orth.).
-            </p>
-            {table_html}
-        </section>
+        Uses ``build_combined_spectrum_figure`` from plotly_builders to produce
+        a single stacked figure with DFT at bottom, ML methods above, and
+        (optionally) the experimental NIST trace.
         """
+        comparisons = analysis_results["comparisons"]
+        freq_grid = analysis_results["freq_grid"]
+        exp_on = analysis_results.get("_exp_on_grid")
 
-    def _create_timing_hardware_section(self, comparison: dict) -> str:
-        """Create timing breakdown and hardware context HTML block."""
-        ml_hw = comparison.get("ml_hardware", {})
-        dft_hw = comparison.get("dft_hardware", {})
-        ml_timing = comparison.get("ml_gaussian_timing", {})
-        dft_timing = comparison.get("dft_gaussian_timing", {})
+        # Use first comparison's DFT broadened as the DFT reference
+        dft_norm = comparisons[0]["_dft_broadened"]
+        ml_norms: dict[str, np.ndarray] = {}
+        for comp in comparisons:
+            ml_norms[comp["name"]] = comp["_ml_broadened"]
+
+        fig = build_combined_spectrum_figure(
+            freq_grid, dft_norm, ml_norms, experimental_norm=exp_on
+        )
+        div = self._fig_to_div(fig, "combined-spectrum")
+        return (
+            '<section class="comparison-section" id="combined">'
+            "<h2>Combined Spectrum Comparison</h2>"
+            f'<div class="plot-container">{div}</div>'
+            "</section>"
+        )
+
+    def _create_comparison_section(self, comp: dict, index: int, analysis_results: dict) -> str:
+        """Build a per-method comparison section (D-11).
+
+        Each section contains:
+        - Interactive Plotly spectrum plot (ML vs DFT, optional experimental overlay)
+        - Interactive Plotly regression scatter plot
+        - Static PNG mode-overlap heatmap (if the file exists in output_dir/plots/)
+        - Inline timing block (ML/DFT Gaussian elapsed, speedup)
+        - Degenerate mode notes (if ``comp["deg_result"]`` has groups)
+        - Per-method metrics mini-table
+
+        Parameters
+        ----------
+        comp : dict
+            Single comparison dict from ``analysis_results["comparisons"]``.
+        index : int
+            1-based index for HTML id attributes.
+        analysis_results : dict
+            Full analysis results (for freq_grid and experimental data).
+        """
+        freq_grid = analysis_results["freq_grid"]
+        exp_on = analysis_results.get("_exp_on_grid")
+        ml_name = comp["name"]
+        ml_name_esc = self._esc(ml_name)
+
+        # Plotly spectrum figure
+        spec_fig = build_spectrum_figure(
+            freq_grid,
+            comp["_dft_broadened"],
+            comp["_ml_broadened"],
+            ml_name,
+            experimental_norm=exp_on,
+        )
+        spec_div = self._fig_to_div(spec_fig, f"spectrum-{index}")
+
+        # Plotly regression figure
+        dft_freqs = np.asarray(comp["dft_spectrum"].frequencies, dtype=float)
+        ml_freqs = np.asarray(comp["ml_spectrum"].frequencies, dtype=float)
+        reg_fig = build_regression_figure(dft_freqs, ml_freqs, ml_name)
+        reg_div = self._fig_to_div(reg_fig, f"regression-{index}")
+
+        # Heatmap PNG (stays as static image)
+        heatmap_html = ""
+        plots_dir = self.output_dir / "plots"
+        heatmap_files = (
+            list(plots_dir.glob(f"mode_overlap_{ml_name}_*.png")) if plots_dir.exists() else []
+        )
+        if heatmap_files:
+            heatmap_rel = f"plots/{heatmap_files[0].name}"
+            heatmap_html = (
+                f'<div class="plot-container">'
+                f'<img src="{self._esc(heatmap_rel)}" alt="Mode overlap heatmap">'
+                f"</div>"
+            )
+
+        # Timing block (D-09, D-11)
+        ml_gauss_s = comp.get("ml_gaussian_timing", {}).get("total_elapsed_s", 0.0)
+        dft_gauss_s = comp.get("dft_gaussian_timing", {}).get("total_elapsed_s", 0.0)
+        speedup = comp.get("speedup", 0.0)
+        timing_html = (
+            '<div class="timing-block">'
+            f"ML pipeline: <strong>{ml_gauss_s:.2f}s</strong> \u00b7 "
+            f"DFT pipeline: <strong>{dft_gauss_s:.2f}s</strong> \u00b7 "
+            f"Speedup: <strong>{speedup:.1f}\u00d7</strong>"
+            "</div>"
+        )
+
+        # Degenerate notes
+        deg_html = ""
+        deg_result = comp.get("deg_result")
+        if deg_result is not None:
+            groups = getattr(deg_result, "groups", None) or []
+            for g in groups:
+                label = self._esc(g.get("label", ""))
+                mult = g.get("multiplicity", 0)
+                overlap = g.get("subspace_overlap", 0.0)
+                deg_html += (
+                    f'<div class="degenerate-note">'
+                    f"Degenerate group {label}: {mult}-fold, "
+                    f"subspace overlap {overlap:.3f}"
+                    f"</div>"
+                )
+
+        # Per-method metrics mini table
+        m = comp["metrics"]
+        exp_agree = comp.get("experimental_agreement")
+        exp_str = self._format_exp_agreement(exp_agree)
+        metrics_table = (
+            '<table class="data-table">'
+            "<thead><tr>"
+            "<th>R\u00b2 freq</th><th>R\u00b2 int</th>"
+            "<th>RMSE</th><th>MAE</th>"
+            "<th>Max err</th><th>Matched</th>"
+            "<th>Speedup</th><th>Exp. agree</th>"
+            "</tr></thead>"
+            f"<tbody><tr>"
+            f"<td>{m.r2_freq:.4f}</td>"
+            f"<td>{m.r2_intensity:.4f}</td>"
+            f"<td>{m.rmse_freq:.2f}</td>"
+            f"<td>{m.mae_freq:.2f}</td>"
+            f"<td>{m.max_error_freq:.2f}</td>"
+            f"<td>{m.num_matched}/{m.num_matched + m.num_dft_only}</td>"
+            f"<td>{speedup:.1f}\u00d7</td>"
+            f"<td>{exp_str}</td>"
+            f"</tr></tbody></table>"
+        )
+
+        return (
+            f'<section class="comparison-section" id="comparison-{index}">'
+            f"<h2>{ml_name_esc} vs DFT</h2>"
+            f'<div class="plot-container">{spec_div}</div>'
+            f'<div class="plot-container">{reg_div}</div>'
+            f"{heatmap_html}"
+            f"{timing_html}"
+            f"{deg_html}"
+            f"{metrics_table}"
+            f"</section>"
+        )
+
+    def _create_summary_table(self, comparisons: list[dict]) -> str:
+        """Build the overall summary comparison table.
+
+        Columns: method name, R2 (freq), R2 (intensity), RMSE, speedup, and
+        experimental agreement.  Method names are HTML-escaped.
+        """
+        if not comparisons:
+            return (
+                '<section id="summary-table">'
+                "<h2>Summary Comparison</h2>"
+                '<div class="warning-box">No comparisons available.</div>'
+                "</section>"
+            )
+
+        rows: list[str] = []
+        for comp in comparisons:
+            m = comp["metrics"]
+            name = self._esc(comp["name"])
+            speedup = comp.get("speedup", 0.0)
+            exp_agree = comp.get("experimental_agreement")
+            exp_str = self._format_exp_agreement(exp_agree)
+            rows.append(
+                f"<tr>"
+                f"<td>{name}</td>"
+                f"<td>{m.r2_freq:.4f}</td>"
+                f"<td>{m.r2_intensity:.4f}</td>"
+                f"<td>{m.rmse_freq:.2f}</td>"
+                f"<td>{speedup:.1f}\u00d7</td>"
+                f"<td>{exp_str}</td>"
+                f"</tr>"
+            )
+        return (
+            '<section id="summary-table">'
+            "<h2>Summary Comparison</h2>"
+            '<table class="data-table">'
+            "<thead><tr>"
+            "<th>Method</th><th>R\u00b2 freq</th><th>R\u00b2 int</th>"
+            "<th>RMSE</th><th>Speedup</th><th>Exp. agreement</th>"
+            "</tr></thead>"
+            f"<tbody>{''.join(rows)}</tbody></table>"
+            "</section>"
+        )
+
+    @staticmethod
+    def _format_exp_agreement(exp_agree: float | None) -> str:
+        """Format experimental agreement for display.
+
+        Returns the value formatted to 2 decimal places, or an em-dash
+        when the value is None or NaN.
+        """
+        if exp_agree is None:
+            return "\u2014"
+        if isinstance(exp_agree, float) and math.isnan(exp_agree):
+            return "\u2014"
+        return f"{exp_agree:.2f}"
+
+    def _create_experimental_info_section(self, analysis_results: dict) -> str:
+        """Build the experimental data source info section.
+
+        Shows NIST source, molecule name, CAS number, and data range
+        when experimental data is available.  All user-facing strings
+        are HTML-escaped (T-23-01).
+        """
+        experimental = analysis_results.get("experimental")
+        if experimental is None:
+            return ""
+
+        source = self._esc(getattr(experimental, "source", ""))
+        mol_name = self._esc(getattr(experimental, "molecule_name", ""))
+        cas = self._esc(getattr(experimental, "cas_number", ""))
+
+        # Wavenumber range
+        wn = getattr(experimental, "wavenumbers", None)
+        if wn is not None and len(wn) > 0:
+            wn_range = f"{float(wn[0]):.0f} -- {float(wn[-1]):.0f} cm\u207b\u00b9"
+        else:
+            wn_range = "unknown"
+
+        return (
+            '<section class="comparison-section" id="experimental">'
+            "<h2>Experimental Reference Data</h2>"
+            '<div class="stats-box">'
+            f"<p><strong>Source:</strong> {source}</p>"
+            f"<p><strong>Molecule:</strong> {mol_name}</p>"
+            f"<p><strong>CAS Number:</strong> {cas}</p>"
+            f"<p><strong>Data range:</strong> {wn_range}</p>"
+            "<p>Experimental IR spectrum overlaid as black dashed line "
+            "on all spectrum plots above.</p>"
+            "</div>"
+            "</section>"
+        )
+
+    def _create_timing_hardware_section(self, comp: dict) -> str:
+        """Build detailed timing and hardware context table for a comparison.
+
+        This preserves the Phase 20 timing/hardware info that was in the
+        original report generator.  Shows a two-row table (ML / DFT) with
+        hardware device, pipeline time, and Gaussian wall time columns.
+
+        Parameters
+        ----------
+        comp : dict
+            Single comparison dict containing ``ml_hardware``, ``dft_hardware``,
+            ``ml_gaussian_timing``, ``dft_gaussian_timing`` sub-dicts.
+
+        Returns
+        -------
+        str
+            HTML fragment, or empty string if no timing data is available.
+        """
+        ml_hw = comp.get("ml_hardware", {})
+        dft_hw = comp.get("dft_hardware", {})
+        ml_timing = comp.get("ml_gaussian_timing", {})
+        dft_timing = comp.get("dft_gaussian_timing", {})
 
         # If no hardware or timing data at all, return empty
-        has_data = any([
-            ml_hw.get("cpu"), ml_hw.get("gpu"),
-            dft_hw.get("cpu"), dft_hw.get("node"),
-            ml_timing.get("total_elapsed_s"), dft_timing.get("total_elapsed_s"),
-        ])
+        has_data = any(
+            [
+                ml_hw.get("cpu"),
+                ml_hw.get("gpu"),
+                dft_hw.get("cpu"),
+                dft_hw.get("node"),
+                ml_timing.get("total_elapsed_s"),
+                dft_timing.get("total_elapsed_s"),
+            ]
+        )
         if not has_data:
             return ""
-
-        rows = []
 
         # ML row
         ml_gpu = ml_hw.get("gpu", "")
         ml_cpu = ml_hw.get("cpu", "")
-        ml_device = ml_gpu if ml_gpu else ml_cpu if ml_cpu else "—"
+        ml_device = self._esc(ml_gpu if ml_gpu else ml_cpu if ml_cpu else "\u2014")
         ml_gauss_s = ml_timing.get("total_elapsed_s", 0)
-        ml_gauss = f"{ml_gauss_s:.1f} s" if ml_gauss_s else "—"
-        rows.append(f"""
-            <tr>
-                <td><strong>ML</strong> ({comparison["name"]})</td>
-                <td>{ml_device}</td>
-                <td>{comparison["ml_runtime"]:.1f} s</td>
-                <td>{ml_gauss}</td>
-            </tr>
-        """)
+        ml_gauss = f"{ml_gauss_s:.1f} s" if ml_gauss_s else "\u2014"
+        ml_pipeline = comp.get("ml_runtime", 0.0)
 
         # DFT row
         dft_cpu = dft_hw.get("cpu", "")
         dft_node = dft_hw.get("node", "")
         dft_cpus = dft_hw.get("cpus", "")
-        dft_device = dft_cpu if dft_cpu else "—"
+        dft_device = self._esc(dft_cpu if dft_cpu else "\u2014")
         if dft_node:
-            dft_device += f" ({dft_node})"
+            dft_device += f" ({self._esc(dft_node)})"
         if dft_cpus:
-            dft_device += f" x{dft_cpus}"
+            dft_device += f" x{self._esc(str(dft_cpus))}"
         dft_gauss_s = dft_timing.get("total_elapsed_s", 0)
-        dft_gauss = f"{dft_gauss_s:.1f} s" if dft_gauss_s else "—"
-        rows.append(f"""
-            <tr>
-                <td><strong>DFT</strong></td>
-                <td>{dft_device}</td>
-                <td>{comparison["dft_runtime"]:.1f} s</td>
-                <td>{dft_gauss}</td>
-            </tr>
-        """)
+        dft_gauss = f"{dft_gauss_s:.1f} s" if dft_gauss_s else "\u2014"
+        dft_pipeline = comp.get("dft_runtime", 0.0)
 
-        return f"""
-            <h3>Timing &amp; Hardware</h3>
-            <table style="font-size: 0.9em;">
-                <thead>
-                    <tr>
-                        <th>Method</th>
-                        <th>Hardware</th>
-                        <th>Pipeline Time</th>
-                        <th>Gaussian Wall Time</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {"".join(rows)}
-                </tbody>
-            </table>
-            <p style="color: #888; font-size: 0.8em; margin-top: 5px;">
-                Pipeline time = total Python runtime. Gaussian wall time = elapsed time reported by Gaussian in the log file.
-            </p>
-        """
+        ml_name = self._esc(comp.get("name", "ML"))
 
-    def create_summary_table(self, comparisons: list[dict]) -> str:
-        """Create summary comparison table"""
-        # FIXED: Check list length
-        if len(comparisons) == 0:
-            return """
-            <section id="summary">
-                <h2>Summary Comparison</h2>
-                <div class="warning-box">
-                    <p>No comparisons available to summarize.</p>
-                </div>
-            </section>
-            """
-
-        rows = []
-        for comp in comparisons:
-            m = comp["metrics"]
-            rows.append(f"""
-            <tr>
-                <td>{comp["name"]}</td>
-                <td>{m.r2_freq:.4f}</td>
-                <td>{m.mae_freq:.2f}</td>
-                <td>{m.rmse_freq:.2f}</td>
-                <td>{m.max_error_freq:.2f}</td>
-                <td>{m.num_matched}/{m.num_matched + m.num_dft_only}</td>
-                <td>{m.match_rate:.1%}</td>
-                <td>{comp["speedup"]:.1f}x</td>
-            </tr>
-            """)
-
-        return f"""
-        <section id="summary">
-            <h2>Summary Comparison</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Calculator</th>
-                        <th>R^2</th>
-                        <th>MAE (cm^-1)</th>
-                        <th>RMSE (cm^-1)</th>
-                        <th>Max Error (cm^-1)</th>
-                        <th>Matched Modes</th>
-                        <th>Match Rate</th>
-                        <th>Speedup</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {"".join(rows)}
-                </tbody>
-            </table>
-        </section>
-        """
-
-    def create_footer(self) -> str:
-        """Create footer"""
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        return f"""
-        <footer>
-            <p>Generated by IR Spectral Analysis Framework</p>
-            <p class="timestamp">Report generated: {timestamp}</p>
-        </footer>
-        """
-
-    def create_experimental_section(self, experimental: ExperimentalSpectrum | None) -> str:
-        """Create section showing experimental data source info."""
-        if experimental is None:
-            return ""
-        return f"""
-        <section id="experimental" class="comparison-section">
-            <h2>Experimental Reference Data</h2>
-            <div style="padding: 15px; background: #f0f8ff; border-left: 4px solid #2E86C1;
-                        margin-bottom: 20px;">
-                <p><strong>Source:</strong> {experimental.source}</p>
-                <p><strong>Molecule:</strong> {experimental.molecule_name}</p>
-                <p><strong>CAS Number:</strong> {experimental.cas_number}</p>
-                <p style="color: #666; font-size: 0.9em; margin-top: 10px;">
-                    Experimental IR spectrum overlaid as black dashed line on all spectrum
-                    plots above.
-                    Data range: {experimental.wavenumbers[0]:.0f}
-                    - {experimental.wavenumbers[-1]:.0f} cm&#8315;&#185;
-                </p>
-            </div>
-            <p style="color: #888; font-size: 0.85em;">
-                Note: Quantitative peak position comparison (MAE, RMSE) will be added
-                in a future phase.
-            </p>
-        </section>
-        """
-
-    def generate_report(self, analysis_results: dict):
-        """
-        Generate complete HTML report
-
-        Parameters
-        ----------
-        analysis_results : dict
-            Results from comparison workflow
-        """
-        comparisons = analysis_results["comparisons"]
-        experimental = analysis_results.get("experimental")
-
-        html_parts = [
-            "<!DOCTYPE html>",
-            '<html lang="en">',
-            "<head>",
-            '<meta charset="UTF-8">',
-            '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
-            f"<title>IR Analysis: {self.molecule_name}</title>",
-            self.create_css(),
-            "</head>",
-            "<body>",
-            '<div class="container">',
-            self.create_header(),
-            self.create_navigation(comparisons),
-            '<div class="content">',
-            self.create_overview(comparisons),
-            self.create_combined_plots_section(),  # Add combined plots after overview
-        ]
-
-        # Add comparison sections (now includes mode overlap heatmaps within each section)
-        for i, comp in enumerate(comparisons, 1):
-            html_parts.append(self.create_comparison_section(comp, i))
-
-        # Add experimental section (after comparisons, before summary)
-        html_parts.append(self.create_experimental_section(experimental))
-
-        # Add summary and footer
-        html_parts.extend(
-            [
-                self.create_summary_table(comparisons),
-                "</div>",  # content
-                self.create_footer(),
-                "</div>",  # container
-                "</body>",
-                "</html>",
-            ]
+        return (
+            "<h3>Timing &amp; Hardware</h3>"
+            '<table class="data-table">'
+            "<thead><tr>"
+            "<th>Method</th>"
+            "<th>Hardware</th>"
+            "<th>Pipeline Time</th>"
+            "<th>Gaussian Wall Time</th>"
+            "</tr></thead>"
+            "<tbody>"
+            f"<tr>"
+            f"<td><strong>ML</strong> ({ml_name})</td>"
+            f"<td>{ml_device}</td>"
+            f"<td>{ml_pipeline:.1f} s</td>"
+            f"<td>{ml_gauss}</td>"
+            f"</tr>"
+            f"<tr>"
+            f"<td><strong>DFT</strong></td>"
+            f"<td>{dft_device}</td>"
+            f"<td>{dft_pipeline:.1f} s</td>"
+            f"<td>{dft_gauss}</td>"
+            f"</tr>"
+            "</tbody></table>"
         )
 
-        # Write to file
-        output_path = self.output_dir / "report.html"
-        with output_path.open("w", encoding="utf-8") as f:
-            f.write("\n".join(html_parts))
+    # ------------------------------------------------------------------
+    # Overtones section (D-04 mode-aware)
+    # ------------------------------------------------------------------
 
-        print(f"\n{'=' * 60}")
-        print("HTML REPORT GENERATED")
-        print(f"{'=' * 60}")
-        print(f"Location: {output_path}")
-        print(f"Open in browser: file://{output_path.absolute()}")
-        print(f"{'=' * 60}\n")
+    # TODO(phase-follow-up): populate overtone/combination data from
+    # analysis_workflow once upstream emits it as structured records in
+    # comparison dicts.  As of Plan 23-04, overtone/combination band data
+    # is embedded in SpectrumData labels but NOT surfaced as separate
+    # comparison["overtones"] records -- see Step 0 grep survey.
+    def _create_overtones_section(self, analysis_results: dict) -> str:
+        """Render overtones section -- real data (Option A) or explicit stub (Option B).
+
+        Option A (real data): If ``analysis_results["overtones"]`` or any
+        ``comparison["overtones"]`` contains records, renders a
+        ``<table class="overtone-table">`` with columns: mode_id,
+        frequency, intensity, type.
+
+        Option B (explicit stub): Renders an ``overtones-placeholder`` div
+        explaining that the data is not yet surfaced by the pipeline.
+
+        Both options produce grep-able markers for automated verification.
+        The section heading always contains the word "overtone" so the
+        harmonic-skip test can detect its presence/absence.
+        """
+        overtones_data = self._collect_overtones(analysis_results)
+        if overtones_data:
+            # Option A: real data
+            rows = "".join(
+                f"<tr><td>{self._esc(row.get('mode_id', ''))}</td>"
+                f"<td>{row.get('freq_cm', 0):.1f}</td>"
+                f"<td>{row.get('intensity', 0):.3f}</td>"
+                f"<td>{self._esc(row.get('type', 'overtone'))}</td></tr>"
+                for row in overtones_data
+            )
+            body = (
+                '<table class="overtone-table data-table">'
+                "<thead><tr><th>Mode</th><th>Freq (cm\u207b\u00b9)</th>"
+                "<th>Intensity</th><th>Type</th></tr></thead>"
+                f"<tbody>{rows}</tbody></table>"
+            )
+        else:
+            # Option B: explicit stub, grep-able
+            body = (
+                '<div class="overtones-placeholder">'
+                "Placeholder -- anharmonic overtone/combination data "
+                "not yet surfaced by the analysis pipeline. Populated "
+                "in a follow-up phase."
+                "</div>"
+            )
+        return (
+            '<section class="comparison-section" id="overtones">'
+            "<h2>Overtones and combination bands</h2>"
+            f"{body}"
+            "</section>"
+        )
+
+    def _collect_overtones(self, analysis_results: dict) -> list[dict]:
+        """Collect overtone/combination band records from analysis_results.
+
+        Checks ``analysis_results["overtones"]`` first (top-level), then
+        iterates per-comparison ``comp["overtones"]``.  Returns an empty
+        list if no data is found, which triggers the stub path in
+        ``_create_overtones_section``.
+
+        Returns
+        -------
+        list[dict]
+            Each dict has keys: mode_id, freq_cm, intensity, type.
+            Empty list if no overtone data is available.
+        """
+        # Check top-level first
+        top = analysis_results.get("overtones")
+        if top:
+            return list(top)
+        # Check per-comparison
+        collected: list[dict] = []
+        for comp in analysis_results.get("comparisons", []):
+            ot = comp.get("overtones")
+            if ot:
+                collected.extend(ot)
+        return collected
+
+    def _create_footer(self) -> str:
+        """Create the report footer with generation info."""
+        return (
+            f'<footer class="footer">'
+            f"Generated by mace-gaussian {self._esc(self.mode)} analysis "
+            f"\u00b7 Phase 23"
+            f"</footer>"
+        )

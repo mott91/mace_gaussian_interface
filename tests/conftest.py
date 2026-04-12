@@ -147,6 +147,7 @@ def fake_metrics_b():
         num_dft_only=0,
         num_ml_only=0,
         match_rate=1.0,
+        num_intensity_filtered=0,
     )
 
 
