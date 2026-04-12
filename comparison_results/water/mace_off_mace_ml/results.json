@@ -11,7 +11,7 @@
         "ir_intensity": 80.4177
       },
       {
-        "freq_cm": 3813.4192,
+        "freq_cm": 3813.4191,
         "ir_intensity": 6.593
       },
       {
@@ -23,19 +23,19 @@
       {
         "mode": 1,
         "freq_cm": 3649.175,
-        "ir_intensity": 2.17004256,
+        "ir_intensity": 2.17004198,
         "freq_harmonic": 3813.419
       },
       {
         "mode": 2,
         "freq_cm": 1593.068,
-        "ir_intensity": 235.71931686,
+        "ir_intensity": 235.71933606,
         "freq_harmonic": 1621.591
       },
       {
         "mode": 3,
         "freq_cm": 3744.857,
-        "ir_intensity": 36.51854269,
+        "ir_intensity": 36.51854447,
         "freq_harmonic": 3908.159
       }
     ],
@@ -45,14 +45,14 @@
         "overtone_level": 2,
         "freq_harmonic": 7626.838,
         "freq_anharmonic": 7222.27,
-        "ir_intensity": 0.00616189
+        "ir_intensity": 0.00616193
       },
       {
         "mode": 2,
         "overtone_level": 2,
         "freq_harmonic": 3243.182,
         "freq_anharmonic": 3161.369,
-        "ir_intensity": 0.56832046
+        "ir_intensity": 0.56832079
       },
       {
         "mode": 3,
@@ -68,35 +68,35 @@
         "mode2": 1,
         "freq_harmonic": 5435.01,
         "freq_anharmonic": 5240.452,
-        "ir_intensity": 0.35896085
+        "ir_intensity": 0.35896052
       },
       {
         "mode1": 3,
         "mode2": 1,
         "freq_harmonic": 7721.578,
         "freq_anharmonic": 7219.494,
-        "ir_intensity": 6.72259472
+        "ir_intensity": 6.72259491
       },
       {
         "mode1": 3,
         "mode2": 2,
         "freq_harmonic": 5529.75,
         "freq_anharmonic": 5332.205,
-        "ir_intensity": 0.01114426
+        "ir_intensity": 0.01114427
       },
       {
         "mode1": 2,
         "mode2": 1,
         "freq_harmonic": 5435.01,
         "freq_anharmonic": 5240.452,
-        "ir_intensity": 0.27326609
+        "ir_intensity": 0.27326584
       },
       {
         "mode1": 3,
         "mode2": 1,
         "freq_harmonic": 7721.578,
         "freq_anharmonic": 7219.494,
-        "ir_intensity": 3.71481827
+        "ir_intensity": 3.71481839
       },
       {
         "mode1": 3,
@@ -108,8 +108,13 @@
     ]
   },
   "energy_eV": 0.09915829148038027,
-  "dipole": null,
-  "runtime_s": 12.976787090301514,
+  "dipole": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": -0.992578336975792,
+    "magnitude": 0.992578336975792
+  },
+  "runtime_s": 12.849509239196777,
   "files": {
     "gaussian_log": "gaussian_freq.log",
     "gaussian_input": "gaussian_freq.gjf"
@@ -118,6 +123,8 @@
     "tool_version": "0.2.0",
     "python_version": "3.10.19 | packaged by conda-forge | (main, Oct 13 2025, 14:08:27) [GCC 14.3.0]",
     "platform": "Linux-5.10.0-37-amd64-x86_64-with-glibc2.31",
+    "cpu_model": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "ram_gb": 62.7,
     "torch_version": "2.4.0+cu121",
     "cuda_available": true,
     "cuda_version": "12.1",
@@ -128,5 +135,15 @@
   "calculation_parameters": {
     "energy_calculator": "mace_off",
     "dipole_calculator": "mace_ml"
+  },
+  "gaussian_timing": {
+    "total_elapsed_s": 11.5,
+    "total_cpu_s": 2.0,
+    "stages": [
+      {
+        "cpu_s": 2.0,
+        "elapsed_s": 11.5
+      }
+    ]
   }
 }

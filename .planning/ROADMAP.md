@@ -139,10 +139,10 @@ Plans:
   3. The report is visually thesis-ready: consistent styling, publication-quality plots (300 DPI, proper axis labels), and a clear narrative flow from molecule overview to detailed comparison
 **Plans**: 5 plans
 Plans:
-- [ ] 23-01-PLAN.md -- Wave 0: test scaffolds (plotly_builders, report_data, executive_summary, html_report) + conftest fixtures + pyproject plotly declaration
-- [ ] 23-02-PLAN.md -- Wave 1: _shared_css.build_css + plotly_builders (spectrum/regression/combined figure builders, experimental_on_grid)
-- [ ] 23-03-PLAN.md -- Wave 1: executive_summary (rank_methods, build_verdict, compute_experimental_agreement) + report_data (JSON/CSV export)
-- [ ] 23-04-PLAN.md -- Wave 2: HTMLReportGenerator overhaul (mode flag, Plotly integration, executive summary section, shared CSS, html.escape for T-23-01)
+- [x] 23-01-PLAN.md -- Wave 0: test scaffolds (plotly_builders, report_data, executive_summary, html_report) + conftest fixtures + pyproject plotly declaration
+- [x] 23-02-PLAN.md -- Wave 1: _shared_css.build_css + plotly_builders (spectrum/regression/combined figure builders, experimental_on_grid)
+- [x] 23-03-PLAN.md -- Wave 1: executive_summary (rank_methods, build_verdict, compute_experimental_agreement) + report_data (JSON/CSV export)
+- [x] 23-04-PLAN.md -- Wave 2: HTMLReportGenerator overhaul (mode flag, Plotly integration, executive summary section, shared CSS, html.escape for T-23-01)
 - [ ] 23-05-PLAN.md -- Wave 3: batch_report CSS consolidation + analysis_workflow wiring + water smoke test + human-verify checkpoint
 **UI hint**: yes
 
@@ -210,7 +210,7 @@ Plans:
 | 20. Wall-Clock Timing | v1.2 | 1/1 | Complete (verified) | 2026-04-02 |
 | 21. NIST Experimental Overlay | v1.2 | 2/2 | Complete   | 2026-04-02 |
 | 22. Early SLURM Submission | v1.2 | 1/1 | Complete (verified) | 2026-04-05 |
-| 23. Anharmonic Pipeline & Report | v1.2 | 0/TBD | Not started | - |
+| 23. Anharmonic Pipeline & Report | v1.2 | 4/5 | In Progress|  |
 | 24. VPT2 Research Spike | v1.2 | 0/TBD | Not started | - |
 | 16. Benchmark Campaign | v1.3 | 0/TBD | Not started | - |
 | 17. Docs Update | v1.3 | 1/1 | Complete    | 2026-04-02 |
