@@ -1,14 +1,25 @@
 """Shared test fixtures and configuration for mace-gaussian test suite."""
 
+from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
 import pytest
 
 from mace_gaussian.analysis.analyze_spectra import ComparisonMetrics, SpectrumData
-from mace_gaussian.analysis.nist_fetcher import ExperimentalSpectrum
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
+
+
+@dataclass
+class FakeExperimentalSpectrum:
+    """Stand-in for ExperimentalSpectrum until nist_fetcher lands."""
+
+    source: str
+    molecule_name: str
+    cas_number: str
+    wavenumbers: np.ndarray
+    absorbance: np.ndarray
 
 
 @pytest.fixture
@@ -120,53 +131,93 @@ def fake_spectrum() -> SpectrumData:
 
 
 @pytest.fixture
-def fake_experimental() -> ExperimentalSpectrum:
-    """Fake ExperimentalSpectrum for report tests."""
-    wn = np.linspace(400, 4000, 100)
-    return ExperimentalSpectrum(
-        wavenumbers=wn,
-        absorbance=np.exp(-((wn - 3700) ** 2) / 500),
-        source="NIST WebBook (fixture)",
-        molecule_name="water",
-        cas_number="7732-18-5",
+def fake_metrics_b():
+    """A second ComparisonMetrics with slightly worse values."""
+    return ComparisonMetrics(
+        mae_freq=25.0,
+        rmse_freq=30.0,
+        r2_freq=0.980,
+        slope_freq=0.98,
+        intercept_freq=10.0,
+        mae_intensity=0.2,
+        r2_intensity=0.70,
+        max_error_freq=55.0,
+        num_peaks=3,
+        num_matched=3,
+        num_dft_only=0,
+        num_ml_only=0,
+        match_rate=1.0,
     )
 
 
 @pytest.fixture
-def fake_analysis_results(fake_metrics, fake_spectrum, fake_experimental, tmp_path) -> dict:
-    """Fake analysis results dict matching the canonical comparison shape."""
+def fake_experimental():
+    """A FakeExperimentalSpectrum for water."""
+    return FakeExperimentalSpectrum(
+        source="NIST",
+        molecule_name="water",
+        cas_number="7732-18-5",
+        wavenumbers=np.linspace(400, 4000, 100),
+        absorbance=np.random.default_rng(42).random(100),
+    )
+
+
+@pytest.fixture
+def fake_analysis_results(fake_metrics, fake_metrics_b, fake_spectrum, fake_experimental):
+    """Full analysis_results dict matching the shape consumed by report_data.export_report_data."""
     return {
         "molecule": "water",
         "mode": "anharmonic",
         "bandwidth_fwhm": 10.0,
-        "output_dir": str(tmp_path),
+        "output_dir": "/tmp/test_output",
+        "experimental": fake_experimental,
         "comparisons": [
             {
                 "name": "mace_off_espaloma",
                 "metrics": fake_metrics,
+                "ml_peaks": 3,
+                "dft_peaks": 3,
+                "ml_runtime": 12.5,
+                "dft_runtime": 120.0,
+                "speedup": 9.6,
+                "spectrum_plot": "spectrum.png",
+                "regression_plot": "regression.png",
+                "table_file": "table.csv",
+                "comparison_df": None,
                 "ml_spectrum": fake_spectrum,
                 "dft_spectrum": fake_spectrum,
-                "ml_runtime": 13.4,
-                "dft_runtime": 60.0,
-                "speedup": 4.5,
-                "ml_gaussian_timing": {"total_elapsed_s": 11.5},
-                "dft_gaussian_timing": {"total_elapsed_s": 58.0},
-                "ml_hardware": {
-                    "cpu": "i7-6800K",
-                    "gpu": "RTX 2070 SUPER",
-                    "ram_gb": 62.7,
-                },
-                "dft_hardware": {
-                    "cpu": "Xeon Gold 6254",
-                    "node": "rune03",
-                    "cpus": "48",
-                },
-                "spectrum_plot": "spectrum_mace_off_espaloma.png",
-                "regression_plot": "regression_mace_off_espaloma.png",
-                "table_file": "comparison_mace_off_espaloma.csv",
                 "mode_mapping": None,
                 "deg_result": None,
-            }
+                "experimental": fake_experimental,
+                "experimental_agreement": 0.92,
+                "ml_hardware": {"cpu": "Intel i7", "gpu": "RTX 3090", "ram_gb": 32.0},
+                "dft_hardware": {"cpu": "Xeon E5", "node": "rune03", "cpus": "16"},
+                "ml_gaussian_timing": {"total_elapsed_s": 10.0},
+                "dft_gaussian_timing": {"total_elapsed_s": 100.0},
+            },
+            {
+                "name": "mace_anicc_mace_ml",
+                "metrics": fake_metrics_b,
+                "ml_peaks": 3,
+                "dft_peaks": 3,
+                "ml_runtime": 15.0,
+                "dft_runtime": 120.0,
+                "speedup": 8.0,
+                "spectrum_plot": "spectrum2.png",
+                "regression_plot": "regression2.png",
+                "table_file": "table2.csv",
+                "comparison_df": None,
+                "ml_spectrum": fake_spectrum,
+                "dft_spectrum": fake_spectrum,
+                "mode_mapping": None,
+                "deg_result": None,
+                "experimental": fake_experimental,
+                "experimental_agreement": 0.85,
+                "ml_hardware": {"cpu": "Intel i7", "gpu": "RTX 3090", "ram_gb": 32.0},
+                "dft_hardware": {"cpu": "Xeon E5", "node": "rune03", "cpus": "16"},
+                "ml_gaussian_timing": {"total_elapsed_s": 13.0},
+                "dft_gaussian_timing": {"total_elapsed_s": 100.0},
+            },
         ],
-        "experimental": fake_experimental,
+        "executive_summary": None,
     }
