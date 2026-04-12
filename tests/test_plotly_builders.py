@@ -1,12 +1,11 @@
 """RED tests for Phase 23 plotly_builders module."""
-
 import numpy as np
 import pytest
 
 plotly_builders = pytest.importorskip("mace_gaussian.analysis.plotly_builders")
 
 
-def test_build_spectrum_figure_returns_plotly_figure(fake_spectrum):
+def test_build_spectrum_figure_returns_plotly_figure():
     import plotly.graph_objects as go
 
     freq_grid = np.linspace(400, 4000, 200)
@@ -23,7 +22,7 @@ def test_build_spectrum_figure_returns_plotly_figure(fake_spectrum):
     assert len(fig.data) >= 2
 
 
-def test_spectrum_includes_experimental(fake_experimental):
+def test_spectrum_includes_experimental():
     freq_grid = np.linspace(400, 4000, 200)
     dft_norm = np.zeros_like(freq_grid)
     ml_norm = np.zeros_like(freq_grid)
@@ -66,11 +65,14 @@ def test_build_regression_figure_returns_plotly_figure():
     assert isinstance(fig, go.Figure)
 
 
-def test_build_combined_spectrum_figure_multi_method(fake_spectrum):
+def test_build_combined_spectrum_figure_multi_method():
     import plotly.graph_objects as go
 
     freq_grid = np.linspace(400, 4000, 200)
-    ml_norms = {"method_a": np.zeros_like(freq_grid), "method_b": np.zeros_like(freq_grid)}
+    ml_norms = {
+        "method_a": np.zeros_like(freq_grid),
+        "method_b": np.zeros_like(freq_grid),
+    }
     fig = plotly_builders.build_combined_spectrum_figure(
         freq_grid=freq_grid,
         dft_norm=np.zeros_like(freq_grid),
@@ -79,3 +81,34 @@ def test_build_combined_spectrum_figure_multi_method(fake_spectrum):
     assert isinstance(fig, go.Figure)
     # 1 DFT + 2 ML methods = at least 3 traces
     assert len(fig.data) >= 3
+
+
+def test_combined_spectrum_x_axis_reversed():
+    freq_grid = np.linspace(400, 4000, 200)
+    ml_norms = {"method_a": np.zeros_like(freq_grid)}
+    fig = plotly_builders.build_combined_spectrum_figure(
+        freq_grid=freq_grid,
+        dft_norm=np.zeros_like(freq_grid),
+        ml_norms=ml_norms,
+    )
+    assert fig.layout.xaxis.autorange == "reversed"
+
+
+def test_experimental_on_grid_returns_none_for_none():
+    freq_grid = np.linspace(400, 4000, 200)
+    result = plotly_builders.experimental_on_grid(None, freq_grid)
+    assert result is None
+
+
+def test_experimental_on_grid_normalizes():
+    from types import SimpleNamespace
+
+    freq_grid = np.linspace(400, 4000, 200)
+    exp = SimpleNamespace(
+        wavenumbers=np.linspace(400, 4000, 100),
+        absorbance=np.random.rand(100) * 5.0,
+    )
+    result = plotly_builders.experimental_on_grid(exp, freq_grid)
+    assert result is not None
+    assert len(result) == len(freq_grid)
+    assert np.max(result) <= 1.0 + 1e-10
