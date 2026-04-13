@@ -23,9 +23,14 @@ from .executive_summary import (
     rank_methods,
 )
 from .plotly_builders import (
+    build_anharmonicity_ratio_figure,
     build_combined_spectrum_figure,
+    build_error_histogram_figure,
     build_intensity_regression_figure,
+    build_pareto_figure,
+    build_per_region_table,
     build_regression_figure,
+    build_residual_figure,
     build_spectrum_figure,
     experimental_on_grid,
 )
@@ -119,11 +124,27 @@ class HTMLReportGenerator:
                 "</div>"
             )
 
+        # Pareto plot (speedup vs MAE) — only if we have speedup data
+        pareto_html = ""
+        if len(ranked) > 1:
+            names = [r["name"] for r in ranked]
+            maes = [r.get("mae_freq", r.get("rmse_freq", 0.0)) for r in ranked]
+            speedups = [r.get("speedup", 0.0) for r in ranked]
+            if any(s > 0 for s in speedups):
+                pareto_fig = build_pareto_figure(names, maes, speedups)
+                pareto_html = (
+                    '<section id="pareto">'
+                    f'<div class="plot-container">'
+                    f'{self._fig_to_div(pareto_fig, "pareto")}</div>'
+                    "</section>"
+                )
+
         sections = [
             self._create_head(),
             self._create_header(),
             self._create_navigation(comparisons),
             self._create_executive_summary(ranked, verdict),
+            pareto_html,
             mode_overview,
             self._create_combined_plots(analysis_results),
         ]
@@ -429,6 +450,60 @@ class HTMLReportGenerator:
                 )
                 int_reg_div = self._fig_to_div(int_fig, f"int-regression-{index}")
 
+        # Residual plot + error histogram (side by side)
+        residual_row = ""
+        if len(matched_dft_freq) > 0:
+            res_fig = build_residual_figure(
+                matched_dft_freq, matched_ml_freq, ml_name, mode_ids=matched_ids
+            )
+            res_div = self._fig_to_div(res_fig, f"residual-{index}")
+            hist_fig = build_error_histogram_figure(
+                matched_dft_freq, matched_ml_freq, ml_name, mode_ids=matched_ids
+            )
+            hist_div = self._fig_to_div(hist_fig, f"error-hist-{index}")
+            residual_row = (
+                '<div style="display:flex;gap:1rem;flex-wrap:wrap">'
+                f'<div class="plot-container" style="flex:1;min-width:0">{res_div}</div>'
+                f'<div class="plot-container" style="flex:1;min-width:0">{hist_div}</div>'
+                "</div>"
+            )
+
+        # Per-region accuracy breakdown
+        region_html = ""
+        if len(matched_dft_freq) > 0:
+            region_data = build_per_region_table(
+                matched_dft_freq, matched_ml_freq, mode_ids=matched_ids
+            )
+            if region_data:
+                rows = ""
+                for rname, rd in region_data.items():
+                    bias_sign = "+" if rd["bias"] >= 0 else ""
+                    rows += (
+                        f"<tr><td>{self._esc(rname)}</td>"
+                        f"<td>{rd['n']}</td>"
+                        f"<td>{rd['mae']:.1f}</td>"
+                        f"<td>{rd['rmse']:.1f}</td>"
+                        f"<td>{bias_sign}{rd['bias']:.1f}</td></tr>"
+                    )
+                region_html = (
+                    '<div class="stats-box">'
+                    "<h4>Per-Region Accuracy</h4>"
+                    '<table class="summary-table"><thead>'
+                    "<tr><th>Region</th><th>n</th><th>MAE</th>"
+                    "<th>RMSE</th><th>Bias</th></tr></thead>"
+                    f"<tbody>{rows}</tbody></table></div>"
+                )
+
+        # Anharmonicity ratio (only in anharmonic mode)
+        anharm_div = ""
+        if self.mode == "anharmonic":
+            ml_results = comp.get("_ml_results")
+            dft_results = comp.get("_dft_results")
+            if ml_results and dft_results:
+                anharm_div = self._build_anharmonicity_section(
+                    ml_results, dft_results, ml_name, index
+                )
+
         # Heatmap PNG (stays as static image)
         heatmap_html = ""
         plots_dir = self.output_dir / "plots"
@@ -552,9 +627,40 @@ class HTMLReportGenerator:
             f"{deg_html}"
             f'<div class="plot-container">{spec_div}</div>'
             f"{reg_row}"
+            f"{residual_row}"
+            f"{region_html}"
+            f"{anharm_div}"
             f"{heatmap_html}"
             f"</section>"
         )
+
+    def _build_anharmonicity_section(
+        self, ml_results: dict, dft_results: dict, ml_name: str, index: int
+    ) -> str:
+        """Build anharmonicity ratio plot from raw results dicts."""
+        try:
+            ml_anharm = ml_results.get("frequencies", {}).get("anharmonic", [])
+            dft_anharm = dft_results.get("frequencies", {}).get("anharmonic", [])
+            if not ml_anharm or not dft_anharm:
+                return ""
+
+            # Build mode-number-indexed lookups
+            ml_by_mode = {m["mode"]: m for m in ml_anharm}
+            dft_by_mode = {m["mode"]: m for m in dft_anharm}
+            common = sorted(set(ml_by_mode) & set(dft_by_mode))
+            if len(common) < 3:
+                return ""
+
+            dft_harm = np.array([dft_by_mode[m]["freq_harmonic"] for m in common])
+            dft_anh = np.array([dft_by_mode[m]["freq_cm"] for m in common])
+            ml_harm = np.array([ml_by_mode[m]["freq_harmonic"] for m in common])
+            ml_anh = np.array([ml_by_mode[m]["freq_cm"] for m in common])
+
+            fig = build_anharmonicity_ratio_figure(dft_harm, dft_anh, ml_harm, ml_anh, ml_name)
+            div = self._fig_to_div(fig, f"anharm-ratio-{index}")
+            return f'<div class="plot-container">{div}</div>'
+        except Exception:
+            return ""
 
     def _create_summary_table(self, comparisons: list[dict]) -> str:
         """Build the overall summary comparison table.

@@ -442,6 +442,348 @@ def build_combined_spectrum_figure(
     return fig
 
 
+def build_residual_figure(
+    dft_freqs: np.ndarray,
+    ml_freqs: np.ndarray,
+    ml_name: str,
+    mode_ids: list[str] | None = None,
+) -> object:
+    """Build a residual plot: (ML - DFT) error vs DFT frequency.
+
+    Reveals systematic bias (e.g. consistently blue-shifted regions).
+    """
+    import plotly.graph_objects as go
+
+    errors = ml_freqs - dft_freqs
+
+    _type_style = {
+        "fundamental": {"color": _ML_COLOR, "symbol": "circle", "name": "Fundamental"},
+        "overtone": {"color": "#0173B2", "symbol": "diamond", "name": "Overtone"},
+        "combination": {"color": "#CC78BC", "symbol": "square", "name": "Combination"},
+    }
+
+    fig = go.Figure()
+
+    if mode_ids is not None and len(mode_ids) == len(dft_freqs):
+        groups: dict[str, tuple[list, list]] = {}
+        for i, mid in enumerate(mode_ids):
+            if mid.startswith("O"):
+                t = "overtone"
+            elif mid.startswith("C"):
+                t = "combination"
+            else:
+                t = "fundamental"
+            groups.setdefault(t, ([], []))
+            groups[t][0].append(float(dft_freqs[i]))
+            groups[t][1].append(float(errors[i]))
+
+        for t in ("fundamental", "overtone", "combination"):
+            if t not in groups:
+                continue
+            dx, ex = groups[t]
+            style = _type_style[t]
+            fig.add_trace(
+                go.Scatter(
+                    x=dx, y=ex, mode="markers",
+                    name=f"{style['name']} (n={len(dx)})",
+                    marker=dict(color=style["color"], symbol=style["symbol"], size=6,
+                                line=dict(width=0.5, color="#333")),
+                    hovertemplate=(
+                        "DFT: %{x:.1f} cm\u207b\u00b9<br>"
+                        "\u0394: %{y:.1f} cm\u207b\u00b9"
+                        f"<extra>{style['name']}</extra>"
+                    ),
+                )
+            )
+    else:
+        fig.add_trace(
+            go.Scatter(
+                x=dft_freqs, y=errors, mode="markers",
+                name=f"Residuals (n={len(dft_freqs)})",
+                marker=dict(color=_ML_COLOR, size=6, line=dict(width=0.5, color="#333")),
+                hovertemplate="DFT: %{x:.1f}<br>\u0394: %{y:.1f}<extra></extra>",
+            )
+        )
+
+    # Zero line
+    fig.add_hline(y=0, line=dict(color="#888", dash="dash", width=1))
+
+    mae = float(np.mean(np.abs(errors)))
+    bias = float(np.mean(errors))
+    fig.update_layout(
+        title=f"Residuals: {ml_name} (bias={bias:+.1f}, MAE={mae:.1f} cm\u207b\u00b9)",
+        xaxis_title="DFT frequency (cm\u207b\u00b9)",
+        yaxis_title="ML \u2212 DFT (cm\u207b\u00b9)",
+        template="simple_white",
+        height=400,
+        margin=dict(l=60, r=20, t=60, b=50),
+        legend=dict(x=0.05, y=0.98, xanchor="left", yanchor="top",
+                    bgcolor="rgba(255,255,255,0.8)"),
+    )
+    return fig
+
+
+def build_error_histogram_figure(
+    dft_freqs: np.ndarray,
+    ml_freqs: np.ndarray,
+    ml_name: str,
+    mode_ids: list[str] | None = None,
+) -> object:
+    """Build a histogram of frequency errors (ML - DFT), stacked by mode type."""
+    import plotly.graph_objects as go
+
+    errors = ml_freqs - dft_freqs
+
+    _type_colors = {
+        "fundamental": _ML_COLOR,
+        "overtone": "#0173B2",
+        "combination": "#CC78BC",
+    }
+
+    fig = go.Figure()
+
+    if mode_ids is not None and len(mode_ids) == len(errors):
+        groups: dict[str, list[float]] = {}
+        for i, mid in enumerate(mode_ids):
+            if mid.startswith("O"):
+                t = "overtone"
+            elif mid.startswith("C"):
+                t = "combination"
+            else:
+                t = "fundamental"
+            groups.setdefault(t, [])
+            groups[t].append(float(errors[i]))
+
+        for t in ("fundamental", "overtone", "combination"):
+            if t not in groups:
+                continue
+            fig.add_trace(
+                go.Histogram(
+                    x=groups[t], name=f"{t.capitalize()} (n={len(groups[t])})",
+                    marker_color=_type_colors[t], opacity=0.7,
+                )
+            )
+        fig.update_layout(barmode="overlay")
+    else:
+        fig.add_trace(
+            go.Histogram(
+                x=errors, name=f"All modes (n={len(errors)})",
+                marker_color=_ML_COLOR, opacity=0.8,
+            )
+        )
+
+    fig.add_vline(x=0, line=dict(color="#888", dash="dash", width=1))
+
+    std = float(np.std(errors))
+    fig.update_layout(
+        title=f"Error Distribution: {ml_name} (\u03c3={std:.1f} cm\u207b\u00b9)",
+        xaxis_title="ML \u2212 DFT (cm\u207b\u00b9)",
+        yaxis_title="Count",
+        template="simple_white",
+        height=400,
+        margin=dict(l=60, r=20, t=60, b=50),
+        legend=dict(x=0.95, y=0.98, xanchor="right", yanchor="top",
+                    bgcolor="rgba(255,255,255,0.8)"),
+    )
+    return fig
+
+
+def build_anharmonicity_ratio_figure(
+    dft_harm_freqs: np.ndarray,
+    dft_anharm_freqs: np.ndarray,
+    ml_harm_freqs: np.ndarray,
+    ml_anharm_freqs: np.ndarray,
+    ml_name: str,
+) -> object:
+    """Build anharmonicity ratio comparison: (harm - anharm) / harm for ML vs DFT.
+
+    Shows whether ML captures anharmonic corrections correctly.
+    """
+    import plotly.graph_objects as go
+
+    # Avoid division by zero
+    dft_mask = dft_harm_freqs > 1.0
+    ml_mask = ml_harm_freqs > 1.0
+    valid = dft_mask & ml_mask
+
+    if np.sum(valid) < 2:
+        fig = go.Figure()
+        fig.add_annotation(text="Insufficient data for anharmonicity ratio",
+                           xref="paper", yref="paper", x=0.5, y=0.5, showarrow=False)
+        return fig
+
+    dft_ratio = (dft_harm_freqs[valid] - dft_anharm_freqs[valid]) / dft_harm_freqs[valid] * 100
+    ml_ratio = (ml_harm_freqs[valid] - ml_anharm_freqs[valid]) / ml_harm_freqs[valid] * 100
+
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scatter(
+            x=dft_ratio, y=ml_ratio, mode="markers",
+            name=f"Modes (n={int(np.sum(valid))})",
+            marker=dict(color=_ML_COLOR, size=8, line=dict(width=1, color="#333")),
+            hovertemplate="DFT: %{x:.2f}%<br>ML: %{y:.2f}%<extra></extra>",
+        )
+    )
+
+    all_r = np.concatenate([dft_ratio, ml_ratio])
+    lo, hi = float(np.min(all_r)), float(np.max(all_r))
+    margin = (hi - lo) * 0.05
+    lo -= margin
+    hi += margin
+
+    r2_str = "N/A"
+    ss_res = float(np.sum((ml_ratio - dft_ratio) ** 2))
+    ss_tot = float(np.sum((dft_ratio - np.mean(dft_ratio)) ** 2))
+    if ss_tot > 0:
+        r2 = 1.0 - ss_res / ss_tot
+        r2_str = f"{r2:.3f}"
+
+    fig.add_trace(
+        go.Scatter(
+            x=[lo, hi], y=[lo, hi], mode="lines",
+            name=f"y=x | R\u00b2={r2_str}",
+            line=dict(color="#888", dash="dash", width=1.5),
+            hoverinfo="skip",
+        )
+    )
+
+    fig.update_layout(
+        title=f"Anharmonicity Ratio: {ml_name} vs DFT",
+        xaxis_title="DFT anharmonic correction (%)",
+        yaxis_title="ML anharmonic correction (%)",
+        xaxis=dict(range=[lo, hi], constrain="domain"),
+        yaxis=dict(range=[lo, hi], scaleanchor="x", scaleratio=1, constrain="domain"),
+        template="simple_white",
+        height=500,
+        width=500,
+        margin=dict(l=60, r=20, t=60, b=50),
+        legend=dict(x=0.05, y=0.98, xanchor="left", yanchor="top",
+                    bgcolor="rgba(255,255,255,0.8)"),
+    )
+    return fig
+
+
+def build_per_region_table(
+    dft_freqs: np.ndarray,
+    ml_freqs: np.ndarray,
+    mode_ids: list[str] | None = None,
+) -> dict[str, dict[str, float]]:
+    """Compute per-region accuracy breakdown.
+
+    Returns a dict of region_name -> {mae, rmse, bias, n} for each spectral region.
+    Not a Plotly figure — returns data for HTML table rendering.
+    """
+    regions = {
+        "Fingerprint (400\u20131500)": (400, 1500),
+        "C-H stretch (2800\u20133200)": (2800, 3200),
+        "Overtone (4000+)": (4000, 15000),
+        "Other": None,  # everything else
+    }
+
+    errors = ml_freqs - dft_freqs
+    result: dict[str, dict[str, float]] = {}
+
+    claimed = np.zeros(len(dft_freqs), dtype=bool)
+    for name, bounds in regions.items():
+        if bounds is None:
+            continue
+        lo, hi = bounds
+        mask = (dft_freqs >= lo) & (dft_freqs < hi)
+        claimed |= mask
+        if np.sum(mask) > 0:
+            e = errors[mask]
+            result[name] = {
+                "mae": float(np.mean(np.abs(e))),
+                "rmse": float(np.sqrt(np.mean(e ** 2))),
+                "bias": float(np.mean(e)),
+                "n": int(np.sum(mask)),
+            }
+
+    # "Other" gets everything unclaimed
+    other_mask = ~claimed
+    if np.sum(other_mask) > 0:
+        e = errors[other_mask]
+        result["Other"] = {
+            "mae": float(np.mean(np.abs(e))),
+            "rmse": float(np.sqrt(np.mean(e ** 2))),
+            "bias": float(np.mean(e)),
+            "n": int(np.sum(other_mask)),
+        }
+
+    return result
+
+
+def build_pareto_figure(
+    method_names: list[str],
+    mae_values: list[float],
+    speedup_values: list[float],
+) -> object:
+    """Build a cost-accuracy Pareto plot: MAE vs speedup across all methods.
+
+    Points on the Pareto frontier are highlighted.
+    """
+    import plotly.graph_objects as go
+
+    mae = np.array(mae_values)
+    spd = np.array(speedup_values)
+
+    # Find Pareto frontier: lower MAE and higher speedup is better
+    frontier = []
+    for i in range(len(mae)):
+        dominated = False
+        for j in range(len(mae)):
+            if i != j and mae[j] <= mae[i] and spd[j] >= spd[i]:
+                if mae[j] < mae[i] or spd[j] > spd[i]:
+                    dominated = True
+                    break
+        if not dominated:
+            frontier.append(i)
+
+    is_frontier = np.zeros(len(mae), dtype=bool)
+    is_frontier[frontier] = True
+
+    fig = go.Figure()
+
+    # Non-frontier points
+    if np.sum(~is_frontier) > 0:
+        fig.add_trace(
+            go.Scatter(
+                x=spd[~is_frontier], y=mae[~is_frontier], mode="markers+text",
+                name="Methods",
+                text=[method_names[i] for i in range(len(mae)) if not is_frontier[i]],
+                textposition="top center", textfont=dict(size=9),
+                marker=dict(color="#999", size=10, line=dict(width=1, color="#333")),
+                hovertemplate="%{text}<br>Speedup: %{x:.1f}\u00d7<br>MAE: %{y:.1f}<extra></extra>",
+            )
+        )
+
+    # Frontier points
+    if np.sum(is_frontier) > 0:
+        fig.add_trace(
+            go.Scatter(
+                x=spd[is_frontier], y=mae[is_frontier], mode="markers+text",
+                name="Pareto frontier",
+                text=[method_names[i] for i in range(len(mae)) if is_frontier[i]],
+                textposition="top center", textfont=dict(size=9),
+                marker=dict(color=_ML_COLOR, size=12, symbol="star",
+                            line=dict(width=1, color="#333")),
+                hovertemplate="%{text}<br>Speedup: %{x:.1f}\u00d7<br>MAE: %{y:.1f}<extra></extra>",
+            )
+        )
+
+    fig.update_layout(
+        title="Cost-Accuracy Pareto: Speedup vs Frequency MAE",
+        xaxis_title="Speedup (\u00d7 vs DFT)",
+        yaxis_title="Frequency MAE (cm\u207b\u00b9)",
+        template="simple_white",
+        height=500,
+        margin=dict(l=60, r=20, t=60, b=50),
+        legend=dict(x=0.95, y=0.98, xanchor="right", yanchor="top",
+                    bgcolor="rgba(255,255,255,0.8)"),
+    )
+    return fig
+
+
 def experimental_on_grid(
     experimental: Any | None,
     freq_grid: np.ndarray,

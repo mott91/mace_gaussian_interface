@@ -565,6 +565,8 @@ class ComparisonWorkflow:
             },
             "ml_gaussian_timing": ml_gaussian_timing,
             "dft_gaussian_timing": dft_gaussian_timing,
+            "_ml_results": ml_results,
+            "_dft_results": dft_results,
         }
 
     def create_combined_plots(

@@ -98,6 +98,7 @@ def rank_methods(
                 "r2_freq": float(m.r2_freq),
                 "r2_intensity": float(m.r2_intensity),
                 "rmse_freq": float(m.rmse_freq),
+                "mae_freq": float(m.mae_freq),
                 "speedup": float(c.get("speedup", 0.0)),
                 "experimental_agreement": exp_agree_out if has_exp else None,
             }
