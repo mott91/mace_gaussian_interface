@@ -529,7 +529,10 @@ class ComparisonWorkflow:
         dft_gaussian_timing = dft_results.get("gaussian_timing", dft_results.get("timing", {}))
 
         # Speedup: DFT Gaussian elapsed time vs ML pipeline time
+        # Prefer gaussian_timing.total_elapsed_s, fall back to runtime_s (pre-phase-20 calcs)
         dft_gauss_s = dft_gaussian_timing.get("total_elapsed_s", 0) if dft_gaussian_timing else 0
+        if dft_gauss_s == 0:
+            dft_gauss_s = dft_runtime
         speedup = dft_gauss_s / ml_runtime if ml_runtime > 0 and dft_gauss_s > 0 else 0
         dft_hardware = dft_results.get("hardware", {})
 
@@ -896,6 +899,7 @@ class ComparisonWorkflow:
             output_dir=self.output_dir,
             bandwidth_fwhm=self.bandwidth_fwhm,
             degenerate_groups=deg_groups_data if deg_groups_data else None,
+            mode="harmonic" if self.use_harmonic else "anharmonic",
         )
 
         generator.generate_report(analysis_results)

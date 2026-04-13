@@ -24,6 +24,7 @@ from .executive_summary import (
 )
 from .plotly_builders import (
     build_combined_spectrum_figure,
+    build_intensity_regression_figure,
     build_regression_figure,
     build_spectrum_figure,
     experimental_on_grid,
@@ -85,6 +86,10 @@ class HTMLReportGenerator:
         self._compute_and_attach_experimental_agreement(analysis_results)
 
         comparisons = analysis_results["comparisons"]
+        # Sort comparisons by MAE (best first)
+        comparisons.sort(key=lambda c: c["metrics"].mae_freq)
+        analysis_results["comparisons"] = comparisons
+
         ranked = rank_methods(comparisons)
         has_exp = analysis_results.get("experimental") is not None
         verdict = build_verdict(ranked, has_experimental=has_exp)
@@ -93,16 +98,40 @@ class HTMLReportGenerator:
             "ranked": ranked,
         }
 
+        # Mode count overview from first comparison's DFT spectrum
+        mode_overview = ""
+        if comparisons and "dft_spectrum" in comparisons[0]:
+            from collections import Counter
+            dft_labels = Counter(comparisons[0]["dft_spectrum"].labels)
+            n_fund = dft_labels.get("fundamental", 0)
+            n_ot = dft_labels.get("overtone", 0)
+            n_cb = dft_labels.get("combination", 0)
+            mode_overview = (
+                '<div class="stats-grid" style="margin:16px 0">'
+                f'<div class="stat-item"><div class="stat-label">Fundamentals</div>'
+                f'<div class="stat-value">{n_fund}</div></div>'
+                f'<div class="stat-item"><div class="stat-label">Overtones</div>'
+                f'<div class="stat-value">{n_ot}</div></div>'
+                f'<div class="stat-item"><div class="stat-label">Combination Bands</div>'
+                f'<div class="stat-value">{n_cb}</div></div>'
+                f'<div class="stat-item"><div class="stat-label">Total Modes</div>'
+                f'<div class="stat-value">{n_fund + n_ot + n_cb}</div></div>'
+                "</div>"
+            )
+
         sections = [
             self._create_head(),
             self._create_header(),
             self._create_navigation(comparisons),
             self._create_executive_summary(ranked, verdict),
+            mode_overview,
             self._create_combined_plots(analysis_results),
         ]
         for i, comp in enumerate(comparisons, 1):
             sections.append(self._create_comparison_section(comp, i, analysis_results))
         sections.append(self._create_experimental_info_section(analysis_results))
+        if self.mode == "anharmonic":
+            sections.append(self._create_category_awards(comparisons))
         sections.append(self._create_summary_table(comparisons))
         if self.mode == "anharmonic":
             sections.append(self._create_overtones_section(analysis_results))
@@ -159,7 +188,21 @@ class HTMLReportGenerator:
     # ------------------------------------------------------------------
 
     def _enrich_with_broadened_spectra(self, analysis_results: dict) -> None:
-        """Broaden ML and DFT spectra onto the shared frequency grid."""
+        """Broaden ML and DFT spectra onto the shared frequency grid.
+
+        In anharmonic mode, extends the grid to cover the highest detected
+        frequency (overtones/combinations can exceed 4000 cm-1) plus margin.
+        """
+        if self.mode == "anharmonic":
+            max_freq = 4000.0
+            for comp in analysis_results["comparisons"]:
+                for spec in (comp["ml_spectrum"], comp["dft_spectrum"]):
+                    if len(spec.frequencies) > 0:
+                        max_freq = max(max_freq, float(np.max(spec.frequencies)))
+            upper = max_freq + 200.0  # 200 cm-1 margin beyond highest band
+            self._analyzer.freq_range = (400, upper)
+            self._analyzer.freq_grid = np.arange(400, upper, self._analyzer.freq_step)
+
         freq_grid = self._analyzer.freq_grid
         analysis_results["freq_grid"] = freq_grid
         for comp in analysis_results["comparisons"]:
@@ -338,11 +381,53 @@ class HTMLReportGenerator:
         )
         spec_div = self._fig_to_div(spec_fig, f"spectrum-{index}")
 
-        # Plotly regression figure
-        dft_freqs = np.asarray(comp["dft_spectrum"].frequencies, dtype=float)
-        ml_freqs = np.asarray(comp["ml_spectrum"].frequencies, dtype=float)
-        reg_fig = build_regression_figure(dft_freqs, ml_freqs, ml_name)
-        reg_div = self._fig_to_div(reg_fig, f"regression-{index}")
+        # Get paired arrays for regression plots via mode matching;
+        # fall back to raw spectrum arrays when mode IDs are absent.
+        mode_mapping = comp.get("mode_mapping")
+        matched_dft_freq, matched_ml_freq, matched_dft_int, matched_ml_int, match_stats = (
+            self._analyzer.match_by_mode(
+                comp["dft_spectrum"], comp["ml_spectrum"], mode_mapping=mode_mapping
+            )
+        )
+        matched_ids = match_stats.get("matched_mode_ids")
+        if len(matched_dft_freq) == 0:
+            dft_s, ml_s = comp["dft_spectrum"], comp["ml_spectrum"]
+            n = min(len(dft_s.frequencies), len(ml_s.frequencies))
+            matched_dft_freq = np.asarray(dft_s.frequencies[:n], dtype=float)
+            matched_ml_freq = np.asarray(ml_s.frequencies[:n], dtype=float)
+            matched_dft_int = np.asarray(dft_s.intensities[:n], dtype=float)
+            matched_ml_int = np.asarray(ml_s.intensities[:n], dtype=float)
+            matched_ids = None
+
+        # Per-category MAE for category awards
+        cat_mae: dict[str, float | None] = {"fundamental": None, "overtone": None, "combination": None}
+        if matched_ids is not None and len(matched_ids) == len(matched_dft_freq):
+            for cat, prefix in (("fundamental", "F"), ("overtone", "O"), ("combination", "C")):
+                mask = [mid.startswith(prefix) for mid in matched_ids]
+                if any(mask):
+                    m = np.array(mask)
+                    cat_mae[cat] = float(np.mean(np.abs(matched_ml_freq[m] - matched_dft_freq[m])))
+        comp["_cat_mae"] = cat_mae
+
+        # Frequency regression (left) — skip if no matched modes
+        reg_div = ""
+        if len(matched_dft_freq) > 0:
+            reg_fig = build_regression_figure(
+                matched_dft_freq, matched_ml_freq, ml_name, mode_ids=matched_ids
+            )
+            reg_div = self._fig_to_div(reg_fig, f"regression-{index}")
+
+        # Intensity regression (right) — filter symmetry-forbidden modes
+        # Keep a mode if either DFT or ML intensity >= threshold
+        int_reg_div = ""
+        if len(matched_dft_int) > 0:
+            int_mask = (matched_dft_int >= 0.1) | (matched_ml_int >= 0.1)
+            if np.sum(int_mask) > 1:
+                int_ids = [matched_ids[i] for i, m in enumerate(int_mask) if m] if matched_ids else None
+                int_fig = build_intensity_regression_figure(
+                    matched_dft_int[int_mask], matched_ml_int[int_mask], ml_name, mode_ids=int_ids
+                )
+                int_reg_div = self._fig_to_div(int_fig, f"int-regression-{index}")
 
         # Heatmap PNG (stays as static image)
         heatmap_html = ""
@@ -351,74 +436,123 @@ class HTMLReportGenerator:
             list(plots_dir.glob(f"mode_overlap_{ml_name}_*.png")) if plots_dir.exists() else []
         )
         if heatmap_files:
-            heatmap_rel = f"plots/{heatmap_files[0].name}"
+            import base64
+
+            img_data = heatmap_files[0].read_bytes()
+            b64 = base64.b64encode(img_data).decode("ascii")
             heatmap_html = (
                 f'<div class="plot-container">'
-                f'<img src="{self._esc(heatmap_rel)}" alt="Mode overlap heatmap">'
+                f'<img src="data:image/png;base64,{b64}" alt="Mode overlap heatmap">'
                 f"</div>"
             )
 
-        # Timing block (D-09, D-11)
+        # Timing — prefer gaussian_timing, fall back to runtime_s
         ml_gauss_s = comp.get("ml_gaussian_timing", {}).get("total_elapsed_s", 0.0)
+        if ml_gauss_s == 0.0:
+            ml_gauss_s = comp.get("ml_runtime", 0.0)
         dft_gauss_s = comp.get("dft_gaussian_timing", {}).get("total_elapsed_s", 0.0)
+        if dft_gauss_s == 0.0:
+            dft_gauss_s = comp.get("dft_runtime", 0.0)
         speedup = comp.get("speedup", 0.0)
-        timing_html = (
-            '<div class="timing-block">'
-            f"ML pipeline: <strong>{ml_gauss_s:.2f}s</strong> \u00b7 "
-            f"DFT pipeline: <strong>{dft_gauss_s:.2f}s</strong> \u00b7 "
-            f"Speedup: <strong>{speedup:.1f}\u00d7</strong>"
-            "</div>"
-        )
 
-        # Degenerate notes
+        # Degenerate notes — compact single-line summary
         deg_html = ""
         deg_result = comp.get("deg_result")
         if deg_result is not None:
             groups = getattr(deg_result, "groups", None) or []
-            for g in groups:
-                label = self._esc(g.get("label", ""))
-                mult = g.get("multiplicity", 0)
-                overlap = g.get("subspace_overlap", 0.0)
-                deg_html += (
+            if groups:
+                items = []
+                for g in groups:
+                    label = self._esc(getattr(g, "symmetry_label", ""))
+                    mult = getattr(g, "multiplicity", 0)
+                    overlap = getattr(g, "subspace_overlap", 0.0)
+                    tag = f"{label} " if label else ""
+                    items.append(f"{tag}{mult}-fold ({overlap:.2f})")
+                deg_html = (
                     f'<div class="degenerate-note">'
-                    f"Degenerate group {label}: {mult}-fold, "
-                    f"subspace overlap {overlap:.3f}"
-                    f"</div>"
+                    f"{len(groups)} degenerate group{'s' if len(groups) != 1 else ''}: "
+                    + ", ".join(items)
+                    + "</div>"
                 )
 
-        # Per-method metrics mini table
+        # Per-method metrics — punchy stat boxes with timing integrated
         m = comp["metrics"]
         exp_agree = comp.get("experimental_agreement")
         exp_str = self._format_exp_agreement(exp_agree)
-        metrics_table = (
-            '<table class="data-table">'
-            "<thead><tr>"
-            "<th>R\u00b2 freq</th><th>R\u00b2 int</th>"
-            "<th>RMSE</th><th>MAE</th>"
-            "<th>Max err</th><th>Matched</th>"
-            "<th>Speedup</th><th>Exp. agree</th>"
-            "</tr></thead>"
-            f"<tbody><tr>"
-            f"<td>{m.r2_freq:.4f}</td>"
-            f"<td>{m.r2_intensity:.4f}</td>"
-            f"<td>{m.rmse_freq:.2f}</td>"
-            f"<td>{m.mae_freq:.2f}</td>"
-            f"<td>{m.max_error_freq:.2f}</td>"
-            f"<td>{m.num_matched}/{m.num_matched + m.num_dft_only}</td>"
-            f"<td>{speedup:.1f}\u00d7</td>"
-            f"<td>{exp_str}</td>"
-            f"</tr></tbody></table>"
+
+        r2_class = (
+            "metric-good" if m.r2_freq > 0.95
+            else "metric-warning" if m.r2_freq > 0.90
+            else "metric-bad"
         )
+        mae_class = (
+            "metric-good" if m.mae_freq < 10
+            else "metric-warning" if m.mae_freq < 20
+            else "metric-bad"
+        )
+
+        metrics_table = (
+            '<div class="stats-box">'
+            "<h4>Statistical Metrics</h4>"
+            '<div class="stats-grid">'
+            f'<div class="stat-item">'
+            f'<div class="stat-label">R\u00b2 (Frequency)</div>'
+            f'<div class="stat-value {r2_class}">{m.r2_freq:.4f}</div></div>'
+            f'<div class="stat-item">'
+            f'<div class="stat-label">R\u00b2 (Intensity)</div>'
+            f'<div class="stat-value">{m.r2_intensity:.4f}</div></div>'
+            f'<div class="stat-item">'
+            f'<div class="stat-label">MAE</div>'
+            f'<div class="stat-value {mae_class}">{m.mae_freq:.2f} cm\u207b\u00b9</div></div>'
+            f'<div class="stat-item">'
+            f'<div class="stat-label">RMSE</div>'
+            f'<div class="stat-value">{m.rmse_freq:.2f} cm\u207b\u00b9</div></div>'
+            f'<div class="stat-item">'
+            f'<div class="stat-label">Max Error</div>'
+            f'<div class="stat-value">{m.max_error_freq:.2f} cm\u207b\u00b9</div></div>'
+            f'<div class="stat-item">'
+            f'<div class="stat-label">Matched Modes</div>'
+            f'<div class="stat-value">{m.num_matched}/{m.num_matched + m.num_dft_only}</div></div>'
+            f'<div class="stat-item">'
+            f'<div class="stat-label">ML Pipeline</div>'
+            f'<div class="stat-value">{ml_gauss_s:.1f}s</div></div>'
+            f'<div class="stat-item">'
+            f'<div class="stat-label">DFT Pipeline</div>'
+            f'<div class="stat-value">{dft_gauss_s:.1f}s</div></div>'
+            f'<div class="stat-item">'
+            f'<div class="stat-label">Speedup</div>'
+            f'<div class="stat-value">{speedup:.1f}\u00d7</div></div>'
+            f'<div class="stat-item">'
+            f'<div class="stat-label">Exp. Agreement</div>'
+            f'<div class="stat-value">{exp_str}</div></div>'
+            "</div></div>"
+        )
+
+        # Side-by-side regression container (skip entirely if no matched modes)
+        reg_row = ""
+        if reg_div or int_reg_div:
+            reg_left = (
+                f'<div class="plot-container" style="flex:1;min-width:0">'
+                f"{reg_div}</div>"
+            ) if reg_div else ""
+            reg_right = (
+                '<div class="plot-container" style="flex:1;min-width:0">'
+                f"{int_reg_div}</div>"
+            ) if int_reg_div else ""
+            reg_row = (
+                '<div style="display:flex;gap:1rem;flex-wrap:wrap">'
+                f"{reg_left}{reg_right}"
+                "</div>"
+            )
 
         return (
             f'<section class="comparison-section" id="comparison-{index}">'
             f"<h2>{ml_name_esc} vs DFT</h2>"
-            f'<div class="plot-container">{spec_div}</div>'
-            f'<div class="plot-container">{reg_div}</div>'
-            f"{heatmap_html}"
-            f"{timing_html}"
-            f"{deg_html}"
             f"{metrics_table}"
+            f"{deg_html}"
+            f'<div class="plot-container">{spec_div}</div>'
+            f"{reg_row}"
+            f"{heatmap_html}"
             f"</section>"
         )
 
@@ -625,20 +759,80 @@ class HTMLReportGenerator:
         """
         overtones_data = self._collect_overtones(analysis_results)
         if overtones_data:
-            # Option A: real data
-            rows = "".join(
-                f"<tr><td>{self._esc(row.get('mode_id', ''))}</td>"
-                f"<td>{row.get('freq_cm', 0):.1f}</td>"
-                f"<td>{row.get('intensity', 0):.3f}</td>"
-                f"<td>{self._esc(row.get('type', 'overtone'))}</td></tr>"
-                for row in overtones_data
-            )
-            body = (
-                '<table class="overtone-table data-table">'
-                "<thead><tr><th>Mode</th><th>Freq (cm\u207b\u00b9)</th>"
-                "<th>Intensity</th><th>Type</th></tr></thead>"
-                f"<tbody>{rows}</tbody></table>"
-            )
+            # Option A: real data — DFT vs ML comparison table
+            def _fmt(v, fmt=".1f"):
+                return f"{v:{fmt}}" if v is not None else "\u2014"
+
+            # Group by method
+            by_method: dict[str, list[dict]] = {}
+            for row in overtones_data:
+                by_method.setdefault(row["method"], []).append(row)
+
+            _MAX_TABLE_ROWS = 15  # Show full table up to this many rows
+
+            tables = []
+            for method, rows in by_method.items():
+
+                # Compute errors for rows that have both DFT and ML
+                paired = [r for r in rows if r["dft_freq"] is not None and r["ml_freq"] is not None]
+                n_ot = sum(1 for r in rows if r["type"] == "overtone")
+                n_cb = sum(1 for r in rows if r["type"] == "combination")
+                errors = [abs(r["ml_freq"] - r["dft_freq"]) for r in paired]
+                mae = sum(errors) / len(errors) if errors else 0.0
+
+                summary = (
+                    f"<h3>{self._esc(method)} vs DFT</h3>"
+                    f'<div class="stats-grid" style="margin-bottom:12px">'
+                    f'<div class="stat-item"><div class="stat-label">Overtones</div>'
+                    f'<div class="stat-value">{n_ot}</div></div>'
+                    f'<div class="stat-item"><div class="stat-label">Combinations</div>'
+                    f'<div class="stat-value">{n_cb}</div></div>'
+                    f'<div class="stat-item"><div class="stat-label">MAE</div>'
+                    f'<div class="stat-value">{mae:.1f} cm\u207b\u00b9</div></div>'
+                    f"</div>"
+                )
+
+                # Show full table for small molecules, top-N worst for large
+                if len(rows) <= _MAX_TABLE_ROWS:
+                    display_rows = rows
+                    table_note = ""
+                else:
+                    # Sort by absolute error, show worst N
+                    paired.sort(key=lambda r: abs(r["ml_freq"] - r["dft_freq"]), reverse=True)
+                    display_rows = paired[:_MAX_TABLE_ROWS]
+                    table_note = (
+                        f'<p style="color:#6b7280;font-size:0.85em;margin-top:4px">'
+                        f"Showing {_MAX_TABLE_ROWS} largest errors out of {len(rows)} total entries.</p>"
+                    )
+
+                def _delta(r):
+                    if r["dft_freq"] is not None and r["ml_freq"] is not None:
+                        return f"{r['ml_freq'] - r['dft_freq']:+.1f}"
+                    return "\u2014"
+
+                trs = "".join(
+                    f"<tr><td>{self._esc(r['mode_id'])}</td>"
+                    f"<td>{self._esc(r['type'])}</td>"
+                    f"<td>{_fmt(r['dft_freq'])}</td>"
+                    f"<td>{_fmt(r['ml_freq'])}</td>"
+                    f"<td>{_delta(r)}</td>"
+                    f"<td>{_fmt(r['dft_int'], '.3f')}</td>"
+                    f"<td>{_fmt(r['ml_int'], '.3f')}</td></tr>"
+                    for r in display_rows
+                )
+                tables.append(
+                    summary
+                    + f'<table class="overtone-table data-table">'
+                    f"<thead><tr><th>Mode</th><th>Type</th>"
+                    f"<th>DFT freq (cm\u207b\u00b9)</th>"
+                    f"<th>ML freq (cm\u207b\u00b9)</th>"
+                    f"<th>\u0394freq (cm\u207b\u00b9)</th>"
+                    f"<th>DFT int (km/mol)</th>"
+                    f"<th>ML int (km/mol)</th></tr></thead>"
+                    f"<tbody>{trs}</tbody></table>"
+                    + table_note
+                )
+            body = "\n".join(tables)
         else:
             # Option B: explicit stub, grep-able
             body = (
@@ -656,30 +850,122 @@ class HTMLReportGenerator:
         )
 
     def _collect_overtones(self, analysis_results: dict) -> list[dict]:
-        """Collect overtone/combination band records from analysis_results.
+        """Collect overtone/combination band records from SpectrumData objects.
 
-        Checks ``analysis_results["overtones"]`` first (top-level), then
-        iterates per-comparison ``comp["overtones"]``.  Returns an empty
-        list if no data is found, which triggers the stub path in
-        ``_create_overtones_section``.
+        Extracts entries with ``label == "overtone"`` or
+        ``label == "combination"`` from both DFT and ML ``SpectrumData``
+        in each comparison, then matches them by ``mode_id`` to produce
+        side-by-side DFT vs ML rows.
 
         Returns
         -------
         list[dict]
-            Each dict has keys: mode_id, freq_cm, intensity, type.
-            Empty list if no overtone data is available.
+            Each dict has keys: method, mode_id, dft_freq, dft_int,
+            ml_freq, ml_int, type.  Empty list if no overtone data.
         """
-        # Check top-level first
-        top = analysis_results.get("overtones")
-        if top:
-            return list(top)
-        # Check per-comparison
         collected: list[dict] = []
         for comp in analysis_results.get("comparisons", []):
-            ot = comp.get("overtones")
-            if ot:
-                collected.extend(ot)
+            dft_spec = comp.get("dft_spectrum")
+            ml_spec = comp.get("ml_spectrum")
+            if dft_spec is None or ml_spec is None:
+                continue
+
+            method = comp.get("name", "ML")
+
+            # Build {mode_id: (freq, intensity)} for non-fundamental entries
+            def _extract_ot(spec):
+                out = {}
+                for i, label in enumerate(spec.labels):
+                    if label in ("overtone", "combination"):
+                        out[spec.mode_ids[i]] = (
+                            float(spec.frequencies[i]),
+                            float(spec.intensities[i]),
+                            label,
+                        )
+                return out
+
+            dft_ot = _extract_ot(dft_spec)
+            ml_ot = _extract_ot(ml_spec)
+
+            # All mode_ids from both sides, sorted
+            all_ids = sorted(set(dft_ot) | set(ml_ot))
+            for mid in all_ids:
+                d = dft_ot.get(mid)
+                m = ml_ot.get(mid)
+                collected.append(
+                    {
+                        "method": method,
+                        "mode_id": mid,
+                        "dft_freq": d[0] if d else None,
+                        "dft_int": d[1] if d else None,
+                        "ml_freq": m[0] if m else None,
+                        "ml_int": m[1] if m else None,
+                        "type": (d or m)[2],
+                    }
+                )
         return collected
+
+    def _create_category_awards(self, comparisons: list[dict]) -> str:
+        """Render a category awards section crowning the best ML method per mode type.
+
+        Shows best MAE for fundamentals, overtones, and combination bands
+        separately, so the user can see which model excels at each.
+        """
+        categories = [
+            ("fundamental", "Fundamentals"),
+            ("overtone", "Overtones"),
+            ("combination", "Combination Bands"),
+        ]
+
+        cards = []
+        for cat_key, cat_label in categories:
+            # Collect (method_name, mae) for this category
+            entries = []
+            for comp in comparisons:
+                cat_mae = comp.get("_cat_mae", {})
+                mae = cat_mae.get(cat_key)
+                if mae is not None:
+                    entries.append((comp["name"], mae))
+
+            if not entries:
+                cards.append(
+                    f'<div class="award-card">'
+                    f"<h3>{self._esc(cat_label)}</h3>"
+                    f'<div class="award-no-data">No data</div>'
+                    f"</div>"
+                )
+                continue
+
+            entries.sort(key=lambda x: x[1])
+            best_name, best_mae = entries[0]
+
+            rows = "".join(
+                f'<tr class="{"award-winner" if i == 0 else ""}">'
+                f"<td>{i + 1}</td>"
+                f"<td>{self._esc(name)}</td>"
+                f"<td>{mae:.1f}</td></tr>"
+                for i, (name, mae) in enumerate(entries)
+            )
+
+            cards.append(
+                f'<div class="award-card">'
+                f"<h3>{self._esc(cat_label)}</h3>"
+                f'<div class="award-winner-name">{self._esc(best_name)}</div>'
+                f'<div class="award-winner-mae">MAE: {best_mae:.1f} cm\u207b\u00b9</div>'
+                f'<table class="data-table award-table">'
+                f"<thead><tr><th>#</th><th>Method</th>"
+                f"<th>MAE (cm\u207b\u00b9)</th></tr></thead>"
+                f"<tbody>{rows}</tbody></table>"
+                f"</div>"
+            )
+
+        return (
+            '<section class="comparison-section" id="per-category-accuracy">'
+            "<h2>Per-Category Accuracy Ranking</h2>"
+            '<div class="awards-grid">'
+            + "\n".join(cards)
+            + "</div></section>"
+        )
 
     def _create_footer(self) -> str:
         """Create the report footer with generation info."""
