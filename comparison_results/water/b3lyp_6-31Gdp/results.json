@@ -4,7 +4,109 @@
   "method": "B3LYP/6-31G(d,p)",
   "source": "slurm_cluster",
   "host": "mot@tci5",
-  "frequencies": {},
+  "frequencies": {
+    "harmonic": [
+      {
+        "freq_cm": 1665.3001,
+        "ir_intensity": 70.3304
+      },
+      {
+        "freq_cm": 3799.2204,
+        "ir_intensity": 1.6374
+      },
+      {
+        "freq_cm": 3912.4175,
+        "ir_intensity": 20.2278
+      }
+    ],
+    "anharmonic": [
+      {
+        "mode": 1,
+        "freq_cm": 3624.001,
+        "ir_intensity": 0.69164139,
+        "freq_harmonic": 3799.22
+      },
+      {
+        "mode": 2,
+        "freq_cm": 1615.153,
+        "ir_intensity": 171.15661144,
+        "freq_harmonic": 1665.3
+      },
+      {
+        "mode": 3,
+        "freq_cm": 3722.273,
+        "ir_intensity": 17.25283075,
+        "freq_harmonic": 3912.417
+      }
+    ],
+    "overtones": [
+      {
+        "mode": 1,
+        "overtone_level": 2,
+        "freq_harmonic": 7598.441,
+        "freq_anharmonic": 7161.57,
+        "ir_intensity": 0.77569767
+      },
+      {
+        "mode": 2,
+        "overtone_level": 2,
+        "freq_harmonic": 3330.6,
+        "freq_anharmonic": 3194.746,
+        "ir_intensity": 0.80602577
+      },
+      {
+        "mode": 3,
+        "overtone_level": 2,
+        "freq_harmonic": 7824.835,
+        "freq_anharmonic": 7346.675,
+        "ir_intensity": 0.04914659
+      }
+    ],
+    "combination_bands": [
+      {
+        "mode1": 2,
+        "mode2": 1,
+        "freq_harmonic": 5464.52,
+        "freq_anharmonic": 5228.051,
+        "ir_intensity": 0.40654498
+      },
+      {
+        "mode1": 3,
+        "mode2": 1,
+        "freq_harmonic": 7711.638,
+        "freq_anharmonic": 7179.8,
+        "ir_intensity": 3.68333467
+      },
+      {
+        "mode1": 3,
+        "mode2": 2,
+        "freq_harmonic": 5577.718,
+        "freq_anharmonic": 5319.353,
+        "ir_intensity": 3.30789821
+      },
+      {
+        "mode1": 2,
+        "mode2": 1,
+        "freq_harmonic": 5464.52,
+        "freq_anharmonic": 5228.051,
+        "ir_intensity": 0.31022459
+      },
+      {
+        "mode1": 3,
+        "mode2": 1,
+        "freq_harmonic": 7711.638,
+        "freq_anharmonic": 7179.8,
+        "ir_intensity": 2.0466155
+      },
+      {
+        "mode1": 3,
+        "mode2": 2,
+        "freq_harmonic": 5577.718,
+        "freq_anharmonic": 5319.353,
+        "ir_intensity": 2.48085125
+      }
+    ]
+  },
   "ir_intensities": {},
   "timing": {
     "total_elapsed_s": 15.6,

@@ -114,7 +114,7 @@
     "z": -2.081481485004517,
     "magnitude": 2.081481485004517
   },
-  "runtime_s": 13.50486707687378,
+  "runtime_s": 12.879360437393188,
   "files": {
     "gaussian_log": "gaussian_freq.log",
     "gaussian_input": "gaussian_freq.gjf"
@@ -138,10 +138,10 @@
   },
   "gaussian_timing": {
     "total_elapsed_s": 11.6,
-    "total_cpu_s": 2.0,
+    "total_cpu_s": 1.6,
     "stages": [
       {
-        "cpu_s": 2.0,
+        "cpu_s": 1.6,
         "elapsed_s": 11.6
       }
     ]

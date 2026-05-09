@@ -114,7 +114,7 @@
     "z": -0.992578336975792,
     "magnitude": 0.992578336975792
   },
-  "runtime_s": 12.849509239196777,
+  "runtime_s": 13.024902105331421,
   "files": {
     "gaussian_log": "gaussian_freq.log",
     "gaussian_input": "gaussian_freq.gjf"
@@ -137,12 +137,12 @@
     "dipole_calculator": "mace_ml"
   },
   "gaussian_timing": {
-    "total_elapsed_s": 11.5,
-    "total_cpu_s": 2.0,
+    "total_elapsed_s": 11.7,
+    "total_cpu_s": 1.6,
     "stages": [
       {
-        "cpu_s": 2.0,
-        "elapsed_s": 11.5
+        "cpu_s": 1.6,
+        "elapsed_s": 11.7
       }
     ]
   }
