@@ -1,56 +1,81 @@
 # Phase 23 — Next Session TODO
 
 ## What's Done This Session
-- Bug 1: Regression plot axes equal range (scaleanchor + constrain="domain")
-- Bug 2: Overtones section pulls from SpectrumData labels, DFT vs ML side-by-side with Δfreq
-- Bug 3: Heatmap was working; now base64-embedded for SSH download
-- Feature 4: `mode="harmonic"` wired in analysis_workflow.py
-- Regression plots color-coded by type (fundamental/overtone/combination) — both freq and intensity
-- Per-Category Accuracy Ranking section (was "Category Awards")
-- Experimental line: alpha 0.15, solid
-- Combined spectrum: 10 maximally distinct colors
-- Regression y-axis: simplified to "ML frequencies"/"ML intensities"
-- Regression plots enlarged (550x550), legend inside plot (top-left)
-- Comparisons sorted by MAE (best first in nav + sections)
-- Metrics stat boxes above spectrum, timing integrated into boxes
-- Wider layout (95% max-width)
-- Heatmap: numbers hidden when >12 modes, x-labels rotated for large matrices
-- Overtone tables: summary stats + top-15 worst errors for large molecules
-- Degenerate notes collapsed into single compact line
-- Timing fallback to runtime_s when gaussian_timing unavailable
-- Mode count overview (fundamentals/overtones/combinations/total) in executive summary
-- DegenerateGroup .get() → getattr() fix
 
-## Remaining / Open Items
+### Verification gap fixes (commit `d9879cb`)
+- `batch_report.py` now imports `_shared_css.build_css` and `html` stdlib;
+  `_esc()` helper wraps user-controlled molecule/combo/timing strings (T-23-01)
+- `analysis_workflow.py` passes `mode="harmonic" | "anharmonic"` to
+  `HTMLReportGenerator` based on `use_harmonic`
+- 23-VERIFICATION should now flip 5/7 → 7/7 on re-run
 
-### 1. Octane fundamentals all IR-inactive
-All fundamental and overtone DFT intensities are 0.0 for octane (symmetric molecule).
-Only combination bands have nonzero intensity. This is correct physics, not a bug.
-The intensity regression plot correctly shows only combos after the >= 0.1 filter.
+### Report polish (commit `98af64c`)
+- Regression plots: equal-range axes, type color-coding, R²/count legend
+- Overtones section, heatmap, executive summary, layout improvements
+- See commit body for the full list
 
-### 2. Feature 5: Eigenvector overlap confidence flags per mode
-In regression plots and/or per-method metrics table, show eigenvector overlap score
-for each matched mode pair. Flag modes with overlap < 0.7 as low-confidence.
-Data available from `comp["mode_mapping"]` and overlap matrix.
+### Feature 5 — eigenvector overlap confidence flags (commit `e2f2ffe`)
+- `analyze_spectra.match_by_mode` accepts `mode_overlaps`, returns
+  `matched_mode_overlaps` aligned with matched arrays
+- `plotly_builders` exposes `LOW_OVERLAP_THRESHOLD = 0.7` and a shared
+  `_add_regression_traces` helper. Both regression builders accept
+  `mode_overlaps`; low-overlap fundamentals render as hollow markers
+  (`circle-open`) at 0.55 opacity in their own legend trace, with the
+  overlap value shown on hover
+- `html_report_generator` threads overlaps through and adds a
+  "Low-overlap (< 0.7)" stat box (n/N fundamentals)
+- `analysis_workflow` stores `mode_overlaps` in `comp` so the report has
+  the data without re-running the match
 
-### 3. Investigate 5600-5800 cm⁻¹ intensity difference (mace_anicc_mace_ml on octane)
-User noticed a large intensity difference in this overtone/combo frequency region.
-Check which specific mode_id via hover tooltip. May be a real ML prediction error.
+### Adjacent work — `mace_polar1` dipole calculator (commit `0a014a5`)
+- New `MACEPolar1DipoleCalculator` registered alongside `espaloma` and
+  `mace_ml`, wired through factory / CLI / workflow defaults
+- Spike scripts in `scripts/spike_polar_*` validate static dipoles vs
+  B3LYP and autograd-vs-finite-difference derivative agreement
+- End-to-end IR intensity comparison on water + HF: POLAR-1 and MACE4IR
+  trade wins per molecule — kept as additional dipole option, not
+  default replacement
 
-### 4. Timing data missing for pre-phase-20 calculations
-Octane calcs were run before timing was implemented. Need to either:
-- Recalculate octane with timing enabled
-- Or accept N/A for old calcs (currently shows 0.0s as fallback)
+## Resolved Decisions
 
-### 5. Harmonic report still generates with new Plotly style
-User noted harmonic report was replaced with new style (not what they wanted).
-Decide: keep single anharmonic report or maintain separate harmonic report.
-For thesis, one anharmonic report per molecule is likely sufficient.
+- **Harmonic report** — keep unified Plotly style with `mode=` flag.
+  Anharmonic stays the default; harmonic report is fast sanity check.
+  No separate template.
+- **Octane all-zero fundamentals** — correct physics for the symmetric
+  alkane, not a bug. Intensity regression filter (≥ 0.1 km/mol) keeps
+  combos visible.
 
-## Files Changed
-- `mace_gaussian/analysis/plotly_builders.py` — colors, regression layout, type color-coding, legend
-- `mace_gaussian/analysis/_shared_css.py` — wider layout, awards CSS, nav flex-wrap
-- `mace_gaussian/analysis/html_report_generator.py` — MAE sorting, metrics boxes, timing, overtones, mode overview, degenerate fix
-- `mace_gaussian/analysis/analyze_spectra.py` — matched_mode_ids in match_stats
-- `mace_gaussian/analysis/mode_matching.py` — heatmap text/label scaling
-- `mace_gaussian/analysis/analysis_workflow.py` — mode="harmonic" wiring
+## Remaining / Open Items (deferred)
+
+### Octane intensity discrepancy at 5600–5800 cm⁻¹
+Investigation deferred until octane is recalculated with timing
+instrumentation during the v1.3 benchmark campaign. Recipe to follow
+when picked up:
+1. Hover the regression-plot points in 5600–5800 cm⁻¹ to read off
+   `mode_id`; look up overtone vs combination in
+   `comparison_results/octane/mace_anicc_mace_ml/results.json`
+2. Compare the parent fundamentals (DFT vs ML) — discrepancy is either
+   in the underlying ML fundamental (dipole-derivative error amplified
+   into the overtone) or in the χ matrix (anharmonic coupling, energy
+   side)
+3. Check Gaussian freq log for Fermi resonance comments around `2νₖ`
+
+### Pre-Phase-20 octane timing data missing
+Resolved-by-deferring: octane will be re-run with timing enabled in the
+benchmark campaign. Until then the report falls back to `runtime_s`.
+
+## Files Changed (this session)
+- `mace_gaussian/analysis/plotly_builders.py` — overlap helper, hollow
+  markers, hover tooltips
+- `mace_gaussian/analysis/analyze_spectra.py` — overlap plumbing in
+  `match_by_mode`
+- `mace_gaussian/analysis/html_report_generator.py` — overlap stat box,
+  threading
+- `mace_gaussian/analysis/analysis_workflow.py` — store mode_overlaps in
+  comp; mode flag wiring
+- `mace_gaussian/analysis/batch_report.py` — XSS mitigation, shared CSS
+- `mace_gaussian/calculators/mace_polar1.py` — new dipole calculator
+- `mace_gaussian/calculators/{__init__,factory}.py`,
+  `mace_gaussian/{cli,workflow}.py` — wiring
+- `tests/test_plotly_builders.py`, `tests/test_calculators.py`,
+  `tests/test_batch_report.py` — coverage for above
