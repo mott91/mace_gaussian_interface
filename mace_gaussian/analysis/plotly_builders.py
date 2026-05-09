@@ -16,7 +16,7 @@ import numpy as np
 # Color conventions: DFT is the reference (black), ML is orange, experimental is grey
 _DFT_COLOR = "#000000"
 _ML_COLOR = "#DE8F05"
-_EXP_COLOR = "rgba(128,128,128,0.15)"
+_EXP_COLOR = "rgba(128,128,128,0.45)"
 
 
 def build_spectrum_figure(
@@ -515,8 +515,9 @@ def build_residual_figure(
         xaxis_title="DFT frequency (cm\u207b\u00b9)",
         yaxis_title="ML \u2212 DFT (cm\u207b\u00b9)",
         template="simple_white",
+        autosize=True,
         height=400,
-        margin=dict(l=60, r=20, t=60, b=50),
+        margin=dict(l=60, r=30, t=60, b=50),
         legend=dict(x=0.05, y=0.98, xanchor="left", yanchor="top",
                     bgcolor="rgba(255,255,255,0.8)"),
     )
@@ -575,13 +576,17 @@ def build_error_histogram_figure(
     fig.add_vline(x=0, line=dict(color="#888", dash="dash", width=1))
 
     std = float(np.std(errors))
+    # Symmetric x-axis so 0 is centred
+    x_lim = float(np.max(np.abs(errors))) * 1.15
     fig.update_layout(
         title=f"Error Distribution: {ml_name} (\u03c3={std:.1f} cm\u207b\u00b9)",
         xaxis_title="ML \u2212 DFT (cm\u207b\u00b9)",
+        xaxis=dict(range=[-x_lim, x_lim]),
         yaxis_title="Count",
         template="simple_white",
+        autosize=True,
         height=400,
-        margin=dict(l=60, r=20, t=60, b=50),
+        margin=dict(l=60, r=30, t=60, b=50),
         legend=dict(x=0.95, y=0.98, xanchor="right", yanchor="top",
                     bgcolor="rgba(255,255,255,0.8)"),
     )
@@ -654,10 +659,10 @@ def build_anharmonicity_ratio_figure(
         xaxis=dict(range=[lo, hi], constrain="domain"),
         yaxis=dict(range=[lo, hi], scaleanchor="x", scaleratio=1, constrain="domain"),
         template="simple_white",
-        height=500,
-        width=500,
-        margin=dict(l=60, r=20, t=60, b=50),
-        legend=dict(x=0.05, y=0.98, xanchor="left", yanchor="top",
+        width=400,
+        height=400,
+        margin=dict(l=60, r=30, t=60, b=50),
+        legend=dict(x=0.95, y=0.05, xanchor="right", yanchor="bottom",
                     bgcolor="rgba(255,255,255,0.8)"),
     )
     return fig
@@ -718,68 +723,64 @@ def build_pareto_figure(
     mae_values: list[float],
     speedup_values: list[float],
 ) -> object:
-    """Build a cost-accuracy Pareto plot: MAE vs speedup across all methods.
+    """Build a cost-accuracy scatter: MAE vs speedup across methods.
 
-    Points on the Pareto frontier are highlighted.
+    Duplicate (x, y) pairs get their labels alternated top/bottom so they
+    don't pile on top of each other (e.g. methods sharing the same MACE
+    frequency backbone have identical MAE_freq).
     """
     import plotly.graph_objects as go
 
-    mae = np.array(mae_values)
-    spd = np.array(speedup_values)
+    display_names = [n.replace("mace_", "") for n in method_names]
 
-    # Find Pareto frontier: lower MAE and higher speedup is better
-    frontier = []
-    for i in range(len(mae)):
-        dominated = False
-        for j in range(len(mae)):
-            if i != j and mae[j] <= mae[i] and spd[j] >= spd[i]:
-                if mae[j] < mae[i] or spd[j] > spd[i]:
-                    dominated = True
-                    break
-        if not dominated:
-            frontier.append(i)
-
-    is_frontier = np.zeros(len(mae), dtype=bool)
-    is_frontier[frontier] = True
+    # Pairs that share a MACE frequency backbone have identical MAE_freq;
+    # alternate top/bottom label placement so names don't stack on each other.
+    seen: dict[float, int] = {}
+    positions: list[str] = []
+    _alt = ("top right", "bottom right")
+    for y in mae_values:
+        key = round(float(y), 1)
+        idx = seen.get(key, 0)
+        positions.append(_alt[idx % len(_alt)])
+        seen[key] = idx + 1
 
     fig = go.Figure()
-
-    # Non-frontier points
-    if np.sum(~is_frontier) > 0:
-        fig.add_trace(
-            go.Scatter(
-                x=spd[~is_frontier], y=mae[~is_frontier], mode="markers+text",
-                name="Methods",
-                text=[method_names[i] for i in range(len(mae)) if not is_frontier[i]],
-                textposition="top center", textfont=dict(size=9),
-                marker=dict(color="#999", size=10, line=dict(width=1, color="#333")),
-                hovertemplate="%{text}<br>Speedup: %{x:.1f}\u00d7<br>MAE: %{y:.1f}<extra></extra>",
-            )
+    fig.add_trace(
+        go.Scatter(
+            x=speedup_values,
+            y=mae_values,
+            mode="markers+text",
+            text=display_names,
+            textposition=positions,
+            textfont=dict(size=10),
+            cliponaxis=False,
+            marker=dict(color=_ML_COLOR, size=10, line=dict(width=1, color="#333")),
+            hovertemplate=(
+                "%{text}<br>"
+                "Speedup: %{x:.2f}\u00d7<br>"
+                "MAE: %{y:.1f} cm\u207b\u00b9"
+                "<extra></extra>"
+            ),
         )
+    )
 
-    # Frontier points
-    if np.sum(is_frontier) > 0:
-        fig.add_trace(
-            go.Scatter(
-                x=spd[is_frontier], y=mae[is_frontier], mode="markers+text",
-                name="Pareto frontier",
-                text=[method_names[i] for i in range(len(mae)) if is_frontier[i]],
-                textposition="top center", textfont=dict(size=9),
-                marker=dict(color=_ML_COLOR, size=12, symbol="star",
-                            line=dict(width=1, color="#333")),
-                hovertemplate="%{text}<br>Speedup: %{x:.1f}\u00d7<br>MAE: %{y:.1f}<extra></extra>",
-            )
+    # Break-even reference: ML as fast as DFT
+    if speedup_values and min(speedup_values) < 1.0 < max(speedup_values) * 1.05:
+        fig.add_vline(
+            x=1.0, line=dict(color="#888", dash="dash", width=1),
+            annotation_text="ML = DFT cost", annotation_position="top",
+            annotation_font=dict(size=10, color="#888"),
         )
 
     fig.update_layout(
-        title="Cost-Accuracy Pareto: Speedup vs Frequency MAE",
+        title="Cost vs Accuracy: Speedup vs Frequency MAE",
         xaxis_title="Speedup (\u00d7 vs DFT)",
         yaxis_title="Frequency MAE (cm\u207b\u00b9)",
         template="simple_white",
-        height=500,
-        margin=dict(l=60, r=20, t=60, b=50),
-        legend=dict(x=0.95, y=0.98, xanchor="right", yanchor="top",
-                    bgcolor="rgba(255,255,255,0.8)"),
+        autosize=True,
+        height=420,
+        margin=dict(l=70, r=40, t=60, b=55),
+        showlegend=False,
     )
     return fig
 

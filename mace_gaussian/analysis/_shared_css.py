@@ -11,9 +11,9 @@ def build_css() -> str:
     /* ---- Typography & layout base ---- */
     body {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        max-width: 1200px;
+        max-width: 95%;
         margin: 0 auto;
-        padding: 24px;
+        padding: 24px 40px;
         color: #1a1a1a;
         background: #fafafa;
         line-height: 1.5;
@@ -52,6 +52,9 @@ def build_css() -> str:
         top: 0;
         z-index: 100;
         box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem 0;
     }
     nav a {
         color: #374151;
@@ -71,7 +74,7 @@ def build_css() -> str:
     /* ---- Content wrapper ---- */
     .content {
         padding: 3rem 4rem;
-        max-width: 1600px;
+        max-width: 100%;
         margin: 0 auto;
     }
     section { margin-bottom: 4rem; }
@@ -163,7 +166,7 @@ def build_css() -> str:
         box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
     .comparison-section .plot-container { margin: 16px 0; }
-    .comparison-section .plotly-graph-div { width: 100% !important; }
+    .plotly-graph-div { display: block; }
 
     /* ---- Plot containers ---- */
     .plot-container {
@@ -345,6 +348,49 @@ def build_css() -> str:
     .stat-box .label { font-size: 13px; color: #7f8c8d; }
     tr.best td { background: #d4edda; }
     tr.worst td { background: #f8d7da; }
+
+    /* ---- Category awards ---- */
+    .awards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 16px;
+        margin: 16px 0;
+    }
+    .award-card {
+        background: #f6f8fa;
+        border: 1px solid #e1e4e8;
+        border-radius: 6px;
+        padding: 16px;
+        text-align: center;
+    }
+    .award-card h3 {
+        margin-top: 0;
+        color: #0173B2;
+        font-size: 1.1em;
+    }
+    .award-winner-name {
+        font-size: 1.2em;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin: 8px 0 4px;
+    }
+    .award-winner-mae {
+        font-size: 0.95em;
+        color: #059669;
+        font-weight: 600;
+        margin-bottom: 12px;
+    }
+    .award-no-data {
+        color: #9ca3af;
+        font-style: italic;
+        padding: 16px 0;
+    }
+    .award-table { font-size: 0.85em; }
+    .award-table td, .award-table th { text-align: center; }
+    tr.award-winner td {
+        background: #fffbf2;
+        font-weight: 600;
+    }
 
     /* ---- Footer ---- */
     .footer, footer {

@@ -51,6 +51,8 @@ class TestExportReportData:
             "r2_intensity",
             "rmse_freq",
             "mae_freq",
+            "rmse_intensity",
+            "mae_intensity",
             "max_error_freq",
             "num_matched",
             "num_dft_only",

@@ -91,8 +91,10 @@ class HTMLReportGenerator:
         self._compute_and_attach_experimental_agreement(analysis_results)
 
         comparisons = analysis_results["comparisons"]
-        # Sort comparisons by MAE (best first)
-        comparisons.sort(key=lambda c: c["metrics"].mae_freq)
+        # Sort comparisons: non-espaloma first (by MAE), then espaloma (by MAE)
+        comparisons.sort(
+            key=lambda c: ("espaloma" in c["name"].lower(), c["metrics"].mae_freq)
+        )
         analysis_results["comparisons"] = comparisons
 
         ranked = rank_methods(comparisons)
@@ -111,40 +113,34 @@ class HTMLReportGenerator:
             n_fund = dft_labels.get("fundamental", 0)
             n_ot = dft_labels.get("overtone", 0)
             n_cb = dft_labels.get("combination", 0)
-            mode_overview = (
-                '<div class="stats-grid" style="margin:16px 0">'
+            items = [
                 f'<div class="stat-item"><div class="stat-label">Fundamentals</div>'
                 f'<div class="stat-value">{n_fund}</div></div>'
-                f'<div class="stat-item"><div class="stat-label">Overtones</div>'
-                f'<div class="stat-value">{n_ot}</div></div>'
-                f'<div class="stat-item"><div class="stat-label">Combination Bands</div>'
-                f'<div class="stat-value">{n_cb}</div></div>'
+            ]
+            if self.mode == "anharmonic":
+                items.append(
+                    f'<div class="stat-item"><div class="stat-label">Overtones</div>'
+                    f'<div class="stat-value">{n_ot}</div></div>'
+                )
+                items.append(
+                    f'<div class="stat-item"><div class="stat-label">Combination Bands</div>'
+                    f'<div class="stat-value">{n_cb}</div></div>'
+                )
+            items.append(
                 f'<div class="stat-item"><div class="stat-label">Total Modes</div>'
                 f'<div class="stat-value">{n_fund + n_ot + n_cb}</div></div>'
-                "</div>"
             )
-
-        # Pareto plot (speedup vs MAE) — only if we have speedup data
-        pareto_html = ""
-        if len(ranked) > 1:
-            names = [r["name"] for r in ranked]
-            maes = [r.get("mae_freq", r.get("rmse_freq", 0.0)) for r in ranked]
-            speedups = [r.get("speedup", 0.0) for r in ranked]
-            if any(s > 0 for s in speedups):
-                pareto_fig = build_pareto_figure(names, maes, speedups)
-                pareto_html = (
-                    '<section id="pareto">'
-                    f'<div class="plot-container">'
-                    f'{self._fig_to_div(pareto_fig, "pareto")}</div>'
-                    "</section>"
-                )
+            mode_overview = (
+                '<div class="stats-grid" style="margin:16px 0">'
+                + "".join(items)
+                + "</div>"
+            )
 
         sections = [
             self._create_head(),
             self._create_header(),
             self._create_navigation(comparisons),
             self._create_executive_summary(ranked, verdict),
-            pareto_html,
             mode_overview,
             self._create_combined_plots(analysis_results),
         ]
@@ -186,7 +182,7 @@ class HTMLReportGenerator:
             encoded = base64.b64encode(f.read()).decode()
         return f"data:image/png;base64,{encoded}"
 
-    def _fig_to_div(self, fig: Any, div_id: str) -> str:
+    def _fig_to_div(self, fig: Any, div_id: str, responsive: bool = True) -> str:
         """Convert a Plotly figure to an HTML div string.
 
         Uses the emit-once pattern: first call includes plotly.js (per
@@ -201,7 +197,7 @@ class HTMLReportGenerator:
             include_plotlyjs=include,
             full_html=False,
             div_id=div_id,
-            config={"displaylogo": False, "responsive": True},
+            config={"displaylogo": False, "responsive": responsive},
         )
 
     # ------------------------------------------------------------------
@@ -367,6 +363,31 @@ class HTMLReportGenerator:
             "</section>"
         )
 
+    def _create_pareto_section(self, comparisons: list[dict]) -> str:
+        """Build a compact cost-vs-accuracy Pareto scatter (MAE vs speedup)."""
+        names: list[str] = []
+        maes: list[float] = []
+        speedups: list[float] = []
+        for comp in comparisons:
+            speedup = comp.get("speedup", 0.0)
+            mae = getattr(comp.get("metrics"), "mae_freq", None)
+            if mae is None or speedup <= 0:
+                continue
+            names.append(comp["name"])
+            maes.append(float(mae))
+            speedups.append(float(speedup))
+        if len(names) < 2:
+            return ""
+
+        fig = build_pareto_figure(names, maes, speedups)
+        div = self._fig_to_div(fig, "pareto")
+        return (
+            '<section class="comparison-section" id="pareto">'
+            "<h2>Cost vs Accuracy</h2>"
+            f'<div class="plot-container">{div}</div>'
+            "</section>"
+        )
+
     def _create_comparison_section(self, comp: dict, index: int, analysis_results: dict) -> str:
         """Build a per-method comparison section (D-11).
 
@@ -450,8 +471,10 @@ class HTMLReportGenerator:
                 )
                 int_reg_div = self._fig_to_div(int_fig, f"int-regression-{index}")
 
-        # Residual plot + error histogram (side by side)
+        # Residual plot + error histogram
         residual_row = ""
+        res_div = ""
+        hist_div = ""
         if len(matched_dft_freq) > 0:
             res_fig = build_residual_figure(
                 matched_dft_freq, matched_ml_freq, ml_name, mode_ids=matched_ids
@@ -462,9 +485,9 @@ class HTMLReportGenerator:
             )
             hist_div = self._fig_to_div(hist_fig, f"error-hist-{index}")
             residual_row = (
-                '<div style="display:flex;gap:1rem;flex-wrap:wrap">'
-                f'<div class="plot-container" style="flex:1;min-width:0">{res_div}</div>'
-                f'<div class="plot-container" style="flex:1;min-width:0">{hist_div}</div>'
+                '<div style="display:flex;gap:1rem;flex-wrap:wrap;overflow:hidden">'
+                f'<div class="plot-container" style="flex:1 1 0;min-width:0;overflow:hidden">{res_div}</div>'
+                f'<div class="plot-container" style="flex:1 1 0;min-width:0;overflow:hidden">{hist_div}</div>'
                 "</div>"
             )
 
@@ -583,6 +606,12 @@ class HTMLReportGenerator:
             f'<div class="stat-label">RMSE</div>'
             f'<div class="stat-value">{m.rmse_freq:.2f} cm\u207b\u00b9</div></div>'
             f'<div class="stat-item">'
+            f'<div class="stat-label">MAE (Intensity)</div>'
+            f'<div class="stat-value">{m.mae_intensity:.2f} km/mol</div></div>'
+            f'<div class="stat-item">'
+            f'<div class="stat-label">RMSE (Intensity)</div>'
+            f'<div class="stat-value">{m.rmse_intensity:.2f} km/mol</div></div>'
+            f'<div class="stat-item">'
             f'<div class="stat-label">Max Error</div>'
             f'<div class="stat-value">{m.max_error_freq:.2f} cm\u207b\u00b9</div></div>'
             f'<div class="stat-item">'
@@ -607,18 +636,33 @@ class HTMLReportGenerator:
         reg_row = ""
         if reg_div or int_reg_div:
             reg_left = (
-                f'<div class="plot-container" style="flex:1;min-width:0">'
+                f'<div class="plot-container" style="flex:1 1 0;min-width:0;overflow:hidden">'
                 f"{reg_div}</div>"
             ) if reg_div else ""
             reg_right = (
-                '<div class="plot-container" style="flex:1;min-width:0">'
+                '<div class="plot-container" style="flex:1 1 0;min-width:0;overflow:hidden">'
                 f"{int_reg_div}</div>"
             ) if int_reg_div else ""
             reg_row = (
-                '<div style="display:flex;gap:1rem;flex-wrap:wrap">'
+                '<div style="display:flex;gap:1rem;flex-wrap:wrap;overflow:hidden">'
                 f"{reg_left}{reg_right}"
                 "</div>"
             )
+
+        # Residual gets full width; anharmonicity (square) pairs with error histogram
+        if anharm_div and hist_div:
+            anharm_hist_row = (
+                '<div style="display:flex;gap:1rem;flex-wrap:wrap;overflow:hidden">'
+                f'<div class="plot-container" style="flex:1 1 0;min-width:0;overflow:hidden">{anharm_div}</div>'
+                f'<div class="plot-container" style="flex:1 1 0;min-width:0;overflow:hidden">{hist_div}</div>'
+                "</div>"
+            )
+            residual_full = (
+                f'<div class="plot-container">{res_div}</div>' if res_div else ""
+            )
+        else:
+            anharm_hist_row = f'<div class="plot-container">{anharm_div}</div>' if anharm_div else ""
+            residual_full = residual_row
 
         return (
             f'<section class="comparison-section" id="comparison-{index}">'
@@ -627,9 +671,9 @@ class HTMLReportGenerator:
             f"{deg_html}"
             f'<div class="plot-container">{spec_div}</div>'
             f"{reg_row}"
-            f"{residual_row}"
+            f"{residual_full}"
+            f"{anharm_hist_row}"
             f"{region_html}"
-            f"{anharm_div}"
             f"{heatmap_html}"
             f"</section>"
         )
@@ -657,8 +701,7 @@ class HTMLReportGenerator:
             ml_anh = np.array([ml_by_mode[m]["freq_cm"] for m in common])
 
             fig = build_anharmonicity_ratio_figure(dft_harm, dft_anh, ml_harm, ml_anh, ml_name)
-            div = self._fig_to_div(fig, f"anharm-ratio-{index}")
-            return f'<div class="plot-container">{div}</div>'
+            return self._fig_to_div(fig, f"anharm-ratio-{index}", responsive=False)
         except Exception:
             return ""
 

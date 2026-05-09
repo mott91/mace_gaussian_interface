@@ -65,6 +65,7 @@ class ComparisonMetrics:
     slope_freq: float
     intercept_freq: float
     mae_intensity: float
+    rmse_intensity: float
     r2_intensity: float
     max_error_freq: float
     num_peaks: int
@@ -452,6 +453,7 @@ class SpectrumAnalyzer:
             "match_rate": match_rate,
             "dft_only_modes": sorted(list(dft_only_modes)),
             "ml_only_modes": sorted(list(ml_only_modes)),
+            "matched_mode_ids": sorted(list(matched_modes)),
         }
 
         logger.info(
@@ -503,6 +505,7 @@ class SpectrumAnalyzer:
                 slope_freq=0,
                 intercept_freq=0,
                 mae_intensity=0,
+                rmse_intensity=0,
                 r2_intensity=0,
                 max_error_freq=0,
                 num_peaks=0,
@@ -533,13 +536,16 @@ class SpectrumAnalyzer:
         if len(dft_int_filtered) > 1:
             int_errors = ml_int_filtered - dft_int_filtered
             mae_intensity = np.mean(np.abs(int_errors))
+            rmse_intensity = float(np.sqrt(np.mean(int_errors**2)))
             _, _, r_value_int, _, _ = linregress(dft_int_filtered, ml_int_filtered)
             r2_intensity = r_value_int**2
         elif len(dft_int_filtered) == 1:
             mae_intensity = float(np.abs(ml_int_filtered[0] - dft_int_filtered[0]))
+            rmse_intensity = mae_intensity  # single sample: MAE == RMSE
             r2_intensity = 0.0
         else:
             mae_intensity = 0.0
+            rmse_intensity = 0.0
             r2_intensity = 0.0
 
         if num_intensity_filtered > 0:
@@ -555,6 +561,7 @@ class SpectrumAnalyzer:
             slope_freq=slope_freq,
             intercept_freq=intercept_freq,
             mae_intensity=mae_intensity,
+            rmse_intensity=rmse_intensity,
             r2_intensity=r2_intensity,
             max_error_freq=max_error_freq,
             num_peaks=len(dft_freq),

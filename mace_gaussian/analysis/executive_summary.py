@@ -3,11 +3,13 @@
 Computes the 'best method' composite score for per-molecule reports and
 emits a one-line verdict for the executive summary card.
 
-Scoring weights (documented in 23-RESEARCH.md A2):
-- 40% normalized RMSE (primary accuracy metric)
-- 30% (1 - R2_freq)  (linearity of frequency correlation)
-- 20% (1 - R2_intensity) (intensity accuracy)
-- 10% (1 - experimental_agreement) when experimental data available; else 0 and redistribute to RMSE
+Scoring weights — symmetric across frequency and intensity so dipole-calculator
+choice is reflected as strongly as energy-calculator choice:
+- 20% normalized RMSE_freq
+- 20% (1 - R²_freq)
+- 20% normalized RMSE_intensity
+- 20% (1 - R²_intensity)
+- 20% (1 - experimental_agreement) when available; else 0 and redistribute equally
 """
 
 from __future__ import annotations
@@ -18,8 +20,28 @@ from typing import Any
 import numpy as np
 from scipy.stats import pearsonr
 
-_DEFAULT_WEIGHTS = {"rmse": 0.4, "r2_freq": 0.3, "r2_int": 0.2, "exp": 0.1}
-_WEIGHTS_NO_EXP = {"rmse": 0.5, "r2_freq": 0.3, "r2_int": 0.2, "exp": 0.0}
+_DEFAULT_WEIGHTS = {
+    "rmse_freq": 0.20,
+    "r2_freq": 0.20,
+    "rmse_int": 0.20,
+    "r2_int": 0.20,
+    "exp": 0.20,
+}
+_WEIGHTS_NO_EXP = {
+    "rmse_freq": 0.25,
+    "r2_freq": 0.25,
+    "rmse_int": 0.25,
+    "r2_int": 0.25,
+    "exp": 0.0,
+}
+
+
+def _min_max_normalize(arr: np.ndarray) -> np.ndarray:
+    """Min-max normalize to [0, 1]; returns zeros when all values are equal."""
+    lo = float(arr.min())
+    hi = float(arr.max())
+    span = max(hi - lo, 1e-9)
+    return (arr - lo) / span
 
 
 def compute_experimental_agreement(
@@ -67,14 +89,13 @@ def rank_methods(
     if weights is None:
         weights = _DEFAULT_WEIGHTS if has_exp else _WEIGHTS_NO_EXP
 
-    rmses = np.array([c["metrics"].rmse_freq for c in comparisons], dtype=float)
-    rmse_min = float(rmses.min())
-    rmse_max = float(rmses.max())
-    span = max(rmse_max - rmse_min, 1e-9)
-    rmse_norm = (rmses - rmse_min) / span
+    rmse_freq_arr = np.array([c["metrics"].rmse_freq for c in comparisons], dtype=float)
+    rmse_freq_norm = _min_max_normalize(rmse_freq_arr)
+    rmse_int_arr = np.array([c["metrics"].rmse_intensity for c in comparisons], dtype=float)
+    rmse_int_norm = _min_max_normalize(rmse_int_arr)
 
     scored: list[dict[str, Any]] = []
-    for c, rn in zip(comparisons, rmse_norm):
+    for c, rn_freq, rn_int in zip(comparisons, rmse_freq_norm, rmse_int_norm):
         m = c["metrics"]
         exp_agree_raw = c.get("experimental_agreement")
         if exp_agree_raw is None or (
@@ -86,8 +107,9 @@ def rank_methods(
             exp_agree_val = float(exp_agree_raw)
             exp_agree_out = exp_agree_val
         score = (
-            weights["rmse"] * float(rn)
+            weights["rmse_freq"] * float(rn_freq)
             + weights["r2_freq"] * (1.0 - float(m.r2_freq))
+            + weights["rmse_int"] * float(rn_int)
             + weights["r2_int"] * (1.0 - float(m.r2_intensity))
             + weights["exp"] * (1.0 - exp_agree_val)
         )
@@ -99,6 +121,8 @@ def rank_methods(
                 "r2_intensity": float(m.r2_intensity),
                 "rmse_freq": float(m.rmse_freq),
                 "mae_freq": float(m.mae_freq),
+                "rmse_intensity": float(m.rmse_intensity),
+                "mae_intensity": float(m.mae_intensity),
                 "speedup": float(c.get("speedup", 0.0)),
                 "experimental_agreement": exp_agree_out if has_exp else None,
             }

@@ -343,8 +343,12 @@ def plot_mode_overlap_heatmap(
         else:
             y_labels = [f"{i}" for i in range(n_modes_calc)]
 
-    ax.set_xticklabels(x_labels, fontsize=8.5, color="#4a4a4a", family="sans-serif")
-    ax.set_yticklabels(y_labels, fontsize=8.5, color="#4a4a4a", family="sans-serif")
+    # Scale font and rotate labels for large matrices
+    _n_max = max(n_modes_calc, n_modes_ref)
+    _fs = 8.5 if _n_max <= 12 else max(5.0, 8.5 - (_n_max - 12) * 0.2)
+    _rot = 90 if _n_max > 12 else 0
+    ax.set_xticklabels(x_labels, fontsize=_fs, color="#4a4a4a", family="sans-serif", rotation=_rot, ha="center" if _rot == 0 else "right")
+    ax.set_yticklabels(y_labels, fontsize=_fs, color="#4a4a4a", family="sans-serif")
 
     # Elegant axis labels with proper LaTeX formatting
     ax.set_xlabel(
@@ -386,8 +390,9 @@ def plot_mode_overlap_heatmap(
     ax.spines["left"].set_color("#c0c0c0")
     ax.spines["bottom"].set_color("#c0c0c0")
 
-    # Add overlap values as text with refined color logic
-    for i in range(n_modes_calc):
+    # Add overlap values as text with refined color logic (skip when too many modes)
+    _show_text = max(n_modes_calc, n_modes_ref) <= 12
+    for i in range(n_modes_calc if _show_text else 0):
         for j in range(n_modes_ref):
             value = alignment_matrix[i, j]
             # Softer text color choices for better readability

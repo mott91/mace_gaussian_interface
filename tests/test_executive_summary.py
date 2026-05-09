@@ -106,6 +106,9 @@ class TestRankMethods:
             "r2_freq",
             "r2_intensity",
             "rmse_freq",
+            "mae_freq",
+            "rmse_intensity",
+            "mae_intensity",
             "speedup",
             "experimental_agreement",
         }

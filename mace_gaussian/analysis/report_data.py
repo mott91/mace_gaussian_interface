@@ -72,6 +72,8 @@ def _serialize_comparison(c: dict[str, Any]) -> dict[str, Any]:
             "r2_intensity": float(m.r2_intensity),
             "rmse_freq": float(m.rmse_freq),
             "mae_freq": float(m.mae_freq),
+            "rmse_intensity": float(m.rmse_intensity),
+            "mae_intensity": float(m.mae_intensity),
             "max_error_freq": float(m.max_error_freq),
             "num_matched": int(m.num_matched),
             "num_dft_only": int(m.num_dft_only),
@@ -156,6 +158,8 @@ def _write_summary_metrics_csv(payload: dict[str, Any], out_path: Path) -> None:
                 "r2_intensity",
                 "rmse_freq",
                 "mae_freq",
+                "rmse_intensity",
+                "mae_intensity",
                 "speedup",
                 "experimental_agreement",
             ]
@@ -168,6 +172,8 @@ def _write_summary_metrics_csv(payload: dict[str, Any], out_path: Path) -> None:
                     c["metrics"]["r2_intensity"],
                     c["metrics"]["rmse_freq"],
                     c["metrics"]["mae_freq"],
+                    c["metrics"]["rmse_intensity"],
+                    c["metrics"]["mae_intensity"],
                     c["runtime"]["speedup"],
                     c.get("experimental_agreement", ""),
                 ]
