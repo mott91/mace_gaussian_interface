@@ -15,6 +15,7 @@ Report sections:
 
 import base64
 import contextlib
+import html
 import json
 import logging
 import os
@@ -30,7 +31,13 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
+from ._shared_css import build_css
 from .nist_fetcher import fetch_experimental_spectrum
+
+
+def _esc(value: object) -> str:
+    """HTML-escape a value for safe interpolation (T-23-01 mitigation)."""
+    return html.escape(str(value), quote=True)
 
 logger = logging.getLogger(__name__)
 
@@ -511,11 +518,12 @@ def _generate_html(df: pd.DataFrame, plot_paths: dict, results_dir: str) -> str:
     for name, data_uri in sorted(embedded.items()):
         if name.startswith("spectrum_"):
             mol_name = name.replace("spectrum_", "")
+            mol_esc = _esc(mol_name)
             spectrum_parts.append(
                 f'<div class="plot-card">'
-                f"<h3>{mol_name}</h3>"
+                f"<h3>{mol_esc}</h3>"
                 f'<img src="{data_uri}" '
-                f'alt="Spectrum overlay for {mol_name}">'
+                f'alt="Spectrum overlay for {mol_esc}">'
                 f"</div>"
             )
     spectrum_section = (
@@ -536,7 +544,7 @@ def _generate_html(df: pd.DataFrame, plot_paths: dict, results_dir: str) -> str:
     n_molecules = df["molecule"].nunique()
     n_combos = df["combo"].nunique()
 
-    css = _build_css()
+    css = build_css()
 
     html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -668,13 +676,13 @@ def _build_timing_html(df: pd.DataFrame) -> str:
 
         rows.append(
             f"<tr>"
-            f"<td>{r['molecule']}</td>"
-            f"<td>{r['combo']}</td>"
+            f"<td>{_esc(r['molecule'])}</td>"
+            f"<td>{_esc(r['combo'])}</td>"
             f"<td>{ml_t:.1f}</td>"
             f"<td>{dft_t:.1f}</td>"
             f"<td>{speedup:.1f}x</td>"
-            f"<td style='font-size:0.8em'>{ml_hw}</td>"
-            f"<td style='font-size:0.8em'>{dft_hw}</td>"
+            f"<td style='font-size:0.8em'>{_esc(ml_hw)}</td>"
+            f"<td style='font-size:0.8em'>{_esc(dft_hw)}</td>"
             f"</tr>"
         )
 
@@ -730,7 +738,7 @@ def _build_leaderboard_html(df: pd.DataFrame) -> str:
         rows.append(
             f"<tr{cls}>"
             f"<td>{rank}</td>"
-            f"<td>{row['combo']}</td>"
+            f"<td>{_esc(row['combo'])}</td>"
             f"<td>{row['mean_r2']:.4f}</td>"
             f"<td>{row['mean_rmse']:.1f}</td>"
             f"<td>{row['median_rmse']:.1f}</td>"
@@ -747,91 +755,6 @@ def _embed_or_fallback(embedded: dict, key: str, alt: str, fallback_text: str) -
     if fallback_text:
         return f"<p>{fallback_text}</p>"
     return ""
-
-
-def _build_css() -> str:
-    """Return the <style> block for the report."""
-    return """<style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-        font-family: Arial, Helvetica, sans-serif;
-        line-height: 1.6; color: #1a1a1a; background: #f5f5f5;
-    }
-    nav {
-        position: sticky; top: 0; background: #2c3e50;
-        padding: 12px 24px; z-index: 100;
-        display: flex; gap: 20px; flex-wrap: wrap;
-    }
-    nav a {
-        color: #ecf0f1; text-decoration: none;
-        font-weight: 600; font-size: 14px;
-        padding: 6px 12px; border-radius: 4px;
-        transition: background 0.2s;
-    }
-    nav a:hover { background: #34495e; }
-    .container {
-        max-width: 1400px; margin: 0 auto; padding: 24px;
-    }
-    h1 {
-        font-size: 28px; margin: 24px 0 8px; color: #2c3e50;
-    }
-    h2 {
-        font-size: 22px; margin: 32px 0 16px; color: #2c3e50;
-        border-bottom: 2px solid #3498db; padding-bottom: 8px;
-    }
-    .subtitle { color: #7f8c8d; margin-bottom: 24px; }
-    table {
-        width: 100%; border-collapse: collapse; margin: 16px 0;
-        background: white; border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    th {
-        background: #2c3e50; color: white;
-        padding: 12px 16px; text-align: left;
-        font-weight: 600;
-    }
-    td {
-        padding: 10px 16px;
-        border-bottom: 1px solid #ecf0f1;
-    }
-    tr:nth-child(even) { background: #f8f9fa; }
-    tr:hover { background: #eef2f7; }
-    tr.best td { background: #d4edda; }
-    tr.worst td { background: #f8d7da; }
-    .plot-section { margin: 24px 0; }
-    .plot-section img {
-        max-width: 100%; height: auto;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    .plot-card {
-        background: white; padding: 16px; margin: 16px 0;
-        border-radius: 8px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    .plot-card h3 { margin-bottom: 12px; color: #2c3e50; }
-    .plot-card img { max-width: 100%; height: auto; }
-    .stats-bar {
-        display: flex; gap: 24px;
-        margin: 16px 0; flex-wrap: wrap;
-    }
-    .stat-box {
-        background: white; padding: 16px 24px;
-        border-radius: 8px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        text-align: center;
-    }
-    .stat-box .value {
-        font-size: 28px; font-weight: 700; color: #3498db;
-    }
-    .stat-box .label { font-size: 13px; color: #7f8c8d; }
-    footer {
-        text-align: center; padding: 24px;
-        color: #95a5a6; font-size: 13px;
-        margin-top: 48px; border-top: 1px solid #ddd;
-    }
-</style>"""
 
 
 def generate_batch_report(

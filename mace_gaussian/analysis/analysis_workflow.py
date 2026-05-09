@@ -841,6 +841,8 @@ class ComparisonWorkflow:
                         "mae_freq": c["metrics"].mae_freq,
                         "rmse_freq": c["metrics"].rmse_freq,
                         "r2_freq": c["metrics"].r2_freq,
+                        "mae_intensity": c["metrics"].mae_intensity,
+                        "rmse_intensity": c["metrics"].rmse_intensity,
                         "r2_intensity": c["metrics"].r2_intensity,
                         "speedup": c["speedup"],
                     }

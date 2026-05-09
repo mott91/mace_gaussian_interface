@@ -78,44 +78,33 @@ def _write_min_results_json(path: Path, freqs: list[float]) -> None:
 
 
 def test_batch_report_escapes_molecule_name(tmp_path):
-    """T-23-01 mitigation: batch report must HTML-escape malicious molecule names."""
-    malicious = "<script>alert(1)</script>"
+    """T-23-01 mitigation: batch report must HTML-escape malicious molecule names.
+
+    Payload uses `<img onerror=...>` rather than `<script>...</script>` because
+    the forward slash in a closing `</script>` tag gets interpreted as a path
+    separator when used as a directory name, fragmenting the tree.
+    """
+    malicious = "<img src=x onerror=alert(1)>"
     results_dir = tmp_path / "comparison_results"
     mol_dir = results_dir / malicious
     freqs = [1600.0, 3700.0, 3800.0]
 
-    # DFT reference
     _write_min_results_json(mol_dir / "b3lyp_6-31Gdp" / "results.json", freqs)
-    # One ML combo
     _write_min_results_json(mol_dir / "mace_off_espaloma" / "results.json", freqs)
 
     out_dir = tmp_path / "batch_report_out"
-    try:
-        report_file = generate_batch_report(
-            results_dir=str(results_dir),
-            output_dir=str(out_dir),
-        )
-    except OSError:
-        # Some filesystems reject '<' '>' in directory names. Fall back to
-        # a combo-level XSS test using a safe molecule dir but malicious
-        # combo dir -- the same _esc requirement applies.
-        safe_mol = results_dir / "water"
-        _write_min_results_json(safe_mol / "b3lyp_6-31Gdp" / "results.json", freqs)
-        _write_min_results_json(safe_mol / malicious / "results.json", freqs)
-        report_file = generate_batch_report(
-            results_dir=str(results_dir),
-            output_dir=str(out_dir),
-        )
+    report_file = generate_batch_report(
+        results_dir=str(results_dir),
+        output_dir=str(out_dir),
+    )
 
     html = Path(report_file).read_text()
 
-    # Raw script tag must NOT appear unescaped
-    assert "<script>alert(1)</script>" not in html, (
-        "batch_report did not escape malicious molecule/combo name -- "
+    assert malicious not in html, (
+        "batch_report did not escape malicious molecule name -- "
         "T-23-01 mitigation missing. Expected html.escape wrapping in "
         "mace_gaussian/analysis/batch_report.py."
     )
-    # Escaped form should appear instead
-    assert "&lt;script&gt;" in html, (
-        "Expected HTML-escaped form '&lt;script&gt;' in batch report output"
+    assert "&lt;img src=x onerror=alert(1)&gt;" in html, (
+        "Expected HTML-escaped form of payload in batch report output"
     )
