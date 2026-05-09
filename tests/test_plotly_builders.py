@@ -65,6 +65,36 @@ def test_build_regression_figure_returns_plotly_figure():
     assert isinstance(fig, go.Figure)
 
 
+def test_regression_figure_marks_low_overlap_with_open_marker():
+    """A fundamental with eigenvector overlap below the threshold renders as
+    a hollow ('-open' suffix) symbol in its own legend trace, separate from
+    the high-overlap fundamentals.  Reviewers can then visually discount the
+    flagged points without re-running the analysis.
+    """
+    dft_freqs = np.array([1000.0, 2000.0, 3000.0])
+    ml_freqs = np.array([1010.0, 2050.0, 2990.0])
+    mode_ids = ["F1", "F2", "F3"]
+    # F2 has overlap 0.4 — below the 0.7 threshold — F1 and F3 are clean.
+    mode_overlaps = [0.95, 0.4, 0.92]
+
+    fig = plotly_builders.build_regression_figure(
+        dft_freqs=dft_freqs,
+        ml_freqs=ml_freqs,
+        ml_name="test",
+        mode_ids=mode_ids,
+        mode_overlaps=mode_overlaps,
+    )
+
+    open_traces = [t for t in fig.data if getattr(t.marker, "symbol", None) == "circle-open"]
+    closed_traces = [t for t in fig.data if getattr(t.marker, "symbol", None) == "circle"]
+    assert len(open_traces) == 1, "low-overlap fundamental should produce one hollow trace"
+    assert len(closed_traces) == 1, "high-overlap fundamentals should produce one filled trace"
+    assert "low overlap" in open_traces[0].name
+    # Two high-overlap fundamentals (F1, F3); one low-overlap (F2).
+    assert len(closed_traces[0].x) == 2
+    assert len(open_traces[0].x) == 1
+
+
 def test_build_combined_spectrum_figure_multi_method():
     import plotly.graph_objects as go
 

@@ -426,12 +426,16 @@ class HTMLReportGenerator:
         # Get paired arrays for regression plots via mode matching;
         # fall back to raw spectrum arrays when mode IDs are absent.
         mode_mapping = comp.get("mode_mapping")
+        mode_overlaps_dict = comp.get("mode_overlaps")
         matched_dft_freq, matched_ml_freq, matched_dft_int, matched_ml_int, match_stats = (
             self._analyzer.match_by_mode(
-                comp["dft_spectrum"], comp["ml_spectrum"], mode_mapping=mode_mapping
+                comp["dft_spectrum"], comp["ml_spectrum"],
+                mode_mapping=mode_mapping,
+                mode_overlaps=mode_overlaps_dict,
             )
         )
         matched_ids = match_stats.get("matched_mode_ids")
+        matched_overlaps = match_stats.get("matched_mode_overlaps")
         if len(matched_dft_freq) == 0:
             dft_s, ml_s = comp["dft_spectrum"], comp["ml_spectrum"]
             n = min(len(dft_s.frequencies), len(ml_s.frequencies))
@@ -440,6 +444,7 @@ class HTMLReportGenerator:
             matched_dft_int = np.asarray(dft_s.intensities[:n], dtype=float)
             matched_ml_int = np.asarray(ml_s.intensities[:n], dtype=float)
             matched_ids = None
+            matched_overlaps = None
 
         # Per-category MAE for category awards
         cat_mae: dict[str, float | None] = {"fundamental": None, "overtone": None, "combination": None}
@@ -450,12 +455,15 @@ class HTMLReportGenerator:
                     m = np.array(mask)
                     cat_mae[cat] = float(np.mean(np.abs(matched_ml_freq[m] - matched_dft_freq[m])))
         comp["_cat_mae"] = cat_mae
+        comp["_matched_overlaps"] = matched_overlaps
 
         # Frequency regression (left) — skip if no matched modes
         reg_div = ""
         if len(matched_dft_freq) > 0:
             reg_fig = build_regression_figure(
-                matched_dft_freq, matched_ml_freq, ml_name, mode_ids=matched_ids
+                matched_dft_freq, matched_ml_freq, ml_name,
+                mode_ids=matched_ids,
+                mode_overlaps=matched_overlaps,
             )
             reg_div = self._fig_to_div(reg_fig, f"regression-{index}")
 
@@ -466,8 +474,14 @@ class HTMLReportGenerator:
             int_mask = (matched_dft_int >= 0.1) | (matched_ml_int >= 0.1)
             if np.sum(int_mask) > 1:
                 int_ids = [matched_ids[i] for i, m in enumerate(int_mask) if m] if matched_ids else None
+                int_overlaps = (
+                    [matched_overlaps[i] for i, m in enumerate(int_mask) if m]
+                    if matched_overlaps else None
+                )
                 int_fig = build_intensity_regression_figure(
-                    matched_dft_int[int_mask], matched_ml_int[int_mask], ml_name, mode_ids=int_ids
+                    matched_dft_int[int_mask], matched_ml_int[int_mask], ml_name,
+                    mode_ids=int_ids,
+                    mode_overlaps=int_overlaps,
                 )
                 int_reg_div = self._fig_to_div(int_fig, f"int-regression-{index}")
 
@@ -617,6 +631,7 @@ class HTMLReportGenerator:
             f'<div class="stat-item">'
             f'<div class="stat-label">Matched Modes</div>'
             f'<div class="stat-value">{m.num_matched}/{m.num_matched + m.num_dft_only}</div></div>'
+            f"{self._low_overlap_stat(comp)}"
             f'<div class="stat-item">'
             f'<div class="stat-label">ML Pipeline</div>'
             f'<div class="stat-value">{ml_gauss_s:.1f}s</div></div>'
@@ -760,6 +775,30 @@ class HTMLReportGenerator:
         if isinstance(exp_agree, float) and math.isnan(exp_agree):
             return "\u2014"
         return f"{exp_agree:.2f}"
+
+    @staticmethod
+    def _low_overlap_stat(comp: dict) -> str:
+        """Render a stat-item showing the count of low-overlap fundamentals.
+
+        Reads the eigenvector-overlap list cached on ``comp`` by the
+        regression-figure section.  Empty string when no overlap data is
+        available so the box layout collapses gracefully.
+        """
+        from .plotly_builders import LOW_OVERLAP_THRESHOLD
+
+        overlaps = comp.get("_matched_overlaps")
+        if not overlaps:
+            return ""
+        valid = [o for o in overlaps if o is not None]
+        if not valid:
+            return ""
+        n_low = sum(1 for o in valid if o < LOW_OVERLAP_THRESHOLD)
+        cls = "metric-warning" if n_low > 0 else "metric-good"
+        return (
+            '<div class="stat-item">'
+            f'<div class="stat-label">Low-overlap (&lt; {LOW_OVERLAP_THRESHOLD:.1f})</div>'
+            f'<div class="stat-value {cls}">{n_low}/{len(valid)}</div></div>'
+        )
 
     def _create_experimental_info_section(self, analysis_results: dict) -> str:
         """Build the experimental data source info section.

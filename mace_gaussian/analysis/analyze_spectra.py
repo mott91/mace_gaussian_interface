@@ -353,6 +353,7 @@ class SpectrumAnalyzer:
         dft_spectrum: SpectrumData,
         ml_spectrum: SpectrumData,
         mode_mapping: Optional[dict[int, int]] = None,
+        mode_overlaps: Optional[dict[int, float]] = None,
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict]:
         """
         Match peaks between spectra using mode numbers (rigorous mode-by-mode comparison).
@@ -370,6 +371,11 @@ class SpectrumAnalyzer:
             Mapping from ML mode index to DFT mode index (from eigenvector matching).
             If provided, uses this to remap ML mode numbers before matching.
             Format: {ml_mode_idx: dft_mode_idx}
+        mode_overlaps : dict, optional
+            Eigenvector overlap (0-1) per ML mode index. When supplied alongside
+            mode_mapping, ``match_stats["matched_mode_overlaps"]`` is populated
+            with one overlap per matched row (None for derived overtones /
+            combinations that have no eigenvector).
 
         Returns
         -------
@@ -393,13 +399,17 @@ class SpectrumAnalyzer:
         dft_mode_dict = {mode_id: i for i, mode_id in enumerate(dft_spectrum.mode_ids)}
         ml_mode_dict = {mode_id: i for i, mode_id in enumerate(ml_spectrum.mode_ids)}
 
+        # Per-position original ML index — populated only when remapping a
+        # fundamental, used to look up eigenvector overlaps below.
+        ml_original_indices: list[Optional[int]] = [None] * len(ml_spectrum.mode_ids)
+
         # If mode mapping is provided, remap ML mode IDs based on eigenvector matching
         if mode_mapping is not None:
             logger.info(
                 f"Using eigenvector-based mode mapping for {len(mode_mapping)} fundamental modes"
             )
             ml_mode_ids_remapped = []
-            for _, mode_id in enumerate(ml_spectrum.mode_ids):
+            for pos, mode_id in enumerate(ml_spectrum.mode_ids):
                 # Only remap fundamental modes (F1, F2, etc.)
                 if mode_id.startswith("F"):
                     ml_mode_num = int(mode_id[1:])  # Extract mode number from "F{num}"
@@ -410,6 +420,7 @@ class SpectrumAnalyzer:
                         dft_mode_num = dft_idx + 1
                         remapped_id = f"F{dft_mode_num}"
                         ml_mode_ids_remapped.append(remapped_id)
+                        ml_original_indices[pos] = ml_idx
                         logger.debug(f"  Remapped {mode_id} -> {remapped_id}")
                     else:
                         # No mapping found, keep original
@@ -432,7 +443,8 @@ class SpectrumAnalyzer:
         dft_only_modes = dft_modes_set - ml_modes_set
         ml_only_modes = ml_modes_set - dft_modes_set
 
-        # Extract matched data
+        # Extract matched data, parallel to sorted(matched_modes)
+        matched_overlaps: list[Optional[float]] = []
         for mode_id in sorted(matched_modes):
             dft_idx = dft_mode_dict[mode_id]
             ml_idx = ml_mode_dict[mode_id]
@@ -441,6 +453,13 @@ class SpectrumAnalyzer:
             ml_freq_matched.append(ml_spectrum.frequencies[ml_idx])
             dft_int_matched.append(dft_spectrum.intensities[dft_idx])
             ml_int_matched.append(ml_spectrum.intensities[ml_idx])
+
+            ovl: Optional[float] = None
+            if mode_overlaps is not None:
+                ml_orig = ml_original_indices[ml_idx]
+                if ml_orig is not None and ml_orig in mode_overlaps:
+                    ovl = float(mode_overlaps[ml_orig])
+            matched_overlaps.append(ovl)
 
         # Calculate match statistics
         num_dft_modes = len(dft_modes_set)
@@ -454,6 +473,7 @@ class SpectrumAnalyzer:
             "dft_only_modes": sorted(list(dft_only_modes)),
             "ml_only_modes": sorted(list(ml_only_modes)),
             "matched_mode_ids": sorted(list(matched_modes)),
+            "matched_mode_overlaps": matched_overlaps,
         }
 
         logger.info(

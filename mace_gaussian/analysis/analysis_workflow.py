@@ -551,6 +551,7 @@ class ComparisonWorkflow:
             "ml_spectrum": ml_spectrum,  # Store for combined plots
             "dft_spectrum": dft_spectrum,
             "mode_mapping": mode_mapping,  # Store mode mapping for combined plots
+            "mode_overlaps": mode_overlaps,  # Store per-mode eigenvector overlaps for confidence flags
             "deg_result": deg_result,  # Degenerate group analysis result
             "experimental": experimental,
             "ml_hardware": {

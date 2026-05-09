@@ -18,6 +18,100 @@ _DFT_COLOR = "#000000"
 _ML_COLOR = "#DE8F05"
 _EXP_COLOR = "rgba(128,128,128,0.45)"
 
+# Eigenvector-overlap threshold below which a matched mode is rendered with a
+# hollow marker — the matching algorithm placed it but the modes are physically
+# different enough that the comparison should be read with caution.
+LOW_OVERLAP_THRESHOLD = 0.7
+
+_TYPE_STYLE = {
+    "fundamental": {"color": _ML_COLOR, "symbol": "circle", "name": "Fundamental"},
+    "overtone":    {"color": "#0173B2", "symbol": "diamond", "name": "Overtone"},
+    "combination": {"color": "#CC78BC", "symbol": "square", "name": "Combination"},
+}
+
+
+def _classify_mode_type(mode_id: str | None) -> str:
+    if mode_id is None:
+        return "fundamental"
+    if mode_id.startswith("O"):
+        return "overtone"
+    if mode_id.startswith("C"):
+        return "combination"
+    return "fundamental"
+
+
+def _add_regression_traces(
+    fig: Any,
+    x: np.ndarray,
+    y: np.ndarray,
+    mode_ids: list[str] | None,
+    mode_overlaps: list[float | None] | None,
+    *,
+    unit_label: str,
+    low_threshold: float = LOW_OVERLAP_THRESHOLD,
+) -> int:
+    """Add regression scatter traces grouped by (type, confidence).
+
+    Low-overlap points (overlap < ``low_threshold``) render with hollow
+    symbols and reduced opacity. Returns the count of low-overlap points so
+    the caller can surface it in the report.
+    """
+    import plotly.graph_objects as go
+
+    n = len(x)
+    has_overlaps = mode_overlaps is not None and len(mode_overlaps) == n
+
+    # Group key: (type, is_low_overlap) → (xs, ys, overlaps)
+    groups: dict[tuple[str, bool], tuple[list, list, list]] = {}
+    for i in range(n):
+        mid = mode_ids[i] if mode_ids is not None and i < len(mode_ids) else None
+        t = _classify_mode_type(mid)
+        ovl = mode_overlaps[i] if has_overlaps else None
+        is_low = has_overlaps and ovl is not None and ovl < low_threshold
+        groups.setdefault((t, is_low), ([], [], []))
+        groups[(t, is_low)][0].append(x[i])
+        groups[(t, is_low)][1].append(y[i])
+        groups[(t, is_low)][2].append(ovl)
+
+    n_low = sum(len(v[0]) for k, v in groups.items() if k[1])
+
+    for t in ("fundamental", "overtone", "combination"):
+        for is_low in (False, True):
+            key = (t, is_low)
+            if key not in groups:
+                continue
+            xs, ys, ovls = groups[key]
+            style = _TYPE_STYLE[t]
+            symbol = style["symbol"] + ("-open" if is_low else "")
+            label = f"{style['name']}{', low overlap' if is_low else ''} (n={len(xs)})"
+            # Only fundamentals carry meaningful overlap values — show on hover.
+            show_overlap = t == "fundamental" and any(o is not None for o in ovls)
+            customdata = [[o if o is not None else float("nan")] for o in ovls] if show_overlap else None
+            hover = f"DFT: %{{x:.1f}} {unit_label}<br>ML: %{{y:.1f}} {unit_label}"
+            if show_overlap:
+                hover += "<br>overlap: %{customdata[0]:.2f}"
+            extra = f"{style['name']}{', low overlap' if is_low else ''}"
+
+            fig.add_trace(
+                go.Scatter(
+                    x=xs,
+                    y=ys,
+                    mode="markers",
+                    name=label,
+                    legendgroup=t,
+                    customdata=customdata,
+                    marker=dict(
+                        color=style["color"],
+                        symbol=symbol,
+                        size=8,
+                        opacity=0.55 if is_low else 1.0,
+                        line=dict(width=1.5 if is_low else 1, color="#333"),
+                    ),
+                    hovertemplate=hover + f"<extra>{extra}</extra>",
+                )
+            )
+    return n_low
+
 
 def build_spectrum_figure(
     freq_grid: np.ndarray,
@@ -97,12 +191,16 @@ def build_regression_figure(
     ml_freqs: np.ndarray,
     ml_name: str,
     mode_ids: list[str] | None = None,
+    mode_overlaps: list[float | None] | None = None,
 ) -> object:
     """Build a regression scatter plot (ML vs DFT frequencies).
 
     Includes a y=x perfect-agreement reference line.  When *mode_ids* is
     supplied, points are color-coded by type (fundamental / overtone /
-    combination).
+    combination).  When *mode_overlaps* is supplied, fundamentals whose
+    eigenvector overlap is below ``LOW_OVERLAP_THRESHOLD`` render with
+    hollow markers — flagging that the matching algorithm may have paired
+    physically different modes.
 
     Parameters
     ----------
@@ -115,6 +213,9 @@ def build_regression_figure(
     mode_ids : list[str] or None
         Matched mode IDs (e.g. ``["F1", "F2", "O1_2", "C1_2"]``).
         Used to color-code by type.
+    mode_overlaps : list[float | None] or None
+        Per-point eigenvector overlap, aligned with ``dft_freqs``.  ``None``
+        for derived overtones / combinations.
 
     Returns
     -------
@@ -135,52 +236,13 @@ def build_regression_figure(
     ss_tot = float(np.sum((dft_freqs - np.mean(dft_freqs)) ** 2))
     r2_all = 1.0 - ss_res / ss_tot if ss_tot > 0 else float("nan")
 
-    _type_style = {
-        "fundamental": {"color": _ML_COLOR, "symbol": "circle", "name": "Fundamental"},
-        "overtone": {"color": "#0173B2", "symbol": "diamond", "name": "Overtone"},
-        "combination": {"color": "#CC78BC", "symbol": "square", "name": "Combination"},
-    }
-
     fig = go.Figure()
 
-    if mode_ids is not None and len(mode_ids) == len(dft_freqs):
-        # Group by type
-        groups: dict[str, tuple[list, list]] = {}
-        for i, mid in enumerate(mode_ids):
-            if mid.startswith("O"):
-                t = "overtone"
-            elif mid.startswith("C"):
-                t = "combination"
-            else:
-                t = "fundamental"
-            groups.setdefault(t, ([], []))
-            groups[t][0].append(dft_freqs[i])
-            groups[t][1].append(ml_freqs[i])
-
-        for t in ("fundamental", "overtone", "combination"):
-            if t not in groups:
-                continue
-            dx, mx = groups[t]
-            style = _type_style[t]
-            fig.add_trace(
-                go.Scatter(
-                    x=dx,
-                    y=mx,
-                    mode="markers",
-                    name=f"{style['name']} (n={len(dx)})",
-                    marker=dict(
-                        color=style["color"],
-                        symbol=style["symbol"],
-                        size=8,
-                        line=dict(width=1, color="#333"),
-                    ),
-                    hovertemplate=(
-                        "DFT: %{x:.1f} cm\u207b\u00b9<br>"
-                        "ML: %{y:.1f} cm\u207b\u00b9"
-                        f"<extra>{style['name']}</extra>"
-                    ),
-                )
-            )
+    if mode_ids is not None or mode_overlaps is not None:
+        _add_regression_traces(
+            fig, dft_freqs, ml_freqs, mode_ids, mode_overlaps,
+            unit_label="cm\u207b\u00b9",
+        )
     else:
         fig.add_trace(
             go.Scatter(
@@ -227,11 +289,14 @@ def build_intensity_regression_figure(
     ml_intensities: np.ndarray,
     ml_name: str,
     mode_ids: list[str] | None = None,
+    mode_overlaps: list[float | None] | None = None,
 ) -> object:
     """Build a regression scatter plot (ML vs DFT intensities).
 
     When *mode_ids* is supplied, points are color-coded by type
-    (fundamental / overtone / combination).
+    (fundamental / overtone / combination).  When *mode_overlaps* is
+    supplied, fundamentals whose eigenvector overlap is below
+    ``LOW_OVERLAP_THRESHOLD`` render with hollow markers.
 
     Parameters
     ----------
@@ -243,6 +308,8 @@ def build_intensity_regression_figure(
         Name of the ML method for axis labels.
     mode_ids : list[str] or None
         Matched mode IDs for color-coding by type.
+    mode_overlaps : list[float | None] or None
+        Per-point eigenvector overlap, aligned with ``dft_intensities``.
 
     Returns
     -------
@@ -263,51 +330,13 @@ def build_intensity_regression_figure(
     ss_tot = float(np.sum((dft_intensities - np.mean(dft_intensities)) ** 2))
     r2_all = 1.0 - ss_res / ss_tot if ss_tot > 0 else float("nan")
 
-    _type_style = {
-        "fundamental": {"color": _ML_COLOR, "symbol": "circle", "name": "Fundamental"},
-        "overtone": {"color": "#0173B2", "symbol": "diamond", "name": "Overtone"},
-        "combination": {"color": "#CC78BC", "symbol": "square", "name": "Combination"},
-    }
-
     fig = go.Figure()
 
-    if mode_ids is not None and len(mode_ids) == len(dft_intensities):
-        groups: dict[str, tuple[list, list]] = {}
-        for i, mid in enumerate(mode_ids):
-            if mid.startswith("O"):
-                t = "overtone"
-            elif mid.startswith("C"):
-                t = "combination"
-            else:
-                t = "fundamental"
-            groups.setdefault(t, ([], []))
-            groups[t][0].append(dft_intensities[i])
-            groups[t][1].append(ml_intensities[i])
-
-        for t in ("fundamental", "overtone", "combination"):
-            if t not in groups:
-                continue
-            dx, mx = groups[t]
-            style = _type_style[t]
-            fig.add_trace(
-                go.Scatter(
-                    x=dx,
-                    y=mx,
-                    mode="markers",
-                    name=f"{style['name']} (n={len(dx)})",
-                    marker=dict(
-                        color=style["color"],
-                        symbol=style["symbol"],
-                        size=8,
-                        line=dict(width=1, color="#333"),
-                    ),
-                    hovertemplate=(
-                        "DFT: %{x:.1f} km/mol<br>"
-                        "ML: %{y:.1f} km/mol"
-                        f"<extra>{style['name']}</extra>"
-                    ),
-                )
-            )
+    if mode_ids is not None or mode_overlaps is not None:
+        _add_regression_traces(
+            fig, dft_intensities, ml_intensities, mode_ids, mode_overlaps,
+            unit_label="km/mol",
+        )
     else:
         fig.add_trace(
             go.Scatter(
