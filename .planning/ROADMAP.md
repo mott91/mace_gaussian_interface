@@ -56,7 +56,7 @@ Full archive: `.planning/milestones/v1.1-ROADMAP.md`, `.planning/milestones/v1.1
 - [x] **Phase 20: Wall-Clock Timing** - Per-molecule per-calculator timing instrumentation and batch report timing table (completed 2026-04-02, verified 2026-04-05)
 - [x] **Phase 21: NIST Experimental Overlay** - Fetch, cache, and overlay experimental IR spectra from NIST WebBook (completed 2026-04-02)
 - [x] **Phase 22: Early SLURM Submission** - Submit DFT jobs per-molecule immediately after geometry optimization (completed 2026-04-05)
-- [ ] **Phase 23: Anharmonic Pipeline & Report Overhaul** - Thesis-quality HTML report integrating all v1.2 features
+- [x] **Phase 23: Anharmonic Pipeline & Report Overhaul** - Thesis-quality HTML report integrating all v1.2 features (completed 2026-04-12)
 - [ ] **Phase 24: VPT2 Research Spike** - Time-boxed Psience/VPT2 feasibility evaluation on water
 
 ## Phase Details
@@ -143,7 +143,7 @@ Plans:
 - [x] 23-02-PLAN.md -- Wave 1: _shared_css.build_css + plotly_builders (spectrum/regression/combined figure builders, experimental_on_grid)
 - [x] 23-03-PLAN.md -- Wave 1: executive_summary (rank_methods, build_verdict, compute_experimental_agreement) + report_data (JSON/CSV export)
 - [x] 23-04-PLAN.md -- Wave 2: HTMLReportGenerator overhaul (mode flag, Plotly integration, executive summary section, shared CSS, html.escape for T-23-01)
-- [ ] 23-05-PLAN.md -- Wave 3: batch_report CSS consolidation + analysis_workflow wiring + water smoke test + human-verify checkpoint
+- [x] 23-05-PLAN.md -- Wave 3: batch_report CSS consolidation + analysis_workflow wiring + water smoke test + human-verify checkpoint
 **UI hint**: yes
 
 ### Phase 24: VPT2 Research Spike
@@ -210,7 +210,7 @@ Plans:
 | 20. Wall-Clock Timing | v1.2 | 1/1 | Complete (verified) | 2026-04-02 |
 | 21. NIST Experimental Overlay | v1.2 | 2/2 | Complete   | 2026-04-02 |
 | 22. Early SLURM Submission | v1.2 | 1/1 | Complete (verified) | 2026-04-05 |
-| 23. Anharmonic Pipeline & Report | v1.2 | 4/5 | In Progress|  |
+| 23. Anharmonic Pipeline & Report | v1.2 | 5/5 | Complete   | 2026-04-12 |
 | 24. VPT2 Research Spike | v1.2 | 0/TBD | Not started | - |
 | 16. Benchmark Campaign | v1.3 | 0/TBD | Not started | - |
 | 17. Docs Update | v1.3 | 1/1 | Complete    | 2026-04-02 |
