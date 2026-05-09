@@ -35,7 +35,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 VALID_ENERGY_CALCULATORS = ["mace_mp", "mace_omol", "mace_off", "mace_anicc", "mace_polar"]
-VALID_DIPOLE_CALCULATORS = ["espaloma", "mace_ml"]
+VALID_DIPOLE_CALCULATORS = ["espaloma", "mace_ml", "mace_polar1"]
 
 
 def _validate_energy_calculators(ctx, param, value):
@@ -86,9 +86,9 @@ def cli():
 )
 @click.option(
     "--dipole-calculators",
-    default="espaloma,mace_ml",
+    default="espaloma,mace_ml,mace_polar1",
     callback=_validate_dipole_calculators,
-    help="Comma-separated dipole calculators. Choices: espaloma, mace_ml",
+    help="Comma-separated dipole calculators. Choices: espaloma, mace_ml, mace_polar1",
 )
 @click.option(
     "--force-optimization",
@@ -542,9 +542,9 @@ def diagnose():
 )
 @click.option(
     "--dipole-calculators",
-    default="espaloma,mace_ml",
+    default="espaloma,mace_ml,mace_polar1",
     callback=_validate_dipole_calculators,
-    help="Comma-separated dipole calculators. Choices: espaloma, mace_ml",
+    help="Comma-separated dipole calculators. Choices: espaloma, mace_ml, mace_polar1",
 )
 @click.option("--skip-dft-baseline", is_flag=True, help="Skip DFT baseline calculations")
 @click.option(

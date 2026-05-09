@@ -724,7 +724,7 @@ def run_pipeline(
     energy_calculators : list, optional
         List of energy calculators to use (default: ['mace_mp', 'mace_omol'])
     dipole_calculators : list, optional
-        List of dipole calculators to use (default: ['espaloma', 'mace_ml'])
+        List of dipole calculators to use (default: ['espaloma', 'mace_ml', 'mace_polar1'])
     force_optimization : bool
         If True, force re-optimization even if optimized geometry exists
     include_dft_baselines : bool
@@ -746,7 +746,7 @@ def run_pipeline(
     if energy_calculators is None:
         energy_calculators = ["mace_mp", "mace_omol", "mace_anicc", "mace_off", "mace_polar"]
     if dipole_calculators is None:
-        dipole_calculators = ["espaloma", "mace_ml"]
+        dipole_calculators = ["espaloma", "mace_ml", "mace_polar1"]
 
     # Extract molecule name
     molecule_name = Path(input_file).stem

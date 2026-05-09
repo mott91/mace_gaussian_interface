@@ -45,6 +45,7 @@ for dep in _heavy_deps:
 from mace_gaussian.calculators.base import DipoleCalculatorBase  # noqa: E402
 from mace_gaussian.calculators.espaloma import EspalomaDipoleCalculator  # noqa: E402
 from mace_gaussian.calculators.mace_ml import MACEMLDipoleCalculator  # noqa: E402
+from mace_gaussian.calculators.mace_polar1 import MACEPolar1DipoleCalculator  # noqa: E402
 from mace_gaussian.calculators.xtb import XTBDipoleCalculator  # noqa: E402
 
 # Restore original module state for heavy deps
@@ -59,7 +60,12 @@ for dep in _heavy_deps:
 # Helpers
 # ---------------------------------------------------------------------------
 
-ALL_CALCULATOR_CLASSES = [EspalomaDipoleCalculator, MACEMLDipoleCalculator, XTBDipoleCalculator]
+ALL_CALCULATOR_CLASSES = [
+    EspalomaDipoleCalculator,
+    MACEMLDipoleCalculator,
+    MACEPolar1DipoleCalculator,
+    XTBDipoleCalculator,
+]
 
 
 def _make_mock_calculator(name: str, available: bool) -> MagicMock:
@@ -112,13 +118,20 @@ class TestDipoleCalculatorFactory:
     location inside factory.py to avoid real heavy-dependency imports.
     """
 
-    def _make_factory(self, espaloma_avail=True, xtb_avail=True, mace_ml_avail=True):
+    def _make_factory(
+        self,
+        espaloma_avail=True,
+        xtb_avail=True,
+        mace_ml_avail=True,
+        mace_polar1_avail=True,
+    ):
         """Create a factory with mocked calculators."""
         from mace_gaussian.calculators.factory import DipoleCalculatorFactory
 
         mock_esp = _make_mock_calculator("espaloma", espaloma_avail)
         mock_xtb = _make_mock_calculator("xtb", xtb_avail)
         mock_mace = _make_mock_calculator("mace_ml", mace_ml_avail)
+        mock_polar1 = _make_mock_calculator("mace_polar1", mace_polar1_avail)
 
         p1 = patch(
             "mace_gaussian.calculators.factory.EspalomaDipoleCalculator", return_value=mock_esp
@@ -127,7 +140,11 @@ class TestDipoleCalculatorFactory:
         p3 = patch(
             "mace_gaussian.calculators.factory.MACEMLDipoleCalculator", return_value=mock_mace
         )
-        with p1, p2, p3:
+        p4 = patch(
+            "mace_gaussian.calculators.factory.MACEPolar1DipoleCalculator",
+            return_value=mock_polar1,
+        )
+        with p1, p2, p3, p4:
             factory = DipoleCalculatorFactory()
 
         return factory
@@ -152,39 +169,59 @@ class TestDipoleCalculatorFactory:
 
     def test_auto_selects_first_available(self):
         """auto mode returns the first available calculator per preferred_order."""
-        # preferred_order is [mace_ml, espaloma, xtb]
-        # Make mace_ml unavailable so espaloma should be selected
-        factory = self._make_factory(mace_ml_avail=False, espaloma_avail=True, xtb_avail=True)
+        # preferred_order is [mace_ml, mace_polar1, espaloma, xtb]
+        # Make mace_ml + mace_polar1 unavailable so espaloma should be selected
+        factory = self._make_factory(
+            mace_ml_avail=False, mace_polar1_avail=False, espaloma_avail=True, xtb_avail=True
+        )
         calc = factory.get_calculator("auto")
         assert calc.name == "espaloma"
 
     def test_auto_selects_mace_ml_when_available(self):
         """auto mode prefers mace_ml (first in preferred_order)."""
-        factory = self._make_factory(mace_ml_avail=True, espaloma_avail=True, xtb_avail=True)
+        factory = self._make_factory(
+            mace_ml_avail=True, mace_polar1_avail=True, espaloma_avail=True, xtb_avail=True
+        )
         calc = factory.get_calculator("auto")
         assert calc.name == "mace_ml"
 
+    def test_auto_falls_back_to_mace_polar1(self):
+        """auto mode picks mace_polar1 when mace_ml is unavailable."""
+        factory = self._make_factory(
+            mace_ml_avail=False, mace_polar1_avail=True, espaloma_avail=True, xtb_avail=True
+        )
+        calc = factory.get_calculator("auto")
+        assert calc.name == "mace_polar1"
+
     def test_auto_raises_when_none_available(self):
         """auto mode raises RuntimeError when no calculators are available."""
-        factory = self._make_factory(espaloma_avail=False, xtb_avail=False, mace_ml_avail=False)
+        factory = self._make_factory(
+            espaloma_avail=False,
+            xtb_avail=False,
+            mace_ml_avail=False,
+            mace_polar1_avail=False,
+        )
         with pytest.raises(RuntimeError, match="No dipole calculators available"):
             factory.get_calculator("auto")
 
     def test_list_available(self):
         """list_available returns a dict mapping names to availability booleans."""
-        factory = self._make_factory(espaloma_avail=True, xtb_avail=False, mace_ml_avail=True)
+        factory = self._make_factory(
+            espaloma_avail=True, xtb_avail=False, mace_ml_avail=True, mace_polar1_avail=True
+        )
         result = factory.list_available()
 
         assert isinstance(result, dict)
         assert result["espaloma"] is True
         assert result["xtb"] is False
         assert result["mace_ml"] is True
-        assert len(result) == 3
+        assert result["mace_polar1"] is True
+        assert len(result) == 4
 
     def test_preferred_order_is_set(self):
-        """Factory has a preferred_order list with all three calculator names."""
+        """Factory has a preferred_order list with all four calculator names."""
         factory = self._make_factory()
-        assert factory.preferred_order == ["mace_ml", "espaloma", "xtb"]
+        assert factory.preferred_order == ["mace_ml", "mace_polar1", "espaloma", "xtb"]
 
 
 # ---------------------------------------------------------------------------

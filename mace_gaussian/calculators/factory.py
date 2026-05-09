@@ -7,6 +7,7 @@ import logging
 from .base import DipoleCalculatorBase
 from .espaloma import EspalomaDipoleCalculator
 from .mace_ml import MACEMLDipoleCalculator
+from .mace_polar1 import MACEPolar1DipoleCalculator
 from .xtb import XTBDipoleCalculator
 
 logger = logging.getLogger(__name__)
@@ -17,7 +18,7 @@ class DipoleCalculatorFactory:
 
     def __init__(self):
         self.calculators = {}
-        self.preferred_order = ["mace_ml", "espaloma", "xtb"]
+        self.preferred_order = ["mace_ml", "mace_polar1", "espaloma", "xtb"]
         self._register_calculators()
 
     def _register_calculators(self):
@@ -26,6 +27,7 @@ class DipoleCalculatorFactory:
             EspalomaDipoleCalculator(),
             XTBDipoleCalculator(),
             MACEMLDipoleCalculator(),
+            MACEPolar1DipoleCalculator(),
         ]
 
         for calc in calculators:
