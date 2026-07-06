@@ -361,6 +361,22 @@ class GaussianLogParser:
         logger.warning("Could not find final energy in log file")
         return None
 
+    def _unwrapped_archive(self) -> Optional[str]:
+        """Return the Gaussian archive section with its 70-column line wrapping removed.
+
+        The archive hard-wraps mid-token (continuation lines start with a single
+        space), so regexes must run on the unwrapped text or numbers get truncated
+        at line breaks.
+        """
+        start = self.content.find("1\\1\\GINC")
+        if start == -1:
+            return None
+        end = self.content.find("@", start)
+        if end == -1:
+            end = len(self.content)
+        lines = self.content[start:end].splitlines()
+        return "".join(line[1:] if line.startswith(" ") else line for line in lines)
+
     def parse_dipole_moment(self) -> Optional[dict[str, float]]:
         """
         Parse dipole moment from log file.
@@ -374,7 +390,10 @@ class GaussianLogParser:
         # Format: Dipole=x,y,z (may have '-' for undefined components in linear molecules)
         archive_pattern = r"Dipole=([-\d\.]+),([-\d\.]+),([-\d\.]+)"
 
-        match = re.search(archive_pattern, self.content)
+        # The archive wraps at 70 columns and can split the entry mid-number,
+        # so unwrap it first; fall back to raw content for truncated logs.
+        search_text = self._unwrapped_archive() or self.content
+        match = re.search(archive_pattern, search_text)
         if match:
             try:
                 x = float(match.group(1))

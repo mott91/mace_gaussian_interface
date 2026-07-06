@@ -269,6 +269,29 @@ class TestParseFinalEnergy:
         assert result == pytest.approx(WATER_ENERGY_EXPECTED, abs=0.000001)
 
 
+class TestParseDipoleMoment:
+    """Tests for parse_dipole_moment() method."""
+
+    def test_dipole_survives_archive_line_wrap(self, tmp_path):
+        """The archive wraps at 70 columns and can split a dipole component
+        mid-number; the parser must unwrap before matching or the component
+        is silently truncated (e.g. z = '-0.' instead of -0.7490303)."""
+        log = tmp_path / "wrapped.log"
+        log.write_text(
+            " 1\\1\\GINC-HOST\\Freq\\External\\H2O1\\USER\\06-Jul-2026\\0\\\\#P freq=(anharm\n"
+            " onic) external\\\\water\\\\0,1\\O\\H\\H\\\\Version=ES64L-G16RevC.02\\HTot=\n"
+            " -76.4085735\\GTot=-76.4299948\\Dipole=0.,-0.0000575,-0.\n"
+            " 7490303\\DipoleDeriv=-0.6767591,-0.0000002,-0.0000234\\\\@\n"
+        )
+        parser = GaussianLogParser(str(log))
+        result = parser.parse_dipole_moment()
+
+        assert result is not None
+        au_to_debye = 2.54174623
+        assert result["z"] == pytest.approx(-0.7490303 * au_to_debye, rel=1e-6)
+        assert result["magnitude"] == pytest.approx(0.7490303 * au_to_debye, rel=1e-4)
+
+
 # --- Edge case and error handling tests ---
 
 
