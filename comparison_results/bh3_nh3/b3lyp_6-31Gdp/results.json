@@ -1392,7 +1392,12 @@
     ]
   },
   "energy_eV": 1.267343103020645,
-  "dipole": null,
+  "dipole": {
+    "x": 1.2454556527e-05,
+    "y": 2.54174623e-07,
+    "z": 5.565968508600961,
+    "magnitude": 5.565968508614901
+  },
   "runtime_s": 401.4693012237549,
   "files": {
     "gaussian_log": "gaussian_freq.log",

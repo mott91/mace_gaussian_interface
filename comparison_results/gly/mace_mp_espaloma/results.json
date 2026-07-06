@@ -253,7 +253,12 @@
     "combination_bands": []
   },
   "energy_eV": 1.24873051482894,
-  "dipole": null,
+  "dipole": {
+    "x": -1.1802204648339352,
+    "y": -0.35600460221249003,
+    "z": -0.0032153089809500005,
+    "magnitude": 1.2327489446846613
+  },
   "runtime_s": 195.39374685287476,
   "files": {
     "gaussian_log": "gaussian_freq.log",

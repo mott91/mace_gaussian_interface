@@ -90,10 +90,10 @@
   "dipole": {
     "x": 0.0,
     "y": 0.0,
-    "z": -0.992578336975792,
-    "magnitude": 0.992578336975792
+    "z": -1.875700947699848,
+    "magnitude": 1.875700947699848
   },
-  "runtime_s": 13.25190806388855,
+  "runtime_s": 13.200627565383911,
   "files": {
     "gaussian_log": "gaussian_freq.log",
     "gaussian_input": "gaussian_freq.gjf"
