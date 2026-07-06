@@ -27,6 +27,10 @@
         "ir_intensity": 0.0
       },
       {
+        "freq_cm": 1161.1316,
+        "ir_intensity": 0.0
+      },
+      {
         "freq_cm": 1333.7261,
         "ir_intensity": 0.076
       },
@@ -37,6 +41,14 @@
       {
         "freq_cm": 1427.0865,
         "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 1427.0865,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 1428.0676,
+        "ir_intensity": 9.0238
       },
       {
         "freq_cm": 1428.0676,

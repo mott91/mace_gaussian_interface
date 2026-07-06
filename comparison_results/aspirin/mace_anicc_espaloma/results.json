@@ -7,6 +7,18 @@
   "frequencies": {
     "harmonic": [
       {
+        "freq_cm": -19.7499,
+        "ir_intensity": 4.3406
+      },
+      {
+        "freq_cm": 82.4456,
+        "ir_intensity": 10.8304
+      },
+      {
+        "freq_cm": 90.853,
+        "ir_intensity": 21.7265
+      },
+      {
         "freq_cm": 98.1295,
         "ir_intensity": 2.9049
       },

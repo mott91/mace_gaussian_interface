@@ -23,19 +23,19 @@
       {
         "mode": 1,
         "freq_cm": 3618.599,
-        "ir_intensity": 366.63338566,
+        "ir_intensity": 332.55623422,
         "freq_harmonic": 3780.244
       },
       {
         "mode": 2,
         "freq_cm": 1621.011,
-        "ir_intensity": 1773.3688164,
+        "ir_intensity": 720.57259586,
         "freq_harmonic": 1650.589
       },
       {
         "mode": 3,
         "freq_cm": 3702.754,
-        "ir_intensity": 734.84661232,
+        "ir_intensity": 682.04684196,
         "freq_harmonic": 3889.003
       }
     ],
@@ -83,27 +83,6 @@
         "freq_harmonic": 5539.592,
         "freq_anharmonic": 5302.891,
         "ir_intensity": 1.9823869
-      },
-      {
-        "mode1": 2,
-        "mode2": 1,
-        "freq_harmonic": 5430.833,
-        "freq_anharmonic": 5242.237,
-        "ir_intensity": 0.07703713
-      },
-      {
-        "mode1": 3,
-        "mode2": 1,
-        "freq_harmonic": 7669.247,
-        "freq_anharmonic": 7153.08,
-        "ir_intensity": 9.30814914
-      },
-      {
-        "mode1": 3,
-        "mode2": 2,
-        "freq_harmonic": 5539.592,
-        "freq_anharmonic": 5302.891,
-        "ir_intensity": 1.49136226
       }
     ]
   },
@@ -114,7 +93,7 @@
     "z": -2.081481485004517,
     "magnitude": 2.081481485004517
   },
-  "runtime_s": 12.879360437393188,
+  "runtime_s": 13.01528000831604,
   "files": {
     "gaussian_log": "gaussian_freq.log",
     "gaussian_input": "gaussian_freq.gjf"
@@ -122,7 +101,7 @@
   "version_info": {
     "tool_version": "0.2.0",
     "python_version": "3.10.19 | packaged by conda-forge | (main, Oct 13 2025, 14:08:27) [GCC 14.3.0]",
-    "platform": "Linux-5.10.0-37-amd64-x86_64-with-glibc2.31",
+    "platform": "Linux-5.10.0-41-amd64-x86_64-with-glibc2.31",
     "cpu_model": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
     "ram_gb": 62.7,
     "torch_version": "2.4.0+cu121",
@@ -137,12 +116,12 @@
     "dipole_calculator": "espaloma"
   },
   "gaussian_timing": {
-    "total_elapsed_s": 11.6,
+    "total_elapsed_s": 11.7,
     "total_cpu_s": 1.6,
     "stages": [
       {
         "cpu_s": 1.6,
-        "elapsed_s": 11.6
+        "elapsed_s": 11.7
       }
     ]
   }

@@ -7,6 +7,18 @@
   "frequencies": {
     "harmonic": [
       {
+        "freq_cm": -254.2938,
+        "ir_intensity": 0.0
+      },
+      {
+        "freq_cm": 590.9328,
+        "ir_intensity": 361.4498
+      },
+      {
+        "freq_cm": 590.9329,
+        "ir_intensity": 361.4498
+      },
+      {
         "freq_cm": 776.3658,
         "ir_intensity": 42.4706
       },
@@ -61,9 +73,122 @@
       {
         "freq_cm": 3528.9646,
         "ir_intensity": 659.734
+      },
+      {
+        "freq_cm": 3528.9646,
+        "ir_intensity": 659.734
       }
     ],
-    "anharmonic": [],
+    "anharmonic": [
+      {
+        "mode": 1,
+        "freq_cm": 3251.395,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 3528.965
+      },
+      {
+        "mode": 2,
+        "freq_cm": 3251.608,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 3528.965
+      },
+      {
+        "mode": 3,
+        "freq_cm": 3092.252,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 3395.616
+      },
+      {
+        "mode": 4,
+        "freq_cm": 2433.693,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 2352.988
+      },
+      {
+        "mode": 5,
+        "freq_cm": 2894.378,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 2310.207
+      },
+      {
+        "mode": 6,
+        "freq_cm": 2894.841,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 2310.207
+      },
+      {
+        "mode": 7,
+        "freq_cm": 1434.949,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 1527.162
+      },
+      {
+        "mode": 8,
+        "freq_cm": 1434.798,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 1527.162
+      },
+      {
+        "mode": 9,
+        "freq_cm": 1037.283,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 1130.433
+      },
+      {
+        "mode": 10,
+        "freq_cm": 786.19,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 996.512
+      },
+      {
+        "mode": 11,
+        "freq_cm": 364.502,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 884.618
+      },
+      {
+        "mode": 12,
+        "freq_cm": 364.4,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 884.618
+      },
+      {
+        "mode": 13,
+        "freq_cm": 795.016,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 823.514
+      },
+      {
+        "mode": 14,
+        "freq_cm": 794.823,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 823.514
+      },
+      {
+        "mode": 15,
+        "freq_cm": 743.29,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 776.366
+      },
+      {
+        "mode": 16,
+        "freq_cm": 512.871,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 590.933
+      },
+      {
+        "mode": 17,
+        "freq_cm": 512.694,
+        "ir_intensity": 0.0,
+        "freq_harmonic": 590.933
+      },
+      {
+        "mode": 18,
+        "freq_cm": -275.812,
+        "ir_intensity": 0.0,
+        "freq_harmonic": -254.294
+      }
+    ],
     "overtones": [],
     "combination_bands": []
   },
