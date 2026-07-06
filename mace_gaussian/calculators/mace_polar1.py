@@ -16,6 +16,7 @@ import logging
 import numpy as np
 import torch
 
+from ..utils.units import BOHR_TO_ANGSTROM
 from .base import DipoleCalculatorBase
 
 logger = logging.getLogger(__name__)
@@ -80,10 +81,11 @@ class MACEPolar1DipoleCalculator(DipoleCalculatorBase):
         if isinstance(dipole, torch.Tensor):
             dipole = dipole.detach().cpu().numpy()
         dipole = np.asarray(dipole).reshape(-1)[:3]
-        return dipole, None
+        # PolarMACE outputs e*Angstrom -> convert to e*Bohr (base-class contract)
+        return dipole / BOHR_TO_ANGSTROM, None
 
     def calculate_dipole_derivatives(self, atoms, **kwargs) -> np.ndarray:
-        """Dipole derivatives ∂μ/∂r in shape (3*N_atoms, 3), units e/Å.
+        """Dipole derivatives ∂μ/∂r in shape (3*N_atoms, 3), atomic units e.
 
         Tries an autograd Jacobian (3 backward passes, ~20× faster for typical
         molecules). Falls back to base-class finite differences if autograd
@@ -115,9 +117,7 @@ class MACEPolar1DipoleCalculator(DipoleCalculatorBase):
         output = model(batch_dict, training=True)
         dipole = output["dipole"].reshape(-1)[:3]
 
-        dmu_dr = torch.zeros(
-            (3, n_atoms, 3), device=positions.device, dtype=positions.dtype
-        )
+        dmu_dr = torch.zeros((3, n_atoms, 3), device=positions.device, dtype=positions.dtype)
         for i in range(3):
             grad = torch.autograd.grad(
                 dipole[i], positions, retain_graph=(i < 2), create_graph=False

@@ -131,6 +131,24 @@ class TestParseHarmonicFrequencies:
             assert entry["freq_cm"] > 0
             assert "ir_intensity" in entry
 
+    def test_imaginary_frequencies_parsed(self, acoh_ml_log):
+        """Blocks containing imaginary (negative) frequencies must not be dropped.
+
+        The acetic acid ML log starts with 'Frequencies -- -255.1032 328.8894
+        373.3440'. A regex that cannot match the minus sign silently drops the
+        whole block — losing the imaginary mode AND the real modes sharing its
+        block, and misaligning every subsequent IR intensity.
+        """
+        parser = GaussianLogParser(acoh_ml_log)
+        result = parser.parse_harmonic_frequencies()
+
+        # All 18 modes (8 atoms -> 3*8-6), including the imaginary one
+        assert len(result) == 18
+        assert result[0]["freq_cm"] == pytest.approx(-255.1032, abs=0.01)
+        # Real modes from the same block are preserved
+        assert result[1]["freq_cm"] == pytest.approx(328.8894, abs=0.01)
+        assert result[2]["freq_cm"] == pytest.approx(373.3440, abs=0.01)
+
 
 # --- Anharmonic frequency tests ---
 
@@ -203,23 +221,27 @@ class TestParseOvertones:
 class TestParseCombinationBands:
     """Tests for parse_combination_bands() method."""
 
-    def test_water_combination_bands_documents_duplication_bug(self, water_dft_log):
-        """Water DFT combination bands return 6 entries (NOT 3).
+    def test_water_combination_bands_no_ds_duplication(self, water_dft_log):
+        """Water DFT combination bands return exactly 3 unique entries.
 
-        Known bug: parser captures combination bands from both I(anharm) and
-        DS(anharm) sections, yielding duplicates. True unique count is 3.
-        See Phase 1 research.
+        The parser must read only the km/mol I(anharm) table and ignore the
+        later DS(anharm) dipole-strength table, which previously produced
+        duplicate entries (6 instead of 3) in different units.
         """
         parser = GaussianLogParser(water_dft_log)
         result = parser.parse_combination_bands()
 
-        # Documents current (buggy) behavior: 6 instead of 3
-        assert len(result) == 6
+        # Only the I(anharm) section is parsed: 3 unique combination bands
+        assert len(result) == 3
 
         # Verify all entries have expected keys
         required_keys = {"mode1", "mode2", "freq_harmonic", "freq_anharmonic", "ir_intensity"}
         for entry in result:
             assert required_keys.issubset(entry.keys())
+
+        # Intensities must be the km/mol I(anharm) values, not DS(anharm)
+        intensities = sorted(e["ir_intensity"] for e in result)
+        assert intensities == pytest.approx([0.40654498, 3.30789823, 3.68333482], abs=0.001)
 
     def test_combination_band_frequencies_positive(self, water_dft_log):
         """All combination band frequencies should be positive."""

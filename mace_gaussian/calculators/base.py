@@ -7,11 +7,18 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 
+from ..utils.units import BOHR_TO_ANGSTROM
+
 logger = logging.getLogger(__name__)
 
 
 class DipoleCalculatorBase(ABC):
-    """Abstract base class for dipole calculators"""
+    """Abstract base class for dipole calculators.
+
+    Unit contract (Gaussian external interface expects atomic units):
+    - ``calculate_dipole`` returns the dipole in e*Bohr.
+    - ``calculate_dipole_derivatives`` returns d(mu)/dr in e (= e*Bohr/Bohr).
+    """
 
     def __init__(self, name: str):
         self.name = name
@@ -32,7 +39,12 @@ class DipoleCalculatorBase(ABC):
         pass
 
     def calculate_dipole_derivatives(self, atoms, displacement=0.01, **kwargs) -> np.ndarray:
-        """Calculate dipole derivatives numerically"""
+        """Calculate dipole derivatives numerically.
+
+        Central differences of ``calculate_dipole`` (e*Bohr) with respect to
+        Cartesian displacements in Angstrom, converted to atomic units (e)
+        before returning. ``displacement`` is in Angstrom.
+        """
         natoms = len(atoms)
         dipole_derivatives = np.zeros((3 * natoms, 3))
         base_positions = atoms.get_positions().copy()
@@ -63,4 +75,5 @@ class DipoleCalculatorBase(ABC):
             # Restore original positions
             atoms.set_positions(base_positions)
 
-        return dipole_derivatives
+        # (e*Bohr)/Angstrom -> e*Bohr/Bohr = e (atomic units, as Gaussian expects)
+        return dipole_derivatives * BOHR_TO_ANGSTROM

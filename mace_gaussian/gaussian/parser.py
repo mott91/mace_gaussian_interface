@@ -47,7 +47,8 @@ class GaussianLogParser:
         list of dict
             List of dictionaries with 'freq_cm' and 'ir_intensity' keys
         """
-        freq_pattern = r"Frequencies\s+--\s+([\d\.\s]+)"
+        # Frequencies may be negative (imaginary modes printed as -xxx.x)
+        freq_pattern = r"Frequencies\s+--\s+([-\d\.\s]+)"
         ir_pattern = r"IR Inten\s+--\s+([\d\.\s]+)"
 
         # Collect all frequency blocks (each "Frequencies --" line is one block)
@@ -123,11 +124,15 @@ class GaussianLogParser:
         in_format_b = False
 
         for i, line in enumerate(lines):
-            # Check if we're in the Fundamental Bands section
+            # Check if we're in the Fundamental Bands section.
+            # Only the "Anharmonic Infrared Spectroscopy" table (I(anharm), km/mol)
+            # is accepted; the later "Dipole strengths" table (DS(anharm),
+            # 10^-40 esu^2.cm^2) is a different physical quantity and must NOT
+            # overwrite the intensities.
             if "Fundamental Bands" in line:
                 # Lookahead: determine which format this section is
                 for j in range(i, min(i + 10, len(lines))):
-                    if "I(anharm)" in lines[j] or "DS(anharm)" in lines[j]:
+                    if "I(anharm)" in lines[j]:
                         in_fundamental_section = True
                         in_format_b = False  # Format A: has intensity column
                         break
@@ -173,7 +178,7 @@ class GaussianLogParser:
                     # or with I(harm) value:
                     #    1(1)                  3764.146   3579.741    653.06339135    625.83031627
                     match = re.match(
-                        r"^\s*(\d+)\(1\)\s+([\d\.]+)\s+([\d\.]+)\s+(?:([\d\.]+)\s+)?([\d\.]+)\s*$",
+                        r"^\s*(\d+)\(1\)\s+(-?[\d\.]+)\s+(-?[\d\.]+)\s+(?:([\d\.]+)\s+)?([\d\.]+)\s*$",
                         line,
                     )
                     if match:
@@ -220,11 +225,13 @@ class GaussianLogParser:
         in_overtones_section = False
 
         for i, line in enumerate(lines):
-            # Check if we're entering the Overtones section
+            # Check if we're entering the Overtones section.
+            # Only accept the km/mol intensity table (I(anharm)); the later
+            # dipole-strength table (DS(anharm)) is a different quantity.
             if "Overtones" in line and "---" in lines[i + 1]:
                 # Look ahead to see if this section has intensities
                 for j in range(i, min(i + 10, len(lines))):
-                    if "I(anharm)" in lines[j] or "DS(anharm)" in lines[j]:
+                    if "I(anharm)" in lines[j]:
                         in_overtones_section = True
                         break
                 continue
@@ -238,7 +245,7 @@ class GaussianLogParser:
                 #    1(2)                  7528.291   6994.185                     11.18668104
                 # Pattern: mode(overtone_level), harmonic freq, anharmonic freq, intensity
                 match = re.match(
-                    r"^\s*(\d+)\((\d+)\)\s+([\d\.]+)\s+([\d\.]+)\s+([\d\.]+)\s*$", line
+                    r"^\s*(\d+)\((\d+)\)\s+(-?[\d\.]+)\s+(-?[\d\.]+)\s+([\d\.]+)\s*$", line
                 )
 
                 if match:
@@ -280,20 +287,23 @@ class GaussianLogParser:
         in_combination_section = False
 
         for i, line in enumerate(lines):
-            # Check if we're entering the Combination Bands section
+            # Check if we're entering the Combination Bands section.
+            # Only accept the km/mol intensity table (I(anharm)); the later
+            # dipole-strength table (DS(anharm)) is a different quantity.
             if "Combination Bands" in line and "---" in lines[i + 1]:
                 # Look ahead to see if this section has intensities
                 for j in range(i, min(i + 10, len(lines))):
-                    if "I(anharm)" in lines[j] or "DS(anharm)" in lines[j]:
+                    if "I(anharm)" in lines[j]:
                         in_combination_section = True
                         break
                 continue
 
             # Check if we're leaving the combination bands section
-            # (usually ends with another major section or analysis)
+            # (next major section, or the start of the dipole-strengths tables)
             if in_combination_section and (
                 "Electric dipole :" in line
                 or "Rotational Constants" in line
+                or "Dipole strengths" in line
                 or line.strip().startswith("==")
             ):
                 break
@@ -303,7 +313,7 @@ class GaussianLogParser:
                 #    2(1)        1(1)      6953.940   6650.547                      0.03741575
                 # Pattern: mode1(1), mode2(1), harmonic freq, anharmonic freq, intensity
                 match = re.match(
-                    r"^\s*(\d+)\(1\)\s+(\d+)\(1\)\s+([\d\.]+)\s+([\d\.]+)\s+([\d\.]+)\s*$", line
+                    r"^\s*(\d+)\(1\)\s+(\d+)\(1\)\s+(-?[\d\.]+)\s+(-?[\d\.]+)\s+([\d\.]+)\s*$", line
                 )
 
                 if match:
@@ -403,9 +413,7 @@ class GaussianLogParser:
             One dict per job step with keys ``cpu_s`` and ``elapsed_s``.
         """
         content = self.log_file.read_text()
-        time_re = re.compile(
-            r"(\d+) days\s+(\d+) hours\s+(\d+) minutes\s+([\d.]+) seconds"
-        )
+        time_re = re.compile(r"(\d+) days\s+(\d+) hours\s+(\d+) minutes\s+([\d.]+) seconds")
         sections: list[dict[str, float]] = []
         current: dict[str, float] = {}
 

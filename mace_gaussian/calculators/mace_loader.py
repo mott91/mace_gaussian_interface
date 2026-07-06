@@ -24,6 +24,7 @@ import numpy as np
 import torch
 
 from mace_gaussian.calculators.base import DipoleCalculatorBase
+from mace_gaussian.utils.units import BOHR_TO_ANGSTROM
 
 logger = logging.getLogger(__name__)
 
@@ -169,6 +170,12 @@ class MACEDipoleCalculator:
             ``(dipole_vector, None)`` where dipole_vector has shape ``(3,)``
             in units of e*Bohr.  Second element reserved for partial charges
             (not yet implemented).
+
+        Notes
+        -----
+        The MACE4IR dipole model outputs e*Angstrom (its fixed-charge baseline
+        is charges [e] x positions [Angstrom]); the value is converted to
+        e*Bohr here to satisfy the base-class unit contract.
         """
         self._ensure_calculator()
 
@@ -203,6 +210,9 @@ class MACEDipoleCalculator:
                 )
                 dipole_moment = dipole_moment.reshape(-1)[:3]
 
+            # Model outputs e*Angstrom -> convert to e*Bohr (atomic units)
+            dipole_moment = dipole_moment / BOHR_TO_ANGSTROM
+
             logger.debug("MACE dipole (final): %s, shape: %s", dipole_moment, dipole_moment.shape)
 
             return dipole_moment, None
@@ -230,7 +240,9 @@ class MACEDipoleCalculator:
         Returns
         -------
         np.ndarray
-            Dipole derivatives, shape (3*N_atoms, 3), units e/Angstrom (same as base class).
+            Dipole derivatives, shape (3*N_atoms, 3), in atomic units e
+            (the autograd Jacobian d(e*Angstrom)/d(Angstrom) is already
+            dimensionless in charge units; same contract as base class).
         """
         if not self.use_autograd:
             return DipoleCalculatorBase.calculate_dipole_derivatives(self, atoms, **kwargs)

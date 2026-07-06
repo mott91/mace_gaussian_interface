@@ -75,6 +75,7 @@ class ComparisonMetrics:
     num_ml_only: int  # Number of modes only in ML (spurious)
     match_rate: float  # Fraction of DFT modes matched (num_matched / total_dft_modes)
     num_intensity_filtered: int  # Modes excluded from intensity regression (DFT < 0.1 km/mol)
+    num_imaginary_excluded: int = 0  # Matched pairs excluded: either frequency imaginary
 
 
 class SpectrumAnalyzer:
@@ -166,7 +167,10 @@ class SpectrumAnalyzer:
             log_content = f.read()
 
         intensities = []
-        freq_pattern = r"Frequencies\s+--\s+([\d\.\s]+)"
+        # Frequencies may be negative (imaginary modes); the pattern must match
+        # those blocks too, otherwise their IR intensities are skipped and every
+        # subsequent intensity is assigned to the wrong mode.
+        freq_pattern = r"Frequencies\s+--\s+([-\d\.\s]+)"
         ir_pattern = r"IR Inten\s+--\s+([\d\.\s]+)"
 
         lines = log_content.split("\n")
@@ -516,6 +520,24 @@ class SpectrumAnalyzer:
             dft_spectrum, ml_spectrum, mode_mapping=mode_mapping
         )
 
+        # Exclude matched pairs where either frequency is imaginary (printed as
+        # negative by Gaussian). An imaginary frequency is not a negative
+        # wavenumber, so freq/intensity error statistics over such pairs are
+        # meaningless. The excluded count is reported as its own quality metric.
+        num_imaginary_excluded = 0
+        if len(dft_freq) > 0:
+            real_mask = (dft_freq > 0) & (ml_freq > 0)
+            num_imaginary_excluded = int((~real_mask).sum())
+            if num_imaginary_excluded > 0:
+                logger.warning(
+                    f"Excluding {num_imaginary_excluded} matched mode pair(s) with "
+                    "imaginary (negative) frequency from metrics"
+                )
+                dft_freq = dft_freq[real_mask]
+                ml_freq = ml_freq[real_mask]
+                dft_int = dft_int[real_mask]
+                ml_int = ml_int[real_mask]
+
         if len(dft_freq) == 0:
             logger.warning("No matching modes found!")
             return ComparisonMetrics(
@@ -534,6 +556,7 @@ class SpectrumAnalyzer:
                 num_ml_only=match_stats["ml_only"],
                 match_rate=match_stats["match_rate"],
                 num_intensity_filtered=0,
+                num_imaginary_excluded=num_imaginary_excluded,
             )
 
         # Frequency metrics
@@ -590,6 +613,7 @@ class SpectrumAnalyzer:
             num_ml_only=match_stats["ml_only"],
             match_rate=match_stats["match_rate"],
             num_intensity_filtered=num_intensity_filtered,
+            num_imaginary_excluded=num_imaginary_excluded,
         )
 
     def plot_spectra_comparison(
