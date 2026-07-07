@@ -57,7 +57,7 @@ Full archive: `.planning/milestones/v1.1-ROADMAP.md`, `.planning/milestones/v1.1
 - [x] **Phase 21: NIST Experimental Overlay** - Fetch, cache, and overlay experimental IR spectra from NIST WebBook (completed 2026-04-02)
 - [x] **Phase 22: Early SLURM Submission** - Submit DFT jobs per-molecule immediately after geometry optimization (completed 2026-04-05)
 - [x] **Phase 23: Anharmonic Pipeline & Report Overhaul** - Thesis-quality HTML report integrating all v1.2 features (completed 2026-04-12)
-- [ ] **Phase 24: VPT2 Research Spike** - Time-boxed Psience/VPT2 feasibility evaluation on water
+- [x] **Phase 24: VPT2 Research Spike** - Time-boxed Psience/VPT2 feasibility evaluation on water (completed 2026-07-06 -- proof-of-concept achieved on branch `spike/24-vpt2-psience`, see phase SPIKE.md)
 
 ## Phase Details
 
@@ -211,6 +211,6 @@ Plans:
 | 21. NIST Experimental Overlay | v1.2 | 2/2 | Complete   | 2026-04-02 |
 | 22. Early SLURM Submission | v1.2 | 1/1 | Complete (verified) | 2026-04-05 |
 | 23. Anharmonic Pipeline & Report | v1.2 | 5/5 | Complete   | 2026-04-12 |
-| 24. VPT2 Research Spike | v1.2 | 0/TBD | Not started | - |
+| 24. VPT2 Research Spike | v1.2 | 1/1 | Complete   | 2026-07-06 |
 | 16. Benchmark Campaign | v1.3 | 0/TBD | Not started | - |
 | 17. Docs Update | v1.3 | 1/1 | Complete    | 2026-04-02 |
