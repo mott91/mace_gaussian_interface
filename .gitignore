@@ -57,6 +57,21 @@ Thumbs.db
 comparison_results/
 analysis_results/
 analysis_results_harmonic/
+/coverage_analysis/
+
+# Per-molecule workflow outputs and batch molecule lists (root-level only)
+/decane/
+/formic_acid/
+/hydrogen_chloride/
+/hydrogen_cyanide/
+/hydrogen_fluoride/
+/methanol/
+/molecules/
+/water/
+/molecules.txt
+/test_batch.txt
+/test_phase22.txt
+/water.txt
 
 # Scratch directories
 testingStuff/
