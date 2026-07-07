@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import base64
 import html
-import math
 from pathlib import Path
 from typing import Any, Literal
 
@@ -306,8 +305,6 @@ class HTMLReportGenerator:
         for idx, entry in enumerate(ranked):
             cls = "method-card best-method" if idx == 0 else "method-card"
             name = self._esc(entry["name"])
-            exp_val = entry.get("experimental_agreement")
-            exp_str = f"{exp_val:.2f}" if exp_val is not None else "\u2014"
             cards.append(
                 f'<div class="{cls}">'
                 f"<h3>{name}</h3>"
@@ -323,9 +320,6 @@ class HTMLReportGenerator:
                 f'<div class="metric">'
                 f'<span class="metric-label">Speedup</span>'
                 f'<span class="metric-value">{entry["speedup"]:.1f}\u00d7</span></div>'
-                f'<div class="metric">'
-                f'<span class="metric-label">Exp. agreement</span>'
-                f'<span class="metric-value">{exp_str}</span></div>'
                 "</div>"
             )
         return (
@@ -589,8 +583,6 @@ class HTMLReportGenerator:
 
         # Per-method metrics — punchy stat boxes with timing integrated
         m = comp["metrics"]
-        exp_agree = comp.get("experimental_agreement")
-        exp_str = self._format_exp_agreement(exp_agree)
 
         r2_class = (
             "metric-good" if m.r2_freq > 0.95
@@ -641,9 +633,6 @@ class HTMLReportGenerator:
             f'<div class="stat-item">'
             f'<div class="stat-label">Speedup</div>'
             f'<div class="stat-value">{speedup:.1f}\u00d7</div></div>'
-            f'<div class="stat-item">'
-            f'<div class="stat-label">Exp. Agreement</div>'
-            f'<div class="stat-value">{exp_str}</div></div>'
             "</div></div>"
         )
 
@@ -723,8 +712,8 @@ class HTMLReportGenerator:
     def _create_summary_table(self, comparisons: list[dict]) -> str:
         """Build the overall summary comparison table.
 
-        Columns: method name, R2 (freq), R2 (intensity), RMSE, speedup, and
-        experimental agreement.  Method names are HTML-escaped.
+        Columns: method name, R2 (freq), R2 (intensity), RMSE, and speedup.
+        Method names are HTML-escaped.
         """
         if not comparisons:
             return (
@@ -739,8 +728,6 @@ class HTMLReportGenerator:
             m = comp["metrics"]
             name = self._esc(comp["name"])
             speedup = comp.get("speedup", 0.0)
-            exp_agree = comp.get("experimental_agreement")
-            exp_str = self._format_exp_agreement(exp_agree)
             rows.append(
                 f"<tr>"
                 f"<td>{name}</td>"
@@ -748,7 +735,6 @@ class HTMLReportGenerator:
                 f"<td>{m.r2_intensity:.4f}</td>"
                 f"<td>{m.rmse_freq:.2f}</td>"
                 f"<td>{speedup:.1f}\u00d7</td>"
-                f"<td>{exp_str}</td>"
                 f"</tr>"
             )
         return (
@@ -757,24 +743,11 @@ class HTMLReportGenerator:
             '<table class="data-table">'
             "<thead><tr>"
             "<th>Method</th><th>R\u00b2 freq</th><th>R\u00b2 int</th>"
-            "<th>RMSE</th><th>Speedup</th><th>Exp. agreement</th>"
+            "<th>RMSE</th><th>Speedup</th>"
             "</tr></thead>"
             f"<tbody>{''.join(rows)}</tbody></table>"
             "</section>"
         )
-
-    @staticmethod
-    def _format_exp_agreement(exp_agree: float | None) -> str:
-        """Format experimental agreement for display.
-
-        Returns the value formatted to 2 decimal places, or an em-dash
-        when the value is None or NaN.
-        """
-        if exp_agree is None:
-            return "\u2014"
-        if isinstance(exp_agree, float) and math.isnan(exp_agree):
-            return "\u2014"
-        return f"{exp_agree:.2f}"
 
     @staticmethod
     def _low_overlap_stat(comp: dict) -> str:

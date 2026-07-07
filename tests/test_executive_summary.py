@@ -179,7 +179,8 @@ class TestBuildVerdict:
         assert "closest to experiment" in verdict
         assert "0.995" in verdict
         assert "20.0" in verdict
-        assert "0.92" in verdict
+        # Agreement value intentionally absent: near-noise metric hidden from display
+        assert "0.92" not in verdict
 
     def test_without_experimental(self):
         ranked = [

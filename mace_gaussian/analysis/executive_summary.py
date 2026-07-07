@@ -139,8 +139,7 @@ def build_verdict(ranked: list[dict[str, Any]], has_experimental: bool) -> str:
     if has_experimental and best.get("experimental_agreement") is not None:
         return (
             f"{best['name']} is closest to experiment "
-            f"(R\u00b2_freq={best['r2_freq']:.3f}, RMSE={best['rmse_freq']:.1f} cm\u207b\u00b9, "
-            f"experimental agreement={best['experimental_agreement']:.2f})."
+            f"(R\u00b2_freq={best['r2_freq']:.3f}, RMSE={best['rmse_freq']:.1f} cm\u207b\u00b9)."
         )
     return (
         f"{best['name']} is closest to DFT "
