@@ -71,6 +71,15 @@ def extract_mode_data_from_checkpoint(
         fchk_file, force_harmonic=force_harmonic
     )
 
+    # Mass-weight (review finding H3). Gaussian's Vib-Modes block stores Cartesian
+    # displacements, which are not orthogonal to each other (a calculation compared
+    # with itself gives off-diagonal overlaps up to ~0.13 for H-rich molecules).
+    # Normal modes are orthonormal in mass-weighted coordinates q = sqrt(m) * x,
+    # so weight and renormalize here, before any overlap is computed.
+    modes = modes * np.sqrt(masses)[None, :, None]
+    norms = np.linalg.norm(modes.reshape(modes.shape[0], -1), axis=1)
+    modes = modes / norms[:, None, None]
+
     logger.info(f"Extracted {modes.shape[0]} modes for {n_atoms} atoms from {fchk_file}")
 
     return modes, frequencies, coords, masses, n_atoms

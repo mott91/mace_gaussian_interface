@@ -51,8 +51,8 @@ WATER_OVERTONES_EXPECTED = [
     },
 ]
 
-# Water energy from archive section
-WATER_ENERGY_EXPECTED = 0.003705  # Hartrees
+# NOTE: the value 0.003705 that used to live here was the Gibbs thermal correction,
+# not an energy (review finding H4). The DFT fixture contains no SCF energy line.
 
 
 # --- Harmonic frequency tests ---
@@ -261,12 +261,14 @@ class TestParseFinalEnergy:
     """Tests for parse_final_energy() method."""
 
     def test_water_energy_extraction(self, water_dft_log):
-        """Energy parsing extracts Hartree energy from 'Energy=' pattern in archive section."""
-        parser = GaussianLogParser(water_dft_log)
-        result = parser.parse_final_energy()
+        """The truncated DFT fixture has no 'SCF Done' line, so no energy is found.
 
-        assert result is not None
-        assert result == pytest.approx(WATER_ENERGY_EXPECTED, abs=0.000001)
+        Before review fix H4 the unanchored 'Energy=' regex matched
+        'Thermal correction to Gibbs Free Energy= 0.003705' and this test pinned
+        that value (WATER_ENERGY_EXPECTED). See tests/test_review_fixes.py.
+        """
+        parser = GaussianLogParser(water_dft_log)
+        assert parser.parse_final_energy() is None
 
 
 class TestParseDipoleMoment:

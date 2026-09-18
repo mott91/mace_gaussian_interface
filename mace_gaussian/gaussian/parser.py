@@ -348,13 +348,23 @@ class GaussianLogParser:
         float or None
             Final energy in Hartrees, or None if not found
         """
-        # Look for the last "Energy=" line from external calculation
-        pattern = r"Energy=\s+([-\d\.]+)"
+        # Two sources, both anchored (review finding H4). An unanchored "Energy="
+        # pattern also matched "Thermal correction to Gibbs Free Energy=" in the
+        # thermochemistry block and returned that instead of the energy.
+        #   External runs:  " Energy=   -76.4312   NIter=  1"
+        #   DFT runs:       " SCF Done:  E(RB3LYP) =  -76.4196339639     A.U. after ..."
+        patterns = (
+            r"^\s*Energy=\s+(-?\d+\.\d+)\s+NIter",
+            r"SCF Done:\s+E\([^)]*\)\s+=\s+(-?\d+\.\d+)",
+        )
+        last = None
+        for pattern in patterns:
+            for m in re.finditer(pattern, self.content, re.MULTILINE):
+                if last is None or m.start() > last.start():
+                    last = m
 
-        matches = re.findall(pattern, self.content)
-        if matches:
-            # Return the last one (final energy)
-            energy_hartree = float(matches[-1])
+        if last is not None:
+            energy_hartree = float(last.group(1))
             logger.info(f"Parsed final energy: {energy_hartree} Hartree")
             return energy_hartree
 

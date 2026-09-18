@@ -45,6 +45,23 @@ plt.rcParams["legend.fontsize"] = 9
 plt.rcParams["figure.dpi"] = 300
 
 
+def gaussian_mode_to_checkpoint_index(anharmonic: list[dict]) -> dict[int, int]:
+    """Map Gaussian's anharmonic ``Mode(n)`` numbers to 1-based ascending-frequency indices.
+
+    The .fchk stores normal modes in ascending harmonic frequency; Gaussian's anharmonic
+    tables number them by symmetry block. Each anharmonic row carries its harmonic
+    frequency (``freq_harmonic``), which is identical to the .fchk value, so sorting the
+    rows by it recovers the checkpoint position (review finding H2).
+
+    Returns an empty dict (caller falls back to the raw number) when the entries lack
+    ``mode`` or ``freq_harmonic`` (result files written before July 2026).
+    """
+    if not anharmonic or any("mode" not in e or "freq_harmonic" not in e for e in anharmonic):
+        return {}
+    ordered = sorted(anharmonic, key=lambda e: (e["freq_harmonic"], e["mode"]))
+    return {e["mode"]: rank + 1 for rank, e in enumerate(ordered)}
+
+
 @dataclass
 class SpectrumData:
     """Container for spectral data"""
@@ -282,17 +299,23 @@ class SpectrumAnalyzer:
 
         # ANHARMONIC MODE: Extract anharmonic fundamentals (and optionally overtones/combinations)
         else:
-            # # COMMENTED OUT: This is the old behavior (anharmonic frequencies)
-            # # Kept for reference - can be restored by setting use_harmonic=False
             anharmonic = results.get("frequencies", {}).get("anharmonic", [])
+
+            # Review finding H2: Gaussian numbers the rows of its anharmonic tables by
+            # symmetry block (water: Mode(1)=3799, Mode(2)=1665, Mode(3)=3912), but the
+            # eigenvector mapping from match_modes() is built on the .fchk order, which is
+            # ascending frequency. Mode IDs must live in the .fchk index space, so every
+            # Gaussian mode number is translated to its ascending-frequency rank here.
+            # Overtone and combination labels go through the same translation.
+            to_ckpt = gaussian_mode_to_checkpoint_index(anharmonic)
+
             for idx, entry in enumerate(anharmonic):
                 frequencies.append(entry["freq_cm"])
                 intensities.append(entry["ir_intensity"])
                 labels.append("fundamental")
-                # Mode ID: F{mode_number}
                 # Fallback to index if 'mode' key doesn't exist (old result files)
                 mode_num = entry.get("mode", idx + 1)
-                mode_ids.append(f"F{mode_num}")
+                mode_ids.append(f"F{to_ckpt.get(mode_num, mode_num)}")
 
             # Add overtones (only in anharmonic mode)
             if include_overtones:
@@ -302,10 +325,9 @@ class SpectrumAnalyzer:
                     intensities.append(entry["ir_intensity"])
                     labels.append("overtone")
                     # Mode ID: O{mode}_{level}
-                    # Fallback for old result files
                     mode_num = entry.get("mode", idx + 1)
                     overtone_level = entry.get("overtone_level", 2)
-                    mode_ids.append(f"O{mode_num}_{overtone_level}")
+                    mode_ids.append(f"O{to_ckpt.get(mode_num, mode_num)}_{overtone_level}")
 
             # Add combination bands (only in anharmonic mode)
             if include_combinations:
@@ -315,10 +337,9 @@ class SpectrumAnalyzer:
                     intensities.append(entry["ir_intensity"])
                     labels.append("combination")
                     # Mode ID: C{mode1}_{mode2} (sorted to ensure C1_2 == C2_1)
-                    # Fallback for old result files
                     mode1 = entry.get("mode1", idx + 1)
                     mode2 = entry.get("mode2", idx + 2)
-                    m1, m2 = sorted([mode1, mode2])
+                    m1, m2 = sorted([to_ckpt.get(mode1, mode1), to_ckpt.get(mode2, mode2)])
                     mode_ids.append(f"C{m1}_{m2}")
 
         return SpectrumData(

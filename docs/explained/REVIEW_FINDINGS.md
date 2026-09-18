@@ -137,6 +137,17 @@ translation for overtone/combination indices.
 (check `Mode_Overlap` column order in `analysis_results_harmonic/<mol>/data/comparison_*.csv`)
 and compare the anharmonic `comparison_*.csv` pairs by hand.
 
+**Status 2026-09-18: FIXED on `fix/review-2026-09`.** New
+`analyze_spectra.gaussian_mode_to_checkpoint_index()` ranks the anharmonic rows by
+`freq_harmonic` and `extract_spectrum_data` labels fundamentals, overtones and
+combinations in checkpoint index space. Old result files without `freq_harmonic` fall
+back to the raw number. Tests in `tests/test_review_fixes.py`. Before/after comparison of
+the analysis output: see the table at the end of this file.
+
+Left open as **H2b**: `html_report_generator._build_anharmonicity_section` (lines 685-712)
+pairs ML and DFT anharmonic rows by raw Gaussian mode number with no eigenvector mapping at
+all. Same bug class; it feeds only the anharmonicity-ratio plot, not the metrics.
+
 ---
 
 ## H3. Mode overlaps use Cartesian displacements, not mass-weighted eigenvectors
@@ -167,6 +178,10 @@ eigenvectors", which is currently false.
 **Suggested fix:** In `extract_mode_data_from_checkpoint` or at the top of `match_modes`:
 `modes = modes * np.sqrt(masses)[None, :, None]`, then renormalize each mode. Two lines.
 
+**Status 2026-09-18: FIXED on `fix/review-2026-09`** in
+`mode_matching.extract_mode_data_from_checkpoint`. Test: self-overlap of the water and
+methane fixture checkpoints is the identity to 1e-6.
+
 ---
 
 ## H4. `parse_final_energy` returns a thermal correction, not the energy
@@ -194,6 +209,12 @@ garbage. Cheap to fix, embarrassing to leave.
 
 **Suggested fix:** For external logs use `^\s*Energy=\s+(-?[\d.]+)\s+NIter`; for DFT logs use
 `SCF Done:\s+E\(\w+\)\s+=\s+(-?[\d.]+)`; try both, take the last match of whichever hits.
+
+**Status 2026-09-18: FIXED on `fix/review-2026-09`** in `parser.parse_final_energy`.
+Note: `tests/test_gaussian_parser.py` had pinned the wrong value (`WATER_ENERGY_EXPECTED =
+0.003705`, i.e. the Gibbs correction); that test now asserts `None` for the truncated DFT
+fixture, and the real cases are in `tests/test_review_fixes.py`. Existing `results.json`
+energies are still wrong until re-parsed or rerun.
 
 ---
 
