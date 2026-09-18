@@ -369,12 +369,30 @@ docs should say "neutral closed-shell only" rather than imply support.
 |---|---|---|
 | M1 | flag, don't fail | `calculate_dipole_properties` counts fallbacks on `atoms.info`; `results.json` gets `calculation_parameters.dipole_fallbacks = {count, last_error, intensities_trustworthy}` and the run prints a warning. `base.py` no longer swallows finite-difference errors. |
 | M2 | fix | `is_calc_finished(proc, socket, deadline=...)` raises `GaussianTimeoutError` inside the wait loop; `runner.py` catches it, kills g16, re-raises with output. |
-| M3 | fix | `socket.poll(timeout=1000)` replaces poll(10 ms) + sleep(1 s). Timing before/after on water below. |
+| M3 | fix | `socket.poll(timeout=1000)` replaces poll(10 ms) + sleep(1 s). **Measured** on water (OMOL + MACE4IR, 7 external calls): Gaussian elapsed 16.6 s → 15.6 s, i.e. ~0.15 s per call, not the ~0.5 s per call estimated in M3 above. The estimate was an upper bound; most of the wall time is helper-process start-up, model inference and Gaussian's own work (see breakdown below). For decane (181 calls) expect ~25 s saved, not 90. |
 | M4 | fmax 1e-4 | `OPT_FMAX = 1e-4`; `geometry_optimisation` returns `(mol, steps, converged)` from the optimizer; stage 1 records the real verdict. |
 | M5 | fix | `batch_report` reads `analysis_results_harmonic/<mol>/data/comparison_<combo>.csv` (Pearson r², imaginary pairs excluded, same as per-molecule reports); rows carry `pairing = "eigenvector"` or `"sorted"` (fallback with warning). `generate_batch_report(..., analysis_dir=)`. |
 | M6 | document | README "Scope" section: neutral closed-shell only. |
 
 Tests for all of these in `tests/test_review_fixes.py`.
+
+**Observation O3 (cost chapter): the ML side, not the bridge, dominates small-molecule wall
+time.** Water, OMOL extra_large + MACE4IR, RTX 2070 Super, after M3:
+
+| | seconds |
+|---|---|
+| Gaussian elapsed (whole freq(anharm) job) | 15.6 |
+| of which the 7 external calls, measured in Python | 13.7 (4.0, 2.7, 2.6, then 1.1 each) |
+| Gaussian's own CPU time | 1.8 |
+| socket wait + helper start-up (remainder) | ~0.1 |
+
+So for a 3-atom molecule one ML call costs about 1.1 s once warm (extra_large forward,
+autograd Hessian, MACE4IR autograd Jacobian) and the first three calls carry CUDA/model
+warm-up. The per-call DEBUG timing (`energy=`, `hessian=`, `dipole=` in `workflow.py:305`)
+should be promoted to INFO and stored in results.json before the alkane ladder is run,
+otherwise the cost plot cannot separate model inference from Gaussian overhead. This is
+also why water shows no ML speed-up: DFT's 7 Hessians on 3 atoms are cheap, and the ML
+floor is ~1 s per call regardless of size.
 
 ## L1. Espaloma "dipole derivatives" are a fixed-charge model (physics note, not a bug)
 
