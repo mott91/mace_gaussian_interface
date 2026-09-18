@@ -42,7 +42,7 @@ class MACEMLDipoleCalculator(DipoleCalculatorBase):
             self.mace_calc = MACEDipoleCalculator(self.model_path)
             self.available = True
             logger.info(f"\u2713 MACE ML dipole calculator available (model: {self.model_path})")
-        except (ImportError, FileNotFoundError) as e:
+        except Exception as e:  # L4: any failure means "unavailable", never an import crash
             self.available = False
             logger.warning(f"\u2717 MACE ML dipole calculator failed: {e}")
 

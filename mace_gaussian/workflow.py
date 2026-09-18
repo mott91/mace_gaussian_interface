@@ -23,6 +23,7 @@ import json
 import logging
 import os
 import shutil
+import tempfile
 import time
 import warnings
 from pathlib import Path
@@ -573,22 +574,25 @@ def run_frequency_calculation(
 
             print(f"  -> Gaussian input: {scratch_path / gjf_basename}")
 
-            # IPC socket — absolute path inside scratch dir
-            ipc_path = str((scratch_path / "zmq.ipc").resolve())
+            # IPC socket in a short temp dir, not the scratch dir: Unix socket paths are
+            # limited to 107 characters and the scratch path can exceed that on the
+            # cluster (review finding L12).
+            with tempfile.TemporaryDirectory(prefix="mg-") as sock_dir:
+                ipc_path = str(Path(sock_dir) / "zmq.ipc")
 
-            # Environment for Gaussian subprocess
-            env = os.environ.copy()
-            env["MACE_IPC_PATH"] = ipc_path
+                # Environment for Gaussian subprocess
+                env = os.environ.copy()
+                env["MACE_IPC_PATH"] = ipc_path
 
-            print("  -> Launching Gaussian...")
-            run_gaussian_with_zmq(
-                gjf_basename,
-                on_request=_on_request,
-                timeout_seconds=DEFAULT_TIMEOUT_SECONDS,
-                ipc_file=ipc_path,
-                cwd=str(scratch_path),
-                env=env,
-            )
+                print("  -> Launching Gaussian...")
+                run_gaussian_with_zmq(
+                    gjf_basename,
+                    on_request=_on_request,
+                    timeout_seconds=DEFAULT_TIMEOUT_SECONDS,
+                    ipc_file=ipc_path,
+                    cwd=str(scratch_path),
+                    env=env,
+                )
 
             # Move files from scratch to freq_dir (before context manager exits)
             for src_name, dst_name in [

@@ -3,9 +3,25 @@
 import os
 from unittest.mock import patch
 
+import pytest
 from click.testing import CliRunner
 
 from mace_gaussian.cli import VALID_DIPOLE_CALCULATORS, VALID_ENERGY_CALCULATORS, cli
+
+
+@pytest.fixture(autouse=True)
+def _never_run_the_pipeline():
+    """These tests exercise click option validation only.
+
+    Review finding L9: on a machine with g16 on PATH the accepted-value tests used
+    to pass validation and then really start run_pipeline (loading MACE models and
+    running espaloma), taking 46 to 361 s each. Stop at the pipeline boundary.
+    """
+    with patch(
+        "mace_gaussian.workflow.run_pipeline",
+        return_value={"dft_baselines": {}, "ml_calculations": [], "molecule_name": "x"},
+    ):
+        yield
 
 
 class TestEnergyCalculatorValidation:

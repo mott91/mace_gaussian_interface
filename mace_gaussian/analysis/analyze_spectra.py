@@ -163,10 +163,18 @@ class SpectrumAnalyzer:
 
         # Try to find .log file for IR intensities
         if log_path is None:
-            # Try to find .log in same directory
+            # Prefer the log that belongs to this checkpoint (same stem), then the
+            # pipeline's standard names, then the newest .log (review finding L6:
+            # glob()[0] was arbitrary when a directory held more than one log).
             log_candidates = list(fchk_path.parent.glob("*.log"))
             if log_candidates:
-                log_path = log_candidates[0]
+                by_name = {p.name: p for p in log_candidates}
+                log_path = (
+                    by_name.get(fchk_path.with_suffix(".log").name)
+                    or by_name.get("gaussian_freq.log")
+                    or by_name.get("gaussian_dft.log")
+                    or max(log_candidates, key=lambda p: p.stat().st_mtime)
+                )
             else:
                 logger.warning("No .log file found for IR intensities, using zeros")
                 intensities = np.zeros(n_modes)

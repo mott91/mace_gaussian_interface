@@ -39,12 +39,12 @@ def test_terminal_states_contains_exactly_seven():
     assert TERMINAL_STATES == expected
 
 
-def test_default_poll_interval_is_one_hour():
-    assert DEFAULT_POLL_INTERVAL == 3600
+def test_default_poll_interval_is_ten_minutes():
+    assert DEFAULT_POLL_INTERVAL == 600
 
 
 def test_default_remote_base():
-    assert DEFAULT_REMOTE_BASE == "~/mace_gaussian_dft"
+    assert DEFAULT_REMOTE_BASE == "/scratch_rune03a/mot/calculations/mace_gaussian"
 
 
 # ---------------------------------------------------------------------------
@@ -196,7 +196,7 @@ def test_submit_dft_jobs(mock_ssh, mock_scp, tmp_path):
     assert mock_ssh.call_count == 2
     mkdir_cmd = mock_ssh.call_args_list[0][0][1]
     assert "mkdir -p" in mkdir_cmd
-    assert "mace_gaussian_dft/water" in mkdir_cmd
+    assert f"{DEFAULT_REMOTE_BASE}/water" in mkdir_cmd
     # SCP called twice: gjf file + slurm script
     assert mock_scp.call_count == 2
 

@@ -69,56 +69,63 @@ def run_gaussian_with_zmq(
         GaussianRunError: Gaussian exits with non-zero return code.
             Exception message includes captured stdout/stderr.
     """
-    proc = subprocess.Popen(
-        ["g16", gjf_file],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        cwd=cwd,
-        env=env,
-    )
-    start = time.time()
-    deadline = start + timeout_seconds
+    # g16's stdout/stderr go to a file instead of an undrained pipe (review finding L7:
+    # a pipe nobody reads deadlocks the child once it fills the 64 KB buffer).
+    console_path = Path(cwd or ".") / "g16_console.txt"
+    console = console_path.open("w+b")
+    try:
+        proc = subprocess.Popen(
+            ["g16", gjf_file],
+            stdout=console,
+            stderr=subprocess.STDOUT,
+            cwd=cwd,
+            env=env,
+        )
+        start = time.time()
+        deadline = start + timeout_seconds
 
-    with GaussianZMQServer(ipc_file) as server:
-        try:
-            # The deadline is checked inside the wait loop (review finding M2), so a
-            # Gaussian process that hangs without ever sending a request still times out.
-            while not is_calc_finished(proc, server.socket, deadline=deadline):
-                msg = server.socket.recv_string()
-                try:
-                    reply = on_request(msg)
-                    server.socket.send_string(reply)
-                except Exception:
-                    server.socket.send_string("error")
-                    raise
-        except GaussianTimeoutError:
-            elapsed = time.time() - start
-            proc.kill()
-            proc.wait()
-            stdout_data = proc.stdout.read().decode(errors="replace")
-            stderr_data = proc.stderr.read().decode(errors="replace")
+        def _console_text() -> str:
+            console.flush()
+            return console_path.read_text(errors="replace")
+
+        with GaussianZMQServer(ipc_file) as server:
+            try:
+                # The deadline is checked inside the wait loop (review finding M2), so a
+                # Gaussian process that hangs without ever sending a request still times out.
+                while not is_calc_finished(proc, server.socket, deadline=deadline):
+                    msg = server.socket.recv_string()
+                    try:
+                        reply = on_request(msg)
+                        server.socket.send_string(reply)
+                    except Exception:
+                        server.socket.send_string("error")
+                        raise
+            except GaussianTimeoutError:
+                elapsed = time.time() - start
+                proc.kill()
+                proc.wait()
+                logger.error(
+                    "Gaussian timed out after %.1fh (limit: %ds, gjf: %s)",
+                    elapsed / 3600,
+                    timeout_seconds,
+                    gjf_file,
+                )
+                raise GaussianTimeoutError(
+                    f"Gaussian timed out after {elapsed:.0f}s "
+                    f"(GAUSSIAN_TIMEOUT_SECONDS={timeout_seconds}, gjf={gjf_file})\n"
+                    f"console: {_console_text()}"
+                ) from None
+
+        proc.wait()
+        if proc.returncode != 0:
             logger.error(
-                "Gaussian timed out after %.1fh (limit: %ds, gjf: %s)",
-                elapsed / 3600,
-                timeout_seconds,
+                "Gaussian exited with code %d (gjf: %s)",
+                proc.returncode,
                 gjf_file,
             )
-            raise GaussianTimeoutError(
-                f"Gaussian timed out after {elapsed:.0f}s "
-                f"(GAUSSIAN_TIMEOUT_SECONDS={timeout_seconds}, gjf={gjf_file})\n"
-                f"stdout: {stdout_data}\nstderr: {stderr_data}"
-            ) from None
-
-    proc.wait()
-    if proc.returncode != 0:
-        stdout_data = proc.stdout.read().decode(errors="replace")
-        stderr_data = proc.stderr.read().decode(errors="replace")
-        logger.error(
-            "Gaussian exited with code %d (gjf: %s)",
-            proc.returncode,
-            gjf_file,
-        )
-        raise GaussianRunError(
-            f"Gaussian (g16) exited with code {proc.returncode} for {gjf_file}\n"
-            f"stdout: {stdout_data}\nstderr: {stderr_data}"
-        )
+            raise GaussianRunError(
+                f"Gaussian (g16) exited with code {proc.returncode} for {gjf_file}\n"
+                f"console: {_console_text()}"
+            )
+    finally:
+        console.close()

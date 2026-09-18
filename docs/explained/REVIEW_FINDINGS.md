@@ -394,6 +394,24 @@ otherwise the cost plot cannot separate model inference from Gaussian overhead. 
 also why water shows no ML speed-up: DFT's 7 Hessians on 3 atoms are cheap, and the ML
 floor is ~1 s per call regardless of size.
 
+## Status of L1-L12 and the test suite (2026-09-18, branch `fix/review-2026-09`)
+
+| # | done |
+|---|---|
+| L1 | thesis text only; nothing to change in code (`01_physics.md` §5 and `03_hard_questions.md` A5 carry the argument) |
+| L2 | `DFT_BASELINES` has one entry, `b3lyp` |
+| L3 | `mace_loader._DIPOLE_PKG_DIR` points at `<repo>/mace_dipole_pkg` |
+| L4 | all four dipole availability checks catch `Exception` |
+| L5 | moot since H4 |
+| L6 | `extract_spectrum_from_fchk` prefers the log with the checkpoint's stem, then `gaussian_freq.log` / `gaussian_dft.log`, then the newest |
+| L7 | g16 console output goes to `g16_console.txt` in the run directory (runner and DFT twin), read back on error |
+| L8 | `docs/methods.md` updated: per-model re-optimization, fmax 1e-4, 5x3 models, mass-weighted overlaps + degenerate subspaces, Lorentzian 10 cm-1, imaginary/intensity filters |
+| L9 | `tests/test_cli_validation.py` autouse fixture mocks `run_pipeline` |
+| L10 | the two `TestElementGuardAtCallSites` pipeline tests mock LBFGS, `run_gaussian_with_zmq` and the dipole factory; they can no longer touch `comparison_results/` |
+| L11 | `HTMLReportGenerator.generate_report` writes a short error page when there are no comparisons |
+| L12 | the IPC socket lives in `tempfile.TemporaryDirectory(prefix="mg-")`, ~20 characters |
+| stale tests | `test_html_report.py` reads with `encoding="utf-8"`; the three `test_slurm.py` assertions match the current constants |
+
 ## L1. Espaloma "dipole derivatives" are a fixed-charge model (physics note, not a bug)
 
 **Where:** `mace_gaussian/calculators/espaloma.py:34-76`.

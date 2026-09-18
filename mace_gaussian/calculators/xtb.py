@@ -20,7 +20,7 @@ class XTBDipoleCalculator(DipoleCalculatorBase):
 
             self.available = True
             logger.info("\u2713 xTB dipole calculator available")
-        except ImportError as e:
+        except Exception as e:  # L4
             self.available = False
             logger.warning(f"\u2717 xTB dipole calculator failed: {e}")
 

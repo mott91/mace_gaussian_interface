@@ -16,6 +16,8 @@ Covers:
 
 from unittest.mock import MagicMock, patch
 
+import numpy as np
+
 import pytest
 from ase import Atoms
 
@@ -249,11 +251,18 @@ class TestElementGuardAtCallSites:
         mock_results_mgr = MagicMock()
         mock_calc = MagicMock()
 
-        # We allow calculator() to be called and return a mock, then the function
-        # will fail later (no real Gaussian), but the guard must not raise.
-        with patch("mace_gaussian.workflow.calculator", return_value=mock_calc):
-            # The function will fail somewhere after the guard — that's fine
-            # We just need to confirm no ValueError from the element guard
+        # Review finding L10: this test used to let the real pipeline run, which
+        # launched Gaussian and overwrote comparison_results/. Everything past the
+        # guard is now mocked; the guard must simply not raise.
+        with (
+            patch("mace_gaussian.workflow.calculator", return_value=mock_calc),
+            patch("mace_gaussian.workflow.LBFGS") as mock_lbfgs,
+            patch("mace_gaussian.workflow.run_gaussian_with_zmq"),
+            patch("mace_gaussian.workflow.dipole_factory"),
+        ):
+            mock_lbfgs.return_value.run.return_value = True
+            mock_lbfgs.return_value.get_number_of_steps.return_value = 0
+            mock_calc.get_forces.return_value = np.zeros((3, 3))
             try:
                 run_frequency_calculation(
                     good_atoms,
@@ -266,7 +275,7 @@ class TestElementGuardAtCallSites:
                 if "mace_anicc only supports" in str(e):
                     pytest.fail(f"Element guard raised unexpectedly: {e}")
             except Exception:
-                pass  # Other errors are expected (no real Gaussian available)
+                pass  # Other errors are expected (mocked Gaussian)
 
     def test_run_frequency_calculation_other_calculators_unaffected(self):
         """Element guard is NOT triggered for mace_mp (no restriction on element types)."""
@@ -276,7 +285,15 @@ class TestElementGuardAtCallSites:
         mock_results_mgr = MagicMock()
         mock_calc = MagicMock()
 
-        with patch("mace_gaussian.workflow.calculator", return_value=mock_calc):
+        with (
+            patch("mace_gaussian.workflow.calculator", return_value=mock_calc),
+            patch("mace_gaussian.workflow.LBFGS") as mock_lbfgs,
+            patch("mace_gaussian.workflow.run_gaussian_with_zmq"),
+            patch("mace_gaussian.workflow.dipole_factory"),
+        ):
+            mock_lbfgs.return_value.run.return_value = True
+            mock_lbfgs.return_value.get_number_of_steps.return_value = 0
+            mock_calc.get_forces.return_value = np.zeros((2, 3))
             # Should not raise ValueError from element guard (mace_mp has no restriction)
             try:
                 run_frequency_calculation(

@@ -86,10 +86,16 @@ class HTMLReportGenerator:
         analysis_results : dict
             Results from comparison workflow.
         """
+        comparisons = analysis_results.get("comparisons") or []
+        if not comparisons:
+            # Review finding L11: run_full_analysis returns an empty comparison list
+            # (with an "error" key) when no DFT baseline or no ML results are found;
+            # write a short error page instead of failing on comparisons[0].
+            self._write_error_report(analysis_results.get("error", "No comparisons available"))
+            return
+
         self._enrich_with_broadened_spectra(analysis_results)
         self._compute_and_attach_experimental_agreement(analysis_results)
-
-        comparisons = analysis_results["comparisons"]
         # Sort comparisons: non-espaloma first (by MAE), then espaloma (by MAE)
         comparisons.sort(
             key=lambda c: ("espaloma" in c["name"].lower(), c["metrics"].mae_freq)
@@ -165,6 +171,26 @@ class HTMLReportGenerator:
         out_path.write_text(html_out, encoding="utf-8")
 
         export_report_data(analysis_results, self.output_dir / "report_data.json")
+
+    def _write_error_report(self, message: str) -> None:
+        """Minimal report.html explaining why there is nothing to show (L11)."""
+        html_out = "\n".join(
+            [
+                self._create_head(),
+                self._create_header(),
+                f'<section class="section"><h2>No comparisons</h2>'
+                f"<p>{self._esc(message)}</p>"
+                "<p>Check that <code>comparison_results/&lt;molecule&gt;/</code> contains a "
+                "DFT directory with <code>calculator_type: dft</code> and at least one ML "
+                "directory with <code>calculator_type: ml</code> in its results.json.</p>"
+                "</section>",
+                self._create_footer(),
+                "</body></html>",
+            ]
+        )
+        out_path = self.output_dir / "report.html"
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(html_out, encoding="utf-8")
 
     # ------------------------------------------------------------------
     # Helpers

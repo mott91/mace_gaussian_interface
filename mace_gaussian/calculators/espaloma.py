@@ -27,7 +27,7 @@ class EspalomaDipoleCalculator(DipoleCalculatorBase):
 
             self.available = True
             logger.info("\u2713 Espaloma-charge dipole calculator available and tested")
-        except ImportError as e:
+        except Exception as e:  # L4: any failure (import, DGL/torch, CUDA) means "unavailable"
             self.available = False
             logger.warning(f"\u2717 Espaloma-charge dipole calculator failed: {e}")
 

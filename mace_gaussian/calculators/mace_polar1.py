@@ -48,7 +48,7 @@ class MACEPolar1DipoleCalculator(DipoleCalculatorBase):
 
             self.available = True
             logger.info("✓ MACE-POLAR-1 dipole calculator available")
-        except ImportError as e:
+        except Exception as e:  # L4
             self.available = False
             logger.warning(f"✗ MACE-POLAR-1 dipole calculator failed: {e}")
 

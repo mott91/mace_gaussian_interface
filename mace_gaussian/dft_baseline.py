@@ -47,28 +47,12 @@ def sanitize_calculator_name(method: str, basis: str) -> str:
     return f"{method}_{basis_clean}"
 
 
-# DFT methods for baseline calculations
-# Using B3LYP/6-31G(d,p) - standard for frequency calculations
+# DFT reference calculations. One entry per level of theory; every ML model is
+# compared against the same twin. (Review finding L2: this used to hold four
+# identical B3LYP entries keyed by ML model name, which ran the same job four
+# times when skip_if_exists was False.)
 DFT_BASELINES = {
-    "mace_omol": {
-        "method": "b3lyp",
-        "basis": "6-31G(d,p)",
-        "description": "B3LYP/6-31G(d,p)",
-        "extra_keywords": "",
-    },
-    "mace_off": {
-        "method": "b3lyp",
-        "basis": "6-31G(d,p)",
-        "description": "B3LYP/6-31G(d,p)",
-        "extra_keywords": "",
-    },
-    "mace_mp": {
-        "method": "b3lyp",
-        "basis": "6-31G(d,p)",
-        "description": "B3LYP/6-31G(d,p)",
-        "extra_keywords": "",
-    },
-    "mace_polar": {
+    "b3lyp": {
         "method": "b3lyp",
         "basis": "6-31G(d,p)",
         "description": "B3LYP/6-31G(d,p)",
@@ -239,18 +223,21 @@ def run_gaussian_dft(
     try:
         print("  \u2192 Launching Gaussian calculation...")
 
-        # Run Gaussian (g16 executable)
-        proc = subprocess.Popen(
-            ["g16", gjf_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd
-        )
+        # Run Gaussian (g16 executable). Console output goes to a file, not an
+        # undrained pipe (review finding L7).
+        console_path = Path(cwd or ".") / "g16_console.txt"
+        with console_path.open("wb") as console:
+            proc = subprocess.Popen(
+                ["g16", gjf_file], stdout=console, stderr=subprocess.STDOUT, cwd=cwd
+            )
 
-        # Wait for completion
-        try:
-            proc.wait(timeout=timeout)
-        except subprocess.TimeoutExpired:
-            proc.kill()
-            logger.error(f"Gaussian calculation timed out after {timeout}s")
-            return False, log_file
+            # Wait for completion
+            try:
+                proc.wait(timeout=timeout)
+            except subprocess.TimeoutExpired:
+                proc.kill()
+                logger.error(f"Gaussian calculation timed out after {timeout}s")
+                return False, log_file
 
         # Check return code
         if proc.returncode != 0:

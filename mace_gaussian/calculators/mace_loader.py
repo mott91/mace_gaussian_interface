@@ -28,8 +28,10 @@ from mace_gaussian.utils.units import BOHR_TO_ANGSTROM
 
 logger = logging.getLogger(__name__)
 
-# Path to mace_dipole_pkg/ for lazy sys.path setup
-_DIPOLE_PKG_DIR = str(Path(__file__).resolve().parent.parent / "mace_dipole_pkg")
+# Path to <repo>/mace_dipole_pkg/ for lazy sys.path setup (review finding L3: this used
+# to point one level too deep, at mace_gaussian/mace_dipole_pkg, which does not exist;
+# it only worked because the fork is pip-installed in the environment).
+_DIPOLE_PKG_DIR = str(Path(__file__).resolve().parents[2] / "mace_dipole_pkg")
 
 
 def _ensure_dipole_importable() -> None:

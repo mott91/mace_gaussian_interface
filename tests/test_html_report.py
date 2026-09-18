@@ -32,7 +32,7 @@ def _generate(fake_analysis_results, tmp_path, mode="anharmonic"):
     fake_analysis_results["mode"] = mode
     fake_analysis_results["output_dir"] = str(tmp_path)
     gen.generate_report(fake_analysis_results)
-    return (tmp_path / "report.html").read_text()
+    return (tmp_path / "report.html").read_text(encoding="utf-8")
 
 
 def test_per_method_section_has_plotly_div(fake_analysis_results, tmp_path):
