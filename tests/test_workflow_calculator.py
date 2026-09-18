@@ -242,13 +242,16 @@ class TestElementGuardAtCallSites:
             # calculator() must NOT have been called (guard fires first)
             mock_calc_fn.assert_not_called()
 
-    def test_run_frequency_calculation_does_not_raise_for_hcno_with_mace_anicc(self):
+    def test_run_frequency_calculation_does_not_raise_for_hcno_with_mace_anicc(self, tmp_path):
         """run_frequency_calculation does NOT raise the element guard error for HCNO molecules."""
+        from mace_gaussian.utils.results import ResultsManager
         from mace_gaussian.workflow import run_frequency_calculation
 
         good_atoms = _atoms(["H", "H", "O"])  # water — HCNO only
 
-        mock_results_mgr = MagicMock()
+        # A real ResultsManager on tmp_path: with a MagicMock the file-move step wrote
+        # files named after the mock into the repo root.
+        mock_results_mgr = ResultsManager(base_output_dir=str(tmp_path / "results"))
         mock_calc = MagicMock()
 
         # Review finding L10: this test used to let the real pipeline run, which
@@ -277,12 +280,13 @@ class TestElementGuardAtCallSites:
             except Exception:
                 pass  # Other errors are expected (mocked Gaussian)
 
-    def test_run_frequency_calculation_other_calculators_unaffected(self):
+    def test_run_frequency_calculation_other_calculators_unaffected(self, tmp_path):
         """Element guard is NOT triggered for mace_mp (no restriction on element types)."""
+        from mace_gaussian.utils.results import ResultsManager
         from mace_gaussian.workflow import run_frequency_calculation
 
         bad_for_anicc_atoms = _atoms(["H", "F"])  # F would fail anicc guard
-        mock_results_mgr = MagicMock()
+        mock_results_mgr = ResultsManager(base_output_dir=str(tmp_path / "results"))
         mock_calc = MagicMock()
 
         with (
