@@ -77,34 +77,37 @@ def run_gaussian_with_zmq(
         env=env,
     )
     start = time.time()
+    deadline = start + timeout_seconds
 
     with GaussianZMQServer(ipc_file) as server:
-        while not is_calc_finished(proc, server.socket):
+        try:
+            # The deadline is checked inside the wait loop (review finding M2), so a
+            # Gaussian process that hangs without ever sending a request still times out.
+            while not is_calc_finished(proc, server.socket, deadline=deadline):
+                msg = server.socket.recv_string()
+                try:
+                    reply = on_request(msg)
+                    server.socket.send_string(reply)
+                except Exception:
+                    server.socket.send_string("error")
+                    raise
+        except GaussianTimeoutError:
             elapsed = time.time() - start
-            if elapsed > timeout_seconds:
-                proc.kill()
-                proc.wait()
-                stdout_data = proc.stdout.read().decode(errors="replace")
-                stderr_data = proc.stderr.read().decode(errors="replace")
-                logger.error(
-                    "Gaussian timed out after %.1fh (limit: %ds, gjf: %s)",
-                    elapsed / 3600,
-                    timeout_seconds,
-                    gjf_file,
-                )
-                raise GaussianTimeoutError(
-                    f"Gaussian timed out after {elapsed:.0f}s "
-                    f"(GAUSSIAN_TIMEOUT_SECONDS={timeout_seconds}, gjf={gjf_file})\n"
-                    f"stdout: {stdout_data}\nstderr: {stderr_data}"
-                )
-
-            msg = server.socket.recv_string()
-            try:
-                reply = on_request(msg)
-                server.socket.send_string(reply)
-            except Exception:
-                server.socket.send_string("error")
-                raise
+            proc.kill()
+            proc.wait()
+            stdout_data = proc.stdout.read().decode(errors="replace")
+            stderr_data = proc.stderr.read().decode(errors="replace")
+            logger.error(
+                "Gaussian timed out after %.1fh (limit: %ds, gjf: %s)",
+                elapsed / 3600,
+                timeout_seconds,
+                gjf_file,
+            )
+            raise GaussianTimeoutError(
+                f"Gaussian timed out after {elapsed:.0f}s "
+                f"(GAUSSIAN_TIMEOUT_SECONDS={timeout_seconds}, gjf={gjf_file})\n"
+                f"stdout: {stdout_data}\nstderr: {stderr_data}"
+            ) from None
 
     proc.wait()
     if proc.returncode != 0:

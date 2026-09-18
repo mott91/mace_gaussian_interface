@@ -45,23 +45,36 @@ DPI = 300
 FONT_FAMILY = "Arial, Helvetica, sans-serif"
 
 
-def aggregate_results(results_dir: str = "comparison_results") -> pd.DataFrame:
-    """Walk comparison_results/ and compute R^2/RMSE per molecule x combo.
+def aggregate_results(
+    results_dir: str = "comparison_results",
+    analysis_dir: str = "analysis_results_harmonic",
+) -> pd.DataFrame:
+    """Walk comparison_results/ and collect R^2/RMSE per molecule x combo.
+
+    Metrics are taken from the eigenvector-matched harmonic comparison CSVs written by
+    ``run_analysis_harmonic.py`` (``<analysis_dir>/<molecule>/data/comparison_<combo>.csv``)
+    when they exist, so the leaderboard agrees with the per-molecule reports (review
+    finding M5). If no CSV exists for a combo the old sorted-frequency pairing is used
+    and the row is marked ``pairing = "sorted"``.
 
     Parameters
     ----------
     results_dir : str
         Path to directory containing per-molecule subdirectories
         with results.json files.
+    analysis_dir : str
+        Base directory of the harmonic analysis output.
 
     Returns
     -------
     pd.DataFrame
-        Columns: molecule, combo, r2, rmse, n_atoms, n_freqs
+        Columns: molecule, combo, r2, rmse, n_atoms, n_freqs, pairing, ...
     """
     results_path = Path(results_dir)
     rows: list[dict] = []
-    empty = pd.DataFrame(columns=["molecule", "combo", "r2", "rmse", "n_atoms", "n_freqs"])
+    empty = pd.DataFrame(
+        columns=["molecule", "combo", "r2", "rmse", "n_atoms", "n_freqs", "pairing"]
+    )
 
     if not results_path.is_dir():
         return empty
@@ -111,7 +124,10 @@ def aggregate_results(results_dir: str = "comparison_results") -> pd.DataFrame:
             if combo_name in ("b3lyp_6-31Gdp", "geometry_opt"):
                 continue
 
-            row = _compute_combo_metrics(molecule, combo_name, combo_dir, dft_freqs, n_atoms)
+            matched_csv = Path(analysis_dir) / molecule / "data" / f"comparison_{combo_name}.csv"
+            row = _compute_combo_metrics(
+                molecule, combo_name, combo_dir, dft_freqs, n_atoms, matched_csv=matched_csv
+            )
             if row is not None:
                 row["dft_runtime_s"] = dft_runtime
                 row["dft_gaussian_s"] = dft_gauss_s
@@ -127,14 +143,43 @@ def aggregate_results(results_dir: str = "comparison_results") -> pd.DataFrame:
     return pd.DataFrame(rows) if rows else empty
 
 
+def _metrics_from_matched_csv(csv_path: Path) -> tuple[float, float, int] | None:
+    """(r2, rmse, n_pairs) from an eigenvector-matched comparison CSV.
+
+    Uses the same conventions as the per-molecule report: Pearson r² on the matched
+    pairs, pairs with an imaginary (negative) frequency on either side excluded.
+    Returns None if the file is unreadable or has fewer than two usable pairs.
+    """
+    try:
+        df = pd.read_csv(csv_path)
+        dft = df["DFT_Frequency_cm"].to_numpy(dtype=float)
+        ml = df["ML_Frequency_cm"].to_numpy(dtype=float)
+    except (OSError, KeyError, ValueError) as e:
+        logger.warning("Could not read matched CSV %s: %s", csv_path, e)
+        return None
+    real = (dft > 0) & (ml > 0)
+    dft, ml = dft[real], ml[real]
+    if len(dft) < 2:
+        return None
+    r = np.corrcoef(dft, ml)[0, 1]
+    r2 = float(r * r) if np.isfinite(r) else 0.0
+    rmse = float(np.sqrt(np.mean((dft - ml) ** 2)))
+    return r2, rmse, len(dft)
+
+
 def _compute_combo_metrics(
     molecule: str,
     combo_name: str,
     combo_dir: Path,
     dft_freqs: list[float],
     n_atoms: int,
+    matched_csv: Path | None = None,
 ) -> dict | None:
-    """Compute R^2 and RMSE for a single molecule/combo pair."""
+    """Compute R^2 and RMSE for a single molecule/combo pair.
+
+    Prefers the eigenvector-matched CSV (review finding M5); falls back to
+    sorted-frequency pairing only when no CSV is available.
+    """
     ml_json = combo_dir / "results.json"
     if not ml_json.exists():
         return None
@@ -151,27 +196,43 @@ def _compute_combo_metrics(
         )
         return None
 
-    ml_freqs = sorted(
-        entry["freq_cm"] for entry in ml_data.get("frequencies", {}).get("harmonic", [])
-    )
+    pairing = "sorted"
+    n_pairs = 0
+    if matched_csv is not None and matched_csv.exists():
+        matched = _metrics_from_matched_csv(matched_csv)
+        if matched is not None:
+            r2, rmse, n_pairs = matched
+            pairing = "eigenvector"
 
-    if len(dft_freqs) != len(ml_freqs) or len(dft_freqs) == 0:
-        logger.debug(
-            "Frequency count mismatch for %s/%s: DFT=%d ML=%d",
+    if pairing == "sorted":
+        logger.warning(
+            "%s/%s: no matched comparison CSV, using sorted-frequency pairing "
+            "(run run_analysis_harmonic.py first for mode-matched metrics)",
             molecule,
             combo_name,
-            len(dft_freqs),
-            len(ml_freqs),
         )
-        return None
+        ml_freqs = sorted(
+            entry["freq_cm"] for entry in ml_data.get("frequencies", {}).get("harmonic", [])
+        )
 
-    dft_arr = np.array(dft_freqs)
-    ml_arr = np.array(ml_freqs)
+        if len(dft_freqs) != len(ml_freqs) or len(dft_freqs) == 0:
+            logger.debug(
+                "Frequency count mismatch for %s/%s: DFT=%d ML=%d",
+                molecule,
+                combo_name,
+                len(dft_freqs),
+                len(ml_freqs),
+            )
+            return None
 
-    ss_res = np.sum((dft_arr - ml_arr) ** 2)
-    ss_tot = np.sum((dft_arr - np.mean(dft_arr)) ** 2)
-    r2 = 1.0 - ss_res / ss_tot if ss_tot > 0 else 0.0
-    rmse = float(np.sqrt(np.mean((dft_arr - ml_arr) ** 2)))
+        dft_arr = np.array(dft_freqs)
+        ml_arr = np.array(ml_freqs)
+
+        ss_res = np.sum((dft_arr - ml_arr) ** 2)
+        ss_tot = np.sum((dft_arr - np.mean(dft_arr)) ** 2)
+        r2 = 1.0 - ss_res / ss_tot if ss_tot > 0 else 0.0
+        rmse = float(np.sqrt(np.mean((dft_arr - ml_arr) ** 2)))
+        n_pairs = len(dft_freqs)
 
     # Extract timing data
     ml_runtime = ml_data.get("runtime_s", 0)
@@ -189,7 +250,8 @@ def _compute_combo_metrics(
         "r2": r2,
         "rmse": rmse,
         "n_atoms": n_atoms,
-        "n_freqs": len(dft_freqs),
+        "n_freqs": n_pairs,
+        "pairing": pairing,
         "ml_runtime_s": ml_runtime,
         "ml_gaussian_s": ml_gauss_s,
         "ml_gpu": gpu,
@@ -760,6 +822,7 @@ def _embed_or_fallback(embedded: dict, key: str, alt: str, fallback_text: str) -
 def generate_batch_report(
     results_dir: str = "comparison_results",
     output_dir: str = "batch_report",
+    analysis_dir: str = "analysis_results_harmonic",
 ) -> str:
     """Generate multi-molecule batch accuracy report.
 
@@ -769,6 +832,8 @@ def generate_batch_report(
         Path to comparison_results directory.
     output_dir : str
         Output directory for the HTML report.
+    analysis_dir : str
+        Harmonic analysis output; its mode-matched CSVs supply the metrics (M5).
 
     Returns
     -------
@@ -780,7 +845,7 @@ def generate_batch_report(
     ValueError
         If no comparison results found in results_dir.
     """
-    df = aggregate_results(results_dir)
+    df = aggregate_results(results_dir, analysis_dir=analysis_dir)
     if df.empty:
         raise ValueError(f"No comparison results found in {results_dir}")
 

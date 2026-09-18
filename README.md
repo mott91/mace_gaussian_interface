@@ -101,9 +101,18 @@ python run_analysis.py water
 
 This will:
 1. Optimize geometry with MACE
-2. Run ML calculations (multiple energy/dipole combos)
+2. Run ML calculations (multiple energy/dipole combos), each re-optimized on its own
+   energy model before the Gaussian frequency job
 3. Run DFT baseline for comparison
 4. Generate statistical analysis and HTML report
+
+### Scope
+
+**Neutral, closed-shell molecules only.** Charge 0 and multiplicity 1 are fixed throughout
+the pipeline; the `charge`/`multiplicity` parameters in the workflow functions are not
+exposed on the CLI and are overwritten when a stored geometry is loaded. Espaloma's bond
+perception also assumes a neutral molecule. Ions and radicals are out of scope (they are
+also outside the reliable domain of the foundation models used).
 
 ### Available Test Molecules
 

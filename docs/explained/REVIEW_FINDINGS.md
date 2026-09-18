@@ -363,6 +363,19 @@ docs should say "neutral closed-shell only" rather than imply support.
 
 ---
 
+## Status of M1-M6 (2026-09-18, branch `fix/review-2026-09`)
+
+| # | decision (user) | done |
+|---|---|---|
+| M1 | flag, don't fail | `calculate_dipole_properties` counts fallbacks on `atoms.info`; `results.json` gets `calculation_parameters.dipole_fallbacks = {count, last_error, intensities_trustworthy}` and the run prints a warning. `base.py` no longer swallows finite-difference errors. |
+| M2 | fix | `is_calc_finished(proc, socket, deadline=...)` raises `GaussianTimeoutError` inside the wait loop; `runner.py` catches it, kills g16, re-raises with output. |
+| M3 | fix | `socket.poll(timeout=1000)` replaces poll(10 ms) + sleep(1 s). Timing before/after on water below. |
+| M4 | fmax 1e-4 | `OPT_FMAX = 1e-4`; `geometry_optimisation` returns `(mol, steps, converged)` from the optimizer; stage 1 records the real verdict. |
+| M5 | fix | `batch_report` reads `analysis_results_harmonic/<mol>/data/comparison_<combo>.csv` (Pearson r², imaginary pairs excluded, same as per-molecule reports); rows carry `pairing = "eigenvector"` or `"sorted"` (fallback with warning). `generate_batch_report(..., analysis_dir=)`. |
+| M6 | document | README "Scope" section: neutral closed-shell only. |
+
+Tests for all of these in `tests/test_review_fixes.py`.
+
 ## L1. Espaloma "dipole derivatives" are a fixed-charge model (physics note, not a bug)
 
 **Where:** `mace_gaussian/calculators/espaloma.py:34-76`.

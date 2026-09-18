@@ -14,6 +14,8 @@ from pathlib import Path
 
 import zmq
 
+from ..utils.exceptions import GaussianTimeoutError
+
 logger = logging.getLogger(__name__)
 
 
@@ -87,7 +89,7 @@ class GaussianZMQServer:
         return False  # Do not suppress exceptions
 
 
-def is_calc_finished(proc: object, socket: zmq.Socket) -> bool:
+def is_calc_finished(proc: object, socket: zmq.Socket, deadline: float | None = None) -> bool:
     """Check if Gaussian calculation is finished or next ML step requested.
 
     Polls the ZMQ socket and the process exit status. Returns True when the
@@ -97,15 +99,24 @@ def is_calc_finished(proc: object, socket: zmq.Socket) -> bool:
     Args:
         proc: subprocess.Popen instance for the running Gaussian process.
         socket: Bound zmq.REP socket from GaussianZMQServer.
+        deadline: Absolute ``time.time()`` value after which
+            GaussianTimeoutError is raised while waiting (review finding M2:
+            the caller's timeout used to be checked only between messages, so a
+            silent hang could never time out). None disables the check.
 
     Returns:
         True if Gaussian process has exited, False if a new message arrived.
+
+    Raises:
+        GaussianTimeoutError: deadline passed while still waiting.
     """
     while True:
-        # Poll socket for messages with 10 ms timeout; returns 0 if no message.
-        if socket.poll(timeout=10) != 0:
+        # Wait up to 1 s for a message; returns as soon as one arrives.
+        # (Review finding M3: this replaces a 10 ms poll followed by an
+        # unconditional 1 s sleep, which added ~0.5 s of idle time per call.)
+        if socket.poll(timeout=1000) != 0:
             return False  # New message: another ML step requested
-        elif proc.poll() is not None:
+        if proc.poll() is not None:
             return True  # Process exited: calculation finished or crashed
-        else:
-            time.sleep(1)
+        if deadline is not None and time.time() > deadline:
+            raise GaussianTimeoutError("Gaussian deadline passed while waiting for a request")

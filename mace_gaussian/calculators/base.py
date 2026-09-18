@@ -69,7 +69,11 @@ class DipoleCalculatorBase(ABC):
                     dipole_derivatives[3 * i + j, :] = dipole_deriv
 
         except Exception as e:
+            # Review finding M1: do not return a partially filled zero array as if it
+            # were a result. The caller (workflow.calculate_dipole_properties) counts
+            # and flags the fallback.
             logger.warning(f"Dipole derivative calculation failed: {e}")
+            raise
 
         finally:
             # Restore original positions

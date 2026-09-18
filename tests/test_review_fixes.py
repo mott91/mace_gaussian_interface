@@ -3,9 +3,15 @@
 H2: anharmonic mode IDs live in .fchk (ascending-frequency) index space.
 H3: mode vectors are mass-weighted, so a calculation overlapped with itself is the identity.
 H4: parse_final_energy returns the energy, not a thermal correction.
+M1: dipole failures are counted and flagged, not silently zeroed.
+M2: the Gaussian deadline is enforced inside the wait loop.
+M3: the wait loop returns as soon as a request arrives.
+M4: geometry_optimisation reports the optimizer's own convergence verdict.
+M5: batch leaderboard metrics come from the eigenvector-matched CSVs.
 """
 
 import json
+import time
 from pathlib import Path
 
 import numpy as np
@@ -101,3 +107,168 @@ class TestParseFinalEnergyAnchored:
 
         parser = GaussianLogParser(str(FIXTURES / "water" / "dft_b3lyp.log"))
         assert parser.parse_final_energy() is None
+
+
+# --- M1 -----------------------------------------------------------------------
+
+
+class _BrokenDipole:
+    name = "broken"
+
+    def calculate_dipole(self, atoms, **kw):
+        raise RuntimeError("CUDA out of memory")
+
+
+class _CountingDipole:
+    """Base-class finite differences with a dipole that fails on the third call."""
+
+    name = "counting"
+
+    def __init__(self):
+        self.calls = 0
+
+    def calculate_dipole(self, atoms, **kw):
+        self.calls += 1
+        if self.calls >= 3:
+            raise RuntimeError("boom")
+        return np.zeros(3), None
+
+
+class TestDipoleFallbackIsFlagged:
+    def test_failure_is_counted_on_atoms(self):
+        from ase import Atoms
+
+        from mace_gaussian.workflow import calculate_dipole_properties
+
+        atoms = Atoms("H2", positions=[[0, 0, 0], [0, 0, 0.74]])
+        dip, derivs, _charges, _pol = calculate_dipole_properties(
+            atoms, _BrokenDipole(), deriv=2, calculate_derivatives=True
+        )
+        assert np.all(dip == 0) and np.all(derivs == 0)
+        assert atoms.info["dipole_fallback_count"] == 1
+        assert "CUDA out of memory" in atoms.info["dipole_fallback_last_error"]
+
+    def test_finite_difference_failure_propagates(self):
+        """base.py used to swallow the exception and return a half-filled zero array."""
+        from ase import Atoms
+
+        from mace_gaussian.calculators.base import DipoleCalculatorBase
+
+        atoms = Atoms("H2", positions=[[0, 0, 0], [0, 0, 0.74]])
+        calc = _CountingDipole()
+        with pytest.raises(RuntimeError, match="boom"):
+            DipoleCalculatorBase.calculate_dipole_derivatives(calc, atoms)
+        # positions restored by the finally block
+        assert atoms.positions[1, 2] == pytest.approx(0.74)
+
+
+# --- M2 / M3 ------------------------------------------------------------------
+
+
+class _FakeProc:
+    def __init__(self, returncode=None):
+        self.returncode = returncode
+
+    def poll(self):
+        return self.returncode
+
+
+@pytest.fixture
+def rep_socket():
+    import zmq
+
+    ctx = zmq.Context()
+    sock = ctx.socket(zmq.REP)
+    sock.setsockopt(zmq.LINGER, 0)
+    sock.bind("inproc://review-test")
+    yield ctx, sock
+    sock.close()
+    ctx.term()
+
+
+class TestWaitLoop:
+    def test_deadline_raises_while_idle(self, rep_socket):
+        from mace_gaussian.gaussian.zmq_server import is_calc_finished
+        from mace_gaussian.utils.exceptions import GaussianTimeoutError
+
+        _, sock = rep_socket
+        t0 = time.time()
+        with pytest.raises(GaussianTimeoutError):
+            is_calc_finished(_FakeProc(None), sock, deadline=time.time() - 1)
+        assert time.time() - t0 < 3  # one poll interval, not forever
+
+    def test_exited_process_returns_true(self, rep_socket):
+        from mace_gaussian.gaussian.zmq_server import is_calc_finished
+
+        _, sock = rep_socket
+        assert is_calc_finished(_FakeProc(0), sock, deadline=time.time() + 60) is True
+
+    def test_message_returns_false_immediately(self, rep_socket):
+        import zmq
+
+        from mace_gaussian.gaussian.zmq_server import is_calc_finished
+
+        ctx, sock = rep_socket
+        req = ctx.socket(zmq.REQ)
+        req.setsockopt(zmq.LINGER, 0)
+        req.connect("inproc://review-test")
+        req.send_string("in|out")
+        t0 = time.time()
+        assert is_calc_finished(_FakeProc(None), sock, deadline=time.time() + 60) is False
+        assert time.time() - t0 < 0.5  # M3: no unconditional 1 s sleep
+        assert sock.recv_string() == "in|out"
+        req.close()
+
+
+# --- M4 -----------------------------------------------------------------------
+
+
+class TestGeometryOptimisationReportsConvergence:
+    def test_returns_optimizer_verdict(self):
+        from ase import Atoms
+        from ase.calculators.emt import EMT
+
+        from mace_gaussian.workflow import OPT_FMAX, geometry_optimisation
+
+        assert pytest.approx(1e-4) == OPT_FMAX
+        atoms = Atoms("H2", positions=[[0, 0, 0], [0, 0, 0.9]])
+        atoms.calc = EMT()
+        _mol, steps, converged = geometry_optimisation(atoms, fmax=1e-2)
+        assert isinstance(converged, bool) and converged
+        assert steps > 0
+
+
+# --- M5 -----------------------------------------------------------------------
+
+
+class TestBatchMetricsFromMatchedCsv:
+    def test_imaginary_pairs_excluded_and_pearson_r2(self, tmp_path):
+        import pandas as pd
+
+        from mace_gaussian.analysis.batch_report import _metrics_from_matched_csv
+
+        df = pd.DataFrame(
+            {
+                "DFT_Frequency_cm": [-274.0, 1000.0, 2000.0, 3000.0],
+                "ML_Frequency_cm": [1356.0, 1010.0, 1990.0, 3020.0],
+            }
+        )
+        p = tmp_path / "comparison_x.csv"
+        df.to_csv(p, index=False)
+        r2, rmse, n = _metrics_from_matched_csv(p)
+        assert n == 3  # the -274 row is dropped
+        assert rmse == pytest.approx(np.sqrt((100 + 100 + 400) / 3))
+        assert 0.99 < r2 <= 1.0
+
+    def test_missing_csv_falls_back_to_sorted(self, tmp_path):
+        from mace_gaussian.analysis.batch_report import _compute_combo_metrics
+
+        combo = tmp_path / "mace_x_y"
+        combo.mkdir()
+        (combo / "results.json").write_text(
+            json.dumps({"frequencies": {"harmonic": [{"freq_cm": f} for f in (1010, 1990)]}})
+        )
+        row = _compute_combo_metrics(
+            "mol", "mace_x_y", combo, [1000.0, 2000.0], 3, matched_csv=tmp_path / "nope.csv"
+        )
+        assert row["pairing"] == "sorted" and row["n_freqs"] == 2

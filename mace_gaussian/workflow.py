@@ -52,8 +52,11 @@ _MACE_ANICC_SUPPORTED_ELEMENTS = frozenset({"H", "C", "N", "O"})
 
 # Geometry optimization settings. Used by stage 1 and by the per-model
 # re-optimization in run_frequency_calculation (review finding H1).
-# Values to be frozen for the campaign (finding M4).
-OPT_FMAX: float = 0.000001  # eV/Å
+# Frozen for the campaign 2026-09-18 (finding M4): 1e-4 eV/Å is well below anything
+# that moves a frequency, and above the force noise floor of the ML surfaces
+# (POLAR needed 805 LBFGS steps to reach the previous 1e-6 target while drifting
+# as a whole molecule; the geometry did not change).
+OPT_FMAX: float = 0.0001  # eV/Å
 OPT_MAX_STEPS: int = 10000
 
 logging.basicConfig(
@@ -227,7 +230,11 @@ def calculate_dipole_properties(
 
     except Exception as e:
         logger.error(f"Dipole calculation failed: {e}")
-        logger.warning("Falling back to zero dipole (IR intensities will be zero)")
+        logger.warning("Falling back to zero dipole for this call (IR intensities affected)")
+        # Review finding M1: count fallbacks on the Atoms object so the run can flag
+        # them in results.json instead of reporting zero intensities as success.
+        atoms.info["dipole_fallback_count"] = atoms.info.get("dipole_fallback_count", 0) + 1
+        atoms.info["dipole_fallback_last_error"] = f"{type(e).__name__}: {e}"
 
         # Fallback to zeros
         dipole = np.zeros(3)
@@ -315,20 +322,24 @@ def run_next_calculation(
 
 
 def geometry_optimisation(mol, fmax=OPT_FMAX):
-    """Run LBFGS geometry optimisation on mol in-place and return (mol, steps)."""
+    """Run LBFGS geometry optimisation on mol in-place.
+
+    Returns (mol, steps, converged). ``converged`` is the optimizer's own verdict
+    (review finding M4: it used to be hardcoded True by the caller).
+    """
     ei = mol.get_potential_energy()
     print("Initial Energy: ", ei, "eV")
     opt = LBFGS(mol)
 
-    opt.run(fmax=fmax, steps=OPT_MAX_STEPS)
+    converged = bool(opt.run(fmax=fmax, steps=OPT_MAX_STEPS))
 
     num_steps = opt.get_number_of_steps()
-    print(f"Optimization steps: {num_steps}")
+    print(f"Optimization steps: {num_steps} (converged: {converged})")
 
     ef = mol.get_potential_energy()
     print("Final Energy: ", ef, "eV")
 
-    return mol, num_steps
+    return mol, num_steps, converged
 
 
 def _check_mace_anicc_elements(atoms) -> None:
@@ -416,7 +427,7 @@ def run_geometry_optimization(
     start_time = time.time()
 
     # Run optimization
-    optimized_atoms, num_steps = geometry_optimisation(atoms)
+    optimized_atoms, num_steps, converged = geometry_optimisation(atoms)
 
     # Get final energy
     final_energy = optimized_atoms.get_potential_energy()
@@ -430,7 +441,7 @@ def run_geometry_optimization(
         calculator_name=calculator_name,
         initial_energy=initial_energy,
         final_energy=final_energy,
-        converged=True,  # geometry_optimisation returns when converged
+        converged=converged,
         num_steps=num_steps,
         runtime=runtime,
     )
@@ -627,10 +638,26 @@ def run_frequency_calculation(
             parsed_data = {"harmonic": [], "anharmonic": []}
             final_energy = mol.get_potential_energy()
 
+        # M1: surface dipole fallbacks (zeroed calls) as a warning flag in results.json
+        n_fallback = int(mol.info.get("dipole_fallback_count", 0))
+        if n_fallback:
+            logger.warning(
+                "%d of the Gaussian calls fell back to a zero dipole; intensities in this "
+                "run are NOT trustworthy (last error: %s)",
+                n_fallback,
+                mol.info.get("dipole_fallback_last_error"),
+            )
+            print(f"  WARNING: {n_fallback} dipole fallback(s) -- intensities unreliable")
+
         calculation_parameters = {
             "energy_calculator": energy_calculator_name,
             "dipole_calculator": dipole_calculator_name,
             "reoptimization": reopt_info,
+            "dipole_fallbacks": {
+                "count": n_fallback,
+                "last_error": mol.info.get("dipole_fallback_last_error"),
+                "intensities_trustworthy": n_fallback == 0,
+            },
         }
         results_mgr.save_frequency_results(
             molecule_name=molecule_name,
