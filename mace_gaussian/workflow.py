@@ -28,6 +28,7 @@ import warnings
 from pathlib import Path
 
 import numpy as np
+from ase.build import minimize_rotation_and_translation
 from ase.io import read
 from ase.optimize import LBFGS
 
@@ -498,19 +499,33 @@ def run_frequency_calculation(
         # H1: relax on this energy model's own surface before Gaussian sees the
         # geometry. freq(anharm) assumes a stationary point; the stage-1 geometry
         # is only a minimum of the optimization calculator's surface.
+        start_positions = mol.get_positions().copy()
         reopt = LBFGS(mol, logfile=None)
         reopt_converged = reopt.run(fmax=OPT_FMAX, steps=OPT_MAX_STEPS)
         max_force = float(np.linalg.norm(mol.get_forces(), axis=1).max())
+        # How far the relaxation moved the atoms, after removing whole-molecule
+        # translation and rotation (a free molecule may drift under LBFGS without any
+        # internal change). A bond-length adjustment is ~0.01 Å; anything approaching
+        # 0.5 Å means the model slid into a different conformer and the run is not
+        # comparable to the other models.
+        start = mol.copy()
+        start.set_positions(start_positions)
+        end = mol.copy()
+        minimize_rotation_and_translation(start, end)
+        displacement = np.linalg.norm(end.get_positions() - start.get_positions(), axis=1)
         reopt_info = {
             "reoptimized_with": energy_calculator_name,
             "fmax_target_eV_A": OPT_FMAX,
             "converged": bool(reopt_converged),
             "steps": reopt.get_number_of_steps(),
             "max_force_eV_A": max_force,
+            "rmsd_from_start_A": float(np.sqrt(np.mean(displacement**2))),
+            "max_atom_shift_A": float(displacement.max()),
         }
         print(
             f"  -> Re-optimized on {energy_calculator_name}: "
-            f"{reopt_info['steps']} steps, max force {max_force:.2e} eV/Å"
+            f"{reopt_info['steps']} steps, max force {max_force:.2e} eV/Å, "
+            f"max atom shift {reopt_info['max_atom_shift_A']:.3f} Å"
         )
 
         # Create frequency directory

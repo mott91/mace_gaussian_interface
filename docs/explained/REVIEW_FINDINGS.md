@@ -83,6 +83,25 @@ stretches: at the OMOL geometry MP sat on its repulsive wall and looked *stiffer
 and must be rerun before any number goes into the thesis. `thesis/MOLECULES.md` still quotes
 the old -193 figure.
 
+Water with the other three models (before = OMOL geometry, after = own minimum; harmonic
+bend / sym / asym, anharmonic in parentheses):
+
+| model | steps to own min | before | after |
+|---|---|---|---|
+| DFT (reference) | | 1665 / 3799 / 3912 (1615 / 3624 / 3722) | |
+| mace_off | 7 | 1622 / 3813 / 3908 (1593 / 3649 / 3745) | 1614 / 3853 / 3947 (1590 / 3687 / 3780) |
+| mace_anicc | 8 | 1651 / 3780 / 3889 (1621 / 3619 / 3703) | 1646 / 3840 / 3944 (1615 / 3676 / 3759) |
+| mace_polar | 805 | 1623 / 3822 / 3921 (1567 / 3680 / 3774) | 1623 / 3822 / 3921 (1567 / 3679 / 3774) |
+
+OFF and ANICC want *shorter* bonds than OMOL, so at the OMOL geometry they sat on the soft
+outer side and looked 20 to 30 cm-1 softer than DFT on the stretches; at their own minima
+they are 40 to 55 cm-1 stiffer. ANICC was the "best" model for water in the old
+`metrics_summary.json` (MAE 16.8); that ranking is not valid anymore. POLAR did not move at
+all but needed 805 LBFGS steps to reach 9e-7 eV/Å: its surface is noisier than the others
+and `OPT_FMAX = 1e-6` is at its noise floor (feeds finding M4; 1e-4 or 1e-3 eV/Å is the
+realistic target). Every model except OMOL changes by tens of cm-1, so H1 is not an
+MP-only issue.
+
 The after-run `results.json` files are kept in `docs/explained/h1_check/`.
 
 **Observation O1 (physics, not a bug): ML surfaces trip Gaussian's cubic-constant
