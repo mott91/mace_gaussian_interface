@@ -109,6 +109,18 @@ now recorded per run as `rmsd_from_start_A` / `max_atom_shift_A` (after removing
 whole-molecule translation and rotation). Anything approaching 0.5 Å would mean a
 different conformer.
 
+Start-point independence (user asked whether starting from the OMOL minimum biases the
+result): MP relaxed from the OMOL minimum, the PubChem input, the B3LYP minimum, a
+randomly perturbed geometry and a 30 %-stretched geometry ends at the same point every
+time (methane C-H 1.0967 Å, E = −23.955869 eV; water O-H 0.9727 Å, E = −14.159422 eV).
+Only the step count differs. `docs/explained/h1_check/start_point_independence.txt`.
+
+Also corrected during the discussion: the three methods do **not** share a geometry.
+Methane C-H: OMOL 1.0878, B3LYP 1.0920, MP 1.0967 Å; water O-H / angle: OMOL 0.9616 /
+104.96°, B3LYP 0.9653 / 103.75°, MP 0.9727 / 104.50° (experiment ≈ 0.958 / 104.5°).
+Every method must therefore get its frequencies at its own minimum; the DFT twin already
+does (Gaussian `opt` before `freq`).
+
 **Observation O2 (POLAR):** during its 805-step relaxation of water the molecule's center
 of mass drifted by 0.29 Å with no internal change (0.0001 Å). The optimizer was chasing a
 net force on the whole molecule, i.e. POLAR's forces do not sum to zero at the 1e-6 eV/Å

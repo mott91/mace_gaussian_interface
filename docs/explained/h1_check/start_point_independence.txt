@@ -1,0 +1,23 @@
+Start-point independence of the per-model re-optimization (2026-09-18)
+
+Question: does starting the MP relaxation from the OMOL minimum bias where it ends?
+Test: relax MACE-MP (large, float64, LBFGS to fmax 1e-6 eV/Å) from five different
+starting geometries and compare the end points.
+
+== methane: MP relaxed from five different starting points
+   OMOL minimum                 start X-H 1.0878 Å -> end X-H 1.0967 Å   E = -23.955869 eV   (4 steps)
+   PubChem input                start X-H 1.0922 Å -> end X-H 1.0967 Å   E = -23.955869 eV   (11 steps)
+   B3LYP minimum                start X-H 1.0920 Å -> end X-H 1.0967 Å   E = -23.955869 eV   (4 steps)
+   OMOL +0.05 Å random noise    start X-H 1.1301 Å -> end X-H 1.0967 Å   E = -23.955869 eV   (19 steps)
+   all bonds stretched 30%      start X-H 1.4142 Å -> end X-H 1.0967 Å   E = -23.955869 eV   (8 steps)
+== water: MP relaxed from five different starting points
+   OMOL minimum                 start X-H 0.9616 Å -> end X-H 0.9727 Å   E = -14.159422 eV   (8 steps)
+   PubChem input                start X-H 0.9561 Å -> end X-H 0.9727 Å   E = -14.159422 eV   (9 steps)
+   B3LYP minimum                start X-H 0.9653 Å -> end X-H 0.9727 Å   E = -14.159422 eV   (8 steps)
+   OMOL +0.05 Å random noise    start X-H 0.9872 Å -> end X-H 0.9727 Å   E = -14.159422 eV   (9 steps)
+   all bonds stretched 30%      start X-H 1.2501 Å -> end X-H 0.9727 Å   E = -14.159422 eV   (11 steps)
+
+Conclusion: for a single-minimum molecule the end point is a property of the surface
+(force = 0), not of the start. The start only changes the number of steps. For molecules
+with several conformers the start decides which conformer, which is why all models start
+from the same well-converged geometry and the aligned atom shift is recorded per run.
