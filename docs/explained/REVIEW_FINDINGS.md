@@ -102,7 +102,30 @@ and `OPT_FMAX = 1e-6` is at its noise floor (feeds finding M4; 1e-4 or 1e-3 eV/�
 realistic target). Every model except OMOL changes by tens of cm-1, so H1 is not an
 MP-only issue.
 
+Conformer check (added after the user asked whether re-optimizing from the OMOL geometry
+could land in a false minimum): the aligned max atom shift of each relaxation is 0.002 to
+0.009 Å for MP/OFF/ANICC on water and methane, i.e. bond-length adjustments only. It is
+now recorded per run as `rmsd_from_start_A` / `max_atom_shift_A` (after removing
+whole-molecule translation and rotation). Anything approaching 0.5 Å would mean a
+different conformer.
+
+**Observation O2 (POLAR):** during its 805-step relaxation of water the molecule's center
+of mass drifted by 0.29 Å with no internal change (0.0001 Å). The optimizer was chasing a
+net force on the whole molecule, i.e. POLAR's forces do not sum to zero at the 1e-6 eV/Å
+level. Harmless for frequencies (Gaussian projects translations), but it is why POLAR
+cannot meet `OPT_FMAX = 1e-6` quickly and it should be mentioned wherever POLAR timings
+are compared.
+
 The after-run `results.json` files are kept in `docs/explained/h1_check/`.
+
+**Independent validation of the fix (Gaussian's optimizer, not ASE's):** methane was run
+with the route `opt freq(anharm)` and MACE-MP as the external engine, starting from the
+OMOL geometry, so that Gaussian itself finds MP's minimum. Gaussian converged in 2 cycles
+(max force 1e-6) and its harmonic frequencies are 1181.2063 ×3, 1415.2 ×2, 2988.2,
+3076.5 ×3 cm-1, against 1181.2084 ×3 ... 3076.5 ×3 from the ASE LBFGS re-optimization:
+identical to 0.002 cm-1. The rotational triple is -3.0 (vs -274 before). Log kept as
+`docs/explained/h1_check/methane_gaussian_opt_on_mace_mp.log`. The two optimizers agree on
+where MP's minimum is; the fix is not an artifact of how the relaxation is done.
 
 **Observation O1 (physics, not a bug): ML surfaces trip Gaussian's cubic-constant
 consistency check even at a proper minimum.** `Unreliable CUBIC force constant` warnings in
@@ -377,6 +400,30 @@ have one log today; if a second one ever lands there (e.g. a SLURM-retrieved
 no reader. g16 writes to the `.log` file so this is fine in practice, but if it ever emits
 more than the pipe buffer (64 KB) to stdout the process deadlocks silently.
 
+## L11. HTML report crashes when there are zero comparisons
+
+`mace_gaussian/analysis/html_report_generator.py:344` indexes `comparisons[0]` in
+`_create_combined_plots`. `run_full_analysis` returns an empty comparison list (with an
+`error` key) when no ML results are found, and `generate_html_report` is documented to write
+an error report in that case, but it raises `IndexError` instead. Seen on `ammonia`, whose
+`mace_*` directories predate the `calculator_type` field and are therefore invisible to
+`find_ml_results` (the same is probably true of other early molecules; worth a scan before
+the campaign so stale directories are either migrated or deleted).
+
+## L12. IPC socket path can exceed the 107-character Unix socket limit
+
+`mace_gaussian/workflow.py` puts the ZMQ socket at
+`<cwd>/.scratch/run_<energy>_<dipole>_<timestamp>_<hex>/zmq.ipc`. Unix domain socket
+paths are limited to 107 characters (`sizeof(sockaddr_un.sun_path)`); ZMQ raises
+`ZMQError: ipc path ... is longer than 107 characters` and the run fails before Gaussian
+starts. From `/home/mot/mace_gaussian` the longest combination
+(`run_mace_polar_mace_polar1_YYYYMMDD_HHMMSS_xxxx/zmq.ipc`) is about 95 characters, so it
+works today by a margin of 12. From a deeper working directory (the cluster scratch
+`/scratch_rune03a/mot/calculations/mace_gaussian/...` is already longer) it will fail.
+Hit during the review's own Gaussian-driven H1 check. Fix: put the socket in
+`tempfile.mkdtemp(prefix="mg-")` (`/tmp/mg-xxxxxx/zmq.ipc`, ~20 chars) instead of the
+scratch dir, or check `len(path) < zmq.IPC_PATH_MAX_LEN` and fail with a clear message.
+
 ## L8. Docs out of sync with the code (`docs/methods.md`)
 
 | methods.md says | code does |
@@ -419,6 +466,35 @@ For the defense, these are the "did you verify X" questions with a yes:
 - **ZMQ LINGER=0 and IPC cleanup** (`zmq_server.py:53-87`): sound.
 - **Manifest atomic writes** (`batch.py:49-70`): sound.
 - **Transmittance→absorbance** (`nist_fetcher.py:451-458`): 2 − log10(%T). Correct.
+
+## Before/after analysis diff for H2 + H3 (2026-09-18)
+
+Both analysis modes were run on ten molecules (water, methane, formic_acid, methanol,
+propane, butane, pentane, octane, acoh; ammonia fails in both runs, see L11) with the
+code before and after the H2/H3 commits. Same `comparison_results/` input, only the
+analysis code differs. Script: the session's `compare_analysis.py`.
+
+**Harmonic reports (H3 only):** MAE unchanged for every molecule and every combination.
+Reported overlap values change by up to 0.21 (methanol MP), assignments never change.
+Exactly what mass-weighting should do.
+
+**Anharmonic reports (H2 + H3):** MAE unchanged where Gaussian numbered the modes the same
+way in the DFT and ML runs (water, formic_acid, methanol, acoh, most OMOL/OFF/ANICC
+cases). Where the numbering differed, the old code paired physically different modes:
+
+| molecule / combo | MAE before | MAE after | what was wrong |
+|---|---|---|---|
+| methane mace_off | 77.7 | 26.5 | DFT C-H stretch 2927 paired with ML bend 1522 (and vice versa), shown with "overlap 0.72" that belonged to other modes; after: 2927↔2930 (overlap 1.00), 1545↔1522 (0.88) |
+| propane mace_mp | 232.6 | 132.6 | 18 pairs re-assigned |
+| butane mace_mp | 235.1 | 134.0 | 20 pairs re-assigned |
+| pentane mace_mp | 155.8 | 124.8 | 29 pairs re-assigned |
+| butane mace_polar | 637.2 | 116.7 | 613 of 702 rows re-assigned; worst old pair was a DFT overtone at 5928 matched to an ML fundamental at 494 |
+| pentane mace_polar | 548.4 | 104.1 | 893 rows re-assigned |
+| methane mace_mp | 279.4 | 279.4 | unchanged (MP methane at the OMOL geometry is broken for H1 reasons anyway) |
+
+The remaining MP/POLAR MAEs of 100+ cm-1 are real model errors plus the H1 geometry
+problem, not pairing errors. All of these anharmonic numbers still come from the stale
+(pre-H1) Gaussian runs and will change again once the panel is rerun at per-model minima.
 
 ## Test suite (run 2026-09-18, `mace4ir_v2`, 20 min 22 s)
 
