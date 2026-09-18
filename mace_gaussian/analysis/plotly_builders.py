@@ -22,6 +22,8 @@ _EXP_COLOR = "rgba(128,128,128,0.45)"
 # hollow marker — the matching algorithm placed it but the modes are physically
 # different enough that the comparison should be read with caution.
 LOW_OVERLAP_THRESHOLD = 0.7
+# R\u00b2 is not shown below this many points (report review item 3, 2026-09-18)
+MIN_N_FOR_R2 = 5
 
 _TYPE_STYLE = {
     "fundamental": {"color": _ML_COLOR, "symbol": "circle", "name": "Fundamental"},
@@ -258,7 +260,7 @@ def build_regression_figure(
             )
         )
     # y=x perfect agreement line
-    r2_str = f"{r2_all:.3f}" if not np.isnan(r2_all) else "N/A"
+    r2_str = f"{r2_all:.3f}" if (not np.isnan(r2_all) and n_shown >= MIN_N_FOR_R2) else "n/a"
     fig.add_trace(
         go.Scatter(
             x=[lo, hi],
@@ -350,7 +352,7 @@ def build_intensity_regression_figure(
                 ),
             )
         )
-    r2_str = f"{r2_all:.3f}" if not np.isnan(r2_all) else "N/A"
+    r2_str = f"{r2_all:.3f}" if (not np.isnan(r2_all) and n_shown >= MIN_N_FOR_R2) else "n/a"
     fig.add_trace(
         go.Scatter(
             x=[lo, hi],
@@ -702,48 +704,54 @@ def build_per_region_table(
     ml_freqs: np.ndarray,
     mode_ids: list[str] | None = None,
 ) -> dict[str, dict[str, float]]:
-    """Compute per-region accuracy breakdown.
+    """Accuracy broken down by wavenumber range and by band type.
 
-    Returns a dict of region_name -> {mae, rmse, bias, n} for each spectral region.
-    Not a Plotly figure — returns data for HTML table rendering.
+    Returns an ordered dict of row_name -> {mae, rmse, bias, n}: neutral wavenumber
+    ranges of the DFT frequency, then (when ``mode_ids`` is given) one row per band
+    type. Not a Plotly figure. Report review item 2 (2026-09-18): the old rows were
+    named after organic functional groups, which put water's bend overtone at
+    3195 cm-1 into a "C-H stretch" row and all fundamentals into "Other".
     """
-    regions = {
-        "Fingerprint (400\u20131500)": (400, 1500),
-        "C-H stretch (2800\u20133200)": (2800, 3200),
-        "Overtone (4000+)": (4000, 15000),
-        "Other": None,  # everything else
-    }
-
+    ranges = [
+        ("400\u20131000 cm\u207b\u00b9", 400, 1000),
+        ("1000\u20132000 cm\u207b\u00b9", 1000, 2000),
+        ("2000\u20133000 cm\u207b\u00b9", 2000, 3000),
+        ("3000\u20134000 cm\u207b\u00b9", 3000, 4000),
+        ("> 4000 cm\u207b\u00b9", 4000, float("inf")),
+    ]
+    dft_freqs = np.asarray(dft_freqs, dtype=float)
+    ml_freqs = np.asarray(ml_freqs, dtype=float)
     errors = ml_freqs - dft_freqs
-    result: dict[str, dict[str, float]] = {}
 
-    claimed = np.zeros(len(dft_freqs), dtype=bool)
-    for name, bounds in regions.items():
-        if bounds is None:
-            continue
-        lo, hi = bounds
-        mask = (dft_freqs >= lo) & (dft_freqs < hi)
-        claimed |= mask
-        if np.sum(mask) > 0:
-            e = errors[mask]
-            result[name] = {
-                "mae": float(np.mean(np.abs(e))),
-                "rmse": float(np.sqrt(np.mean(e ** 2))),
-                "bias": float(np.mean(e)),
-                "n": int(np.sum(mask)),
-            }
-
-    # "Other" gets everything unclaimed
-    other_mask = ~claimed
-    if np.sum(other_mask) > 0:
-        e = errors[other_mask]
-        result["Other"] = {
+    def _stats(mask):
+        if not np.any(mask):
+            return None
+        e = errors[mask]
+        return {
             "mae": float(np.mean(np.abs(e))),
-            "rmse": float(np.sqrt(np.mean(e ** 2))),
+            "rmse": float(np.sqrt(np.mean(e**2))),
             "bias": float(np.mean(e)),
-            "n": int(np.sum(other_mask)),
+            "n": int(np.sum(mask)),
         }
 
+    result: dict[str, dict[str, float]] = {}
+    below = _stats(dft_freqs < 400)
+    if below:
+        result["< 400 cm\u207b\u00b9"] = below
+    for name, lo, hi in ranges:
+        row = _stats((dft_freqs >= lo) & (dft_freqs < hi))
+        if row:
+            result[name] = row
+    if mode_ids is not None and len(mode_ids) == len(dft_freqs):
+        prefixes = np.array([str(m)[:1] for m in mode_ids])
+        for label, prefix in (
+            ("Fundamentals", "F"),
+            ("Overtones", "O"),
+            ("Combination bands", "C"),
+        ):
+            row = _stats(prefixes == prefix)
+            if row:
+                result[label] = row
     return result
 
 

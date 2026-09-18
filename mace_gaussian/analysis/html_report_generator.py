@@ -201,6 +201,53 @@ class HTMLReportGenerator:
         return html.escape(str(s), quote=True)
 
     @staticmethod
+    def _r2_text(r2: float, n: int | None, digits: int = 3) -> str:
+        """R² for display, or 'n/a' when there are too few points for it to mean anything."""
+        from .plotly_builders import MIN_N_FOR_R2
+
+        if n is not None and n < MIN_N_FOR_R2:
+            return f"n/a (n={n})"
+        return f"{r2:.{digits}f}"
+
+    def _create_run_integrity(self, comp: dict) -> str:
+        """Was this run healthy? One row per check, ML and DFT side by side.
+
+        Reads calculation_parameters written by workflow/dft_baseline since 2026-09-18
+        (re-optimization, dipole fallbacks, VPT2 diagnostics). Older results.json
+        files show "n/a". Report review item 4.
+        """
+        ml = (comp.get("_ml_results") or {}).get("calculation_parameters") or {}
+        dft = (comp.get("_dft_results") or {}).get("calculation_parameters") or {}
+        reopt = ml.get("reoptimization") or {}
+        fb = ml.get("dipole_fallbacks") or {}
+        vml = ml.get("vpt2_diagnostics") or {}
+        vdft = dft.get("vpt2_diagnostics") or {}
+
+        def cell(v, fmt=None, good=None):
+            if v is None:
+                return "<td>n/a</td>"
+            txt = fmt(v) if fmt else str(v)
+            cls = "" if good is None else (' class="metric-good"' if good(v) else ' class="metric-bad"')
+            return f"<td{cls}>{self._esc(txt)}</td>"
+
+        rows = [
+            ("Geometry re-optimized on its own surface", cell(reopt.get("reoptimized_with")), "<td>B3LYP opt</td>"),
+            ("Optimizer converged", cell(reopt.get("converged"), good=bool), "<td>n/a</td>"),
+            ("Final max force (eV/Å)", cell(reopt.get("max_force_eV_A"), lambda v: f"{v:.1e}", lambda v: v < 1e-3), "<td>n/a</td>"),
+            ("Max atom shift from start (Å)", cell(reopt.get("max_atom_shift_A"), lambda v: f"{v:.3f}", lambda v: v < 0.1), "<td>n/a</td>"),
+            ("Dipole fallbacks (zeroed calls)", cell(fb.get("count"), good=lambda v: v == 0), "<td>0</td>"),
+            ("Unreliable cubic force constants", cell(vml.get("unreliable_cubic"), good=lambda v: v == 0), cell(vdft.get("unreliable_cubic"), good=lambda v: v == 0)),
+            ("Fermi resonance deperturbed", cell(vml.get("fermi_resonances")), cell(vdft.get("fermi_resonances"))),
+            ("Darling-Dennison deperturbed", cell(vml.get("darling_dennison_resonances")), cell(vdft.get("darling_dennison_resonances"))),
+        ]
+        body = "".join(f"<tr><td>{self._esc(k)}</td>{a}{b}</tr>" for k, a, b in rows)
+        return (
+            '<div class="stats-box"><h4>Run integrity</h4>'
+            '<table class="summary-table"><thead><tr><th>Check</th><th>ML</th><th>DFT</th></tr></thead>'
+            f"<tbody>{body}</tbody></table></div>"
+        )
+
+    @staticmethod
     def encode_image(image_path: Path) -> str:
         """Encode image to base64 for embedding."""
         with Path(image_path).open("rb") as f:
@@ -335,11 +382,14 @@ class HTMLReportGenerator:
                 f'<div class="{cls}">'
                 f"<h3>{name}</h3>"
                 f'<div class="metric">'
-                f'<span class="metric-label">R\u00b2 (freq)</span>'
-                f'<span class="metric-value">{entry["r2_freq"]:.3f}</span></div>'
+                f'<span class="metric-label">MAE (freq)</span>'
+                f'<span class="metric-value">{entry.get("mae_freq", float("nan")):.1f} cm\u207b\u00b9</span></div>'
                 f'<div class="metric">'
-                f'<span class="metric-label">R\u00b2 (intensity)</span>'
-                f'<span class="metric-value">{entry["r2_intensity"]:.3f}</span></div>'
+                f'<span class="metric-label">MAE (intensity)</span>'
+                f'<span class="metric-value">{entry.get("mae_intensity", float("nan")):.1f} km/mol</span></div>'
+                f'<div class="metric">'
+                f'<span class="metric-label">R\u00b2 (freq)</span>'
+                f'<span class="metric-value">{self._r2_text(entry["r2_freq"], entry.get("n_freq"))}</span></div>'
                 f'<div class="metric">'
                 f'<span class="metric-label">RMSE</span>'
                 f'<span class="metric-value">{entry["rmse_freq"]:.1f} cm\u207b\u00b9</span></div>'
@@ -544,9 +594,9 @@ class HTMLReportGenerator:
                     )
                 region_html = (
                     '<div class="stats-box">'
-                    "<h4>Per-Region Accuracy</h4>"
+                    "<h4>Accuracy by wavenumber range and band type</h4>"
                     '<table class="summary-table"><thead>'
-                    "<tr><th>Region</th><th>n</th><th>MAE</th>"
+                    "<tr><th>Rows: DFT wavenumber range, then band type</th><th>n</th><th>MAE</th>"
                     "<th>RMSE</th><th>Bias</th></tr></thead>"
                     f"<tbody>{rows}</tbody></table></div>"
                 )
@@ -558,7 +608,7 @@ class HTMLReportGenerator:
             dft_results = comp.get("_dft_results")
             if ml_results and dft_results:
                 anharm_div = self._build_anharmonicity_section(
-                    ml_results, dft_results, ml_name, index
+                    ml_results, dft_results, ml_name, index, mode_mapping=mode_mapping
                 )
 
         # Heatmap PNG (stays as static image)
@@ -627,10 +677,10 @@ class HTMLReportGenerator:
             '<div class="stats-grid">'
             f'<div class="stat-item">'
             f'<div class="stat-label">R\u00b2 (Frequency)</div>'
-            f'<div class="stat-value {r2_class}">{m.r2_freq:.4f}</div></div>'
+            f'<div class="stat-value {r2_class}">{self._r2_text(m.r2_freq, m.num_peaks, 4)}</div></div>'
             f'<div class="stat-item">'
             f'<div class="stat-label">R\u00b2 (Intensity)</div>'
-            f'<div class="stat-value">{m.r2_intensity:.4f}</div></div>'
+            f'<div class="stat-value">{self._r2_text(m.r2_intensity, m.num_peaks - m.num_intensity_filtered, 4)}</div></div>'
             f'<div class="stat-item">'
             f'<div class="stat-label">MAE</div>'
             f'<div class="stat-value {mae_class}">{m.mae_freq:.2f} cm\u207b\u00b9</div></div>'
@@ -698,6 +748,7 @@ class HTMLReportGenerator:
             f'<section class="comparison-section" id="comparison-{index}">'
             f"<h2>{ml_name_esc} vs DFT</h2>"
             f"{metrics_table}"
+            f"{self._create_run_integrity(comp)}"
             f"{deg_html}"
             f'<div class="plot-container">{spec_div}</div>'
             f"{reg_row}"
@@ -709,26 +760,46 @@ class HTMLReportGenerator:
         )
 
     def _build_anharmonicity_section(
-        self, ml_results: dict, dft_results: dict, ml_name: str, index: int
+        self,
+        ml_results: dict,
+        dft_results: dict,
+        ml_name: str,
+        index: int,
+        mode_mapping: dict[int, int] | None = None,
     ) -> str:
-        """Build anharmonicity ratio plot from raw results dicts."""
+        """Build anharmonicity ratio plot from raw results dicts.
+
+        Pairs modes through the eigenvector mapping (ML checkpoint index -> DFT
+        checkpoint index), translating Gaussian's symmetry-block mode numbers to
+        checkpoint indices first. Review finding H2b: this used to pair ML Mode(n)
+        with DFT Mode(n) by Gaussian's number and ignore the mapping.
+        """
+        from .analyze_spectra import gaussian_mode_to_checkpoint_index
+
         try:
             ml_anharm = ml_results.get("frequencies", {}).get("anharmonic", [])
             dft_anharm = dft_results.get("frequencies", {}).get("anharmonic", [])
             if not ml_anharm or not dft_anharm:
                 return ""
 
-            # Build mode-number-indexed lookups
-            ml_by_mode = {m["mode"]: m for m in ml_anharm}
-            dft_by_mode = {m["mode"]: m for m in dft_anharm}
-            common = sorted(set(ml_by_mode) & set(dft_by_mode))
-            if len(common) < 3:
+            ml_to_ckpt = gaussian_mode_to_checkpoint_index(ml_anharm)
+            dft_to_ckpt = gaussian_mode_to_checkpoint_index(dft_anharm)
+            # checkpoint index (0-based) -> row
+            ml_by_ckpt = {ml_to_ckpt.get(m["mode"], m["mode"]) - 1: m for m in ml_anharm}
+            dft_by_ckpt = {dft_to_ckpt.get(m["mode"], m["mode"]) - 1: m for m in dft_anharm}
+            mapping = mode_mapping if mode_mapping else {i: i for i in ml_by_ckpt}
+            pairs = [
+                (ml_by_ckpt[i], dft_by_ckpt[j])
+                for i, j in sorted(mapping.items())
+                if i in ml_by_ckpt and j in dft_by_ckpt
+            ]
+            if len(pairs) < 3:
                 return ""
 
-            dft_harm = np.array([dft_by_mode[m]["freq_harmonic"] for m in common])
-            dft_anh = np.array([dft_by_mode[m]["freq_cm"] for m in common])
-            ml_harm = np.array([ml_by_mode[m]["freq_harmonic"] for m in common])
-            ml_anh = np.array([ml_by_mode[m]["freq_cm"] for m in common])
+            dft_harm = np.array([d["freq_harmonic"] for _, d in pairs])
+            dft_anh = np.array([d["freq_cm"] for _, d in pairs])
+            ml_harm = np.array([m["freq_harmonic"] for m, _ in pairs])
+            ml_anh = np.array([m["freq_cm"] for m, _ in pairs])
 
             fig = build_anharmonicity_ratio_figure(dft_harm, dft_anh, ml_harm, ml_anh, ml_name)
             return self._fig_to_div(fig, f"anharm-ratio-{index}", responsive=False)
@@ -757,8 +828,9 @@ class HTMLReportGenerator:
             rows.append(
                 f"<tr>"
                 f"<td>{name}</td>"
-                f"<td>{m.r2_freq:.4f}</td>"
-                f"<td>{m.r2_intensity:.4f}</td>"
+                f"<td>{m.mae_freq:.2f}</td>"
+                f"<td>{self._r2_text(m.r2_freq, m.num_peaks, 4)}</td>"
+                f"<td>{self._r2_text(m.r2_intensity, m.num_peaks - m.num_intensity_filtered, 4)}</td>"
                 f"<td>{m.rmse_freq:.2f}</td>"
                 f"<td>{speedup:.1f}\u00d7</td>"
                 f"</tr>"
@@ -768,7 +840,7 @@ class HTMLReportGenerator:
             "<h2>Summary Comparison</h2>"
             '<table class="data-table">'
             "<thead><tr>"
-            "<th>Method</th><th>R\u00b2 freq</th><th>R\u00b2 int</th>"
+            "<th>Method</th><th>MAE</th><th>R\u00b2 freq</th><th>R\u00b2 int</th>"
             "<th>RMSE</th><th>Speedup</th>"
             "</tr></thead>"
             f"<tbody>{''.join(rows)}</tbody></table>"

@@ -662,6 +662,7 @@ def run_frequency_calculation(
                 "last_error": mol.info.get("dipole_fallback_last_error"),
                 "intensities_trustworthy": n_fallback == 0,
             },
+            "vpt2_diagnostics": parsed_data.get("vpt2_diagnostics"),
         }
         results_mgr.save_frequency_results(
             molecule_name=molecule_name,

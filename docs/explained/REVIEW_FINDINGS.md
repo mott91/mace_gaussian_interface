@@ -557,6 +557,25 @@ The remaining MP/POLAR MAEs of 100+ cm-1 are real model errors plus the H1 geome
 problem, not pairing errors. All of these anharmonic numbers still come from the stale
 (pre-H1) Gaussian runs and will change again once the panel is rerun at per-model minima.
 
+## Report review (2026-09-18, after an end-to-end water run with the fixed pipeline)
+
+Water, OMOL/ANICC/MP × MACE4IR/espaloma + B3LYP twin, 6 ML runs of 7-17 s, DFT 17 s,
+analysis in both modes. Report text, tables and embedded plots inspected. Decisions:
+
+| # | issue | decision | done |
+|---|---|---|---|
+| R1 | verdict said "closest to experiment" while quoting DFT metrics (and R²) | fix | verdict: "closest to DFT (MAE, RMSE, slope, speedup)"; summary cards lead with MAE |
+| R2 | region table used organic-group names; water's bend overtone landed in "C-H stretch" | fix | neutral wavenumber ranges + rows per band type (fundamental/overtone/combination) |
+| R3 | R² shown to 3-4 decimals on 3 points | fix | `MIN_N_FOR_R2 = 5`: R² prints "n/a (n=…)" below that in cards, stat boxes, summary table, plotly and matplotlib regressions |
+| R4 | no run-health information in the report | fix | "Run integrity" table per method: re-opt model, converged, max force, atom shift, dipole fallbacks, unreliable cubic count, Fermi / Darling-Dennison deperturbation (new `parse_vpt2_diagnostics`, stored under `calculation_parameters.vpt2_diagnostics` for ML and DFT runs) |
+| R5 | combined spectrum clips (curves normalized to DFT max, espaloma 3× taller) | deferred, plots to be redesigned later | |
+| R6 | raw NIST overlay is a rotational forest for small molecules | options given: size-dependent Gaussian smoothing + area normalization; HITRAN line lists for tier 0/1; Shimanouchi per-mode band origins (NIST WebBook) for a per-mode experimental column | not implemented |
+| R7 | frequency sections repeated 3× per energy model | explained what grouping would cut; user's July decision stands | |
+| R8 = H2b | anharmonicity-ratio plot paired by raw Gaussian mode number | fix | pairs via checkpoint indices + the Hungarian mapping |
+
+Still to build for the thesis: a per-mode master table (DFT harm/VPT2, ML harm/VPT2 per
+energy model, experimental band origin where available).
+
 ## Test suite, final state (2026-09-18, after all fixes)
 
 `360 passed, 2 skipped in 35 s` on `fix/review-2026-09` (commit c61299b). No files

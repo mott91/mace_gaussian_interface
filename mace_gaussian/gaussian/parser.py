@@ -480,6 +480,35 @@ class GaussianLogParser:
             "stages": stages,
         }
 
+    def parse_vpt2_diagnostics(self) -> dict:
+        """Health indicators of the VPT2 run (report review item 4, 2026-09-18).
+
+        Returns
+        -------
+        dict
+            ``unreliable_cubic`` and ``unreliable_quartic``: number of
+            ``WARNING: Unreliable ... force constant`` lines. Gaussian derives each
+            cubic constant from several displacement pairs and warns when they
+            disagree; ML surfaces trigger this more often than DFT (observation O1).
+            ``fermi_resonances`` / ``darling_dennison_resonances``: True when Gaussian
+            applied a deperturbation, i.e. the log does NOT contain the corresponding
+            "No ... resonance found" line. ``has_anharmonic``: whether a VPT2 section
+            exists at all.
+        """
+        c = self.content
+        has_anharm = "Second-order Perturbative Anharmonic Analysis" in c
+        return {
+            "has_anharmonic": has_anharm,
+            "unreliable_cubic": len(re.findall(r"Unreliable CUBIC force constant", c)),
+            "unreliable_quartic": len(re.findall(r"Unreliable QUARTIC force constant", c)),
+            "fermi_resonances": has_anharm and "No Fermi resonance found" not in c,
+            "darling_dennison_resonances": has_anharm
+            and not (
+                "No 2-2 Darling-Dennison resonance found" in c
+                and "No 1-1 Darling-Dennison resonance found" in c
+            ),
+        }
+
     def parse_all(self) -> dict:
         """
         Parse all available data from log file.
@@ -497,6 +526,7 @@ class GaussianLogParser:
             "final_energy_hartree": self.parse_final_energy(),
             "dipole_moment": self.parse_dipole_moment(),
             "timing": self.parse_timing_summary(),
+            "vpt2_diagnostics": self.parse_vpt2_diagnostics(),
         }
 
 

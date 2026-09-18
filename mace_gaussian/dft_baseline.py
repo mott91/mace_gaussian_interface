@@ -438,6 +438,7 @@ def run_dft_baseline_calculation(
             gaussian_log=str(final_log),
             gaussian_gjf=str(final_gjf),
             timestamp=timestamp,
+            calculation_parameters={"vpt2_diagnostics": parsed_data.get("vpt2_diagnostics")},
             gaussian_timing=parsed_data.get("timing"),
         )
 

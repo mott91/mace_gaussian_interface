@@ -1025,7 +1025,8 @@ class SpectrumAnalyzer:
         ax1.set_aspect("equal", adjustable="box")
 
         # Add statistics text box - modern style
-        textstr = f"$R^2$ = {metrics.r2_freq:.4f}\n"
+        r2_txt = f"{metrics.r2_freq:.4f}" if metrics.num_peaks >= 5 else f"n/a (n={metrics.num_peaks})"
+        textstr = f"$R^2$ = {r2_txt}\n"
         textstr += f"MAE = {metrics.mae_freq:.1f} cm$^{{-1}}$\n"
         textstr += f"RMSE = {metrics.rmse_freq:.1f} cm$^{{-1}}$\n"
         textstr += f"Slope = {metrics.slope_freq:.4f}\n"
@@ -1186,7 +1187,8 @@ class SpectrumAnalyzer:
 
             # Add statistics text box
             n_included = int(int_included.sum())
-            textstr = f"$R^2$ = {metrics.r2_intensity:.4f}\n"
+            r2_int_txt = f"{metrics.r2_intensity:.4f}" if n_included >= 5 else f"n/a (n={n_included})"
+            textstr = f"$R^2$ = {r2_int_txt}\n"
             textstr += f"MAE = {metrics.mae_intensity:.1f}\n"
             textstr += f"$n$ = {n_included}"
             if metrics.num_intensity_filtered > 0:

@@ -113,6 +113,8 @@ def rank_methods(
             + weights["r2_int"] * (1.0 - float(m.r2_intensity))
             + weights["exp"] * (1.0 - exp_agree_val)
         )
+        n_freq = int(getattr(m, "num_peaks", 0))
+        n_int = max(0, n_freq - int(getattr(m, "num_intensity_filtered", 0)))
         scored.append(
             {
                 "name": c["name"],
@@ -121,8 +123,11 @@ def rank_methods(
                 "r2_intensity": float(m.r2_intensity),
                 "rmse_freq": float(m.rmse_freq),
                 "mae_freq": float(m.mae_freq),
+                "slope_freq": float(getattr(m, "slope_freq", float("nan"))),
                 "rmse_intensity": float(m.rmse_intensity),
                 "mae_intensity": float(m.mae_intensity),
+                "n_freq": n_freq,
+                "n_int": n_int,
                 "speedup": float(c.get("speedup", 0.0)),
                 "experimental_agreement": exp_agree_out if has_exp else None,
             }
@@ -132,17 +137,22 @@ def rank_methods(
 
 
 def build_verdict(ranked: list[dict[str, Any]], has_experimental: bool) -> str:
-    """Human-readable one-liner for the executive summary card (D-01)."""
+    """Human-readable one-liner for the executive summary card (D-01).
+
+    Every number in the ranking is measured against the DFT reference, so the verdict
+    says so regardless of whether an experimental spectrum was available. (The old
+    wording "closest to experiment" quoted DFT metrics while pointing at a hidden,
+    near-noise spectrum-correlation score; report review item 1, 2026-09-18.)
+    The metric R\u00b2 is not quoted: on a handful of modes it is always ~1 and says nothing.
+    """
     if not ranked:
         return "No ML comparisons available."
     best = ranked[0]
-    if has_experimental and best.get("experimental_agreement") is not None:
-        return (
-            f"{best['name']} is closest to experiment "
-            f"(R\u00b2_freq={best['r2_freq']:.3f}, RMSE={best['rmse_freq']:.1f} cm\u207b\u00b9)."
-        )
+    slope = best.get("slope_freq")
+    slope_txt = f", slope {slope:.3f}" if slope is not None and math.isfinite(slope) else ""
     return (
         f"{best['name']} is closest to DFT "
-        f"(R\u00b2_freq={best['r2_freq']:.3f}, RMSE={best['rmse_freq']:.1f} cm\u207b\u00b9, "
+        f"(MAE {best.get('mae_freq', float('nan')):.1f} cm\u207b\u00b9, "
+        f"RMSE {best['rmse_freq']:.1f} cm\u207b\u00b9{slope_txt}, "
         f"{best['speedup']:.1f}\u00d7 speedup)."
     )

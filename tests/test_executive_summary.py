@@ -109,6 +109,9 @@ class TestRankMethods:
             "mae_freq",
             "rmse_intensity",
             "mae_intensity",
+            "slope_freq",
+            "n_freq",
+            "n_int",
             "speedup",
             "experimental_agreement",
         }
@@ -176,10 +179,13 @@ class TestBuildVerdict:
         ]
         verdict = build_verdict(ranked, has_experimental=True)
         assert "mace_off_espaloma" in verdict
-        assert "closest to experiment" in verdict
-        assert "0.995" in verdict
+        # All quoted numbers are DFT metrics, so the verdict must say DFT even when an
+        # experimental spectrum exists (report review item 1, 2026-09-18).
+        assert "closest to DFT" in verdict
+        assert "closest to experiment" not in verdict
         assert "20.0" in verdict
-        # Agreement value intentionally absent: near-noise metric hidden from display
+        # R² and the near-noise agreement value are intentionally absent
+        assert "0.995" not in verdict
         assert "0.92" not in verdict
 
     def test_without_experimental(self):
