@@ -557,7 +557,13 @@ The remaining MP/POLAR MAEs of 100+ cm-1 are real model errors plus the H1 geome
 problem, not pairing errors. All of these anharmonic numbers still come from the stale
 (pre-H1) Gaussian runs and will change again once the panel is rerun at per-model minima.
 
-## Test suite (run 2026-09-18, `mace4ir_v2`, 20 min 22 s)
+## Test suite, final state (2026-09-18, after all fixes)
+
+`360 passed, 2 skipped in 35 s` on `fix/review-2026-09` (commit c61299b). No files
+written outside `tmp_path`. The slowest test is `test_generate_batch_report_creates_html`
+at 22 s, because it renders the real `comparison_results/` at 300 dpi.
+
+## Test suite, initial state (run 2026-09-18 before fixes, `mace4ir_v2`, 20 min 22 s)
 
 `11 failed, 333 passed, 2 skipped`. The 11 failures are the known ones and are all test
 problems, not code problems:
