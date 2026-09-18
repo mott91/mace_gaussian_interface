@@ -1,0 +1,135 @@
+{
+  "molecule": "water",
+  "energy_calculator": "mace_mp",
+  "dipole_calculator": "mace_ml",
+  "calculator_type": "ml",
+  "timestamp": null,
+  "frequencies": {
+    "harmonic": [
+      {
+        "freq_cm": 1497.3927,
+        "ir_intensity": 78.0964
+      },
+      {
+        "freq_cm": 3695.9477,
+        "ir_intensity": 6.7346
+      },
+      {
+        "freq_cm": 3815.2239,
+        "ir_intensity": 58.886
+      }
+    ],
+    "anharmonic": [
+      {
+        "mode": 1,
+        "freq_cm": 3564.16,
+        "ir_intensity": 2.94899196,
+        "freq_harmonic": 3695.948
+      },
+      {
+        "mode": 2,
+        "freq_cm": 1480.438,
+        "ir_intensity": 95.96526955,
+        "freq_harmonic": 1497.393
+      },
+      {
+        "mode": 3,
+        "freq_cm": 3654.921,
+        "ir_intensity": 31.53604126,
+        "freq_harmonic": 3815.224
+      }
+    ],
+    "overtones": [
+      {
+        "mode": 1,
+        "overtone_level": 2,
+        "freq_harmonic": 7391.895,
+        "freq_anharmonic": 7060.934,
+        "ir_intensity": 0.06260953
+      },
+      {
+        "mode": 2,
+        "overtone_level": 2,
+        "freq_harmonic": 2994.785,
+        "freq_anharmonic": 2951.375,
+        "ir_intensity": 0.40482854
+      },
+      {
+        "mode": 3,
+        "overtone_level": 2,
+        "freq_harmonic": 7630.448,
+        "freq_anharmonic": 7230.32,
+        "ir_intensity": 0.00147301
+      }
+    ],
+    "combination_bands": [
+      {
+        "mode1": 2,
+        "mode2": 1,
+        "freq_harmonic": 5193.34,
+        "freq_anharmonic": 5053.522,
+        "ir_intensity": 0.13593539
+      },
+      {
+        "mode1": 3,
+        "mode2": 1,
+        "freq_harmonic": 7511.172,
+        "freq_anharmonic": 7081.352,
+        "ir_intensity": 9.56336016
+      },
+      {
+        "mode1": 3,
+        "mode2": 2,
+        "freq_harmonic": 5312.617,
+        "freq_anharmonic": 5111.525,
+        "ir_intensity": 0.02821903
+      }
+    ]
+  },
+  "energy_eV": 0.07747081664232784,
+  "dipole": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": -1.889074599663616,
+    "magnitude": 1.889074599663616
+  },
+  "runtime_s": 19.6545627117157,
+  "files": {
+    "gaussian_log": "gaussian_freq.log",
+    "gaussian_input": "gaussian_freq.gjf"
+  },
+  "version_info": {
+    "tool_version": "0.2.0",
+    "python_version": "3.10.19 | packaged by conda-forge | (main, Oct 13 2025, 14:08:27) [GCC 14.3.0]",
+    "platform": "Linux-5.10.0-41-amd64-x86_64-with-glibc2.31",
+    "cpu_model": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "ram_gb": 62.7,
+    "torch_version": "2.4.0+cu121",
+    "cuda_available": true,
+    "cuda_version": "12.1",
+    "gpu_name": "NVIDIA GeForce RTX 2070 SUPER",
+    "mace_version": "0.3.15",
+    "ase_version": "3.26.0"
+  },
+  "calculation_parameters": {
+    "energy_calculator": "mace_mp",
+    "dipole_calculator": "mace_ml",
+    "reoptimization": {
+      "reoptimized_with": "mace_mp",
+      "fmax_target_eV_A": 1e-06,
+      "converged": true,
+      "steps": 8,
+      "max_force_eV_A": 2.1656923796626668e-07
+    }
+  },
+  "gaussian_timing": {
+    "total_elapsed_s": 15.2,
+    "total_cpu_s": 1.8,
+    "stages": [
+      {
+        "cpu_s": 1.8,
+        "elapsed_s": 15.2
+      }
+    ]
+  }
+}
