@@ -49,6 +49,12 @@ os.environ["PYTHONWARNINGS"] = "ignore::FutureWarning"
 # Elements supported by mace_anicc (HCNO molecules only)
 _MACE_ANICC_SUPPORTED_ELEMENTS = frozenset({"H", "C", "N", "O"})
 
+# Geometry optimization settings. Used by stage 1 and by the per-model
+# re-optimization in run_frequency_calculation (review finding H1).
+# Values to be frozen for the campaign (finding M4).
+OPT_FMAX: float = 0.000001  # eV/Å
+OPT_MAX_STEPS: int = 10000
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
@@ -307,13 +313,13 @@ def run_next_calculation(
     )
 
 
-def geometry_optimisation(mol, fmax=0.000001):
+def geometry_optimisation(mol, fmax=OPT_FMAX):
     """Run LBFGS geometry optimisation on mol in-place and return (mol, steps)."""
     ei = mol.get_potential_energy()
     print("Initial Energy: ", ei, "eV")
     opt = LBFGS(mol)
 
-    opt.run(fmax=fmax, steps=10000)
+    opt.run(fmax=fmax, steps=OPT_MAX_STEPS)
 
     num_steps = opt.get_number_of_steps()
     print(f"Optimization steps: {num_steps}")
@@ -489,6 +495,24 @@ def run_frequency_calculation(
         mol.info["charge"] = float(charge)
         mol.info["spin"] = float(multiplicity)
 
+        # H1: relax on this energy model's own surface before Gaussian sees the
+        # geometry. freq(anharm) assumes a stationary point; the stage-1 geometry
+        # is only a minimum of the optimization calculator's surface.
+        reopt = LBFGS(mol, logfile=None)
+        reopt_converged = reopt.run(fmax=OPT_FMAX, steps=OPT_MAX_STEPS)
+        max_force = float(np.linalg.norm(mol.get_forces(), axis=1).max())
+        reopt_info = {
+            "reoptimized_with": energy_calculator_name,
+            "fmax_target_eV_A": OPT_FMAX,
+            "converged": bool(reopt_converged),
+            "steps": reopt.get_number_of_steps(),
+            "max_force_eV_A": max_force,
+        }
+        print(
+            f"  -> Re-optimized on {energy_calculator_name}: "
+            f"{reopt_info['steps']} steps, max force {max_force:.2e} eV/Å"
+        )
+
         # Create frequency directory
         freq_dir = results_mgr.create_frequency_directory(
             molecule_name, energy_calculator_name, dipole_calculator_name, timestamp
@@ -591,6 +615,7 @@ def run_frequency_calculation(
         calculation_parameters = {
             "energy_calculator": energy_calculator_name,
             "dipole_calculator": dipole_calculator_name,
+            "reoptimization": reopt_info,
         }
         results_mgr.save_frequency_results(
             molecule_name=molecule_name,
