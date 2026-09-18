@@ -17,10 +17,8 @@ Covers:
 from unittest.mock import MagicMock, patch
 
 import numpy as np
-
 import pytest
 from ase import Atoms
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -315,11 +313,12 @@ class TestElementGuardAtCallSites:
 
     def test_run_pipeline_raises_for_non_hcno_with_mace_anicc(self):
         """run_pipeline raises ValueError before model load when optimization_calculator is mace_anicc and molecule has non-HCNO elements."""
-        from mace_gaussian.workflow import run_pipeline
+        import os
 
         # Write a temp xyz file with F atom
         import tempfile
-        import os
+
+        from mace_gaussian.workflow import run_pipeline
 
         xyz_content = "2\n\nH 0.0 0.0 0.0\nF 1.0 0.0 0.0\n"
         with tempfile.NamedTemporaryFile(mode="w", suffix=".xyz", delete=False) as f:
@@ -356,10 +355,10 @@ class TestElementGuardAtCallSites:
 
     def test_run_pipeline_does_not_raise_guard_for_hcno_with_mace_anicc(self):
         """run_pipeline does NOT trigger element guard when molecule is HCNO-only."""
-        from mace_gaussian.workflow import run_pipeline
-
-        import tempfile
         import os
+        import tempfile
+
+        from mace_gaussian.workflow import run_pipeline
 
         xyz_content = "3\n\nO 0.0 0.0 0.0\nH 0.96 0.0 0.0\nH -0.24 0.93 0.0\n"
         with tempfile.NamedTemporaryFile(mode="w", suffix=".xyz", delete=False) as f:
