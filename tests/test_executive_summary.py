@@ -11,7 +11,6 @@ from mace_gaussian.analysis.executive_summary import (
     rank_methods,
 )
 
-
 # ── compute_experimental_agreement ──────────────────────────────────────────
 
 
@@ -136,6 +135,23 @@ class TestRankMethods:
         ranked = rank_methods(comps)
         assert ranked[0]["experimental_agreement"] is None
         assert ranked[1]["experimental_agreement"] is None
+
+    def test_experimental_agreement_does_not_affect_ranking(self, fake_metrics, fake_metrics_b):
+        """Ranking is DFT-only: experimental agreement is exported but has zero weight."""
+
+        def comps(exp_a, exp_b):
+            return [
+                {"name": "a", "metrics": fake_metrics, "experimental_agreement": exp_a},
+                {"name": "b", "metrics": fake_metrics_b, "experimental_agreement": exp_b},
+            ]
+
+        with_exp = rank_methods(comps(0.1, 0.99))
+        without_exp = rank_methods(comps(float("nan"), float("nan")))
+        assert [x["name"] for x in with_exp] == [x["name"] for x in without_exp]
+        assert [x["composite_score"] for x in with_exp] == [
+            x["composite_score"] for x in without_exp
+        ]
+        assert with_exp[0]["experimental_agreement"] is not None
 
     def test_deterministic(self, fake_metrics, fake_metrics_b):
         comps = [

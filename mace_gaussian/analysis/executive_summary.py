@@ -4,12 +4,15 @@ Computes the 'best method' composite score for per-molecule reports and
 emits a one-line verdict for the executive summary card.
 
 Scoring weights — symmetric across frequency and intensity so dipole-calculator
-choice is reflected as strongly as energy-calculator choice:
-- 20% normalized RMSE_freq
-- 20% (1 - R²_freq)
-- 20% normalized RMSE_intensity
-- 20% (1 - R²_intensity)
-- 20% (1 - experimental_agreement) when available; else 0 and redistribute equally
+choice is reflected as strongly as energy-calculator choice, all against the DFT
+baseline:
+- 25% normalized RMSE_freq
+- 25% (1 - R²_freq)
+- 25% normalized RMSE_intensity
+- 25% (1 - R²_intensity)
+
+experimental_agreement is still computed and exported but carries zero weight: the
+ranking measures how well each ML model reproduces DFT, not experiment.
 """
 
 from __future__ import annotations
@@ -21,13 +24,6 @@ import numpy as np
 from scipy.stats import pearsonr
 
 _DEFAULT_WEIGHTS = {
-    "rmse_freq": 0.20,
-    "r2_freq": 0.20,
-    "rmse_int": 0.20,
-    "r2_int": 0.20,
-    "exp": 0.20,
-}
-_WEIGHTS_NO_EXP = {
     "rmse_freq": 0.25,
     "r2_freq": 0.25,
     "rmse_int": 0.25,
@@ -87,7 +83,7 @@ def rank_methods(
         for c in comparisons
     )
     if weights is None:
-        weights = _DEFAULT_WEIGHTS if has_exp else _WEIGHTS_NO_EXP
+        weights = _DEFAULT_WEIGHTS
 
     rmse_freq_arr = np.array([c["metrics"].rmse_freq for c in comparisons], dtype=float)
     rmse_freq_norm = _min_max_normalize(rmse_freq_arr)

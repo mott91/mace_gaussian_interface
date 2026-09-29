@@ -75,7 +75,9 @@ mace_gaussian/
 
 Two vendored packages live next to it and are not part of the review:
 `mace_ML_pkg/` (standard mace-torch, provides the energy models) and `mace_dipole_pkg/`
-(a fork with dipole/polarizability heads, provides MACE4IR).
+(a fork whose code supports dipole and polarizability heads, provides MACE4IR). The MACE4IR
+model we load has only the dipole head (`use_polarizability=False`), so the polarizability
+passed to Gaussian is zero and no Raman derivatives exist.
 
 ---
 
