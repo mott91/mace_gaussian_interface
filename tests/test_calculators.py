@@ -216,7 +216,7 @@ class TestDipoleCalculatorFactory:
         assert result["xtb"] is False
         assert result["mace_ml"] is True
         assert result["mace_polar1"] is True
-        assert len(result) == 4
+        assert len(result) == 5  # includes gaussian_b3lyp (reference calculator)
 
     def test_preferred_order_is_set(self):
         """Factory has a preferred_order list with all four calculator names."""

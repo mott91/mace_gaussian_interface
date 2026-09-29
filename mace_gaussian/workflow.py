@@ -388,6 +388,15 @@ def calculator(nnp):
         calc = mace_polar(model="polar-1-l", device="cuda", default_dtype="float64")
         return calc
 
+    if nnp == "gaussian_b3lyp":
+        # Harness self-consistency check: Gaussian itself behind the external
+        # interface (see calculators/gaussian_reference.py).
+        from .calculators.gaussian_reference import GaussianReferenceCalculator
+
+        return GaussianReferenceCalculator()
+
+    raise ValueError(f"Unknown energy calculator: {nnp!r}")
+
 
 # ============================================================================
 # STAGE FUNCTIONS

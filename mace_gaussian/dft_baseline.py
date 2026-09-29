@@ -130,6 +130,7 @@ def create_gaussian_dft_input(
     output_dir: str | Path | None = None,
     nproc: int = 4,
     mem: str = "4GB",
+    optimize: bool = True,
 ) -> None:
     """
     Create Gaussian input file for pure DFT calculation.
@@ -159,12 +160,16 @@ def create_gaussian_dft_input(
         Number of processors for %NProcShared (default: 4)
     mem : str
         Memory for %mem (default: '4GB')
+    optimize : bool
+        Prepend ``opt`` to the route (default). ``False`` runs ``freq(anharm)``
+        at the given geometry unchanged, which the harness self-consistency
+        check needs to compare two runs at exactly the same point.
     """
     symbols = atoms.get_chemical_symbols()
     positions = atoms.get_positions()  # Angstrom
 
-    # Construct route card - pure DFT with geometry optimization, no external interface
-    route = f"# opt freq(anharm) {method}/{basis}"
+    # Construct route card - pure DFT, no external interface
+    route = f"# {'opt ' if optimize else ''}freq(anharm) {method}/{basis}"
     if extra_keywords:
         route += f" {extra_keywords}"
 

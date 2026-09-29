@@ -84,7 +84,7 @@ class TestCheckMaceAniccElements:
         """The module-level constant _MACE_ANICC_SUPPORTED_ELEMENTS is importable."""
         from mace_gaussian.workflow import _MACE_ANICC_SUPPORTED_ELEMENTS
 
-        assert _MACE_ANICC_SUPPORTED_ELEMENTS == frozenset({"H", "C", "N", "O"})
+        assert frozenset({"H", "C", "N", "O"}) == _MACE_ANICC_SUPPORTED_ELEMENTS
 
 
 # ---------------------------------------------------------------------------
@@ -101,9 +101,7 @@ class TestCalculatorMaceAnicc:
         mock_mace_anicc = MagicMock(return_value=mock_calc)
 
         with patch.dict("sys.modules", {"mace.calculators": MagicMock(mace_anicc=mock_mace_anicc)}):
-            from importlib import reload
 
-            import mace_gaussian.workflow as wf
 
             # Patch the import inside the function
             with patch("mace_gaussian.workflow.calculator") as mock_fn:
@@ -147,8 +145,10 @@ class TestCalculatorMaceAnicc:
         # mace_mp is called with model="large"
         assert mock_mace_mp.call_args.kwargs.get("model") == "large"
 
-    def test_unknown_calculator_returns_none(self):
-        """calculator() for an unknown name returns None (no branch matches)."""
+    def test_unknown_calculator_raises(self):
+        """calculator() for an unknown name raises ValueError instead of returning None."""
+        import pytest
+
         from mace_gaussian.workflow import calculator
 
         # Patch all known calculator imports so no network/GPU access occurs
@@ -162,10 +162,8 @@ class TestCalculatorMaceAnicc:
                     mace_anicc=MagicMock(),
                 ),
             },
-        ):
-            result = calculator("nonexistent_calculator")
-
-        assert result is None
+        ), pytest.raises(ValueError, match="nonexistent_calculator"):
+            calculator("nonexistent_calculator")
 
 
 def _make_import_interceptor(mock_mace_anicc):

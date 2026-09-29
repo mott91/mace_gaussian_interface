@@ -249,7 +249,10 @@ there is no unit error".
 
 **B-3. Validation of the harness.** Three items: line-by-line unit audit; Psience
 cross-check (< 0.01 cm⁻¹); DFT self-consistency check (B3LYP through the external interface
-vs native, `[DATA]`). Plus the July intensity bug as an honesty anecdote (factor 3.57, found,
+vs native `freq(anharm)` at the same geometry: water max |Δν| 0.008 cm⁻¹, formaldehyde
+0.034 cm⁻¹, intensities within 0.3 %, all 3 + 6 fundamentals, overtones and combination
+bands; `docs/explained/self_consistency/`, run 2026-09-18 with
+`scripts/dft_self_consistency.py`). Plus the July intensity bug as an honesty anecdote (factor 3.57, found,
 fixed, old data flagged).
 
 **B-4. Mode matching.** Overlap matrix heatmap for methane (T₂ triple), Hungarian assignment,

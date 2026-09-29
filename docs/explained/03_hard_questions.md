@@ -108,9 +108,12 @@ frequencies to better than 0.01 cm⁻¹."
 *Have ready:* The July 2026 intensity bug is a good story: intensities were read from the
 dipole-strength table (10⁻⁴⁰ esu²·cm²) instead of km/mol, a factor 3.57. It was caught by
 the mismatch between harmonic and anharmonic intensity scales, and it is exactly the kind of
-error the audit is for. The remaining P0 item is the DFT self-consistency check: run B3LYP
-through the external interface and compare to native `freq=anharm`. That closes the loop
-on the harness itself.
+error the audit is for. The loop on the harness itself is closed by the DFT self-consistency
+check (2026-09-18): B3LYP/6-31G(d,p) run *through* the external interface, with Gaussian as
+the "ML model", versus native `freq(anharm)` at the identical geometry. Water: max |Δν|
+0.008 cm⁻¹ over all fundamentals, overtones and combination bands, intensities within
+0.02 % (0.11 % with the finite-difference dipole derivatives the ML models use).
+Formaldehyde: 0.034 cm⁻¹, 0.22 %. Tables in `docs/explained/self_consistency/`.
 
 **B2. What exactly does Gaussian still do, and what does the ML model do?**
 
