@@ -171,7 +171,17 @@ def _parse_jdx_file(
 
         x = np.asarray(data["x"], dtype=np.float64)
         y = np.asarray(data["y"], dtype=np.float64)
-        yunits = data.get("yunits", "").upper()
+        xunits = str(data.get("xunits", "")).upper()
+        yunits = str(data.get("yunits", "")).upper()
+
+        # Some WebBook spectra (methanol, 2026-09-18) are tabulated against
+        # wavelength in micrometres; convert to wavenumbers before anything else.
+        if "MICRO" in xunits or xunits.strip() == "UM":
+            x = np.where(x > 0, 1e4 / x, np.nan)
+            keep = np.isfinite(x)
+            x, y = x[keep], y[keep]
+        elif xunits and "CM" not in xunits:
+            logger.warning(f"Unrecognised JDX x unit {xunits!r} in {jdx_path}; assuming cm^-1")
 
         # Convert transmittance to absorbance
         if "TRANSMITTANCE" in yunits:

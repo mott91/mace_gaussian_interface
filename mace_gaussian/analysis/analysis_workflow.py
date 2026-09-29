@@ -18,6 +18,7 @@ import pandas as pd
 from .analyze_spectra import SpectrumAnalyzer, SpectrumData
 from .mode_matching import (
     DegenerateGroupResult,
+    align_modes_to_reference,
     build_degenerate_result,
     collapse_alignment_matrix,
     create_alignment_matrix,
@@ -351,16 +352,25 @@ class ComparisonWorkflow:
             # Extract modes from checkpoints - USE HARMONIC MODES
             # For mode matching, we use harmonic eigenvectors since they are the
             # fundamental normal modes. Anharmonic modes include coupling/perturbations.
-            modes_ml, _freqs_ml, _, _, n_atoms_ml = extract_mode_data_from_checkpoint(
+            modes_ml, _freqs_ml, coords_ml, _, n_atoms_ml = extract_mode_data_from_checkpoint(
                 str(ml_fchk), force_harmonic=True
             )
-            modes_dft, freqs_dft, _, _, n_atoms_dft = extract_mode_data_from_checkpoint(
+            modes_dft, freqs_dft, coords_dft, _, n_atoms_dft = extract_mode_data_from_checkpoint(
                 str(dft_fchk), force_harmonic=True
             )
 
             if n_atoms_ml != n_atoms_dft:
                 logger.warning(f"  Different number of atoms ({n_atoms_ml} vs {n_atoms_dft})")
                 return None
+
+            # The two jobs are oriented independently: rotate the ML modes into the
+            # DFT frame before any overlap is computed.
+            modes_ml, align_rmsd = align_modes_to_reference(modes_ml, coords_ml, coords_dft)
+            if align_rmsd > 0.3:
+                logger.warning(
+                    f"  Geometries differ by {align_rmsd:.2f} A after alignment: "
+                    "mode overlaps may be unreliable"
+                )
 
             # Build alignment matrix (needed for subspace overlap)
             alignment_matrix = create_alignment_matrix(modes_ml, modes_dft)
@@ -667,12 +677,13 @@ class ComparisonWorkflow:
                 # Harmonic modes are the true eigenvectors of the Hessian
                 # Anharmonic modes are perturbed versions and not suitable for mode overlap
                 logger.info(f"  Generating heatmap for {ml_name}...")
-                modes_ml, freqs_ml, *_ = extract_mode_data_from_checkpoint(
+                modes_ml, freqs_ml, coords_ml, *_ = extract_mode_data_from_checkpoint(
                     str(ml_fchk), force_harmonic=True
                 )
-                modes_dft, freqs_dft, *_ = extract_mode_data_from_checkpoint(
+                modes_dft, freqs_dft, coords_dft, *_ = extract_mode_data_from_checkpoint(
                     str(dft_fchk), force_harmonic=True
                 )
+                modes_ml, _ = align_modes_to_reference(modes_ml, coords_ml, coords_dft)
 
                 # Check if same number of atoms
                 if modes_ml.shape[1] != modes_dft.shape[1]:

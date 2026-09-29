@@ -230,6 +230,50 @@ def match_modes(
     return matches
 
 
+def kabsch_rotation(coords: np.ndarray, coords_ref: np.ndarray) -> np.ndarray:
+    """Rotation matrix that best superimposes ``coords`` on ``coords_ref`` (both (n, 3))."""
+    p = coords - coords.mean(axis=0)
+    q = coords_ref - coords_ref.mean(axis=0)
+    v, _s, w = np.linalg.svd(p.T @ q)
+    d = np.sign(np.linalg.det(v @ w))  # keep a proper rotation, never a reflection
+    return v @ np.diag([1.0, 1.0, d]) @ w
+
+
+def align_modes_to_reference(
+    modes: np.ndarray,
+    coords: np.ndarray,
+    coords_ref: np.ndarray,
+) -> tuple[np.ndarray, float]:
+    """Rotate Cartesian normal modes into the reference calculation's frame.
+
+    Gaussian orients every job independently, and each ML model re-optimizes on its
+    own surface, so the ML and DFT checkpoints of the same molecule routinely differ
+    by a rotation (methanol, 2026-09-21: 180 degrees about y). Eigenvector overlaps
+    computed across those frames are meaningless -- the methanol CH3 deformation and
+    the OH stretch came out at 0.55 and were swapped by the assignment. Rotating the
+    modes first restores them to 0.999.
+
+    Parameters
+    ----------
+    modes : np.ndarray
+        Displacement vectors, shape (n_modes, n_atoms, 3).
+    coords, coords_ref : np.ndarray
+        Geometries of the two calculations, shape (n_atoms, 3).
+
+    Returns
+    -------
+    (rotated_modes, rmsd_after_alignment)
+        ``rmsd_after_alignment`` is the residual geometry difference in Angstrom;
+        a large value means the two calculations are not the same structure and the
+        overlaps should be read with caution.
+    """
+    rot = kabsch_rotation(coords, coords_ref)
+    centred = coords - coords.mean(axis=0)
+    ref_centred = coords_ref - coords_ref.mean(axis=0)
+    rmsd = float(np.sqrt(((centred @ rot - ref_centred) ** 2).sum(axis=1).mean()))
+    return modes @ rot, rmsd
+
+
 def create_alignment_matrix(modes_calc: np.ndarray, modes_ref: np.ndarray) -> np.ndarray:
     """
     Create full alignment matrix showing overlap between all mode pairs.
