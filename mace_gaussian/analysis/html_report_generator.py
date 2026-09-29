@@ -21,6 +21,7 @@ from .executive_summary import (
     compute_experimental_agreement,
     rank_methods,
 )
+from .master_table import build_master_table, render_master_table_html
 from .plotly_builders import (
     build_anharmonicity_ratio_figure,
     build_combined_spectrum_figure,
@@ -78,7 +79,7 @@ class HTMLReportGenerator:
     # Public API
     # ------------------------------------------------------------------
 
-    def generate_report(self, analysis_results: dict) -> None:
+    def generate_report(self, analysis_results: dict, filename: str = "report.html") -> None:
         """Generate complete HTML report.
 
         Parameters
@@ -141,6 +142,10 @@ class HTMLReportGenerator:
                 + "</div>"
             )
 
+        # Per-mode master table (thesis table): built once, rendered here and
+        # exported by report_data alongside report_data.json.
+        analysis_results["master_table"] = build_master_table(analysis_results)
+
         sections = [
             self._create_head(),
             self._create_header(),
@@ -148,6 +153,7 @@ class HTMLReportGenerator:
             self._create_executive_summary(ranked, verdict),
             mode_overview,
             self._create_combined_plots(analysis_results),
+            render_master_table_html(analysis_results["master_table"]),
         ]
         for i, comp in enumerate(comparisons, 1):
             sections.append(self._create_comparison_section(comp, i, analysis_results))
@@ -166,7 +172,7 @@ class HTMLReportGenerator:
         if cdn_count > 1:
             raise RuntimeError(f"Plotly CDN referenced {cdn_count} times; expected at most 1.")
 
-        out_path = self.output_dir / "report.html"
+        out_path = self.output_dir / filename
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(html_out, encoding="utf-8")
 
@@ -188,7 +194,7 @@ class HTMLReportGenerator:
                 "</body></html>",
             ]
         )
-        out_path = self.output_dir / "report.html"
+        out_path = self.output_dir / filename
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(html_out, encoding="utf-8")
 
@@ -299,6 +305,12 @@ class HTMLReportGenerator:
             dft_br = self._analyzer.broaden_spectrum(comp["dft_spectrum"])
             comp["_ml_broadened"] = self._normalize(ml_br)
             comp["_dft_broadened"] = self._normalize(dft_br)
+            # Peak of this ML spectrum in units of the DFT peak. Multiplying the
+            # own-max-normalized trace by this puts it on the shared DFT scale, so
+            # a band that is twice too strong looks twice too strong.
+            dft_peak = float(np.max(dft_br)) if dft_br.size else 0.0
+            ml_peak = float(np.max(ml_br)) if ml_br.size else 0.0
+            comp["_ml_dft_peak_ratio"] = (ml_peak / dft_peak) if dft_peak > 0 else 1.0
 
     @staticmethod
     def _normalize(arr: np.ndarray) -> np.ndarray:
@@ -355,6 +367,7 @@ class HTMLReportGenerator:
         for i, comp in enumerate(comparisons, 1):
             name = self._esc(comp["name"])
             links.append(f'<a href="#comparison-{i}">{name}</a>')
+        links.append('<a href="#master-table">Master table</a>')
         links.append('<a href="#summary-table">Table</a>')
         if self.mode == "anharmonic":
             links.append('<a href="#overtones">Overtones</a>')

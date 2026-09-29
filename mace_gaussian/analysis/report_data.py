@@ -17,7 +17,13 @@ from typing import Any
 
 import numpy as np
 
-SCHEMA_VERSION = 1
+from .master_table import (
+    build_master_table,
+    write_master_table_csv,
+    write_master_table_latex,
+)
+
+SCHEMA_VERSION = 2  # 2: added master_table (+ master_table.csv / .tex companions)
 
 
 def export_report_data(analysis_results: dict[str, Any], output_path: Path) -> None:
@@ -39,12 +45,16 @@ def export_report_data(analysis_results: dict[str, Any], output_path: Path) -> N
         "experimental": _serialize_experimental(analysis_results.get("experimental")),
         "comparisons": [_serialize_comparison(c) for c in analysis_results.get("comparisons", [])],
         "executive_summary": analysis_results.get("executive_summary") or {},
+        "master_table": analysis_results.get("master_table")
+        or build_master_table(analysis_results),
     }
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w") as f:
         json.dump(payload, f, indent=2, default=_json_default)
 
     _write_summary_metrics_csv(payload, output_path.parent / "summary_metrics.csv")
+    write_master_table_csv(payload["master_table"], output_path.parent / "master_table.csv")
+    write_master_table_latex(payload["master_table"], output_path.parent / "master_table.tex")
 
     freq_grid = analysis_results.get("freq_grid")
     if freq_grid is not None:
@@ -98,6 +108,12 @@ def _serialize_comparison(c: dict[str, Any]) -> dict[str, Any]:
         "spectrum_ml": _serialize_spectrum(c["ml_spectrum"]),
         "spectrum_dft": _serialize_spectrum(c["dft_spectrum"]),
         "experimental_agreement": exp_agree,
+        # Eigenvector pairing, ML checkpoint index -> DFT checkpoint index (0-based),
+        # so downstream figures can pair overtones and combination bands too.
+        "mode_mapping": {str(k): int(v) for k, v in (c.get("mode_mapping") or {}).items()},
+        "mode_overlaps": {
+            str(k): float(v) for k, v in (c.get("mode_overlaps") or {}).items()
+        },
     }
 
 

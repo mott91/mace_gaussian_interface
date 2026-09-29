@@ -9,6 +9,7 @@ Changes:
 
 import json
 import logging
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -910,22 +911,38 @@ class ComparisonWorkflow:
                         deg_groups_data.append(group_dict)
                 break  # Groups come from DFT ref, same across all ML calcs
 
-        generator = HTMLReportGenerator(
-            molecule_name=self.molecule_name,
-            output_dir=self.output_dir,
+        mode = "harmonic" if self.use_harmonic else "anharmonic"
+        comparisons = analysis_results.get("comparisons")
+
+        # The report (2026-09-18 layout: one section per energy model, per-mode error
+        # chart, master table). Also writes report_data.json and the master table exports.
+        from .report_v2 import ReportV2Generator
+
+        report_path = ReportV2Generator(
+            self.molecule_name,
+            self.output_dir,
+            mode=mode,
             bandwidth_fwhm=self.bandwidth_fwhm,
-            degenerate_groups=deg_groups_data if deg_groups_data else None,
-            mode="harmonic" if self.use_harmonic else "anharmonic",
-        )
-
-        generator.generate_report(analysis_results)
-
-        # Only show success message if we have comparisons
-        if analysis_results.get("comparisons"):
-            logger.info(f"HTML report generated: {self.output_dir}/report.html")
+        ).generate(analysis_results)
+        if comparisons:
+            logger.info(f"HTML report generated: {report_path}")
         else:
-            logger.warning(f"Error report generated: {self.output_dir}/report.html")
+            logger.warning(f"Error report generated: {report_path}")
 
+        # The previous per-run layout, on request only (MACE_GAUSSIAN_LEGACY_REPORT=1).
+        if comparisons and os.environ.get("MACE_GAUSSIAN_LEGACY_REPORT") == "1":
+            try:
+                generator = HTMLReportGenerator(
+                    molecule_name=self.molecule_name,
+                    output_dir=self.output_dir,
+                    bandwidth_fwhm=self.bandwidth_fwhm,
+                    degenerate_groups=deg_groups_data if deg_groups_data else None,
+                    mode=mode,
+                )
+                generator.generate_report(analysis_results, filename="report_legacy.html")
+                logger.info(f"Legacy HTML report generated: {self.output_dir}/report_legacy.html")
+            except Exception:
+                logger.exception("Legacy report generation failed (main report is unaffected)")
 
 def analyze_molecule(
     molecule_name: str,

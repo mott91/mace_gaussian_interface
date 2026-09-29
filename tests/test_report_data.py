@@ -19,7 +19,7 @@ class TestExportReportData:
         out = tmp_path / "report_data.json"
         export_report_data(fake_analysis_results, out)
         data = json.loads(out.read_text())
-        assert data["schema_version"] == 1
+        assert data["schema_version"] == 2
 
     def test_json_has_molecule_and_mode(self, fake_analysis_results, tmp_path):
         out = tmp_path / "report_data.json"

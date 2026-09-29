@@ -573,8 +573,35 @@ analysis in both modes. Report text, tables and embedded plots inspected. Decisi
 | R7 | frequency sections repeated 3× per energy model | explained what grouping would cut; user's July decision stands | |
 | R8 = H2b | anharmonicity-ratio plot paired by raw Gaussian mode number | fix | pairs via checkpoint indices + the Hungarian mapping |
 
-Still to build for the thesis: a per-mode master table (DFT harm/VPT2, ML harm/VPT2 per
-energy model, experimental band origin where available).
+Per-mode master table: built 2026-09-18 (`analysis/master_table.py`). One row per DFT
+normal mode with DFT harmonic/VPT2, each energy model's harmonic/VPT2 for the *same* mode
+(eigenvector pairing, low-overlap cells flagged), and the Shimanouchi band origin assigned
+by nearest DFT VPT2 frequency (`analysis/band_origins.json`, 11 molecules fetched from the
+NIST WebBook; CO₂ has no Shimanouchi page there). Rendered in `report.html`
+(`#master-table`), exported as `master_table.csv` (all 15 runs, with intensities) and
+`master_table.tex` (booktabs, one column group per energy model, for `\input`).
+`report_data.json` schema is now version 2.
+
+## Harness self-consistency check (2026-09-18)
+
+`calculators/gaussian_reference.py` registers Gaussian itself as energy calculator and
+dipole calculator `gaussian_b3lyp` (inner `# b3lyp/6-31G(d,p) freq nosymm` job per
+geometry, fchk read back in the ASE-side units the harness expects, frame check against
+the input coordinates). `scripts/dft_self_consistency.py` runs the production
+`run_frequency_calculation` with it, then native `freq(anharm)` at the geometry the
+harness wrote into its own .gjf, and compares every band.
+
+| molecule | dipole derivatives | inner jobs | max abs. Δν (cm⁻¹) | max rel. ΔI | verdict |
+|---|---|---|---|---|---|
+| water | analytic (fchk) | 14 force + 7 freq | 0.008 | 0.02 % | PASS |
+| water | central differences, 0.005 Å (the ML path) | 140 force + 14 freq | 0.008 | 0.11 % | PASS |
+| formaldehyde | analytic (fchk) | 20 force + 13 freq | 0.034 | 0.22 % | PASS |
+
+Thresholds 0.1 cm⁻¹ and 1 %. The residual is Gaussian's own numerical noise (the External
+energy is printed with 7 decimals, the native SCF energy with 10). Offline half of the
+check: `tests/test_gaussian_reference.py` round-trips the fixture fchk through
+`write_gaussian_output` and requires the atomic-unit numbers back to 1e-9.
+Summaries: `docs/explained/self_consistency/`.
 
 ## Test suite, final state (2026-09-18, after all fixes)
 
