@@ -12,6 +12,8 @@ from __future__ import annotations
 import contextlib
 import json
 import os
+import subprocess
+import sys
 import tempfile
 import time
 from datetime import datetime
@@ -113,6 +115,73 @@ def _combination_key(energy_calc: str, dipole_calc: str) -> str:
     return f"{energy_calc}_{dipole_calc}"
 
 
+ANALYSIS_DIR = "analysis_results"
+FIGURE_SCRIPT = Path(__file__).resolve().parent.parent / "scripts" / "make_thesis_figures.py"
+
+
+def _run_analyses(molecule_name: str, output_dir: str, mol_manifest: dict) -> bool:
+    """Harmonic and anharmonic analysis for one molecule; returns True if the
+    anharmonic one (the input of the thesis figures) succeeded."""
+    from .analysis import analyze_molecule, analyze_molecule_harmonic
+
+    try:
+        click.echo(f"  Running harmonic analysis for {molecule_name}...")
+        analyze_molecule_harmonic(molecule_name, base_results_dir=output_dir)
+        mol_manifest["analysis_harmonic"] = STATUS_COMPLETE
+    except Exception as e:
+        click.echo(f"  Warning: Harmonic analysis failed: {e}", err=True)
+        mol_manifest["analysis_harmonic"] = STATUS_FAILED
+    try:
+        click.echo(f"  Running anharmonic analysis for {molecule_name}...")
+        analyze_molecule(molecule_name, base_results_dir=output_dir, output_dir=ANALYSIS_DIR)
+        mol_manifest["analysis_anharmonic"] = STATUS_COMPLETE
+        return True
+    except Exception as e:
+        click.echo(f"  Warning: Anharmonic analysis failed: {e}", err=True)
+        mol_manifest["analysis_anharmonic"] = STATUS_FAILED
+        return False
+
+
+def refresh_thesis_figures(analysis_dir: str, comparison_dir: str) -> bool:
+    """Redraw every thesis figure from the current analyses (scripts/make_thesis_figures.py).
+
+    Runs in a subprocess so a plotting or LaTeX problem can never break a batch.
+    Returns False (with a message) when the script is missing or fails.
+    """
+    if not FIGURE_SCRIPT.exists():
+        click.echo(f"  Thesis figures skipped: {FIGURE_SCRIPT} not found")
+        return False
+    click.echo("Refreshing thesis figures...")
+    try:
+        proc = subprocess.run(
+            [
+                sys.executable,
+                str(FIGURE_SCRIPT),
+                "--analysis-dir",
+                str(Path(analysis_dir).resolve()),
+                "--comparison-dir",
+                str(Path(comparison_dir).resolve()),
+            ],
+            capture_output=True,
+            # Explicit codec: a detached batch (setsid nohup) inherits no locale, so
+            # Python would decode the child's output as ASCII and raise on the first
+            # non-ASCII character it prints (2026-09-18: the run crashed here).
+            encoding="utf-8",
+            errors="replace",
+        )
+    except Exception as e:
+        click.echo(f"  Thesis figures failed to run: {e!r}", err=True)
+        return False
+    lines = [ln for ln in proc.stdout.splitlines() if "FAIL" in ln or "gallery" in ln]
+    for ln in lines:
+        click.echo(f"  {ln.strip()}")
+    if proc.returncode != 0:
+        click.echo(f"  Thesis figures failed (exit {proc.returncode}):", err=True)
+        click.echo(proc.stderr[-2000:], err=True)
+        return False
+    return True
+
+
 def run_batch(
     batch_file: Path,
     optimization_calculator: str,
@@ -123,6 +192,7 @@ def run_batch(
     keep_scratch: bool = False,
     dft_on_cluster: str | None = None,
     slurm_template: str | None = None,
+    make_figures: bool = True,
 ) -> dict:
     """Run the full pipeline for multiple molecules with manifest-based restart.
 
@@ -150,6 +220,9 @@ def run_batch(
         SSH target for SLURM DFT offloading (e.g. ``user@hostname``).
         When set, DFT baselines are submitted as SLURM jobs instead of
         running locally.
+    make_figures : bool
+        If True (default), redraw the thesis figures once at the end when at
+        least one molecule was analysed.
     slurm_template : str or None
         Path to custom SLURM job template. Defaults to
         ``templates/slurm_dft.sh`` relative to the package root.
@@ -176,6 +249,7 @@ def run_batch(
     results_mgr = ResultsManager(base_output_dir=output_dir)
     total = len(molecules)
     summary = {"complete": 0, "failed": 0, "skipped": 0}
+    analysed_any = False  # any successful anharmonic analysis -> refresh figures
 
     for i, xyz_path in enumerate(molecules, 1):
         molecule_name = xyz_path.stem
@@ -327,15 +401,7 @@ def run_batch(
                 if c.get("status") == STATUS_COMPLETE
             )
             if complete_count > 0:
-                try:
-                    from .analysis import analyze_molecule_harmonic
-
-                    click.echo(f"  Running harmonic analysis for {molecule_name}...")
-                    analyze_molecule_harmonic(molecule_name, base_results_dir=output_dir)
-                    mol_manifest["analysis_harmonic"] = STATUS_COMPLETE
-                except Exception as e:
-                    click.echo(f"  Warning: Harmonic analysis failed: {e}", err=True)
-                    mol_manifest["analysis_harmonic"] = STATUS_FAILED
+                analysed_any |= _run_analyses(molecule_name, output_dir, mol_manifest)
                 save_manifest(manifest, manifest_path)
 
             mol_runtime = time.time() - mol_start
@@ -374,9 +440,7 @@ def run_batch(
                 pending_jobs[mol_name] = job_id
 
         if pending_jobs:
-            click.echo(
-                f"\nWaiting for {len(pending_jobs)} DFT job(s) on {dft_on_cluster}..."
-            )
+            click.echo(f"\nWaiting for {len(pending_jobs)} DFT job(s) on {dft_on_cluster}...")
             final_states = poll_jobs(dft_on_cluster, pending_jobs)
 
             # Update manifest with final states
@@ -398,17 +462,11 @@ def run_batch(
                     manifest["molecules"][mol_name]["dft_baseline"] = STATUS_COMPLETE
                 save_manifest(manifest, manifest_path)
 
-                # Re-run harmonic analysis now that DFT baseline is available
-                from .analysis import analyze_molecule_harmonic
-
+                # Re-run the analyses now that the DFT baseline is available
                 for mol_name in completed_mols:
-                    try:
-                        click.echo(f"  Re-running harmonic analysis for {mol_name}...")
-                        analyze_molecule_harmonic(mol_name, base_results_dir=output_dir)
-                        manifest["molecules"][mol_name]["analysis_harmonic"] = STATUS_COMPLETE
-                    except Exception as e:
-                        click.echo(f"  Warning: Harmonic analysis failed for {mol_name}: {e}", err=True)
-                        manifest["molecules"][mol_name]["analysis_harmonic"] = STATUS_FAILED
+                    analysed_any |= _run_analyses(
+                        mol_name, output_dir, manifest["molecules"][mol_name]
+                    )
                 save_manifest(manifest, manifest_path)
 
     # Print summary table
@@ -434,4 +492,8 @@ def run_batch(
 
     manifest["updated"] = datetime.now().isoformat()
     save_manifest(manifest, manifest_path)
+
+    # After the summary, so a figure problem can never hide the batch result.
+    if make_figures and analysed_any:
+        refresh_thesis_figures(ANALYSIS_DIR, output_dir)
     return summary

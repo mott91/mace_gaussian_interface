@@ -37,7 +37,11 @@ Two separate MACE installations coexist:
 - `analysis_workflow.py` - `ComparisonWorkflow` orchestrator; `analyze_molecule()` / `analyze_molecule_harmonic()` entry points
 - `analyze_spectra.py` - `SpectrumAnalyzer`: KDE broadening, statistical metrics (MAE, RMSE, R², slope/intercept)
 - `mode_matching.py` - Eigenvector dot-product mode matching, overlap heatmaps
-- `html_report_generator.py` - HTML report combining plots + data
+- `report_v2.py` - the per-molecule `report.html` (one section per energy model, per-mode error chart, master table; default since 2026-09-18); also writes `report_data.json`, `master_table.csv/.tex`
+- `html_report_generator.py` - legacy per-run report (`MACE_GAUSSIAN_LEGACY_REPORT=1` -> `report_legacy.html`); its helpers are reused by `report_v2.py`
+- `master_table.py` + `band_origins.json` - per-mode master table and curated Shimanouchi band origins
+- `palette.py` - fixed colors per energy model / dipole model for every figure (use in thesis figures too)
+- `thesis_style.py` - Matplotlib style for thesis figures (LaTeX text, palette slots, true print width); driven by `scripts/make_thesis_figures.py` -> `thesis/figures/` (+ `index.html` gallery)
 - `batch_report.py` - Multi-molecule batch reports
 - `nist_fetcher.py` - NIST experimental spectrum fetching
 - `coverage_analysis.py` - Frequency range coverage analysis

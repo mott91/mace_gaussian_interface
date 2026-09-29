@@ -571,6 +571,12 @@ def diagnose():
     type=click.Path(exists=True),
     help="Path to SLURM job template (default: templates/slurm_dft.sh)",
 )
+@click.option(
+    "--no-figures",
+    is_flag=True,
+    default=False,
+    help="Do not redraw the thesis figures (thesis/figures/) at the end of the batch",
+)
 def batch(
     batch_file,
     optimization_calculator,
@@ -581,6 +587,7 @@ def batch(
     keep_scratch,
     dft_on_cluster,
     slurm_template,
+    no_figures,
 ):
     """Run pipeline for multiple molecules listed in BATCH_FILE.
 
@@ -620,6 +627,7 @@ def batch(
             keep_scratch=keep_scratch,
             dft_on_cluster=dft_on_cluster,
             slurm_template=slurm_template,
+            make_figures=not no_figures,
         )
 
         if summary["failed"] > 0:
