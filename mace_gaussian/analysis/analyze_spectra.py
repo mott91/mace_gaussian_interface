@@ -385,6 +385,22 @@ class SpectrumAnalyzer:
 
         return broadened
 
+    @staticmethod
+    def _remap_derived_id(mode_id: str, mode_mapping: dict[int, int]) -> str:
+        """Translate an overtone (``O3_2``, ``O3_2_l+2``) or combination (``C1_3``) ID from
+        ML to DFT mode numbers. Returned unchanged if any fundamental involved is unmapped."""
+        if mode_id.startswith("O"):
+            num, rest = mode_id[1:].split("_", 1)
+            dft_idx = mode_mapping.get(int(num) - 1)
+            return mode_id if dft_idx is None else f"O{dft_idx + 1}_{rest}"
+        if mode_id.startswith("C"):
+            a, b = (mode_mapping.get(int(t) - 1) for t in mode_id[1:].split("_"))
+            if a is None or b is None:
+                return mode_id
+            m1, m2 = sorted((a + 1, b + 1))
+            return f"C{m1}_{m2}"
+        return mode_id
+
     def match_by_mode(
         self,
         dft_spectrum: SpectrumData,
@@ -463,9 +479,14 @@ class SpectrumAnalyzer:
                         # No mapping found, keep original
                         ml_mode_ids_remapped.append(mode_id)
                 else:
-                    # Keep overtones and combination bands as-is
-                    # (they're derived from fundamentals, so their numbering should follow)
-                    ml_mode_ids_remapped.append(mode_id)
+                    # Overtones and combination bands are labelled by the fundamentals
+                    # they involve, so they follow the same mapping. Keeping the raw ML
+                    # numbers paired e.g. ML 2v1 with DFT 2v1 even when ML mode 1 is DFT
+                    # mode 2.
+                    remapped_id = self._remap_derived_id(mode_id, mode_mapping)
+                    ml_mode_ids_remapped.append(remapped_id)
+                    if remapped_id != mode_id:
+                        logger.debug(f"  Remapped {mode_id} -> {remapped_id}")
 
             # Update ML mode dict with remapped IDs
             ml_mode_dict = {mode_id: i for i, mode_id in enumerate(ml_mode_ids_remapped)}

@@ -569,3 +569,30 @@ class TestGroupRegressionData:
         assert ml_f[0] == pytest.approx(1000.0)
         assert dft_i[0] == pytest.approx(35.0)
         assert ml_i[0] == pytest.approx(30.0)
+
+
+def test_overtones_and_combinations_follow_the_mode_mapping():
+    """ML mode 1 is DFT mode 2 and vice versa: 2v1(ML) must pair with 2v2(DFT)."""
+    import numpy as np
+
+    from mace_gaussian.analysis.analyze_spectra import SpectrumAnalyzer, SpectrumData
+
+    ids = ["F1", "F2", "F3", "O1_2", "O2_2", "O3_2_l+2", "C1_3", "C2_3"]
+    dft = SpectrumData(
+        frequencies=np.array([1000.0, 1100.0, 3000.0, 1990.0, 2190.0, 5990.0, 3995.0, 4095.0]),
+        intensities=np.ones(8),
+        labels=["x"] * 8,
+        mode_ids=ids,
+    )
+    # Same physics, ML lists modes 1 and 2 the other way round
+    ml = SpectrumData(
+        frequencies=np.array([1101.0, 1001.0, 3001.0, 2191.0, 1991.0, 5991.0, 4096.0, 3996.0]),
+        intensities=np.ones(8),
+        labels=["x"] * 8,
+        mode_ids=ids,
+    )
+    dft_f, ml_f, *_, stats = SpectrumAnalyzer().match_by_mode(
+        dft, ml, mode_mapping={0: 1, 1: 0, 2: 2}
+    )
+    assert stats["matched"] == 8
+    np.testing.assert_allclose(ml_f - dft_f, 1.0)
