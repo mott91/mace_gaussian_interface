@@ -335,7 +335,11 @@ class SpectrumAnalyzer:
                     # Mode ID: O{mode}_{level}
                     mode_num = entry.get("mode", idx + 1)
                     overtone_level = entry.get("overtone_level", 2)
-                    mode_ids.append(f"O{to_ckpt.get(mode_num, mode_num)}_{overtone_level}")
+                    mode_id = f"O{to_ckpt.get(mode_num, mode_num)}_{overtone_level}"
+                    # Degenerate modes (linear/symmetric tops) split the overtone by l = 0, +-2
+                    if "l" in entry:
+                        mode_id += f"_l{entry['l']:+d}"
+                    mode_ids.append(mode_id)
 
             # Add combination bands (only in anharmonic mode)
             if include_combinations:

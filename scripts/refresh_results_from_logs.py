@@ -32,7 +32,9 @@ def find_log(calc_dir: Path) -> Path | None:
         candidate = calc_dir / name
         if candidate.exists():
             return candidate
-    return None
+    # Older DFT baselines are named after the molecule (hydrogen_cyanide_freq_anharm.log)
+    logs = sorted(calc_dir.glob("*.log"))
+    return logs[0] if len(logs) == 1 else None
 
 
 def refresh_one(calc_dir: Path) -> str:

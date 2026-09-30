@@ -1,0 +1,134 @@
+ Trimmed from comparison_results/hydrogen_cyanide/mace_omol_mace_ml/gaussian_freq.log
+ (VPT2 tables of a linear molecule: Mode(n,l) labels)
+
+     ==================================================
+          Vibrational Energies at Anharmonic Level
+     ==================================================
+
+ Units: Vibrational energies and rotational constants in cm^-1.
+ NOTE: Transition energies are given with respect to the ground state.
+
+ Reference Data
+ --------------
+                              E(harm)  E(anharm)     Ba(x)      Ca(y)
+ Equilibrium Geometry                              1.503849   1.503849
+ Ground State                 3619.797  3561.878        NaN        NaN
+
+ Fundamental Bands
+ -----------------
+    Mode(n,l)    Status       E(harm)  E(anharm)     Ba(x)      Ca(y)
+       1(1,+0)   active      3469.391  3248.572        NaN        NaN
+       2(1,+0)   active      2238.205  2215.402        NaN        NaN
+       3(1,-1)   active       765.999   752.494        NaN        NaN
+       3(1,+1)   active       765.999   752.494        NaN        NaN
+
+ Overtones
+ ---------
+    Mode(n,l)                 E(harm)  E(anharm)     Ba(x)      Ca(y)
+       1(2,+0)               6938.782  6299.626        NaN        NaN
+       2(2,+0)               4476.411  4416.157        NaN        NaN
+       3(2,-2)               1531.999  1511.527        NaN        NaN
+       3(2,+0)               1531.999  1482.263        NaN        NaN
+       3(2,+2)               1531.999  1511.527        NaN        NaN
+
+ Combination Bands
+ -----------------
+    Mode(n,l)   Mode(n,l)    E(harm)  E(anharm)     Ba(x)      Ca(y)
+       2(1,+0)     1(1,+0)   5707.596  5449.877        NaN        NaN
+       3(1,-1)     1(1,+0)   4235.390  3984.814        NaN        NaN
+       3(1,+1)     1(1,+0)   4235.390  3984.814        NaN        NaN
+       3(1,-1)     2(1,+0)   3004.205  2966.787        NaN        NaN
+       3(1,+1)     2(1,+0)   3004.205  2966.787        NaN        NaN
+
+ WARNING: Anharmonic transition moments for symmetric and linear tops
+          are not yet fully implemented.
+
+     ==================================================
+               Anharmonic Transition Moments
+     ==================================================
+
+ Electric dipole : Fundamental Bands
+ ------------------------------------------------------------------------
+   Mode(n,l)                          X               Y               Z
+      1(1)                       0.000000D+00    0.000000D+00   -0.149737D-01
+      2(1)                       0.000000D+00    0.000000D+00   -0.375346D-02
+      3(1)                       0.507736D-01    0.000000D+00    0.000000D+00
+
+ Electric dipole : Overtones
+ ------------------------------------------------------------------------
+   Mode(n,l)                          X               Y               Z
+      1(2)                       0.000000D+00    0.000000D+00    0.117632D-01
+      2(2)                       0.000000D+00    0.000000D+00    0.616485D-02
+      3(2)                       0.000000D+00    0.000000D+00    0.167093D-01
+
+ Electric dipole : Combination Bands
+ ------------------------------------------------------------------------
+   Mode(n,l)   Mode(n,l)              X               Y               Z
+      2(1)        1(1)           0.000000D+00    0.000000D+00    0.424214D-02
+      3(1)        1(1)          -0.366839D-02    0.000000D+00    0.000000D+00
+      3(1)        2(1)           0.867865D-02    0.000000D+00    0.000000D+00
+
+     ==================================================
+              Anharmonic Infrared Spectroscopy
+     ==================================================
+
+ Units: Transition energies (E) in cm^-1
+        Integrated intensity (I) in km.mol^-1
+
+ Fundamental Bands
+ -----------------
+   Mode(n,l)                E(harm)   E(anharm)        I(harm)       I(anharm)
+      1(1,+0)               3469.391   3248.572     33.50359754     11.79533360
+      2(1,+0)               2238.205   2215.402      2.21306177      0.50544413
+      3(1,-1)                765.999    752.494     28.15361981     31.41490041
+      3(1,+1)                765.999    752.494     28.15361981     31.41490041
+
+ Overtones
+ ---------
+   Mode(n,l)                E(harm)   E(anharm)                      I(anharm)
+      1(2,+0)               6938.782   6299.626                     14.11641430
+      2(2,+0)               4476.411   4416.157                      2.71798341
+      3(2,-2)               1531.999   1511.527                      6.83420114
+      3(2,+0)               1531.999   1482.263                      6.70188703
+      3(2,+2)               1531.999   1511.527                      6.83420114
+
+ Combination Bands
+ -----------------
+   Mode(n,l)   Mode(n,l)    E(harm)   E(anharm)                      I(anharm)
+      2(1,+0)     1(1,+0)   5707.596   5449.877                      1.58822935
+      3(1,-1)     1(1,+0)   4235.390   3984.814                      0.86839089
+      3(1,+1)     1(1,+0)   4235.390   3984.814                      0.86839089
+      3(1,-1)     2(1,+0)   3004.205   2966.787                      3.61866118
+      3(1,+1)     2(1,+0)   3004.205   2966.787                      3.61866118
+
+ Units: Transition energies (E) in cm^-1
+        Dipole strengths (DS) in 10^-40 esu^2.cm^2
+
+ Fundamental Bands
+ -----------------
+   Mode(n,l)                E(harm)   E(anharm)       DS(harm)      DS(anharm)
+      1(1,+0)               3469.391   3248.572     38.52526388     14.48522058
+      2(1,+0)               2238.205   2215.402      3.94458208      0.91018170
+      3(1,-1)                765.999    752.494    146.62678102    166.54816322
+      3(1,+1)                765.999    752.494    146.62678102    166.54816322
+
+ Overtones
+ ---------
+   Mode(n,l)                E(harm)   E(anharm)                     DS(anharm)
+      1(2,+0)               6938.782   6299.626                      8.93957792
+      2(2,+0)               4476.411   4416.157                      2.45532927
+      3(2,-2)               1531.999   1511.527                     18.03761941
+      3(2,+0)               1531.999   1482.263                     18.03761941
+      3(2,+2)               1531.999   1511.527                     18.03761941
+
+ Combination Bands
+ -----------------
+   Mode(n,l)   Mode(n,l)    E(harm)   E(anharm)                     DS(anharm)
+      2(1,+0)     1(1,+0)   5707.596   5449.877                      1.16260968
+      3(1,-1)     1(1,+0)   4235.390   3984.814                      0.86938985
+      3(1,+1)     1(1,+0)   4235.390   3984.814                      0.86938985
+      3(1,-1)     2(1,+0)   3004.205   2966.787                      4.86596463
+      3(1,+1)     2(1,+0)   3004.205   2966.787                      4.86596463
+
+
+ GradGradGradGradGradGradGradGradGradGradGradGradGradGradGradGradGradGrad

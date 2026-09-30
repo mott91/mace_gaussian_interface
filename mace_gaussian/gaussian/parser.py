@@ -14,6 +14,11 @@ from ..utils.exceptions import GaussianParseError
 
 logger = logging.getLogger(__name__)
 
+# A VPT2 state label: ``3(1)`` for asymmetric tops, ``3(1,+1)`` for linear molecules and
+# symmetric tops, where the second number is the vibrational angular momentum l of a
+# degenerate mode. Groups: mode number, quanta, optional l.
+_STATE = r"(\d+)\((\d+)(?:,([+-]?\d+))?\)"
+
 
 class GaussianLogParser:
     """Parser for Gaussian 16 log files."""
@@ -33,6 +38,51 @@ class GaussianLogParser:
 
         with self.log_file.open() as f:
             self.content = f.read()
+
+        self._components: dict[tuple[int, int], int] | None = None
+
+    def _degenerate_components(self) -> dict[tuple[int, int], int]:
+        """Number the fundamental components of a linear or symmetric-top VPT2 run.
+
+        Gaussian labels a degenerate pair once, ``3(1,-1)`` and ``3(1,+1)``, while the
+        harmonic table and the .fchk list it as two modes. Each component gets its own
+        mode number (order of appearance) so that downstream code, which keys everything
+        by ``mode``, sees 3N-5/3N-6 distinct fundamentals. Empty for asymmetric tops,
+        whose labels carry no l.
+        """
+        if self._components is None:
+            self._components = {}
+            start = self.content.find("Fundamental Bands")
+            if start >= 0:
+                for line in self.content[start:].split("\n")[3:]:
+                    m = re.match(r"^\s*(?:[HL]\s+)?" + _STATE, line)
+                    if not m:
+                        break
+                    if m.group(3) is not None and m.group(2) == "1":
+                        key = (int(m.group(1)), int(m.group(3)))
+                        self._components.setdefault(key, len(self._components) + 1)
+        return self._components
+
+    def _fundamental_number(self, n: int, ell: str | None) -> int:
+        """Mode number of fundamental component ``n(1,l)``; ``n`` itself without l."""
+        if ell is None:
+            return n
+        return self._degenerate_components().get((n, int(ell)), n)
+
+    def _fundamental_label(self, match: re.Match) -> dict:
+        """``mode`` for a fundamental row; symmetric-top rows also keep Gaussian's n and l."""
+        n, ell = int(match.group(1)), match.group(3)
+        if ell is None:
+            return {"mode": n}
+        return {"mode": self._fundamental_number(n, ell), "mode_gaussian": n, "l": int(ell)}
+
+    def _is_degenerate(self, n: int) -> bool:
+        return sum(1 for mode, _ in self._degenerate_components() if mode == n) > 1
+
+    def _base_number(self, n: int) -> int:
+        """Lowest component number of mode ``n`` (the overtone's label)."""
+        numbers = [k for (mode, _), k in self._degenerate_components().items() if mode == n]
+        return min(numbers) if numbers else n
 
     def parse_harmonic_frequencies(self) -> list[dict[str, float]]:
         """
@@ -155,19 +205,16 @@ class GaussianLogParser:
                     # Matches: "H  4(1)  active  1828.929  1812.980 ..."
                     # Matches: "  18(1)  active  -255.103  -250.532 ..."  (imaginary/negative modes)
                     match = re.match(
-                        r"^\s*(?:[HL]\s+)?(\d+)\(1\)\s+\w+\s+(-?[\d\.]+)\s+(-?[\d\.]+)",
+                        r"^\s*(?:[HL]\s+)?" + _STATE + r"\s+\w+\s+(-?[\d\.]+)\s+(-?[\d\.]+)",
                         line,
                     )
-                    if match:
-                        mode = int(match.group(1))
-                        freq_harm = float(match.group(2))
-                        freq_anharm = float(match.group(3))
+                    if match and match.group(2) == "1":
                         frequencies.append(
                             {
-                                "mode": mode,
-                                "freq_cm": freq_anharm,
+                                **self._fundamental_label(match),
+                                "freq_cm": float(match.group(5)),
                                 "ir_intensity": 0.0,  # Format B logs have no IR intensity column
-                                "freq_harmonic": freq_harm,
+                                "freq_harmonic": float(match.group(4)),
                             }
                         )
                 else:
@@ -178,21 +225,20 @@ class GaussianLogParser:
                     # or with I(harm) value:
                     #    1(1)                  3764.146   3579.741    653.06339135    625.83031627
                     match = re.match(
-                        r"^\s*(\d+)\(1\)\s+(-?[\d\.]+)\s+(-?[\d\.]+)\s+(?:([\d\.]+)\s+)?([\d\.]+)\s*$",
+                        r"^\s*"
+                        + _STATE
+                        + r"\s+(-?[\d\.]+)\s+(-?[\d\.]+)\s+(?:([\d\.]+)\s+)?([\d\.]+)\s*$",
                         line,
                     )
-                    if match:
-                        mode = int(match.group(1))
-                        freq_harm = float(match.group(2))
-                        freq_anharm = float(match.group(3))
-                        # Group 4 is optional harmonic intensity
-                        ir_anharm = float(match.group(5))
+                    if match and match.group(2) == "1":
+                        # Group 6 is the optional harmonic intensity
                         entry = {
-                            "mode": mode,
-                            "freq_cm": freq_anharm,
-                            "ir_intensity": ir_anharm,
-                            "freq_harmonic": freq_harm,
+                            **self._fundamental_label(match),
+                            "freq_cm": float(match.group(5)),
+                            "ir_intensity": float(match.group(7)),
+                            "freq_harmonic": float(match.group(4)),
                         }
+                        mode = entry["mode"]
                         # Update existing entry from Format B, or append new
                         existing = next((f for f in frequencies if f["mode"] == mode), None)
                         if existing:
@@ -245,25 +291,23 @@ class GaussianLogParser:
                 #    1(2)                  7528.291   6994.185                     11.18668104
                 # Pattern: mode(overtone_level), harmonic freq, anharmonic freq, intensity
                 match = re.match(
-                    r"^\s*(\d+)\((\d+)\)\s+(-?[\d\.]+)\s+(-?[\d\.]+)\s+([\d\.]+)\s*$", line
+                    r"^\s*" + _STATE + r"\s+(-?[\d\.]+)\s+(-?[\d\.]+)\s+([\d\.]+)\s*$", line
                 )
 
                 if match:
-                    mode = int(match.group(1))
-                    overtone_level = int(match.group(2))
-                    freq_harm = float(match.group(3))
-                    freq_anharm = float(match.group(4))
-                    ir_intensity = float(match.group(5))
-
-                    overtones.append(
-                        {
-                            "mode": mode,
-                            "overtone_level": overtone_level,
-                            "freq_harmonic": freq_harm,
-                            "freq_anharmonic": freq_anharm,
-                            "ir_intensity": ir_intensity,
-                        }
-                    )
+                    n = int(match.group(1))
+                    entry = {
+                        "mode": self._base_number(n),
+                        "overtone_level": int(match.group(2)),
+                        "freq_harmonic": float(match.group(4)),
+                        "freq_anharmonic": float(match.group(5)),
+                        "ir_intensity": float(match.group(6)),
+                    }
+                    # A degenerate mode's overtone splits by l (HCN 2v3: l = 0, +-2);
+                    # l keeps those states apart.
+                    if match.group(3) is not None and self._is_degenerate(n):
+                        entry["l"] = int(match.group(3))
+                    overtones.append(entry)
 
         if strict and not overtones:
             raise GaussianParseError(f"No Overtones section found in {self.log_file}.")
@@ -313,15 +357,20 @@ class GaussianLogParser:
                 #    2(1)        1(1)      6953.940   6650.547                      0.03741575
                 # Pattern: mode1(1), mode2(1), harmonic freq, anharmonic freq, intensity
                 match = re.match(
-                    r"^\s*(\d+)\(1\)\s+(\d+)\(1\)\s+(-?[\d\.]+)\s+(-?[\d\.]+)\s+([\d\.]+)\s*$", line
+                    r"^\s*"
+                    + _STATE
+                    + r"\s+"
+                    + _STATE
+                    + r"\s+(-?[\d\.]+)\s+(-?[\d\.]+)\s+([\d\.]+)\s*$",
+                    line,
                 )
 
-                if match:
-                    mode1 = int(match.group(1))
-                    mode2 = int(match.group(2))
-                    freq_harm = float(match.group(3))
-                    freq_anharm = float(match.group(4))
-                    ir_intensity = float(match.group(5))
+                if match and match.group(2) == "1" and match.group(5) == "1":
+                    mode1 = self._fundamental_number(int(match.group(1)), match.group(3))
+                    mode2 = self._fundamental_number(int(match.group(4)), match.group(6))
+                    freq_harm = float(match.group(7))
+                    freq_anharm = float(match.group(8))
+                    ir_intensity = float(match.group(9))
 
                     combination_bands.append(
                         {

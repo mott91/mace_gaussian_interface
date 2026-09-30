@@ -158,7 +158,7 @@ def _key(kind: str, entry: dict, index: int) -> tuple:
     if kind == "anharmonic":
         return (entry["mode"],)
     if kind == "overtones":
-        return (entry["mode"], entry["overtone_level"])
+        return (entry["mode"], entry["overtone_level"], entry.get("l"))
     return (entry["mode1"], entry["mode2"])
 
 

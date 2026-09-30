@@ -404,3 +404,60 @@ class TestParserErrorHandling:
         parser = GaussianLogParser(str(log_file))
         with pytest.raises(GaussianParseError, match="No Combination Bands"):
             parser.parse_combination_bands(strict=True)
+
+
+# --- Linear molecules / symmetric tops: Mode(n,l) labels ---
+
+
+class TestSymmetricTopLabels:
+    """HCN labels its degenerate bend 3(1,-1) / 3(1,+1); the parser used to read 0 bands."""
+
+    @pytest.fixture
+    def hcn(self, fixtures_dir):
+        return GaussianLogParser(str(fixtures_dir / "hcn" / "ml_mace_omol_mace_ml.log"))
+
+    def test_fundamentals_one_entry_per_component(self, hcn):
+        fund = hcn.parse_anharmonic_frequencies()
+        assert [f["mode"] for f in fund] == [1, 2, 3, 4]
+        assert [(f["mode_gaussian"], f["l"]) for f in fund] == [(1, 0), (2, 0), (3, -1), (3, 1)]
+        # Format A (IR table) overwrites the Format B intensity of 0 for both components
+        assert fund[2]["ir_intensity"] == pytest.approx(31.41490041)
+        assert fund[3]["ir_intensity"] == pytest.approx(31.41490041)
+        assert fund[3]["freq_cm"] == pytest.approx(752.494)
+
+    def test_degenerate_overtone_keeps_l(self, hcn):
+        ovt = hcn.parse_overtones()
+        assert len(ovt) == 5
+        bend = [o for o in ovt if o["mode"] == 3]
+        assert [o["l"] for o in bend] == [-2, 0, 2]
+        assert bend[1]["freq_anharmonic"] == pytest.approx(1482.263)
+        # Non-degenerate overtones carry no l, like asymmetric-top ones
+        assert all("l" not in o for o in ovt if o["mode"] != 3)
+
+    def test_combinations_use_component_numbers(self, hcn):
+        comb = hcn.parse_combination_bands()
+        assert [(c["mode1"], c["mode2"]) for c in comb] == [(2, 1), (3, 1), (4, 1), (3, 2), (4, 2)]
+        # I(anharm) table, not the later DS(anharm) table
+        assert comb[0]["ir_intensity"] == pytest.approx(1.58822935)
+
+    def test_mode_ids_unique(self, hcn):
+        from mace_gaussian.analysis.analyze_spectra import SpectrumAnalyzer
+
+        results = {
+            "frequencies": {
+                "anharmonic": hcn.parse_anharmonic_frequencies(),
+                "overtones": hcn.parse_overtones(),
+                "combination_bands": hcn.parse_combination_bands(),
+            }
+        }
+        spec = SpectrumAnalyzer().extract_spectrum_data(results)
+        assert len(spec.mode_ids) == len(set(spec.mode_ids)) == 14
+        # Bend components rank first by harmonic frequency (.fchk order)
+        assert {"F1", "F2", "O1_2_l-2", "O1_2_l+0", "O1_2_l+2", "C1_4", "C2_4"} <= set(
+            spec.mode_ids
+        )
+
+    def test_asymmetric_top_unchanged(self, water_dft_log):
+        p = GaussianLogParser(water_dft_log)
+        assert p._degenerate_components() == {}
+        assert all("l" not in e for e in p.parse_anharmonic_frequencies() + p.parse_overtones())

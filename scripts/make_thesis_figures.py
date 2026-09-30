@@ -966,9 +966,9 @@ def _paired_bands(report: dict, comp: dict) -> dict[str, list[tuple[float, float
             j = mapping.get(int(mid[1:]))
             key, typ = (f"F{j}" if j else None), "fundamental"
         elif kind == "O":
-            j, lvl = mid[1:].split("_")
+            j, rest = mid[1:].split("_", 1)  # rest: level, plus "_l±2" for degenerate modes
             jj = mapping.get(int(j))
-            key, typ = (f"O{jj}_{lvl}" if jj else None), "overtone"
+            key, typ = (f"O{jj}_{rest}" if jj else None), "overtone"
         else:
             a, b = (mapping.get(int(t)) for t in mid[1:].split("_"))
             key, typ = (f"C{min(a, b)}_{max(a, b)}" if a and b else None), "combination"
