@@ -48,6 +48,7 @@ class BandRow:
     dft_intensity: float
     ml_intensity: float
     overlap: float | None  # smallest eigenvector overlap of the modes involved
+    same_conformer: bool | None = None  # conformer_check: ML geometry vs B3LYP geometry
 
 
 @dataclass
@@ -64,6 +65,7 @@ class ChiRow:
     dft_resonant: bool
     ml_resonant: bool
     overlap: float | None
+    same_conformer: bool | None = None
 
 
 def split_run_name(name: str) -> tuple[str, str]:
@@ -148,14 +150,35 @@ def build_tables(
             continue
         energy, dipole = split_run_name(name)
         ml = _Run(run_dir)
+        same = _same_conformer(dft_dirs[0], run_dir)
         mapping = {int(k): int(v) for k, v in (comp.get("mode_mapping") or {}).items()}
         overlaps = {int(k): float(v) for k, v in (comp.get("mode_overlaps") or {}).items()}
         ovl = _overlap_lookup(mapping, overlaps)
-        bands += _band_rows(molecule, energy, dipole, dft, ml, mapping, ovl)
+        new_bands = _band_rows(molecule, energy, dipole, dft, ml, mapping, ovl)
+        for r in new_bands:
+            r.same_conformer = same
+        bands += new_bands
         if energy not in chi_done:
             chi_done.add(energy)
-            chi += _chi_rows(molecule, energy, dft, ml, mapping, ovl)
+            new_chi = _chi_rows(molecule, energy, dft, ml, mapping, ovl)
+            for r in new_chi:
+                r.same_conformer = same
+            chi += new_chi
     return bands, chi
+
+
+def _same_conformer(dft_dir: Path, run_dir: Path) -> bool | None:
+    """conformer_check on the two .fchk files; None when either is missing."""
+    from .conformer_check import check_run
+
+    ref = next((p for p in sorted(dft_dir.glob("*.fchk"))), None)
+    ml = run_dir / "gaussian_freq.fchk"
+    if ref is None or not ml.exists():
+        return None
+    try:
+        return check_run(ref, ml).same_conformer
+    except ValueError:
+        return None
 
 
 def _overlap_lookup(mapping: dict[int, int], overlaps: dict[int, float]):

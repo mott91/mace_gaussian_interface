@@ -418,7 +418,13 @@ def main(argv=None) -> int:
             index[mol]["heatmap"] = heatmap(mol)
 
     pooled = []
-    pb, pc = bands[~bands.molecule.isin(POOL_EXCLUDE)], chi[~chi.molecule.isin(POOL_EXCLUDE)]
+
+    # pooled: leave out ethane (broken baseline) and runs in a different conformer than B3LYP
+    def _keep(df):
+        wrong = df.get("same_conformer", pd.Series(dtype=object)).astype(str) == "False"
+        return df[~df.molecule.isin(POOL_EXCLUDE) & ~wrong]
+
+    pb, pc = _keep(bands), _keep(chi)
     for energy in MODEL_ORDER:
         b, c = pb[pb.energy_model == energy], pc[pc.energy_model == energy]
         if b.empty:
