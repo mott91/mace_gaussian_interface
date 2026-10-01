@@ -1355,6 +1355,10 @@ def main(argv=None) -> int:
             print(f"  ok   {name}")
         except Exception as e:  # keep going; one broken figure must not block the gallery
             print(f"  FAIL {name}: {e!r}")
+    if args.only:
+        # the gallery lists only what this run registered; a partial run must not shrink it
+        print("--only: figures redrawn, gallery page left as it was")
+        return 0
     write_gallery()
     print(f"gallery: {OUT / 'index.html'}  ({len(FIGURES)} figures)")
     return 0
