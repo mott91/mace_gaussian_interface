@@ -1160,7 +1160,8 @@ def fig_overlap_matrices(mol: str = "methane"):
     )
 
     base = COMPARISON / mol
-    dft_fchk = next(iter(base.glob("b3lyp*/gaussian_dft.fchk")), None)
+    # local baselines write gaussian_dft.fchk, cluster ones <molecule>_freq_anharm.fchk
+    dft_fchk = next(iter(sorted(base.glob("b3lyp*/*.fchk"))), None)
     if dft_fchk is None:
         return
     modes_dft, freqs_dft, _, _, _ = extract_mode_data_from_checkpoint(
@@ -1342,7 +1343,12 @@ def main(argv=None) -> int:
 
     available = sorted(p.parent.name for p in ANALYSIS.glob("*/report_data.json"))
     mols = args.molecules or available
-    per_mol = [m for m in ("water", "methanol", "formaldehyde", "methane", "octane") if m in mols]
+    # The legacy thesis gallery shows five worked examples; any other gallery (a campaign)
+    # gets the per-molecule figures (spectra, per-mode errors, overlap) for every molecule.
+    legacy_gallery = OUT.resolve() == (REPO / "thesis" / "figures").resolve()
+    examples = ("water", "methanol", "formaldehyde", "methane", "octane")
+    per_mol = [m for m in examples if m in mols] if legacy_gallery else mols
+    overlap_mols = [m for m in ("water",) if m in mols] if legacy_gallery else mols
 
     families = {
         "spectra": lambda: [fig_stacked_spectra(m) for m in per_mol],
@@ -1356,7 +1362,7 @@ def main(argv=None) -> int:
         "bandtype": lambda: fig_band_type_errors(mols),
         "pareto": lambda: fig_pareto(mols),
         "central": lambda: fig_central_vs_experiment(mols),
-        "overlap": lambda: [fig_overlap_matrices(m) for m in ("water",) if m in mols],
+        "overlap": lambda: [fig_overlap_matrices(m) for m in overlap_mols],
         "supervisor": fig_supervisor,
     }
     for name, fn in families.items():
