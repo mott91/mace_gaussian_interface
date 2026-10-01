@@ -118,6 +118,18 @@ def check_baseline_exists(
     return True
 
 
+# Baseline protocol, frozen 2026-10-01 before the panel campaign (thesis/TODO.md):
+# - nosymm: the ML geometries come from ASE with slightly broken symmetry, so Gaussian runs
+#   asymmetric-top VPT2 for them; with symmetry on, an exactly symmetric DFT minimum got the
+#   symmetric-top treatment instead (ethane: torsion 313 -> 635 cm-1, 12/18 fundamentals
+#   shifted up). nosymm gives both sides the same treatment (validation_results/symmetry_test).
+# - opt=verytight (max force 2e-6 Hartree/Bohr) matches the ML side, OPT_FMAX = 1e-4 eV/A
+#   = 1.9e-6 Hartree/Bohr; Gaussian's default opt is ~200x looser.
+# - int=ultrafine is the G16 default grid, written out so the input documents it.
+BASELINE_OPT = "opt=verytight"
+BASELINE_KEYWORDS = "nosymm int=ultrafine"
+
+
 def create_gaussian_dft_input(
     atoms: Atoms,
     filename: str,
@@ -169,7 +181,8 @@ def create_gaussian_dft_input(
     positions = atoms.get_positions()  # Angstrom
 
     # Construct route card - pure DFT, no external interface
-    route = f"# {'opt ' if optimize else ''}freq(anharm) {method}/{basis}"
+    opt = f"{BASELINE_OPT} " if optimize else ""
+    route = f"# {opt}freq(anharm) {method}/{basis} {BASELINE_KEYWORDS}"
     if extra_keywords:
         route += f" {extra_keywords}"
 
