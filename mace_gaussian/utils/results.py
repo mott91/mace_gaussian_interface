@@ -29,7 +29,7 @@ class ResultsManager:
             Base directory for all comparison results
         """
         self.base_output_dir = Path(base_output_dir)
-        self.base_output_dir.mkdir(exist_ok=True)
+        self.base_output_dir.mkdir(parents=True, exist_ok=True)
 
     def create_molecule_directory(self, molecule_name: str) -> Path:
         """
