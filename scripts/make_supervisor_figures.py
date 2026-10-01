@@ -231,10 +231,9 @@ def _empty(ax, text="no bands"):
 
 
 def grid_figure(bands, chi, energy, heading, name, source="bands"):
-    """3x3 in the style of the thesis figures. Colour means dipole model only (intensity row);
-    the single-series rows are drawn in ink, the energy model's colour is in the title, so
-    MACE-OFF green is never mistaken for espaloma green."""
-    color = INK
+    """3x3 in the style of the thesis figures: method colour for the single-series rows,
+    dipole colours in the intensity row (as in the approved intensity figure)."""
+    color = model_color(energy)
     w = figwidth(1.0)
     fig, axes = plt.subplots(3, 3, figsize=(w, w * 1.03))
     rows = []
