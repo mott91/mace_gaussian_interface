@@ -34,7 +34,20 @@ def dft_fchk(mol_dir: Path) -> Path | None:
 
 
 def main(argv: list[str]) -> int:
-    mols = argv or sorted(p.name for p in BASE.iterdir() if p.is_dir())
+    global BASE, OUT
+    import argparse
+
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("molecules", nargs="*")
+    ap.add_argument("--campaign", default=None, help="check campaigns/<NAME>/ instead")
+    args = ap.parse_args(argv)
+    if args.campaign is not None:
+        from mace_gaussian.campaign import campaign_paths
+
+        paths = campaign_paths(args.campaign)
+        BASE = REPO / paths.comparison
+        OUT = REPO / "campaigns" / args.campaign / "conformer_check.csv"
+    mols = args.molecules or sorted(p.name for p in BASE.iterdir() if p.is_dir())
     rows = []
     for mol in mols:
         ref = dft_fchk(BASE / mol)

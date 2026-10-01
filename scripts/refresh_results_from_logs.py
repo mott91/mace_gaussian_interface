@@ -20,7 +20,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from mace_gaussian.gaussian.parser import parse_gaussian_log  # noqa: E402
+from mace_gaussian.gaussian.parser import parse_gaussian_log
 
 RESULTS_BASE = Path("comparison_results")
 SKIP_DIRS = {"geometry_opt", "experimental"}
@@ -68,9 +68,18 @@ def refresh_one(calc_dir: Path) -> str:
 
 
 def main() -> None:
-    molecules = sys.argv[1:] or sorted(
-        p.name for p in RESULTS_BASE.iterdir() if p.is_dir()
-    )
+    global RESULTS_BASE
+    import argparse
+
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("molecules", nargs="*")
+    ap.add_argument("--campaign", default=None, help="refresh campaigns/<NAME>/ instead")
+    args = ap.parse_args()
+    if args.campaign is not None:
+        from mace_gaussian.campaign import campaign_paths
+
+        RESULTS_BASE = campaign_paths(args.campaign).comparison
+    molecules = args.molecules or sorted(p.name for p in RESULTS_BASE.iterdir() if p.is_dir())
     counts: dict[str, int] = {}
     for mol in molecules:
         mol_dir = RESULTS_BASE / mol

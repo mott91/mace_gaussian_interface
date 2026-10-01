@@ -944,6 +944,7 @@ class ComparisonWorkflow:
             except Exception:
                 logger.exception("Legacy report generation failed (main report is unaffected)")
 
+
 def analyze_molecule(
     molecule_name: str,
     base_results_dir: str = "comparison_results",
@@ -1034,14 +1035,27 @@ def run_analysis_main() -> None:
         default=10.0,
         help="Full width at half maximum for Lorentzian broadening in cm-1 (default: 10.0)",
     )
+    parser.add_argument(
+        "--campaign",
+        default=None,
+        help="Analyse campaigns/<NAME>/ instead of the legacy folders",
+    )
     args = parser.parse_args()
+    from ..campaign import campaign_paths
+
+    paths = campaign_paths(args.campaign)
 
     print("\n" + "=" * 60)
     print(f"ANALYZING: {args.molecule_name.upper()}")
     print("=" * 60 + "\n")
 
     try:
-        results = analyze_molecule(args.molecule_name, bandwidth_fwhm=args.fwhm)
+        results = analyze_molecule(
+            args.molecule_name,
+            base_results_dir=str(paths.comparison),
+            output_dir=str(paths.analysis),
+            bandwidth_fwhm=args.fwhm,
+        )
 
         print("\n" + "=" * 60)
         print("SUCCESS!")
@@ -1088,14 +1102,27 @@ def run_analysis_harmonic_main() -> None:
         default=10.0,
         help="Full width at half maximum for Lorentzian broadening in cm-1 (default: 10.0)",
     )
+    parser.add_argument(
+        "--campaign",
+        default=None,
+        help="Analyse campaigns/<NAME>/ instead of the legacy folders",
+    )
     args = parser.parse_args()
+    from ..campaign import campaign_paths
+
+    paths = campaign_paths(args.campaign)
 
     print("\n" + "=" * 60)
     print(f"HARMONIC ANALYSIS: {args.molecule_name.upper()}")
     print("=" * 60 + "\n")
 
     try:
-        results = analyze_molecule_harmonic(args.molecule_name, bandwidth_fwhm=args.fwhm)
+        results = analyze_molecule_harmonic(
+            args.molecule_name,
+            base_results_dir=str(paths.comparison),
+            output_dir=str(paths.analysis),
+            bandwidth_fwhm=args.fwhm,
+        )
 
         print("\n" + "=" * 60)
         print("SUCCESS!")

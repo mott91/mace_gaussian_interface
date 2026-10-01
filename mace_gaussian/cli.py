@@ -577,6 +577,12 @@ def diagnose():
     default=False,
     help="Do not redraw the thesis figures (thesis/figures/) at the end of the batch",
 )
+@click.option(
+    "--campaign",
+    default=None,
+    help="Isolated campaign: every output under campaigns/<NAME>/ (results, analyses, "
+    "figures) and campaigns/<NAME> on the cluster. Never touches the legacy folders.",
+)
 def batch(
     batch_file,
     optimization_calculator,
@@ -588,6 +594,7 @@ def batch(
     dft_on_cluster,
     slurm_template,
     no_figures,
+    campaign,
 ):
     """Run pipeline for multiple molecules listed in BATCH_FILE.
 
@@ -605,8 +612,13 @@ def batch(
         mace-gaussian batch molecules.txt
         mace-gaussian batch molecules.txt --skip-dft-baseline
         mace-gaussian batch molecules.txt --energy-calculators mace_mp --dipole-calculators espaloma
+        mace-gaussian batch molecules/panel_2026.txt --campaign 2026 --dft-on-cluster mot@tci5
     """
     from mace_gaussian.batch import run_batch
+
+    if campaign is not None and output_dir != "comparison_results":
+        click.echo("Error: use either --campaign or --output-dir, not both", err=True)
+        sys.exit(2)
 
     # Resolve keep_scratch: CLI flag takes precedence over env var
     if not keep_scratch:
@@ -628,6 +640,7 @@ def batch(
             dft_on_cluster=dft_on_cluster,
             slurm_template=slurm_template,
             make_figures=not no_figures,
+            campaign=campaign,
         )
 
         if summary["failed"] > 0:

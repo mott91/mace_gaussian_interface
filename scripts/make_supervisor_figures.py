@@ -57,6 +57,8 @@ from mace_gaussian.analysis.thesis_style import (  # noqa: E402
 
 OUT = REPO / "thesis" / "figures" / "supervisor"
 DATA = OUT / "data"
+ANALYSIS = REPO / "analysis_results"
+COMPARISON = REPO / "comparison_results"
 MODEL_ORDER = ["mace_omol", "mace_off", "mace_anicc", "mace_polar", "mace_mp"]
 DIPOLE_ORDER = ["mace_ml", "mace_polar1", "espaloma"]
 CHI_RUN_DIPOLE = "mace_ml"  # frequencies are dipole-independent; one run per energy model
@@ -291,6 +293,7 @@ def heatmap(mol: str):
     import make_thesis_figures as mtf
 
     mtf.OUT = OUT
+    mtf.COMPARISON = COMPARISON
     mtf.FIGURES.clear()
     mtf.fig_overlap_matrices(mol)
     src = OUT / f"overlap_matrices_{mol}"
@@ -373,20 +376,28 @@ $('hmol').onchange = hshow; show(); pshow(); hshow();
 
 
 def main(argv=None) -> int:
+    global OUT, DATA, ANALYSIS, COMPARISON
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--molecules", nargs="*", default=None)
     ap.add_argument("--rebuild", action="store_true", help="rebuild data/*.csv first")
     ap.add_argument("--no-heatmaps", action="store_true")
+    ap.add_argument(
+        "--campaign", default=None, help="read and write campaigns/<NAME>/ instead of legacy"
+    )
     args = ap.parse_args(argv)
+    if args.campaign is not None:
+        from mace_gaussian.campaign import campaign_paths
+
+        paths = campaign_paths(args.campaign)
+        OUT = paths.figures / "supervisor"
+        DATA = OUT / "data"
+        ANALYSIS, COMPARISON = REPO / paths.analysis, REPO / paths.comparison
 
     if args.rebuild or not (DATA / "bands.csv").exists():
         from mace_gaussian.analysis.band_table import write_tables
 
-        avail = sorted(
-            p.parent.name for p in (REPO / "analysis_results").glob("*/report_data.json")
-        )
-        write_tables(avail, DATA, results_base=REPO / "comparison_results",
-                     analysis_base=REPO / "analysis_results")  # fmt: skip
+        avail = sorted(p.parent.name for p in ANALYSIS.glob("*/report_data.json"))
+        write_tables(avail, DATA, results_base=COMPARISON, analysis_base=ANALYSIS)
     bands = pd.read_csv(DATA / "bands.csv")
     chi = pd.read_csv(DATA / "chi.csv")
     mols = args.molecules or sorted(bands.molecule.unique())

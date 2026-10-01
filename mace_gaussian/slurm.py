@@ -29,7 +29,8 @@ TERMINAL_STATES = frozenset(
     }
 )
 
-DEFAULT_REMOTE_BASE = "/scratch_rune03a/mot/calculations/mace_gaussian"
+from .campaign import DEFAULT_REMOTE_BASE  # noqa: E402  (one source for the cluster root)
+
 DEFAULT_POLL_INTERVAL = 600  # 10 minutes
 
 # Common SSH options: no password prompts, auto-accept new hosts
@@ -177,6 +178,7 @@ def submit_dft_jobs(
     host: str,
     template_path: Path,
     results_dir: str = "comparison_results",
+    remote_base: str = DEFAULT_REMOTE_BASE,
 ) -> dict[str, str]:
     """Submit DFT jobs to a SLURM cluster via SSH.
 
@@ -192,6 +194,9 @@ def submit_dft_jobs(
         Path to SLURM job template with placeholders
     results_dir : str
         Local results directory (used for naming convention)
+    remote_base : str
+        Cluster root for the job folders. A campaign gets its own root so that a
+        retrieval can never pick up a log left there by an older run of the same molecule.
 
     Returns
     -------
@@ -204,7 +209,7 @@ def submit_dft_jobs(
     for mol in molecules:
         name = mol["name"]
         gjf_path = mol["gjf_path"]
-        remote_dir = f"{DEFAULT_REMOTE_BASE}/{name}"
+        remote_dir = f"{remote_base}/{name}"
         gjf_filename = f"{name}_freq_anharm.gjf"
         chk_filename = f"{name}_freq_anharm.chk"
         fchk_filename = f"{name}_freq_anharm.fchk"
@@ -431,6 +436,7 @@ def retrieve_results(
     molecules: list[str],
     results_dir: str = "comparison_results",
     hardware: dict[str, dict] | None = None,
+    remote_base: str = DEFAULT_REMOTE_BASE,
 ) -> dict[str, bool]:
     """Retrieve DFT results from the cluster via SCP.
 
@@ -460,7 +466,7 @@ def retrieve_results(
     success_map: dict[str, bool] = {}
 
     for name in molecules:
-        remote_dir = f"{DEFAULT_REMOTE_BASE}/{name}"
+        remote_dir = f"{remote_base}/{name}"
         local_dir = Path(results_dir) / name / "b3lyp_6-31Gdp"
         local_dir.mkdir(parents=True, exist_ok=True)
 

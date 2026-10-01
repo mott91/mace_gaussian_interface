@@ -22,6 +22,7 @@ from pathlib import Path
 import click
 from ase.io import read
 
+from .campaign import campaign_paths
 from .utils.results import ResultsManager
 
 STATUS_PENDING = "pending"
@@ -110,30 +111,50 @@ def parse_batch_file(batch_file: Path) -> list[Path]:
     return paths
 
 
+def template_resources(template_text: str) -> tuple[int, str]:
+    """Gaussian %NProcShared / %mem matching a SLURM template's request.
+
+    The input must not ask for more than SLURM grants, and should use what it grants: an
+    8-core template with a hard-coded %NProcShared=4 wastes half the node. %mem keeps 1 GB
+    headroom for Gaussian's own overhead once the job has more than 4 GB.
+    """
+    import re
+
+    cpus = re.search(r"--cpus-per-task=(\d+)", template_text)
+    mem = re.search(r"--mem=(\d+)G", template_text)
+    nproc = int(cpus.group(1)) if cpus else 4
+    mem_gb = int(mem.group(1)) if mem else 4
+    return nproc, f"{mem_gb - 1 if mem_gb > 4 else mem_gb}GB"
+
+
 def _combination_key(energy_calc: str, dipole_calc: str) -> str:
     """Return manifest key for an energy+dipole calculator combination."""
     return f"{energy_calc}_{dipole_calc}"
 
 
-ANALYSIS_DIR = "analysis_results"
 FIGURE_SCRIPT = Path(__file__).resolve().parent.parent / "scripts" / "make_thesis_figures.py"
 
 
-def _run_analyses(molecule_name: str, output_dir: str, mol_manifest: dict) -> bool:
+def _run_analyses(
+    molecule_name: str, output_dir: str, mol_manifest: dict, analysis_dir: str
+) -> bool:
     """Harmonic and anharmonic analysis for one molecule; returns True if the
-    anharmonic one (the input of the thesis figures) succeeded."""
+    anharmonic one (the input of the thesis figures) succeeded. ``analysis_dir`` is the
+    anharmonic output folder; the harmonic one is ``<analysis_dir>_harmonic``."""
     from .analysis import analyze_molecule, analyze_molecule_harmonic
 
     try:
         click.echo(f"  Running harmonic analysis for {molecule_name}...")
-        analyze_molecule_harmonic(molecule_name, base_results_dir=output_dir)
+        analyze_molecule_harmonic(
+            molecule_name, base_results_dir=output_dir, output_dir=analysis_dir
+        )
         mol_manifest["analysis_harmonic"] = STATUS_COMPLETE
     except Exception as e:
         click.echo(f"  Warning: Harmonic analysis failed: {e}", err=True)
         mol_manifest["analysis_harmonic"] = STATUS_FAILED
     try:
         click.echo(f"  Running anharmonic analysis for {molecule_name}...")
-        analyze_molecule(molecule_name, base_results_dir=output_dir, output_dir=ANALYSIS_DIR)
+        analyze_molecule(molecule_name, base_results_dir=output_dir, output_dir=analysis_dir)
         mol_manifest["analysis_anharmonic"] = STATUS_COMPLETE
         return True
     except Exception as e:
@@ -142,7 +163,7 @@ def _run_analyses(molecule_name: str, output_dir: str, mol_manifest: dict) -> bo
         return False
 
 
-def refresh_thesis_figures(analysis_dir: str, comparison_dir: str) -> bool:
+def refresh_thesis_figures(analysis_dir: str, comparison_dir: str, out_dir: str) -> bool:
     """Redraw every thesis figure from the current analyses (scripts/make_thesis_figures.py).
 
     Runs in a subprocess so a plotting or LaTeX problem can never break a batch.
@@ -161,6 +182,8 @@ def refresh_thesis_figures(analysis_dir: str, comparison_dir: str) -> bool:
                 str(Path(analysis_dir).resolve()),
                 "--comparison-dir",
                 str(Path(comparison_dir).resolve()),
+                "--out-dir",
+                str(Path(out_dir).resolve()),
             ],
             capture_output=True,
             # Explicit codec: a detached batch (setsid nohup) inherits no locale, so
@@ -193,6 +216,7 @@ def run_batch(
     dft_on_cluster: str | None = None,
     slurm_template: str | None = None,
     make_figures: bool = True,
+    campaign: str | None = None,
 ) -> dict:
     """Run the full pipeline for multiple molecules with manifest-based restart.
 
@@ -233,6 +257,13 @@ def run_batch(
         Summary with keys: complete, failed, skipped, molecules
     """
     molecules = parse_batch_file(batch_file)
+    # A campaign owns every folder (results, analyses, figures, cluster scratch), so it
+    # never meets legacy data; output_dir is then fixed by the campaign (cli enforces it).
+    paths = campaign_paths(campaign)
+    if campaign is not None:
+        output_dir = str(paths.comparison)
+    analysis_dir = str(paths.analysis)
+
     manifest_path = Path(output_dir) / "batch_manifest.json"
     manifest = load_manifest(manifest_path)
 
@@ -303,6 +334,7 @@ def run_batch(
                             if slurm_template
                             else Path(__file__).parent.parent / "templates" / "slurm_dft.sh"
                         )
+                        nproc, mem = template_resources(template.read_text())
 
                         gjf_dir = Path(output_dir) / molecule_name / "b3lyp_6-31Gdp"
                         gjf_dir.mkdir(parents=True, exist_ok=True)
@@ -314,20 +346,21 @@ def run_batch(
                             basis="6-31G(d,p)",
                             title=molecule_name,
                             output_dir=str(gjf_dir),
-                            nproc=4,
-                            mem="4GB",
+                            nproc=nproc,
+                            mem=mem,
                         )
                         job_ids = submit_dft_jobs(
                             [{"name": molecule_name, "gjf_path": str(gjf_path)}],
                             dft_on_cluster,
                             template,
                             output_dir,
+                            remote_base=paths.remote_base,
                         )
                         if molecule_name in job_ids:
                             mol_manifest["slurm"] = {
                                 "job_id": job_ids[molecule_name],
                                 "host": dft_on_cluster,
-                                "remote_dir": f"~/mace_gaussian_dft/{molecule_name}",
+                                "remote_dir": f"{paths.remote_base}/{molecule_name}",
                                 "status": "SUBMITTED",
                             }
                             click.echo(
@@ -401,7 +434,7 @@ def run_batch(
                 if c.get("status") == STATUS_COMPLETE
             )
             if complete_count > 0:
-                analysed_any |= _run_analyses(molecule_name, output_dir, mol_manifest)
+                analysed_any |= _run_analyses(molecule_name, output_dir, mol_manifest, analysis_dir)
                 save_manifest(manifest, manifest_path)
 
             mol_runtime = time.time() - mol_start
@@ -457,7 +490,9 @@ def run_batch(
             # Retrieve results for completed molecules
             if completed_mols:
                 click.echo(f"Retrieving results for {len(completed_mols)} molecule(s)...")
-                retrieve_results(dft_on_cluster, completed_mols, output_dir)
+                retrieve_results(
+                    dft_on_cluster, completed_mols, output_dir, remote_base=paths.remote_base
+                )
                 for mol_name in completed_mols:
                     manifest["molecules"][mol_name]["dft_baseline"] = STATUS_COMPLETE
                 save_manifest(manifest, manifest_path)
@@ -465,7 +500,7 @@ def run_batch(
                 # Re-run the analyses now that the DFT baseline is available
                 for mol_name in completed_mols:
                     analysed_any |= _run_analyses(
-                        mol_name, output_dir, manifest["molecules"][mol_name]
+                        mol_name, output_dir, manifest["molecules"][mol_name], analysis_dir
                     )
                 save_manifest(manifest, manifest_path)
 
@@ -495,5 +530,5 @@ def run_batch(
 
     # After the summary, so a figure problem can never hide the batch result.
     if make_figures and analysed_any:
-        refresh_thesis_figures(ANALYSIS_DIR, output_dir)
+        refresh_thesis_figures(analysis_dir, output_dir, str(paths.figures))
     return summary

@@ -1301,7 +1301,7 @@ def write_gallery():
 
 
 def main(argv=None) -> int:
-    global ANALYSIS, COMPARISON
+    global ANALYSIS, COMPARISON, OUT
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument(
         "--only", help="figure family: morse, spectra, permode, heatmap, intensity, cost"
@@ -1315,6 +1315,12 @@ def main(argv=None) -> int:
     ap.add_argument(
         "--comparison-dir", type=Path, default=COMPARISON, help="raw results (timings, fchk)"
     )
+    ap.add_argument("--out-dir", type=Path, default=OUT, help="where figures and gallery go")
+    ap.add_argument(
+        "--campaign",
+        default=None,
+        help="read campaigns/<NAME>/ and write campaigns/<NAME>/figures/ (overrides the dirs)",
+    )
     ap.add_argument(
         "--exclude",
         nargs="*",
@@ -1322,7 +1328,13 @@ def main(argv=None) -> int:
         help="energy models to leave out of every figure, e.g. --exclude mace_mp",
     )
     args = ap.parse_args(argv)
-    ANALYSIS, COMPARISON = args.analysis_dir, args.comparison_dir
+    ANALYSIS, COMPARISON, OUT = args.analysis_dir, args.comparison_dir, args.out_dir
+    if args.campaign is not None:
+        from mace_gaussian.campaign import campaign_paths
+
+        paths = campaign_paths(args.campaign)
+        ANALYSIS, COMPARISON = REPO / paths.analysis, REPO / paths.comparison
+        OUT = paths.figures
     if args.exclude:
         MODEL_ORDER[:] = [m for m in MODEL_ORDER if m not in set(args.exclude)]
     apply_style()
