@@ -1225,8 +1225,8 @@ def fig_supervisor():
                 f"supervisor/grid_pooled_{m}",
                 1.0,
                 w * 1.03,
-                f"{MODEL_LABEL[m]} against B3LYP-VPT2, all molecules pooled (ethane left out: "
-                "broken B3LYP baseline). Columns: fundamentals, overtones, combination bands. "
+                f"{MODEL_LABEL[m]} against B3LYP-VPT2, all molecules pooled. "
+                "Columns: fundamentals, overtones, combination bands. "
                 "Rows: frequency, IR intensity (colour = dipole model), anharmonic constants "
                 "x_ii and x_ij from band positions (hollow = resonance-shifted, not in the MAE).",
                 "S1 supervisor: pooled by energy model",

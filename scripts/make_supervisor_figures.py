@@ -9,8 +9,7 @@ into ``thesis/figures/supervisor/``:
 - ``grid_<mol>_<model>``: 3x3 per molecule and energy model. Columns fundamentals /
   overtones / combinations; rows frequency, intensity (one marker per dipole model) and
   anharmonic constants (x_ii under overtones, x_ij under combinations).
-- ``grid_pooled_<model>``: the same, every molecule pooled (ethane left out: its B3LYP
-  VPT2 baseline is broken, see thesis/TODO.md).
+- ``grid_pooled_<model>``: the same, every molecule pooled.
 - ``*_xmatrix`` variants: chi row from Gaussian's deperturbed X matrix instead of band
   positions.
 - ``overlap_<mol>``: eigenvector overlap ML vs B3LYP harmonic modes, every energy model.
@@ -61,7 +60,7 @@ DATA = OUT / "data"
 MODEL_ORDER = ["mace_omol", "mace_off", "mace_anicc", "mace_polar", "mace_mp"]
 DIPOLE_ORDER = ["mace_ml", "mace_polar1", "espaloma"]
 CHI_RUN_DIPOLE = "mace_ml"  # frequencies are dipole-independent; one run per energy model
-POOL_EXCLUDE = {"ethane"}  # broken B3LYP VPT2 baseline (D3d symmetric-top treatment)
+POOL_EXCLUDE: set[str] = set()  # ethane is back since its nosymm baseline (2026-10-01)
 INT_FLOOR = 0.01  # km/mol; log axes, DFT intensities below this are left out
 COLUMNS = [
     ("fundamental", "fundamentals"),
@@ -340,7 +339,6 @@ dipole model).</p>
 <label>χ from <select id='src'><option value='bands'>band positions</option><option value='xmatrix'>X matrix</option></select></label>
 <div id='view'></div>
 <h2>Pooled over all molecules</h2>
-<p class='muted'>Ethane is left out (broken B3LYP VPT2 baseline).</p>
 <label>energy model <select id='pmodel'>{opts(pooled, MODEL_LABEL)}</select></label>
 <label>χ from <select id='psrc'><option value='bands'>band positions</option><option value='xmatrix'>X matrix</option></select></label>
 <div id='pview'></div>
@@ -419,7 +417,7 @@ def main(argv=None) -> int:
 
     pooled = []
 
-    # pooled: leave out ethane (broken baseline) and runs in a different conformer than B3LYP
+    # pooled: leave out POOL_EXCLUDE and runs in a different conformer than B3LYP
     def _keep(df):
         wrong = df.get("same_conformer", pd.Series(dtype=object)).astype(str) == "False"
         return df[~df.molecule.isin(POOL_EXCLUDE) & ~wrong]
