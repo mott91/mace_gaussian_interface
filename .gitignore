@@ -59,6 +59,9 @@ analysis_results/
 analysis_results_harmonic/
 /coverage_analysis/
 
+# Thesis writing (kept out of the code repo)
+/thesis/
+
 # Per-molecule workflow outputs and batch molecule lists (root-level only)
 /decane/
 /formic_acid/
