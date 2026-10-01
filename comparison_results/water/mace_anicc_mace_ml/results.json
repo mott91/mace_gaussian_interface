@@ -7,93 +7,93 @@
   "frequencies": {
     "harmonic": [
       {
-        "freq_cm": 1650.5889,
-        "ir_intensity": 80.45
+        "freq_cm": 1646.3436,
+        "ir_intensity": 80.4991
       },
       {
-        "freq_cm": 3780.244,
-        "ir_intensity": 6.5607
+        "freq_cm": 3839.711,
+        "ir_intensity": 6.3548
       },
       {
-        "freq_cm": 3889.0027,
-        "ir_intensity": 63.3355
+        "freq_cm": 3943.7451,
+        "ir_intensity": 64.3663
       }
     ],
     "anharmonic": [
       {
         "mode": 1,
-        "freq_cm": 3618.599,
-        "ir_intensity": 1.92422271,
-        "freq_harmonic": 3780.244
+        "freq_cm": 3675.87,
+        "ir_intensity": 2.26144925,
+        "freq_harmonic": 3839.711
       },
       {
         "mode": 2,
-        "freq_cm": 1621.011,
-        "ir_intensity": 94.41857327,
-        "freq_harmonic": 1650.589
+        "freq_cm": 1614.679,
+        "ir_intensity": 91.48773714,
+        "freq_harmonic": 1646.344
       },
       {
         "mode": 3,
-        "freq_cm": 3702.754,
-        "ir_intensity": 34.13306023,
-        "freq_harmonic": 3889.003
+        "freq_cm": 3758.446,
+        "ir_intensity": 35.20721577,
+        "freq_harmonic": 3943.745
       }
     ],
     "overtones": [
       {
         "mode": 1,
         "overtone_level": 2,
-        "freq_harmonic": 7560.488,
-        "freq_anharmonic": 7158.377,
-        "ir_intensity": 0.00470824
+        "freq_harmonic": 7679.422,
+        "freq_anharmonic": 7272.525,
+        "ir_intensity": 0.00790675
       },
       {
         "mode": 2,
         "overtone_level": 2,
-        "freq_harmonic": 3301.178,
-        "freq_anharmonic": 3221.57,
-        "ir_intensity": 0.46750222
+        "freq_harmonic": 3292.687,
+        "freq_anharmonic": 3209.197,
+        "ir_intensity": 0.2633193
       },
       {
         "mode": 3,
         "overtone_level": 2,
-        "freq_harmonic": 7778.005,
-        "freq_anharmonic": 7313.835,
-        "ir_intensity": 6.666e-05
+        "freq_harmonic": 7887.49,
+        "freq_anharmonic": 7425.902,
+        "ir_intensity": 0.00061316
       }
     ],
     "combination_bands": [
       {
         "mode1": 2,
         "mode2": 1,
-        "freq_harmonic": 5430.833,
-        "freq_anharmonic": 5242.237,
-        "ir_intensity": 0.38954847
+        "freq_harmonic": 5486.055,
+        "freq_anharmonic": 5288.729,
+        "ir_intensity": 0.59961994
       },
       {
         "mode1": 3,
         "mode2": 1,
-        "freq_harmonic": 7669.247,
-        "freq_anharmonic": 7153.08,
-        "ir_intensity": 6.69836
+        "freq_harmonic": 7783.456,
+        "freq_anharmonic": 7266.884,
+        "ir_intensity": 5.78119137
       },
       {
         "mode1": 3,
         "mode2": 2,
-        "freq_harmonic": 5539.592,
-        "freq_anharmonic": 5302.891,
-        "ir_intensity": 0.00956638
+        "freq_harmonic": 5590.089,
+        "freq_anharmonic": 5351.935,
+        "ir_intensity": 0.00664768
       }
     ]
   },
-  "energy_eV": 0.09771608800934291,
+  "energy_eV": -2078.5021621596375,
   "dipole": {
     "x": 0.0,
     "y": 0.0,
-    "z": -1.875700947699848,
-    "magnitude": 1.875700947699848
+    "z": -1.8812958395013242,
+    "magnitude": 1.8812958395013242
   },
-  "runtime_s": 12.898708820343018,
+  "runtime_s": 7.5873847007751465,
   "files": {
     "gaussian_log": "gaussian_freq.log",
     "gaussian_input": "gaussian_freq.gjf"
@@ -113,15 +113,36 @@
   },
   "calculation_parameters": {
     "energy_calculator": "mace_anicc",
-    "dipole_calculator": "mace_ml"
+    "dipole_calculator": "mace_ml",
+    "reoptimization": {
+      "reoptimized_with": "mace_anicc",
+      "fmax_target_eV_A": 0.0001,
+      "converged": true,
+      "steps": 6,
+      "max_force_eV_A": 5.750857219505301e-05,
+      "rmsd_from_start_A": 0.004877810765029849,
+      "max_atom_shift_A": 0.005961492818170181
+    },
+    "dipole_fallbacks": {
+      "count": 0,
+      "last_error": null,
+      "intensities_trustworthy": true
+    },
+    "vpt2_diagnostics": {
+      "has_anharmonic": true,
+      "unreliable_cubic": 0,
+      "unreliable_quartic": 0,
+      "fermi_resonances": false,
+      "darling_dennison_resonances": false
+    }
   },
   "gaussian_timing": {
-    "total_elapsed_s": 11.5,
-    "total_cpu_s": 1.6,
+    "total_elapsed_s": 5.9,
+    "total_cpu_s": 1.8,
     "stages": [
       {
-        "cpu_s": 1.6,
-        "elapsed_s": 11.5
+        "cpu_s": 1.8,
+        "elapsed_s": 5.9
       }
     ]
   }
