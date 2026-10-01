@@ -558,6 +558,35 @@ class GaussianLogParser:
             ),
         }
 
+    def parse_x_matrix(self) -> dict[tuple[int, int], float]:
+        """Total anharmonic constants x_ij (cm^-1) from the "Total Anharmonic X Matrix" block.
+
+        Gaussian prints the lower triangle in blocks of five columns, Fortran ``D``
+        exponents, indexed by its own ``Mode(n)`` numbers (the anharmonic-table numbering,
+        not the ascending-frequency .fchk order). Returns ``{(i, j): x}`` with i >= j, or
+        an empty dict when the log has no VPT2 section. This is the deperturbed X matrix:
+        where Gaussian treats a resonance variationally, the band positions in the
+        spectroscopy tables no longer follow from it alone.
+        """
+        start = self.content.find("Total Anharmonic X Matrix")
+        if start < 0:
+            return {}
+        x: dict[tuple[int, int], float] = {}
+        cols: list[int] = []
+        for line in self.content[start:].split("\n")[2:]:
+            tokens = line.split()
+            if not tokens:
+                break
+            if all(t.isdigit() for t in tokens):
+                cols = [int(t) for t in tokens]
+                continue
+            if not tokens[0].isdigit():
+                break
+            row = int(tokens[0])
+            for col, value in zip(cols, tokens[1:]):
+                x[(row, col)] = float(value.replace("D", "E"))
+        return x
+
     def parse_all(self) -> dict:
         """
         Parse all available data from log file.

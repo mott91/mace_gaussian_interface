@@ -461,3 +461,16 @@ class TestSymmetricTopLabels:
         p = GaussianLogParser(water_dft_log)
         assert p._degenerate_components() == {}
         assert all("l" not in e for e in p.parse_anharmonic_frequencies() + p.parse_overtones())
+
+
+class TestParseXMatrix:
+    def test_two_column_blocks(self, fixtures_dir):
+        x = GaussianLogParser(str(fixtures_dir / "methanol" / "x_matrix_omol.log")).parse_x_matrix()
+        assert len(x) == 12 * 13 // 2  # full lower triangle of 12 modes
+        assert x[(1, 1)] == pytest.approx(-83.4367)
+        assert x[(4, 3)] == pytest.approx(-177.361)
+        assert x[(12, 11)] == pytest.approx(13.4352)  # second block
+        assert x[(12, 12)] == pytest.approx(-30.7095)
+
+    def test_missing_returns_empty(self, water_dft_log):
+        assert GaussianLogParser(water_dft_log).parse_x_matrix() == {}
