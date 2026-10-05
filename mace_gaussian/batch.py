@@ -217,6 +217,7 @@ def run_batch(
     slurm_template: str | None = None,
     make_figures: bool = True,
     campaign: str | None = None,
+    submit_dft_only: bool = False,
 ) -> dict:
     """Run the full pipeline for multiple molecules with manifest-based restart.
 
@@ -379,6 +380,11 @@ def run_batch(
                     mol_manifest["dft_baseline"] = STATUS_COMPLETE
                     save_manifest(manifest, manifest_path)
 
+            if submit_dft_only:
+                # The cluster starts on every baseline now; a later normal batch runs
+                # the ML side and finds these jobs in the manifest (no resubmission).
+                continue
+
             # Stage 3: ML combinations (per-calculator granularity)
             from .workflow import run_frequency_calculation
 
@@ -459,14 +465,24 @@ def run_batch(
                         summary["failed"] += 1
             save_manifest(manifest, manifest_path)
 
+    if submit_dft_only:
+        save_manifest(manifest, manifest_path)
+        click.echo(f"DFT jobs submitted for {total} molecule(s); ML runs not started.")
+        return summary
+
     # SLURM DFT offload: poll submitted jobs, retrieve results
     if dft_on_cluster and not skip_dft_baseline:
         from .slurm import TERMINAL_STATES as _SLURM_TERMINAL
         from .slurm import poll_jobs, retrieve_results
 
-        # Collect submitted jobs that haven't reached a terminal state
+        # Collect this batch's submitted jobs that haven't reached a terminal state. The
+        # manifest is shared by every batch of a campaign; waiting for another list's
+        # jobs would hold up this one (and the GPU) for no reason.
+        batch_names = {p.stem for p in molecules}
         pending_jobs: dict[str, str] = {}
         for mol_name, mol_data in manifest["molecules"].items():
+            if mol_name not in batch_names:
+                continue
             slurm_info = mol_data.get("slurm", {})
             job_id = slurm_info.get("job_id")
             if job_id and slurm_info.get("status") not in _SLURM_TERMINAL:

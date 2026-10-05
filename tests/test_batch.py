@@ -351,3 +351,97 @@ class TestRunBatch:
         manifest = json.loads(manifest_path.read_text())
         assert "molecules" in manifest
         assert "water" in manifest["molecules"]
+
+
+class TestClusterSubmission:
+    """Submitting every DFT job up front, and waiting only for a batch's own jobs."""
+
+    def _batch(self, tmp_path, names, **kwargs):
+        batch_file = tmp_path / f"{'_'.join(names)}.txt"
+        batch_file.write_text("\n".join(str(_write_xyz(tmp_path, n)) for n in names) + "\n")
+        output_dir = tmp_path / "results"
+        output_dir.mkdir(parents=True, exist_ok=True)
+        return run_batch(
+            batch_file=batch_file,
+            optimization_calculator="mace_omol",
+            energy_calculators=["mace_omol"],
+            dipole_calculators=["mace_ml"],
+            skip_dft_baseline=False,
+            output_dir=str(output_dir),
+            dft_on_cluster="user@cluster",
+            make_figures=False,
+            **kwargs,
+        )
+
+    @patch("mace_gaussian.batch._run_analyses", return_value=False)
+    @patch("mace_gaussian.slurm.retrieve_results")
+    @patch("mace_gaussian.slurm.poll_jobs")
+    @patch("mace_gaussian.slurm.submit_dft_jobs")
+    @patch("mace_gaussian.dft_baseline.create_gaussian_dft_input")
+    @patch("mace_gaussian.workflow.calculator")
+    @patch("mace_gaussian.batch.read")
+    @patch("mace_gaussian.workflow.run_frequency_calculation", return_value=True)
+    @patch("mace_gaussian.workflow.run_geometry_optimization")
+    def test_submit_only_then_normal_batch(
+        self,
+        mock_geom_opt,
+        mock_freq_calc,
+        mock_read,
+        _calculator,
+        _gjf,
+        mock_submit,
+        mock_poll,
+        mock_retrieve,
+        _analyses,
+        tmp_path,
+    ):
+        """--submit-dft-only submits and stops; the normal batch then runs ML, no resubmission."""
+        mock_geom_opt.return_value = mock_read.return_value = _make_mock_atoms()
+        mock_submit.side_effect = lambda mols, *a, **k: {m["name"]: "111" for m in mols}
+        mock_poll.side_effect = lambda host, jobs: {name: "COMPLETED" for name in jobs}
+
+        self._batch(tmp_path, ["water", "methane"], submit_dft_only=True)
+        assert mock_submit.call_count == 2
+        assert mock_freq_calc.call_count == 0
+        assert mock_poll.call_count == 0
+
+        manifest = json.loads((tmp_path / "results" / "batch_manifest.json").read_text())
+        assert manifest["molecules"]["water"]["slurm"]["status"] == "SUBMITTED"
+
+        self._batch(tmp_path, ["water", "methane"])
+        assert mock_submit.call_count == 2  # nothing submitted a second time
+        assert mock_freq_calc.call_count == 2
+        assert set(mock_poll.call_args[0][1]) == {"water", "methane"}
+
+    @patch("mace_gaussian.batch._run_analyses", return_value=False)
+    @patch("mace_gaussian.slurm.retrieve_results")
+    @patch("mace_gaussian.slurm.poll_jobs")
+    @patch("mace_gaussian.slurm.submit_dft_jobs")
+    @patch("mace_gaussian.dft_baseline.create_gaussian_dft_input")
+    @patch("mace_gaussian.workflow.calculator")
+    @patch("mace_gaussian.batch.read")
+    @patch("mace_gaussian.workflow.run_frequency_calculation", return_value=True)
+    @patch("mace_gaussian.workflow.run_geometry_optimization")
+    def test_batch_waits_only_for_its_own_jobs(
+        self,
+        mock_geom_opt,
+        _freq_calc,
+        mock_read,
+        _calculator,
+        _gjf,
+        mock_submit,
+        mock_poll,
+        _retrieve,
+        _analyses,
+        tmp_path,
+    ):
+        """Two lists share one manifest; a batch must not wait for the other list's jobs."""
+        mock_geom_opt.return_value = mock_read.return_value = _make_mock_atoms()
+        mock_submit.side_effect = lambda mols, *a, **k: {m["name"]: "111" for m in mols}
+        mock_poll.side_effect = lambda host, jobs: {name: "COMPLETED" for name in jobs}
+
+        self._batch(tmp_path, ["water"], submit_dft_only=True)
+        self._batch(tmp_path, ["glucose"], submit_dft_only=True)
+        self._batch(tmp_path, ["water"])
+
+        assert set(mock_poll.call_args[0][1]) == {"water"}

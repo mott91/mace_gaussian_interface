@@ -583,6 +583,13 @@ def diagnose():
     help="Isolated campaign: every output under campaigns/<NAME>/ (results, analyses, "
     "figures) and campaigns/<NAME> on the cluster. Never touches the legacy folders.",
 )
+@click.option(
+    "--submit-dft-only",
+    is_flag=True,
+    default=False,
+    help="Pre-optimize and submit the DFT jobs to the cluster, then stop (no ML runs, no "
+    "waiting). A later batch without this flag runs the ML side and collects the jobs.",
+)
 def batch(
     batch_file,
     optimization_calculator,
@@ -595,6 +602,7 @@ def batch(
     slurm_template,
     no_figures,
     campaign,
+    submit_dft_only,
 ):
     """Run pipeline for multiple molecules listed in BATCH_FILE.
 
@@ -619,6 +627,9 @@ def batch(
     if campaign is not None and output_dir != "comparison_results":
         click.echo("Error: use either --campaign or --output-dir, not both", err=True)
         sys.exit(2)
+    if submit_dft_only and (not dft_on_cluster or skip_dft_baseline):
+        click.echo("Error: --submit-dft-only needs --dft-on-cluster and a DFT baseline", err=True)
+        sys.exit(2)
 
     # Resolve keep_scratch: CLI flag takes precedence over env var
     if not keep_scratch:
@@ -641,6 +652,7 @@ def batch(
             slurm_template=slurm_template,
             make_figures=not no_figures,
             campaign=campaign,
+            submit_dft_only=submit_dft_only,
         )
 
         if summary["failed"] > 0:
