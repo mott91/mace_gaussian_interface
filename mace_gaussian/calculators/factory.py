@@ -7,6 +7,7 @@ import logging
 from .base import DipoleCalculatorBase
 from .espaloma import EspalomaDipoleCalculator
 from .gaussian_reference import GaussianReferenceDipoleCalculator
+from .mace_mdp import MACEMDPDipoleCalculator
 from .mace_ml import MACEMLDipoleCalculator
 from .mace_polar1 import MACEPolar1DipoleCalculator
 from .xtb import XTBDipoleCalculator
@@ -29,6 +30,7 @@ class DipoleCalculatorFactory:
             XTBDipoleCalculator(),
             MACEMLDipoleCalculator(),
             MACEPolar1DipoleCalculator(),
+            MACEMDPDipoleCalculator(),
             GaussianReferenceDipoleCalculator(),
         ]
 

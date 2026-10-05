@@ -60,7 +60,7 @@ DATA = OUT / "data"
 ANALYSIS = REPO / "analysis_results"
 COMPARISON = REPO / "comparison_results"
 MODEL_ORDER = ["mace_omol", "mace_off", "mace_anicc", "mace_polar", "mace_mp"]
-DIPOLE_ORDER = ["mace_ml", "mace_polar1", "espaloma"]
+DIPOLE_ORDER = ["mace_ml", "mace_polar1", "mace_mdp", "espaloma"]
 CHI_RUN_DIPOLE = "mace_ml"  # frequencies are dipole-independent; one run per energy model
 POOL_EXCLUDE: set[str] = set()  # ethane is back since its nosymm baseline (2026-10-01)
 INT_FLOOR = 0.01  # km/mol; log axes, DFT intensities below this are left out
@@ -266,6 +266,7 @@ def grid_figure(bands, chi, energy, heading, name, source="bands"):
     handles = [Line2D([], [], ls="none", label="dipole model:")] + [
         Line2D([], [], marker="o", ls="none", color=dipole_color(d), label=tex(DIPOLE_LABEL[d]))
         for d in DIPOLE_ORDER
+        if (bands.dipole_model == d).any()
     ]
     if source == "bands":
         handles.append(

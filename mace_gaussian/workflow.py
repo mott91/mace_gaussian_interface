@@ -351,18 +351,38 @@ def _check_mace_anicc_elements(atoms) -> None:
         raise ValueError(f"mace_anicc only supports H/C/N/O — molecule contains: {unsupported}")
 
 
+def _cueq_kwargs() -> dict:
+    """``enable_cueq=True`` when MACE_ENABLE_CUEQ=1 (cuEquivariance kernels, needs a matching env).
+
+    mace_anicc() itself has no such option; ``calculator`` builds that model directly instead.
+    """
+    return {"enable_cueq": True} if os.getenv("MACE_ENABLE_CUEQ") == "1" else {}
+
+
 def calculator(nnp):
     """Return an ASE calculator for the named neural network potential."""
     if nnp == "mace_mp":
         from mace.calculators import mace_mp
 
-        calc = mace_mp(model="large", device="cuda", default_dtype="float64", dispersion=False)
+        calc = mace_mp(
+            model="large",
+            device="cuda",
+            default_dtype="float64",
+            dispersion=False,
+            **_cueq_kwargs(),
+        )
         return calc
 
     if nnp == "mace_off":
         from mace.calculators import mace_off
 
-        calc = mace_off(model="large", device="cuda", default_dtype="float64", dispersion=False)
+        calc = mace_off(
+            model="large",
+            device="cuda",
+            default_dtype="float64",
+            dispersion=False,
+            **_cueq_kwargs(),
+        )
         return calc
 
     if nnp == "mace_omol":
@@ -373,19 +393,37 @@ def calculator(nnp):
             device="cuda",
             default_dtype="float64",
             dispersion=False,
+            **_cueq_kwargs(),
         )
         return calc
 
     if nnp == "mace_anicc":
         from mace.calculators import mace_anicc
 
+        if _cueq_kwargs():
+            # Same model file and settings as mace_anicc(), which cannot pass enable_cueq on.
+            from mace.calculators import MACECalculator, foundations_models
+
+            model_path = (
+                Path(foundations_models.__file__).parent
+                / "foundations_models"
+                / "ani500k_large_CC.model"
+            )
+            return MACECalculator(
+                model_paths=str(model_path),
+                device="cuda",
+                default_dtype="float64",
+                **_cueq_kwargs(),
+            )
         calc = mace_anicc(device="cuda")
         return calc
 
     if nnp == "mace_polar":
         from mace.calculators import mace_polar
 
-        calc = mace_polar(model="polar-1-l", device="cuda", default_dtype="float64")
+        calc = mace_polar(
+            model="polar-1-l", device="cuda", default_dtype="float64", **_cueq_kwargs()
+        )
         return calc
 
     if nnp == "gaussian_b3lyp":
@@ -805,7 +843,7 @@ def run_pipeline(
     energy_calculators : list, optional
         List of energy calculators to use (default: ['mace_mp', 'mace_omol'])
     dipole_calculators : list, optional
-        List of dipole calculators to use (default: ['espaloma', 'mace_ml', 'mace_polar1'])
+        List of dipole calculators to use (default: ['mace_ml', 'mace_polar1', 'mace_mdp'])
     force_optimization : bool
         If True, force re-optimization even if optimized geometry exists
     include_dft_baselines : bool
@@ -827,7 +865,7 @@ def run_pipeline(
     if energy_calculators is None:
         energy_calculators = ["mace_mp", "mace_omol", "mace_anicc", "mace_off", "mace_polar"]
     if dipole_calculators is None:
-        dipole_calculators = ["espaloma", "mace_ml", "mace_polar1"]
+        dipole_calculators = ["mace_ml", "mace_polar1", "mace_mdp"]
 
     # Extract molecule name
     molecule_name = Path(input_file).stem

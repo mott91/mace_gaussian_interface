@@ -26,6 +26,7 @@ _FALLBACK_COLORS = ["#56B4E9", "#F0E442", "#999999", "#8B4513", "#2F4F4F"]
 DIPOLE_COLORS: dict[str, str] = {  # Matplotlib tab10 order
     "mace_ml": "#1f77b4",  # blue
     "mace_polar1": "#ff7f0e",  # orange
+    "mace_mdp": "#2ca02c",  # green, shared with espaloma (never in one report)
     "espaloma": "#2ca02c",  # green
     "xtb": "#d62728",  # red
 }
@@ -33,6 +34,7 @@ DIPOLE_COLORS: dict[str, str] = {  # Matplotlib tab10 order
 DIPOLE_SYMBOLS: dict[str, str] = {
     "mace_ml": "circle",
     "mace_polar1": "diamond",
+    "mace_mdp": "square",
     "espaloma": "square",
     "xtb": "cross",
 }

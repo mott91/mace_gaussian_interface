@@ -28,7 +28,7 @@ from pathlib import Path
 from ..gaussian.parser import GaussianLogParser
 from .analyze_spectra import gaussian_mode_to_checkpoint_index
 
-DIPOLE_MODELS = ("mace_polar1", "mace_ml", "espaloma")
+DIPOLE_MODELS = ("mace_polar1", "mace_ml", "mace_mdp", "espaloma")
 RESONANCE_TOL_CM = 1.0
 
 

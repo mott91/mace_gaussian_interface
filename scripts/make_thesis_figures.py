@@ -53,7 +53,7 @@ COMPARISON = REPO / "comparison_results"
 OUT = REPO / "thesis" / "figures"
 
 MODEL_ORDER = ["mace_omol", "mace_off", "mace_anicc", "mace_polar", "mace_mp"]
-DIPOLE_PREF = ["mace_ml", "mace_polar1", "espaloma"]
+DIPOLE_PREF = ["mace_ml", "mace_polar1", "mace_mdp", "espaloma"]
 FWHM = 10.0  # cm^-1, Lorentzian, as in the report
 
 FIGURES: list[dict] = []  # gallery entries
@@ -568,6 +568,7 @@ def fig_intensity_scatter(mols: list[str]):
     handles = [Line2D([], [], ls="none", label="dipole model:")] + [
         Line2D([], [], marker="o", ls="none", color=dipole_color(d), label=tex(DIPOLE_LABEL[d]))
         for d in DIPOLE_PREF
+        if any(data[m].get(d) for m in models)
     ]
     fig.legend(
         handles=handles,

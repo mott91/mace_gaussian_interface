@@ -144,7 +144,11 @@ class TestDipoleCalculatorFactory:
             "mace_gaussian.calculators.factory.MACEPolar1DipoleCalculator",
             return_value=mock_polar1,
         )
-        with p1, p2, p3, p4:
+        p5 = patch(
+            "mace_gaussian.calculators.factory.MACEMDPDipoleCalculator",
+            return_value=_make_mock_calculator("mace_mdp", True),
+        )
+        with p1, p2, p3, p4, p5:
             factory = DipoleCalculatorFactory()
 
         return factory
@@ -216,7 +220,8 @@ class TestDipoleCalculatorFactory:
         assert result["xtb"] is False
         assert result["mace_ml"] is True
         assert result["mace_polar1"] is True
-        assert len(result) == 5  # includes gaussian_b3lyp (reference calculator)
+        assert result["mace_mdp"] is True
+        assert len(result) == 6  # includes gaussian_b3lyp (reference calculator)
 
     def test_preferred_order_is_set(self):
         """Factory has a preferred_order list with all four calculator names."""

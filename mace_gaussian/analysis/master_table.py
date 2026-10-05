@@ -49,12 +49,18 @@ _ENERGY_LABELS = {
     "mace_anicc": "ANI-cc",
     "mace_polar": "POLAR",
 }
-_DIPOLE_LABELS = {"mace_ml": "", "mace_polar1": "/P1", "espaloma": "/esp", "xtb": "/xtb"}
+_DIPOLE_LABELS = {
+    "mace_ml": "",
+    "mace_polar1": "/P1",
+    "mace_mdp": "/MDP",
+    "espaloma": "/esp",
+    "xtb": "/xtb",
+}
 
 
 # Dipole calculators, most preferred first, used to pick one representative run per
 # energy model for the frequency views (frequencies do not depend on the dipole model).
-_DIPOLE_PREFERENCE = ("mace_ml", "mace_polar1", "espaloma", "xtb")
+_DIPOLE_PREFERENCE = ("mace_ml", "mace_polar1", "mace_mdp", "espaloma", "xtb")
 
 
 def split_method(method: str) -> tuple[str, str | None]:

@@ -51,8 +51,15 @@ MODEL_LABEL = {
     "mace_polar": "MACE-POLAR",
     "mace_anicc": "MACE-ANI-cc",
 }
-DIPOLE_SLOT = {"mace_ml": 0, "mace_polar1": 1, "espaloma": 2}
-DIPOLE_LABEL = {"mace_ml": "MACE4IR", "mace_polar1": "POLAR-1", "espaloma": "espaloma"}
+# mace_mdp took espaloma's place in the 2026 campaign and shares its slot; the two never
+# appear in one figure (espaloma only exists in the older results).
+DIPOLE_SLOT = {"mace_ml": 0, "mace_polar1": 1, "mace_mdp": 2, "espaloma": 2}
+DIPOLE_LABEL = {
+    "mace_ml": "MACE4IR",
+    "mace_polar1": "POLAR-1",
+    "mace_mdp": "MDP",
+    "espaloma": "espaloma",
+}
 
 
 def model_color(energy_model: str) -> str:
