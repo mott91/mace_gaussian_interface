@@ -79,7 +79,7 @@ def cli():
 )
 @click.option(
     "--energy-calculators",
-    default="mace_mp,mace_omol,mace_anicc,mace_off,mace_polar",
+    default="mace_omol,mace_anicc,mace_off,mace_polar",
     callback=_validate_energy_calculators,
     help="Comma-separated energy calculators. "
     "Choices: mace_mp, mace_omol, mace_off, mace_anicc, mace_polar",
@@ -535,7 +535,7 @@ def diagnose():
 )
 @click.option(
     "--energy-calculators",
-    default="mace_mp,mace_omol,mace_anicc,mace_off,mace_polar",
+    default="mace_omol,mace_anicc,mace_off,mace_polar",
     callback=_validate_energy_calculators,
     help="Comma-separated energy calculators. Choices: "
     "mace_mp, mace_omol, mace_off, mace_anicc, mace_polar",

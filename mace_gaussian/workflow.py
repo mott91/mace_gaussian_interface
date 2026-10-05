@@ -354,7 +354,8 @@ def _check_mace_anicc_elements(atoms) -> None:
 def _cueq_kwargs() -> dict:
     """``enable_cueq=True`` when MACE_ENABLE_CUEQ=1 (cuEquivariance kernels, needs a matching env).
 
-    mace_anicc() itself has no such option; ``calculator`` builds that model directly instead.
+    mace_anicc always runs plain: with the kernels it was slower in the pipeline
+    (glycine, 2026-10-05: 1.74 s per Gaussian request against 1.36 s).
     """
     return {"enable_cueq": True} if os.getenv("MACE_ENABLE_CUEQ") == "1" else {}
 
@@ -400,21 +401,6 @@ def calculator(nnp):
     if nnp == "mace_anicc":
         from mace.calculators import mace_anicc
 
-        if _cueq_kwargs():
-            # Same model file and settings as mace_anicc(), which cannot pass enable_cueq on.
-            from mace.calculators import MACECalculator, foundations_models
-
-            model_path = (
-                Path(foundations_models.__file__).parent
-                / "foundations_models"
-                / "ani500k_large_CC.model"
-            )
-            return MACECalculator(
-                model_paths=str(model_path),
-                device="cuda",
-                default_dtype="float64",
-                **_cueq_kwargs(),
-            )
         calc = mace_anicc(device="cuda")
         return calc
 
@@ -841,7 +827,8 @@ def run_pipeline(
     optimization_calculator : str
         Calculator to use for geometry optimization (default: 'mace_omol')
     energy_calculators : list, optional
-        List of energy calculators to use (default: ['mace_mp', 'mace_omol'])
+        List of energy calculators to use
+        (default: ['mace_omol', 'mace_anicc', 'mace_off', 'mace_polar'])
     dipole_calculators : list, optional
         List of dipole calculators to use (default: ['mace_ml', 'mace_polar1', 'mace_mdp'])
     force_optimization : bool
@@ -863,7 +850,7 @@ def run_pipeline(
 
     # Set defaults
     if energy_calculators is None:
-        energy_calculators = ["mace_mp", "mace_omol", "mace_anicc", "mace_off", "mace_polar"]
+        energy_calculators = ["mace_omol", "mace_anicc", "mace_off", "mace_polar"]
     if dipole_calculators is None:
         dipole_calculators = ["mace_ml", "mace_polar1", "mace_mdp"]
 
