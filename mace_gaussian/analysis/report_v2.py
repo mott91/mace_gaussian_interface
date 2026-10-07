@@ -210,9 +210,11 @@ class ReportV2Generator:
         out = []
         for g in groups.values():
             g["runs"].sort(
-                key=lambda c: _DIPOLE_PREFERENCE.index(c["_dipole_model"])
-                if c["_dipole_model"] in _DIPOLE_PREFERENCE
-                else 99
+                key=lambda c: (
+                    _DIPOLE_PREFERENCE.index(c["_dipole_model"])
+                    if c["_dipole_model"] in _DIPOLE_PREFERENCE
+                    else 99
+                )
             )
             g["rep"] = g["runs"][0]
             out.append(g)
@@ -470,11 +472,7 @@ class ReportV2Generator:
                 go.Scatter(
                     x=freq_grid,
                     y=g["rep"]["_ml_broadened"] * ratio + level,
-                    name=(
-                        f"{g['label']} (peak {ratio:.1f}\u00d7 DFT)"
-                        if abs(ratio - 1.0) > 0.05
-                        else g["label"]
-                    ),
+                    name=g["label"],
                     line=dict(color=g["color"], width=2),
                     hovertemplate=f"%{{x:.1f}} cm⁻¹<br>%{{y:.3f}}<extra>{g['label']}</extra>",
                 )
@@ -516,8 +514,17 @@ class ReportV2Generator:
         if not rows:
             return ""
         has_exp = any(r.get("experimental") for r in rows)
-        panels = [("VPT2: ML − DFT", "vpt2", "dft_vpt2")] if anharm else []
-        panels.append(("Harmonic: ML − DFT", "harmonic", "dft_harmonic"))
+        # total error = harmonic part + anharmonic part (error of the shift VPT2 minus harmonic)
+        panels = [("Total error after VPT2: ML − DFT", "vpt2", "dft_vpt2")] if anharm else []
+        panels.append(
+            (
+                "Harmonic part: ML − DFT" if anharm else "Harmonic: ML − DFT",
+                "harmonic",
+                "dft_harmonic",
+            )
+        )
+        if anharm:
+            panels.append(("Anharmonic part: total − harmonic", "shift", "dft_shift"))
         if has_exp:
             panels.append(
                 ("vs experiment: model − band origin", "vpt2" if anharm else "harmonic", "exp")
@@ -544,6 +551,21 @@ class ReportV2Generator:
             vertical_spacing=0.08,
             subplot_titles=[p[0] for p in panels],
         )
+
+        # Draw the worst model first and the best one last, so the best line lies on top
+        # (ranked by the mean absolute error of the first panel). The legend is reversed
+        # below and therefore lists the best model first.
+        def _mae(g: dict) -> float:
+            _, key, ref_key = panels[0]
+            errs = [
+                abs(c[key] - r[ref_key])
+                for r in rows
+                if (c := r["methods"].get(g["rep"]["name"]) or {}).get(key) is not None
+                and r.get(ref_key) is not None
+            ]
+            return sum(errs) / len(errs) if errs else float("inf")
+
+        groups = sorted(groups, key=_mae, reverse=True)
         for row_i, (_, key, ref_key) in enumerate(panels, 1):
             if ref_key == "exp":
                 dft_key = "dft_vpt2" if anharm else "dft_harmonic"
@@ -574,12 +596,18 @@ class ReportV2Generator:
                 ys, symbols = [], []
                 for r in rows:
                     c = r["methods"].get(g["rep"]["name"]) or {}
-                    v = c.get(key)
-                    ref = (
-                        (r["experimental"]["freq_cm"] if r.get("experimental") else None)
-                        if ref_key == "exp"
-                        else r.get(ref_key)
-                    )
+                    if key == "shift":
+                        has = c.get("vpt2") is not None and c.get("harmonic") is not None
+                        v = c["vpt2"] - c["harmonic"] if has else None
+                        has = r.get("dft_vpt2") is not None and r.get("dft_harmonic") is not None
+                        ref = r["dft_vpt2"] - r["dft_harmonic"] if has else None
+                    else:
+                        v = c.get(key)
+                        ref = (
+                            (r["experimental"]["freq_cm"] if r.get("experimental") else None)
+                            if ref_key == "exp"
+                            else r.get(ref_key)
+                        )
                     ys.append(v - ref if v is not None and ref is not None else None)
                     ov = c.get("overlap")
                     symbols.append(
@@ -610,7 +638,8 @@ class ReportV2Generator:
                     col=1,
                 )
             fig.add_hline(y=0, line=dict(color="#888", dash="dash", width=1), row=row_i, col=1)
-            fig.update_yaxes(title_text="Δν (cm⁻¹)", row=row_i, col=1)
+            # one scale for all panels, so the parts can be compared by eye
+            fig.update_yaxes(title_text="Δν (cm⁻¹)", matches="y", row=row_i, col=1)
         fig.update_xaxes(
             tickangle=-90 if compact else -30,
             tickfont=dict(size=9 if compact else 11),
@@ -622,7 +651,14 @@ class ReportV2Generator:
             template="simple_white",
             height=240 * len(panels) + 150,
             margin=dict(l=70, r=20, t=70, b=120),
-            legend=dict(orientation="h", y=1.06, yanchor="bottom", x=0, xanchor="left"),
+            legend=dict(
+                orientation="h",
+                y=1.06,
+                yanchor="bottom",
+                x=0,
+                xanchor="left",
+                traceorder="reversed",
+            ),
             hovermode="x unified",
         )
         # The div id must differ from the section id, otherwise Plotly draws the
@@ -633,8 +669,10 @@ class ReportV2Generator:
             "<h2>Per-mode signed errors</h2>"
             '<p class="caption">One point per DFT normal mode and energy model, paired by '
             "eigenvector overlap (hollow marker: overlap below "
-            f"{LOW_OVERLAP_THRESHOLD:.1f}). Mode labels use the Shimanouchi assignment where "
-            "a band origin exists.</p>"
+            f"{LOW_OVERLAP_THRESHOLD:.1f}). Errors in cm⁻¹. The total error of a VPT2 "
+            "fundamental is the sum of the harmonic part (curvature of the surface) and the "
+            "anharmonic part (error of the shift from harmonic to VPT2). Mode labels use the "
+            "Shimanouchi assignment where a band origin exists.</p>"
             f'<div class="plot-container">{div}</div></section>'
         )
 
@@ -789,30 +827,106 @@ class ReportV2Generator:
         dft_by = {dft_to_ckpt.get(m["mode"], m["mode"]) - 1: m for m in dft_anharm}
         mapping = rep.get("mode_mapping") or {i: i for i in ml_by}
         pairs = [
-            (ml_by[i], dft_by[j]) for i, j in sorted(mapping.items()) if i in ml_by and j in dft_by
+            (ml_by[i], dft_by[j], j + 1)
+            for i, j in sorted(mapping.items())
+            if i in ml_by and j in dft_by
         ]
         if len(pairs) < 3:
             return None
         return build_anharmonicity_ratio_figure(
-            np.array([d["freq_harmonic"] for _, d in pairs]),
-            np.array([d["freq_cm"] for _, d in pairs]),
-            np.array([m["freq_harmonic"] for m, _ in pairs]),
-            np.array([m["freq_cm"] for m, _ in pairs]),
+            np.array([d["freq_harmonic"] for _, d, _ in pairs]),
+            np.array([d["freq_cm"] for _, d, _ in pairs]),
+            np.array([m["freq_harmonic"] for m, _, _ in pairs]),
+            np.array([m["freq_cm"] for m, _, _ in pairs]),
             label,
+            # mode number as in the master table, with the DFT harmonic frequency
+            labels=[f"mode {k} (DFT harmonic {d['freq_harmonic']:.0f} cm⁻¹)" for _, d, k in pairs],
         )
 
+    @staticmethod
+    def _harmonic_intensity_pairs(comp: dict) -> tuple[np.ndarray, np.ndarray] | None:
+        """Harmonic IR intensities of the fundamentals, (DFT, ML), paired by the mode mapping."""
+        ml = (comp.get("_ml_results") or {}).get("frequencies", {}).get("harmonic") or []
+        dft = (comp.get("_dft_results") or {}).get("frequencies", {}).get("harmonic") or []
+        if not ml or not dft:
+            return None
+        mapping = comp.get("mode_mapping") or {i: i for i in range(min(len(ml), len(dft)))}
+        pairs = [
+            (dft[int(j)].get("ir_intensity"), ml[int(i)].get("ir_intensity"))
+            for i, j in sorted(mapping.items())
+            if int(i) < len(ml) and int(j) < len(dft)
+        ]
+        pairs = [(d, m) for d, m in pairs if d is not None and m is not None]
+        if len(pairs) < 3:
+            return None
+        arr = np.array(pairs, dtype=float)
+        return arr[:, 0], arr[:, 1]
+
+    @staticmethod
+    def _vpt2_fundamental_intensity_pairs(comp: dict) -> tuple[np.ndarray, np.ndarray] | None:
+        """VPT2 IR intensities of the same fundamentals, (DFT, ML), paired by the mode mapping."""
+        from .analyze_spectra import gaussian_mode_to_checkpoint_index
+
+        ml = (comp.get("_ml_results") or {}).get("frequencies", {}).get("anharmonic") or []
+        dft = (comp.get("_dft_results") or {}).get("frequencies", {}).get("anharmonic") or []
+        if not ml or not dft:
+            return None
+        ml_to_ckpt = gaussian_mode_to_checkpoint_index(ml)
+        dft_to_ckpt = gaussian_mode_to_checkpoint_index(dft)
+        ml_by = {ml_to_ckpt.get(m["mode"], m["mode"]) - 1: m for m in ml}
+        dft_by = {dft_to_ckpt.get(m["mode"], m["mode"]) - 1: m for m in dft}
+        mapping = comp.get("mode_mapping") or {i: i for i in ml_by}
+        pairs = [
+            (dft_by[int(j)].get("ir_intensity"), ml_by[int(i)].get("ir_intensity"))
+            for i, j in sorted(mapping.items())
+            if int(i) in ml_by and int(j) in dft_by
+        ]
+        pairs = [(d, m) for d, m in pairs if d is not None and m is not None]
+        if len(pairs) < 3:
+            return None
+        arr = np.array(pairs, dtype=float)
+        return arr[:, 0], arr[:, 1]
+
+    @staticmethod
+    def _intensity_cells(dft_i: np.ndarray, ml_i: np.ndarray) -> tuple[float, str]:
+        """MAE, share within a factor 2 and R² of the log values, for bands above 1 km/mol in
+        DFT. Returns (MAE for sorting, three table cells)."""
+        vis = (dft_i > 1.0) & (ml_i > 0.0)
+        d, v = dft_i[vis], ml_i[vis]
+        if len(d) < 3:
+            return float("inf"), "<td>n/a</td><td>n/a</td><td>n/a</td>"
+        mae = float(np.mean(np.abs(v - d)))
+        within = 100.0 * float(np.mean(np.abs(np.log10(v / d)) < np.log10(2.0)))
+        r2 = float(np.corrcoef(np.log10(d), np.log10(v))[0, 1] ** 2)
+        return mae, f"<td>{mae:.2f}</td><td>{within:.0f} %</td><td>{r2:.2f}</td>"
+
     def _dipole_panel(self, g: dict, index: int) -> str:
-        """Intensities are the only thing the dipole model changes: compare them here."""
+        """Intensities are the only thing the dipole model changes: compare them here.
+
+        In the anharmonic report the dipole models are ranked on the HARMONIC intensities of
+        the fundamentals: a harmonic intensity depends on the dipole derivative along the mode
+        only, while a VPT2 intensity also contains the intensity borrowing in resonances,
+        which is set by frequency gaps (energy model). The VPT2 numbers stay in the table.
+        """
         import plotly.graph_objects as go
 
+        harm = {}
+        if self.mode == "anharmonic":
+            for comp in g["runs"]:
+                pairs = self._harmonic_intensity_pairs(comp)
+                if pairs is not None:
+                    harm[id(comp)] = pairs
+        use_harm = bool(harm) and len(harm) == len(g["runs"])
+
         fig = go.Figure()
-        rows = []
+        entries = []
         all_vals = []
         for comp in g["runs"]:
             mt = comp["_v2_match"]
             dip = comp["_dipole_model"] or "?"
-            mask = (mt["dft_i"] >= 0.1) | (mt["ml_i"] >= 0.1)
-            x, y = mt["dft_i"][mask], mt["ml_i"][mask]
+            dft_i, ml_i = harm[id(comp)] if use_harm else (mt["dft_i"], mt["ml_i"])
+            mask = (dft_i >= 0.1) | (ml_i >= 0.1)
+            x, y = dft_i[mask], ml_i[mask]
             if len(x):
                 all_vals += list(x) + list(y)
                 fig.add_trace(
@@ -832,12 +946,28 @@ class ReportV2Generator:
                 )
             m = comp["metrics"]
             n_int = m.num_peaks - m.num_intensity_filtered
-            rows.append(
-                f"<tr><td>{_esc(dip)}</td><td>{m.mae_intensity:.2f}</td>"
-                f"<td>{m.rmse_intensity:.2f}</td>"
-                f"<td>{self.v1._r2_text(m.r2_intensity, n_int, 3)}</td>"
-                f"<td>{comp.get('ml_runtime', 0.0):.1f} s</td></tr>"
-            )
+            runtime = f"<td>{comp.get('ml_runtime', 0.0):.1f} s</td>"
+            if use_harm:
+                mae, cells = self._intensity_cells(dft_i, ml_i)
+                # the same fundamentals after VPT2, so the two blocks can be compared
+                vpt2 = self._vpt2_fundamental_intensity_pairs(comp)
+                vpt2_cells = (
+                    self._intensity_cells(*vpt2)[1]
+                    if vpt2 is not None
+                    else "<td>n/a</td><td>n/a</td><td>n/a</td>"
+                )
+                entries.append((mae, f"<tr><td>{_esc(dip)}</td>{cells}{vpt2_cells}{runtime}</tr>"))
+            else:
+                entries.append(
+                    (
+                        m.mae_intensity,
+                        f"<tr><td>{_esc(dip)}</td><td>{m.mae_intensity:.2f}</td>"
+                        f"<td>{m.rmse_intensity:.2f}</td>"
+                        f"<td>{self.v1._r2_text(m.r2_intensity, n_int, 3)}</td>{runtime}</tr>",
+                    )
+                )
+        # best dipole model first
+        rows = [row for _, row in sorted(entries, key=lambda e: e[0])]
         if all_vals:
             lo, hi = max(min(all_vals), 1e-3), max(all_vals) * 1.1
             fig.add_trace(
@@ -852,8 +982,13 @@ class ReportV2Generator:
             )
             log = hi / lo > 100
             axis = dict(type="log", dtick=1, exponentformat="power") if log else dict()
+            title = (
+                f"Harmonic IR intensities of the fundamentals: {g['label']}"
+                if use_harm
+                else f"IR intensities by dipole model: {g['label']}"
+            )
             fig.update_layout(
-                title=f"IR intensities by dipole model: {g['label']}",
+                title=title,
                 xaxis=dict(title="DFT intensity (km/mol)", constrain="domain", **axis),
                 yaxis=dict(
                     title="ML intensity (km/mol)",
@@ -876,14 +1011,32 @@ class ReportV2Generator:
             div = self._div(fig, f"dipole-v2-{index}")
         else:
             div = ""
+        if use_harm:
+            head = (
+                '<tr><th rowspan="2">Dipole model</th>'
+                '<th colspan="3">Harmonic, fundamentals</th>'
+                '<th colspan="3">VPT2, same fundamentals</th>'
+                '<th rowspan="2">Pipeline</th></tr>'
+                "<tr><th>MAE (km/mol)</th><th>within ×2</th><th>R² (log)</th>"
+                "<th>MAE (km/mol)</th><th>within ×2</th><th>R² (log)</th></tr>"
+            )
+            note = (
+                '<p class="caption">Dipole models are ranked on the harmonic intensities of the '
+                "fundamentals (bands above 1 km/mol in DFT; best first). A harmonic intensity "
+                "depends on the dipole model only; a VPT2 intensity also contains the intensity "
+                "borrowing in resonances, which depends on the frequencies.</p>"
+            )
+        else:
+            head = (
+                "<tr><th>Dipole model</th><th>MAE (km/mol)</th>"
+                "<th>RMSE (km/mol)</th><th>R²</th><th>Pipeline</th></tr>"
+            )
+            note = ""
         return (
             '<div class="side-by-side">'
             '<div class="stats-box"><h4>Dipole models (intensities only)</h4>'
-            '<table class="summary-table"><thead><tr><th>Dipole model</th>'
-            "<th>MAE (km/mol)</th>"
-            "<th>RMSE (km/mol)</th><th>R²</th><th>Pipeline</th>"
-            "</tr></thead>"
-            f"<tbody>{''.join(rows)}</tbody></table></div>"
+            f'<table class="summary-table"><thead>{head}</thead>'
+            f"<tbody>{''.join(rows)}</tbody></table>{note}</div>"
             f'<div class="plot-container">{div}</div></div>'
         )
 

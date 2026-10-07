@@ -630,63 +630,67 @@ def build_anharmonicity_ratio_figure(
     ml_harm_freqs: np.ndarray,
     ml_anharm_freqs: np.ndarray,
     ml_name: str,
+    labels: list[str] | None = None,
 ) -> object:
-    """Build anharmonicity ratio comparison: (harm - anharm) / harm for ML vs DFT.
+    """Anharmonic shift (VPT2 minus harmonic, in cm^-1) of every fundamental, ML vs DFT.
 
-    Shows whether ML captures anharmonic corrections correctly.
+    Shows whether the ML surface has the same anharmonicity as the reference. The shift is
+    given in cm^-1 and not in percent of the harmonic frequency: percent inflates the
+    low-frequency modes. ``labels`` (one per mode) are shown when hovering over a point.
     """
     import plotly.graph_objects as go
 
-    # Avoid division by zero
-    dft_mask = dft_harm_freqs > 1.0
-    ml_mask = ml_harm_freqs > 1.0
-    valid = dft_mask & ml_mask
+    valid = np.isfinite(dft_harm_freqs) & np.isfinite(ml_harm_freqs)
+    valid &= np.isfinite(dft_anharm_freqs) & np.isfinite(ml_anharm_freqs)
 
     if np.sum(valid) < 2:
         fig = go.Figure()
-        fig.add_annotation(text="Insufficient data for anharmonicity ratio",
+        fig.add_annotation(text="Insufficient data for the anharmonic shift",
                            xref="paper", yref="paper", x=0.5, y=0.5, showarrow=False)
         return fig
 
-    dft_ratio = (dft_harm_freqs[valid] - dft_anharm_freqs[valid]) / dft_harm_freqs[valid] * 100
-    ml_ratio = (ml_harm_freqs[valid] - ml_anharm_freqs[valid]) / ml_harm_freqs[valid] * 100
+    dft_shift = dft_anharm_freqs[valid] - dft_harm_freqs[valid]
+    ml_shift = ml_anharm_freqs[valid] - ml_harm_freqs[valid]
+    text = (
+        [lab for lab, ok in zip(labels, valid) if ok]
+        if labels is not None and len(labels) == len(valid)
+        else [""] * int(np.sum(valid))
+    )
 
     fig = go.Figure()
     fig.add_trace(
         go.Scatter(
-            x=dft_ratio, y=ml_ratio, mode="markers",
+            x=dft_shift, y=ml_shift, mode="markers",
             name=f"Modes (n={int(np.sum(valid))})",
+            text=text,
             marker=dict(color=_ML_COLOR, size=8, line=dict(width=1, color="#333")),
-            hovertemplate="DFT: %{x:.2f}%<br>ML: %{y:.2f}%<extra></extra>",
+            hovertemplate=(
+                "%{text}<br>DFT shift: %{x:+.1f} cm\u207b\u00b9"
+                "<br>ML shift: %{y:+.1f} cm\u207b\u00b9<extra></extra>"
+            ),
         )
     )
 
-    all_r = np.concatenate([dft_ratio, ml_ratio])
+    all_r = np.concatenate([dft_shift, ml_shift])
     lo, hi = float(np.min(all_r)), float(np.max(all_r))
     margin = (hi - lo) * 0.05
     lo -= margin
     hi += margin
-
-    r2_str = "N/A"
-    ss_res = float(np.sum((ml_ratio - dft_ratio) ** 2))
-    ss_tot = float(np.sum((dft_ratio - np.mean(dft_ratio)) ** 2))
-    if ss_tot > 0:
-        r2 = 1.0 - ss_res / ss_tot
-        r2_str = f"{r2:.3f}"
+    mae = float(np.mean(np.abs(ml_shift - dft_shift)))
 
     fig.add_trace(
         go.Scatter(
             x=[lo, hi], y=[lo, hi], mode="lines",
-            name=f"y=x | R\u00b2={r2_str}",
+            name=f"y=x | MAE {mae:.1f} cm\u207b\u00b9",
             line=dict(color="#888", dash="dash", width=1.5),
             hoverinfo="skip",
         )
     )
 
     fig.update_layout(
-        title=f"Anharmonicity Ratio: {ml_name} vs DFT",
-        xaxis_title="DFT anharmonic correction (%)",
-        yaxis_title="ML anharmonic correction (%)",
+        title=f"Anharmonic shift: {ml_name} vs DFT",
+        xaxis_title="DFT shift, VPT2 \u2212 harmonic (cm\u207b\u00b9)",
+        yaxis_title="ML shift, VPT2 \u2212 harmonic (cm\u207b\u00b9)",
         xaxis=dict(range=[lo, hi], constrain="domain"),
         yaxis=dict(range=[lo, hi], scaleanchor="x", scaleratio=1, constrain="domain"),
         template="simple_white",

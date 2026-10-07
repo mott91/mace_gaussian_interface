@@ -386,20 +386,29 @@ def plot_mode_overlap_heatmap(
     # Create refined labels with frequencies (use overrides if provided)
     if x_labels is None:
         if freqs_ref is not None:
-            x_labels = [f"{i}\n{freqs_ref[i]:.0f}" for i in range(n_modes_ref)]
+            x_labels = [f"{i + 1}\n{freqs_ref[i]:.0f}" for i in range(n_modes_ref)]
         else:
-            x_labels = [f"{i}" for i in range(n_modes_ref)]
+            x_labels = [f"{i + 1}" for i in range(n_modes_ref)]
 
     if y_labels is None:
         if freqs_calc is not None:
-            y_labels = [f"{i}: {freqs_calc[i]:.0f}" for i in range(n_modes_calc)]
+            y_labels = [f"{i + 1}: {freqs_calc[i]:.0f}" for i in range(n_modes_calc)]
         else:
-            y_labels = [f"{i}" for i in range(n_modes_calc)]
+            y_labels = [f"{i + 1}" for i in range(n_modes_calc)]
 
     # Scale font and rotate labels for large matrices
     _n_max = max(n_modes_calc, n_modes_ref)
-    _fs = 8.5 if _n_max <= 12 else max(5.0, 8.5 - (_n_max - 12) * 0.2)
+    _fs = 8.5 if _n_max <= 12 else max(7.0, 8.5 - (_n_max - 12) * 0.2)
     _rot = 90 if _n_max > 12 else 0
+    if _rot:
+        # a rotated two-line label overlaps its neighbour: one line "index: frequency"
+        x_labels = [str(lab).replace("\n", ": ") for lab in x_labels]
+    # Large molecules: label every k-th mode only (about 25 labels per axis), so the
+    # labels stay readable; every mode keeps its tick mark.
+    _step = int(np.ceil(_n_max / 25)) if _n_max > 30 else 1
+    if _step > 1:
+        x_labels = [lab if i % _step == 0 else "" for i, lab in enumerate(x_labels)]
+        y_labels = [lab if i % _step == 0 else "" for i, lab in enumerate(y_labels)]
     ax.set_xticklabels(x_labels, fontsize=_fs, color="#4a4a4a", family="sans-serif", rotation=_rot, ha="center" if _rot == 0 else "right")
     ax.set_yticklabels(y_labels, fontsize=_fs, color="#4a4a4a", family="sans-serif")
 

@@ -358,14 +358,20 @@ def render_master_table_html(table: dict) -> str:
     esc = html.escape
     freq_cols = ["harm", "VPT2"] if anharm else ["harm"]
     # Header row 1: groups; row 2: sub-columns.
-    head1 = ['<th rowspan="2">Mode</th>', '<th colspan="2">Experiment</th>']
+    # Experiment columns only where a band origin exists for at least one mode
+    has_exp = any(r.get("experimental") for r in rows)
+    head1 = ['<th rowspan="2">Mode</th>']
+    if has_exp:
+        head1.append('<th colspan="2">Experiment</th>')
     head1.append(f'<th colspan="{len(freq_cols)}">DFT</th>')
     for m in methods:
         title = f"paired by {m['pairing']}"
         head1.append(
             f'<th colspan="{len(freq_cols) + 1}" title="{esc(title)}">{esc(m["label"])}</th>'
         )
-    head2 = ["<th>band</th>", "<th>ν₀</th>"] + [f"<th>{c}</th>" for c in freq_cols]
+    head2 = (["<th>band</th>", "<th>ν₀</th>"] if has_exp else []) + [
+        f"<th>{c}</th>" for c in freq_cols
+    ]
     for _ in methods:
         head2 += [f"<th>{c}</th>" for c in freq_cols] + [
             f"<th title='{esc(('VPT2' if anharm else 'harmonic') + ' minus DFT')}'>Δ</th>"
@@ -386,11 +392,9 @@ def render_master_table_html(table: dict) -> str:
                 if x
             )
             exp_label = f'<span title="{esc(tip)}">{esc(exp_label)}</span>'
-        cells = [
-            f"<td>{r['dft_mode']}</td>",
-            f"<td>{exp_label}</td>",
-            f"<td>{_fmt(exp.get('freq_cm'))}</td>",
-        ]
+        cells = [f"<td>{r['dft_mode']}</td>"]
+        if has_exp:
+            cells += [f"<td>{exp_label}</td>", f"<td>{_fmt(exp.get('freq_cm'))}</td>"]
         cells.append(f"<td>{_fmt(r['dft_harmonic'])}</td>")
         dft_ref = r["dft_harmonic"]
         if anharm:
