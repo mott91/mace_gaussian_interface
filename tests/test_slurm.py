@@ -275,3 +275,43 @@ def test_poll_jobs_treats_empty_sacct_as_pending(mock_ssh, mock_sleep):
     assert result == {"water": "COMPLETED"}
     # Should have slept once (60s increments)
     assert mock_sleep.call_count >= 1
+
+
+# ---------------------------------------------------------------------------
+# Gaussian termination check
+# ---------------------------------------------------------------------------
+
+
+def test_gaussian_terminated_normally(tmp_path):
+    from mace_gaussian.slurm import gaussian_terminated_normally
+
+    good = tmp_path / "good.log"
+    good.write_text(" Normal termination of Gaussian 16 at Tue Oct  6 12:19:14 2026.\n")
+    # Optimization link ended normally, the frequency link crashed afterwards
+    bad = tmp_path / "bad.log"
+    bad.write_text(
+        " Normal termination of Gaussian 16 at Tue Oct  6 00:00:00 2026.\n"
+        " Error termination via Lnk1e in /usr/local/g16/l9999.exe at Tue Oct  6 00:34:20 2026.\n"
+        " File lengths (MBytes):  RWF=     14 Int=      0 D2E=      0 Chk=      3 Scr=      1\n"
+    )
+    assert gaussian_terminated_normally(good)
+    assert not gaussian_terminated_normally(bad)
+    assert not gaussian_terminated_normally(tmp_path / "missing.log")
+
+
+@patch("mace_gaussian.slurm._scp_from")
+def test_retrieve_results_rejects_failed_gaussian(mock_scp, tmp_path):
+    """SLURM says COMPLETED, but the log ends with an error -> not a success."""
+    from mace_gaussian.slurm import retrieve_results
+
+    def fake_scp(host, remote, local):
+        if local.endswith(".log"):
+            Path(local).write_text(" Error termination via Lnk1e in l9999.exe.\n")
+        else:
+            Path(local).write_text("")
+        return MagicMock(returncode=0)
+
+    mock_scp.side_effect = fake_scp
+    assert retrieve_results("user@cluster", ["valeric_acid"], str(tmp_path)) == {
+        "valeric_acid": False
+    }

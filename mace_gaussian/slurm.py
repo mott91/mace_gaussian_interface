@@ -431,6 +431,19 @@ def query_node_hardware(host: str, job_ids: dict[str, str]) -> dict[str, dict]:
     return hardware
 
 
+def gaussian_terminated_normally(log_file: str | Path) -> bool:
+    """Return True if the last line of a Gaussian log reports normal termination."""
+    try:
+        with Path(log_file).open("rb") as f:
+            f.seek(0, 2)
+            f.seek(max(f.tell() - 2000, 0))
+            tail = f.read().decode(errors="replace")
+    except OSError:
+        return False
+    lines = [line for line in tail.splitlines() if line.strip()]
+    return bool(lines) and "Normal termination" in lines[-1]
+
+
 def retrieve_results(
     host: str,
     molecules: list[str],
@@ -482,6 +495,12 @@ def retrieve_results(
             success_map[name] = False
             continue
 
+        # SLURM reports COMPLETED when the last command of the job script (formchk) exits
+        # with 0, also if Gaussian itself stopped with an error (e.g. optimization step limit).
+        if not gaussian_terminated_normally(log_local):
+            logger.error("Gaussian did not terminate normally for %s (%s)", name, log_local)
+            ok = False
+
         # Retrieve .chk file
         chk_remote = f"{remote_dir}/{base}.chk"
         chk_local = str(local_dir / f"{base}.chk")
@@ -510,6 +529,9 @@ def retrieve_results(
         # Parse .log and save results.json
         try:
             parsed = parse_gaussian_log(log_local)
+            if not parsed.get("harmonic"):
+                logger.error("No frequencies in the .log for %s", name)
+                ok = False
             results_json_path = local_dir / "results.json"
             results_data = {
                 "molecule": name,

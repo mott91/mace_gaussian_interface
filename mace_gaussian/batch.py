@@ -506,11 +506,17 @@ def run_batch(
             # Retrieve results for completed molecules
             if completed_mols:
                 click.echo(f"Retrieving results for {len(completed_mols)} molecule(s)...")
-                retrieve_results(
+                retrieved = retrieve_results(
                     dft_on_cluster, completed_mols, output_dir, remote_base=paths.remote_base
                 )
-                for mol_name in completed_mols:
-                    manifest["molecules"][mol_name]["dft_baseline"] = STATUS_COMPLETE
+                # COMPLETED in SLURM does not mean Gaussian finished: keep only valid results
+                for mol_name in list(completed_mols):
+                    if retrieved.get(mol_name):
+                        manifest["molecules"][mol_name]["dft_baseline"] = STATUS_COMPLETE
+                    else:
+                        manifest["molecules"][mol_name]["dft_baseline"] = "dft_failed"
+                        completed_mols.remove(mol_name)
+                        click.echo(f"  DFT baseline for {mol_name} is not usable (see log)")
                 save_manifest(manifest, manifest_path)
 
                 # Re-run the analyses now that the DFT baseline is available

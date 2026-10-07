@@ -445,3 +445,38 @@ class TestClusterSubmission:
         self._batch(tmp_path, ["water"])
 
         assert set(mock_poll.call_args[0][1]) == {"water"}
+
+    @patch("mace_gaussian.batch._run_analyses", return_value=False)
+    @patch("mace_gaussian.slurm.retrieve_results")
+    @patch("mace_gaussian.slurm.poll_jobs")
+    @patch("mace_gaussian.slurm.submit_dft_jobs")
+    @patch("mace_gaussian.dft_baseline.create_gaussian_dft_input")
+    @patch("mace_gaussian.workflow.calculator")
+    @patch("mace_gaussian.batch.read")
+    @patch("mace_gaussian.workflow.run_frequency_calculation", return_value=True)
+    @patch("mace_gaussian.workflow.run_geometry_optimization")
+    def test_failed_gaussian_is_not_marked_complete(
+        self,
+        mock_geom_opt,
+        _freq_calc,
+        mock_read,
+        _calculator,
+        _gjf,
+        mock_submit,
+        mock_poll,
+        mock_retrieve,
+        mock_analyses,
+        tmp_path,
+    ):
+        """SLURM COMPLETED but Gaussian failed: baseline is dft_failed and not analysed."""
+        mock_geom_opt.return_value = mock_read.return_value = _make_mock_atoms()
+        mock_submit.side_effect = lambda mols, *a, **k: {m["name"]: "111" for m in mols}
+        mock_poll.side_effect = lambda host, jobs: {name: "COMPLETED" for name in jobs}
+        mock_retrieve.return_value = {"water": True, "valeric": False}
+        self._batch(tmp_path, ["water", "valeric"])
+
+        manifest = json.loads((tmp_path / "results" / "batch_manifest.json").read_text())
+        assert manifest["molecules"]["water"]["dft_baseline"] == "complete"
+        assert manifest["molecules"]["valeric"]["dft_baseline"] == "dft_failed"
+        reanalysed = [c.args[0] for c in mock_analyses.call_args_list[-1:]]
+        assert reanalysed == ["water"]
