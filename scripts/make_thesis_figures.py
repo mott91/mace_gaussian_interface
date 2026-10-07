@@ -638,6 +638,94 @@ def fig_intensity_scatter(mols: list[str]):
     )
 
 
+def fig_intensity_harmonic(mols: list[str]):
+    """Harmonic and VPT2 intensities of the fundamentals against B3LYP, one facet per dipole
+    model. The harmonic row is the test of the dipole model; the VPT2 row also contains the
+    intensity borrowing in resonances, which depends on the frequencies."""
+    energy = next((m for m in MODEL_ORDER if m != "mace_mp"), None)
+    harm_dir = ANALYSIS.with_name(ANALYSIS.name + "_harmonic")
+    data: dict[str, dict[str, list]] = {"harmonic": {}, "VPT2": {}}
+    for mol in mols:
+        for dip in DIPOLE_PREF:
+            f = harm_dir / mol / "data" / f"comparison_{energy}_{dip}.csv"
+            if f.exists():
+                with f.open() as fh:
+                    for r in csv.DictReader(fh):
+                        data["harmonic"].setdefault(dip, []).append(
+                            (float(r["DFT_Intensity_km_mol"]), float(r["ML_Intensity_km_mol"]))
+                        )
+        for r in load_master_csv(mol):
+            for dip in DIPOLE_PREF:
+                try:
+                    d, m = float(r["dft_intensity"]), float(r[f"{energy}_{dip}_intensity"])
+                except (KeyError, ValueError):
+                    continue
+                data["VPT2"].setdefault(dip, []).append((d, m))
+    dips = [d for d in DIPOLE_PREF if data["harmonic"].get(d) and data["VPT2"].get(d)]
+    if not dips:
+        return
+    w = figwidth(1.0)
+    fig, axes = plt.subplots(
+        2, len(dips), figsize=(w, 2 * w / len(dips) + 0.5), sharex=True, sharey=True
+    )
+    axes = np.atleast_2d(axes)
+    lo, hi = 1e-2, 1e3
+    for i, row in enumerate(("harmonic", "VPT2")):
+        for ax, dip in zip(axes[i], dips):
+            clean_axes(ax)
+            pts = np.array(data[row][dip])
+            pts = pts[(pts[:, 0] >= 0.1) | (pts[:, 1] >= 0.1)]
+            ax.plot([lo, hi], [lo, hi], color=INK_MUTED, lw=0.9, ls=(0, (5, 3)), zorder=1)
+            ax.plot(
+                np.maximum(pts[:, 0], 1e-3),
+                np.maximum(pts[:, 1], 1e-3),
+                "o",
+                ms=3.2,
+                color=dipole_color(dip),
+                mec="none",
+                alpha=0.75,
+                zorder=3,
+            )
+            # statistics on the bands one can see: B3LYP above 1 km/mol
+            vis = pts[(pts[:, 0] > 1) & (pts[:, 1] > 0)]
+            lx, ly = np.log10(vis[:, 0]), np.log10(vis[:, 1])
+            within = 100 * np.mean(np.abs(ly - lx) < np.log10(2))
+            # R2 on the log values, as the axes are logarithmic (same as the supervisor table)
+            r2 = np.corrcoef(lx, ly)[0, 1] ** 2
+            ax.text(
+                0.96,
+                0.04,
+                rf"$R^2$ {r2:.2f}" + "\n" + rf"{within:.0f}\,\% within $\times 2$",
+                transform=ax.transAxes,
+                fontsize=ANNOT_FS - 1,
+                color=INK,
+                ha="right",
+                va="bottom",
+            )
+            ax.set_xscale("log")
+            ax.set_yscale("log")
+            ax.set_xlim(lo, hi)
+            ax.set_ylim(lo, hi)
+            ax.set_aspect("equal")
+            if i == 0:
+                ax.set_title(tex(DIPOLE_LABEL[dip]), fontsize=ANNOT_FS, color=dipole_color(dip))
+        axes[i, 0].set_ylabel(rf"{row}" + "\n" + r"ML / km mol$^{-1}$")
+    axes[1, len(dips) // 2].set_xlabel(r"B3LYP / km mol$^{-1}$")
+    fig.tight_layout()
+    save(fig, OUT, "intensity_harmonic_vs_vpt2")
+    register(
+        "intensity_harmonic_vs_vpt2",
+        1.0,
+        2 * w / len(dips) + 0.5,
+        f"IR intensities of the fundamentals, ML against B3LYP, pooled over the molecule panel "
+        f"(modes from {MODEL_LABEL[energy]}); one facet per dipole model. Top: harmonic "
+        "intensities, the test of the dipole model. Bottom: VPT2 intensities of the same bands, "
+        "which also contain the intensity borrowing in resonances. $R^2$ of the logarithmic "
+        "intensities and the share within a factor 2, for bands above 1 km/mol in B3LYP.",
+        "5.4 intensities",
+    )
+
+
 def fig_cost_scaling():
     """Wall time of the full VPT2 run vs number of atoms for the alkane ladder."""
     ladder = [
@@ -831,6 +919,68 @@ def fig_residuals(mols: list[str]):
         "molecule panel; one facet per energy model, hollow markers for eigenvector overlap "
         "below 0.7. The bending region (below 1700 cm$^{-1}$) and the stretching region separate "
         "the models.",
+        "5.2 residuals",
+    )
+
+
+def fig_error_split(mols: list[str]):
+    """Where the error of a VPT2 fundamental comes from: harmonic error (x) against the
+    error of the anharmonic shift (y), pooled, one facet per model. Their sum is the total
+    error, so points on the falling diagonal have a total error of zero."""
+    data = _pooled_fundamentals(mols)
+    models = [m for m in MODEL_ORDER if data[m]]
+    if not models:
+        return
+    w = figwidth(1.0)
+    fig, axes = plt.subplots(
+        1, len(models), figsize=(w, w / len(models) + 0.75), sharex=True, sharey=True
+    )
+    axes = np.atleast_1d(axes)
+    lim = 300.0
+    for ax, m in zip(axes, models):
+        clean_axes(ax)
+        rows = [r for r in data[m] if r["ml_harm"] is not None and r["dft_harm"] is not None]
+        x = np.array([r["ml_harm"] - r["dft_harm"] for r in rows])
+        y = np.array(
+            [(r["ml_vpt2"] - r["ml_harm"]) - (r["dft_vpt2"] - r["dft_harm"]) for r in rows]
+        )
+        low = np.array([r["dft_harm"] < 500 for r in rows])
+        ax.axhline(0, color=INK_MUTED, lw=0.8, ls=(0, (4, 3)), zorder=1)
+        ax.axvline(0, color=INK_MUTED, lw=0.8, ls=(0, (4, 3)), zorder=1)
+        ax.plot([-lim, lim], [lim, -lim], color=INK_MUTED, lw=0.6, ls=(0, (1, 2)), zorder=1)
+        yc = np.clip(y, -lim, lim)
+        ax.plot(x[~low], yc[~low], "o", ms=3.2, color=model_color(m), mec="none", alpha=0.75)
+        ax.plot(x[low], yc[low], "o", ms=3.2, mfc="white", mec=model_color(m), mew=0.8)
+        n_clip = int((np.abs(y) > lim).sum())
+        ax.set_xlim(-lim, lim)
+        ax.set_ylim(-lim, lim)
+        ax.set_xticks([-200, 0, 200])
+        ax.set_yticks([-200, 0, 200])
+        ax.set_aspect("equal")
+        ax.set_title(tex(MODEL_LABEL[m]), fontsize=ANNOT_FS, color=model_color(m))
+        ax.text(
+            0.04,
+            0.03,
+            rf"harm. {np.mean(np.abs(x)):.0f}, anh. {np.mean(np.abs(y)):.0f}"
+            + (f"\n{n_clip} off-scale" if n_clip else ""),
+            transform=ax.transAxes,
+            fontsize=ANNOT_FS - 1,
+            color=INK,
+            va="bottom",
+        )
+    axes[0].set_ylabel("error of the\nanharmonic shift / cm$^{-1}$")
+    axes[len(axes) // 2].set_xlabel(r"harmonic error / cm$^{-1}$")
+    fig.tight_layout()
+    save(fig, OUT, "error_split_pooled")
+    register(
+        "error_split_pooled",
+        1.0,
+        w / len(models) + 0.75,
+        "Two parts of the error of every VPT2 fundamental against B3LYP, pooled over the "
+        "molecule panel: error of the harmonic frequency (x) and error of the anharmonic shift, "
+        "VPT2 minus harmonic (y). The total error is their sum; on the dotted diagonal it is "
+        "zero. Hollow markers: modes below 500 cm$^{-1}$ in B3LYP. Numbers: mean absolute "
+        "value of each part.",
         "5.2 residuals",
     )
 
@@ -1156,6 +1306,7 @@ def fig_central_vs_experiment(mols: list[str]):
 
 def fig_overlap_matrices(mol: str = "methane"):
     from mace_gaussian.analysis.mode_matching import (
+        align_modes_to_reference,
         create_alignment_matrix,
         extract_mode_data_from_checkpoint,
     )
@@ -1165,16 +1316,19 @@ def fig_overlap_matrices(mol: str = "methane"):
     dft_fchk = next(iter(sorted(base.glob("b3lyp*/*.fchk"))), None)
     if dft_fchk is None:
         return
-    modes_dft, freqs_dft, _, _, _ = extract_mode_data_from_checkpoint(
+    modes_dft, freqs_dft, coords_dft, _, _ = extract_mode_data_from_checkpoint(
         str(dft_fchk), force_harmonic=True
     )
     panels = []
     for m in MODEL_ORDER:
         f = base / f"{m}_mace_ml" / "gaussian_freq.fchk"
         if f.exists():
-            modes_ml, freqs_ml, _, _, _ = extract_mode_data_from_checkpoint(
+            modes_ml, freqs_ml, coords_ml, _, _ = extract_mode_data_from_checkpoint(
                 str(f), force_harmonic=True
             )
+            # ML and B3LYP runs sit in different orientations; rotate the ML modes into
+            # the B3LYP frame first (as the reports do), or the overlaps are meaningless
+            modes_ml, _ = align_modes_to_reference(modes_ml, coords_ml, coords_dft)
             panels.append((m, np.abs(create_alignment_matrix(modes_ml, modes_dft)), freqs_ml))
     if not panels:
         return
@@ -1188,10 +1342,14 @@ def fig_overlap_matrices(mol: str = "methane"):
         # rows = B3LYP modes (shared by every panel), columns = this model's own modes
         im = ax.imshow(mat.T, cmap=cmap, vmin=0, vmax=1, aspect="equal", origin="lower")
         ax.set_title(tex(MODEL_LABEL[m]), fontsize=ANNOT_FS, color=model_color(m))
-        ax.set_xticks(range(mat.shape[0]))
-        ax.set_xticklabels([f"{f:.0f}" for f in freqs_ml], rotation=90, fontsize=ANNOT_FS - 2.5)
-        ax.set_yticks(range(mat.shape[1]))
-        ax.set_yticklabels([f"{f:.0f}" for f in freqs_dft], fontsize=ANNOT_FS - 2.5)
+        # label every k-th mode only (about 10 per axis), or the labels overlap
+        step = max(1, int(np.ceil(max(mat.shape) / 10)))
+        ax.set_xticks(range(0, mat.shape[0], step))
+        ax.set_xticklabels(
+            [f"{f:.0f}" for f in freqs_ml[::step]], rotation=90, fontsize=ANNOT_FS - 2.5
+        )
+        ax.set_yticks(range(0, mat.shape[1], step))
+        ax.set_yticklabels([f"{f:.0f}" for f in freqs_dft[::step]], fontsize=ANNOT_FS - 2.5)
         ax.tick_params(length=0)
         for side in ax.spines.values():
             side.set_visible(True)
@@ -1356,8 +1514,10 @@ def main(argv=None) -> int:
         "permode": lambda: [fig_per_mode_errors(m) for m in per_mol],
         "heatmap": lambda: fig_mae_heatmap(mols),
         "intensity": lambda: fig_intensity_scatter(mols),
+        "intensity_harm": lambda: fig_intensity_harmonic(mols),
         "cost": fig_cost_scaling,
         "residuals": lambda: fig_residuals(mols),
+        "split": lambda: fig_error_split(mols),
         "anharm": lambda: fig_anharmonicity_ratio(mols),
         "distribution": lambda: fig_error_distribution(mols),
         "bandtype": lambda: fig_band_type_errors(mols),
