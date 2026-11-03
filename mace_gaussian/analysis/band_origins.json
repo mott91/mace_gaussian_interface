@@ -136,5 +136,83 @@
     "bands": [
       {"label": "ν1", "symmetry": "σ+", "description": "HCl stretch", "freq_cm": 2885.309, "rating": "A", "degeneracy": 1}
     ]
-  }
+  },
+  "acetic_acid": {
+    "cas": "64-19-7",
+    "symmetry": "Cs",
+    "source": "Shimanouchi 1972 via NIST WebBook (gas phase, monomer); CH3 torsion (calculated value) left out",
+    "bands": [
+      {"label": "ν1", "symmetry": "a'", "description": "OH str", "freq_cm": 3583.0, "rating": "B", "degeneracy": 1},
+      {"label": "ν2", "symmetry": "a'", "description": "CH3 d-str", "freq_cm": 3051.0, "rating": "B", "degeneracy": 1},
+      {"label": "ν3", "symmetry": "a'", "description": "CH3 s-str", "freq_cm": 2944.0, "rating": "B", "degeneracy": 1},
+      {"label": "ν4", "symmetry": "a'", "description": "C=O str", "freq_cm": 1788.0, "rating": "B", "degeneracy": 1},
+      {"label": "ν5", "symmetry": "a'", "description": "CH3 d-deform", "freq_cm": 1430.0, "rating": "C", "degeneracy": 1, "note": "Shimanouchi SF(ν14): shared value with the partner band"},
+      {"label": "ν6", "symmetry": "a'", "description": "CH3 s-deform", "freq_cm": 1382.0, "rating": "B", "degeneracy": 1},
+      {"label": "ν7", "symmetry": "a'", "description": "OH bend", "freq_cm": 1264.0, "rating": "B", "degeneracy": 1},
+      {"label": "ν8", "symmetry": "a'", "description": "C-O str", "freq_cm": 1182.0, "rating": "B", "degeneracy": 1},
+      {"label": "ν9", "symmetry": "a'", "description": "CH3 rock", "freq_cm": 989.0, "rating": "B", "degeneracy": 1},
+      {"label": "ν10", "symmetry": "a'", "description": "CC str", "freq_cm": 847.0, "rating": "B", "degeneracy": 1},
+      {"label": "ν11", "symmetry": "a'", "description": "OCO deform", "freq_cm": 657.0, "rating": "B", "degeneracy": 1},
+      {"label": "ν12", "symmetry": "a'", "description": "CCO deform", "freq_cm": 581.0, "rating": "B", "degeneracy": 1},
+      {"label": "ν13", "symmetry": "a", "description": "CH3 d-str", "freq_cm": 2996.0, "rating": "B", "degeneracy": 1},
+      {"label": "ν14", "symmetry": "a", "description": "CH3 d-deform", "freq_cm": 1430.0, "rating": "C", "degeneracy": 1, "note": "Shimanouchi SF(ν5): shared value with the partner band"},
+      {"label": "ν15", "symmetry": "a", "description": "CH3 rock", "freq_cm": 1048.0, "rating": "B", "degeneracy": 1},
+      {"label": "ν16", "symmetry": "a", "description": "C=O op-bend", "freq_cm": 642.0, "rating": "B", "degeneracy": 1},
+      {"label": "ν17", "symmetry": "a", "description": "C-O torsion", "freq_cm": 534.0, "rating": "B", "degeneracy": 1}
+    ]
+  },
+  "phosphine": {
+    "cas": "7803-51-2",
+    "symmetry": "C3v",
+    "source": "Shimanouchi 1972 via NIST WebBook (gas phase)",
+    "bands": [
+      {"label": "ν1", "symmetry": "a1", "description": "Sym str", "freq_cm": 2323.0, "rating": "A", "degeneracy": 1},
+      {"label": "ν2", "symmetry": "a1", "description": "Sym deform", "freq_cm": 992.0, "rating": "B", "degeneracy": 1},
+      {"label": "ν3", "symmetry": "e", "description": "Deg str", "freq_cm": 2328.0, "rating": "B", "degeneracy": 2},
+      {"label": "ν4", "symmetry": "e", "description": "Deg deform", "freq_cm": 1118.0, "rating": "A", "degeneracy": 2}
+    ]
+  },
+  "nitric_acid": {
+    "cas": "7697-37-2",
+    "symmetry": "Cs",
+    "source": "Jacox compilation (Vibrational and electronic energy levels) via NIST WebBook, gas phase",
+    "bands": [
+      {"label": "ν1", "symmetry": "a'", "description": "OH stretch", "freq_cm": 3550.0, "rating": null, "degeneracy": 1, "reference": "McGraw, Bernitt, et al., 1965"},
+      {"label": "ν2", "symmetry": "a'", "description": "NO2 a-stretch", "freq_cm": 1709.57, "rating": null, "degeneracy": 1, "reference": "McGraw, Bernitt, et al., 1965 Bair and Brockman, 1979 Maki and Wells, 1980 May, Webster, et al., 1987"},
+      {"label": "ν3", "symmetry": "a'", "description": "Mixed", "freq_cm": 1325.74, "rating": null, "degeneracy": 1, "reference": "McGraw, Bernitt, et al., 1965 Webster, May, et al., 1985 Perrin, Lado-Bordowsky, et al., 1989 May and Webster, 1989 Perrin, Flaud, et al., 1993 Harwood, Jones, et al., 1993"},
+      {"label": "ν4", "symmetry": "a'", "description": "Mixed", "freq_cm": 1303.52, "rating": null, "degeneracy": 1, "reference": "McGraw, Bernitt, et al., 1965 Perrin, Lado-Bordowsky, et al., 1989 May and Webster, 1989 Perrin, Flaud, et al., 1993 Harwood, Jones, et al., 1993"},
+      {"label": "ν5", "symmetry": "a'", "description": "ON stretch", "freq_cm": 879.11, "rating": null, "degeneracy": 1, "reference": "McGraw, Bernitt, et al., 1965 Maki and Wells, 1984 Maki and Wells, 1992 Tan, Looi, et al., 1992, 2 Perrin, Jaouen, et al., 1993 Perrin, Flaud, et al., 1993 Harwood, Jones, et al., 1993"},
+      {"label": "ν6", "symmetry": "a'", "description": "NO2 scissors", "freq_cm": 646.83, "rating": null, "degeneracy": 1, "reference": "McGraw, Bernitt, et al., 1965 Maki and Olson, 1989 Tan, Wang, et al., 1996"},
+      {"label": "ν7", "symmetry": "a'", "description": "NO2 rock", "freq_cm": 580.3, "rating": null, "degeneracy": 1, "reference": "McGraw, Bernitt, et al., 1965 Maki and Olson, 1989 Looi, Tan, et al., 1996"},
+      {"label": "ν8", "symmetry": "a", "description": "ONO2 OPLA", "freq_cm": 763.15, "rating": null, "degeneracy": 1, "reference": "McGraw, Bernitt, et al., 1965 Maki and Olson, 1989 Looi, Tan, et al., 1996 Wang, Looi, et al., 1996"},
+      {"label": "ν9", "symmetry": "a", "description": "Torsion", "freq_cm": 458.23, "rating": null, "degeneracy": 1, "reference": "McGraw, Bernitt, et al., 1965 van der Veken, Pieters, et al., 1982 Goldman, Burkholder, et al., 1988 Sirota, Weber, et al., 1997"}
+    ]
+  },
+  "formic_acid_trans": {
+    "cas": "64-18-6",
+    "symmetry": "Cs",
+    "source": "Dinu et al., PCCP 28, 19068 (2026), Table 5, gas phase",
+    "bands": [
+      {"label": "ν1", "description": "OH stretch", "freq_cm": 3570.5, "rating": null, "degeneracy": 1},
+      {"label": "ν2", "description": "CH stretch", "freq_cm": 2942.1, "rating": null, "degeneracy": 1},
+      {"label": "ν3", "description": "C=O stretch", "freq_cm": 1776.8, "rating": null, "degeneracy": 1},
+      {"label": "ν4", "description": "CH in-plane bend", "freq_cm": 1379.1, "rating": null, "degeneracy": 1},
+      {"label": "ν5", "description": "COH in-plane bend", "freq_cm": 1306.2, "rating": null, "degeneracy": 1, "note": "nu5/2nu9 (partner 1230.6)"},
+      {"label": "ν6", "description": "C-O stretch", "freq_cm": 1104.9, "rating": null, "degeneracy": 1},
+      {"label": "ν8", "description": "CH out-of-plane bend", "freq_cm": 1033.5, "rating": null, "degeneracy": 1},
+      {"label": "ν9", "description": "COH out-of-plane bend", "freq_cm": 640.7, "rating": null, "degeneracy": 1},
+      {"label": "ν7", "description": "OCO in-plane bend", "freq_cm": 626.2, "rating": null, "degeneracy": 1}
+    ]
+  },
+  "carbon_dioxide": {
+    "cas": "124-38-9",
+    "symmetry": "D∞h",
+    "source": "Dinu et al., PCCP 22, 17932 (2020), Table 1, gas phase",
+    "bands": [
+      {"label": "ν3", "description": "asym stretch", "freq_cm": 2349.9, "rating": null, "degeneracy": 1},
+      {"label": "ν1", "description": "sym stretch", "freq_cm": 1285.5, "rating": null, "degeneracy": 1, "note": "Fermi dyad with 2nu2 (1388.1)"},
+      {"label": "ν2", "description": "bend", "freq_cm": 668.2, "rating": null, "degeneracy": 2}
+    ]
+  },
+  "_added_2026-11-03": "acetic_acid, phosphine (Shimanouchi), nitric_acid (Jacox), formic_acid_trans and carbon_dioxide (gas-phase columns of the Dinu et al. VCI papers). Gas phase only. Not added: ethanol, SO2 (no vibrational-level data on the WebBook), H2O2 (gas-phase levels are tunnelling doublets). The old key formic_acid is kept for the legacy reports."
 }
