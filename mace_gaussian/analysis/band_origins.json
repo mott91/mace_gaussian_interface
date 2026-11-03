@@ -193,15 +193,15 @@
     "symmetry": "Cs",
     "source": "Dinu et al., PCCP 28, 19068 (2026), Table 5, gas phase",
     "bands": [
-      {"label": "ν1", "description": "OH stretch", "freq_cm": 3570.5, "rating": null, "degeneracy": 1},
-      {"label": "ν2", "description": "CH stretch", "freq_cm": 2942.1, "rating": null, "degeneracy": 1},
-      {"label": "ν3", "description": "C=O stretch", "freq_cm": 1776.8, "rating": null, "degeneracy": 1},
-      {"label": "ν4", "description": "CH in-plane bend", "freq_cm": 1379.1, "rating": null, "degeneracy": 1},
-      {"label": "ν5", "description": "COH in-plane bend", "freq_cm": 1306.2, "rating": null, "degeneracy": 1, "note": "nu5/2nu9 (partner 1230.6)"},
-      {"label": "ν6", "description": "C-O stretch", "freq_cm": 1104.9, "rating": null, "degeneracy": 1},
-      {"label": "ν8", "description": "CH out-of-plane bend", "freq_cm": 1033.5, "rating": null, "degeneracy": 1},
-      {"label": "ν9", "description": "COH out-of-plane bend", "freq_cm": 640.7, "rating": null, "degeneracy": 1},
-      {"label": "ν7", "description": "OCO in-plane bend", "freq_cm": 626.2, "rating": null, "degeneracy": 1}
+      {"label": "ν1", "description": "OH stretch", "freq_cm": 3570.5, "rating": null, "degeneracy": 1, "modes": [9]},
+      {"label": "ν2", "description": "CH stretch", "freq_cm": 2942.1, "rating": null, "degeneracy": 1, "modes": [8]},
+      {"label": "ν3", "description": "C=O stretch", "freq_cm": 1776.8, "rating": null, "degeneracy": 1, "modes": [7]},
+      {"label": "ν4", "description": "CH in-plane bend", "freq_cm": 1379.1, "rating": null, "degeneracy": 1, "modes": [6]},
+      {"label": "ν5", "description": "COH in-plane bend", "freq_cm": 1306.2, "rating": null, "degeneracy": 1, "note": "nu5/2nu9 (partner 1230.6)", "modes": [5]},
+      {"label": "ν6", "description": "C-O stretch", "freq_cm": 1104.9, "rating": null, "degeneracy": 1, "modes": [4]},
+      {"label": "ν8", "description": "CH out-of-plane bend", "freq_cm": 1033.5, "rating": null, "degeneracy": 1, "modes": [3]},
+      {"label": "ν9", "description": "COH out-of-plane bend", "freq_cm": 640.7, "rating": null, "degeneracy": 1, "modes": [2]},
+      {"label": "ν7", "description": "OCO in-plane bend", "freq_cm": 626.2, "rating": null, "degeneracy": 1, "modes": [1]}
     ]
   },
   "carbon_dioxide": {
@@ -209,9 +209,9 @@
     "symmetry": "D∞h",
     "source": "Dinu et al., PCCP 22, 17932 (2020), Table 1, gas phase",
     "bands": [
-      {"label": "ν3", "description": "asym stretch", "freq_cm": 2349.9, "rating": null, "degeneracy": 1},
-      {"label": "ν1", "description": "sym stretch", "freq_cm": 1285.5, "rating": null, "degeneracy": 1, "note": "Fermi dyad with 2nu2 (1388.1)"},
-      {"label": "ν2", "description": "bend", "freq_cm": 668.2, "rating": null, "degeneracy": 2}
+      {"label": "ν3", "description": "asym stretch", "freq_cm": 2349.9, "rating": null, "degeneracy": 1, "modes": [4]},
+      {"label": "ν1", "description": "sym stretch", "freq_cm": 1285.5, "rating": null, "degeneracy": 1, "note": "Fermi dyad with 2nu2 (1388.1)", "modes": [3]},
+      {"label": "ν2", "description": "bend", "freq_cm": 668.2, "rating": null, "degeneracy": 2, "modes": [1, 2]}
     ]
   },
   "_added_2026-11-03": "acetic_acid, phosphine (Shimanouchi), nitric_acid (Jacox), formic_acid_trans and carbon_dioxide (gas-phase columns of the Dinu et al. VCI papers). Gas phase only. Not added: ethanol, SO2 (no vibrational-level data on the WebBook), H2O2 (gas-phase levels are tunnelling doublets). The old key formic_acid is kept for the legacy reports."
