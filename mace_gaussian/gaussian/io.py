@@ -16,6 +16,14 @@ DEFAULT_HELPER_SCRIPT = os.getenv(
     str(Path(__file__).parent.parent / "gm_helper.py"),  # Use relative path by default
 )
 
+# Route keywords of the ML (external) frequency job. ``nosymm`` since 2026-11-03: the B3LYP
+# twins run with nosymm (dft_baseline.BASELINE_KEYWORDS), and an exactly symmetric ML
+# geometry (ammonia, phosphine: C3v) otherwise got Gaussian's symmetric-top VPT2 while its
+# B3LYP reference got the asymmetric-top one (campaigns/2026/protocol/DEVIATIONS.md).
+# ML_FREQ_KEYWORD can be replaced, e.g. "freq=(anharm,step=200)" for a step-size test.
+ML_FREQ_KEYWORD = "freq(anharm)"
+ML_ROUTE_KEYWORDS = "nosymm"
+
 
 def parse_gaussian_input(infile: str) -> tuple[int, int, int, int, np.ndarray, list]:
     """
@@ -151,7 +159,7 @@ def ase_to_gjf(
 ):
     # Use default route with configured helper script path if none provided
     if route is None:
-        route = f'# freq (anharm)\n# external="{DEFAULT_HELPER_SCRIPT}"'
+        route = f'# {ML_FREQ_KEYWORD} {ML_ROUTE_KEYWORDS}\n# external="{DEFAULT_HELPER_SCRIPT}"'
 
     symbols = atoms.get_chemical_symbols()
     positions = atoms.get_positions()  # Angstrom by ASE convention
