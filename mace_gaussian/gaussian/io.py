@@ -16,6 +16,12 @@ DEFAULT_HELPER_SCRIPT = os.getenv(
     str(Path(__file__).parent.parent / "gm_helper.py"),  # Use relative path by default
 )
 
+# Frequency keyword of the ML (external) job. Replace it for a step-size test, e.g.
+# "freq=(anharm,step=200)" (step in 1e-4 Angstrom). The default gives exactly the campaign
+# route. No nosymm here: Gaussian's GVPT2 step aborts on nearly symmetric ML geometries
+# with nosymm (campaigns/2026/protocol/DEVIATIONS.md, 2026-11-03).
+ML_FREQ_KEYWORD = "freq (anharm)"
+
 
 def parse_gaussian_input(infile: str) -> tuple[int, int, int, int, np.ndarray, list]:
     """
@@ -151,7 +157,7 @@ def ase_to_gjf(
 ):
     # Use default route with configured helper script path if none provided
     if route is None:
-        route = f'# freq (anharm)\n# external="{DEFAULT_HELPER_SCRIPT}"'
+        route = f'# {ML_FREQ_KEYWORD}\n# external="{DEFAULT_HELPER_SCRIPT}"'
 
     symbols = atoms.get_chemical_symbols()
     positions = atoms.get_positions()  # Angstrom by ASE convention
