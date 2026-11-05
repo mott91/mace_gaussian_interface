@@ -1,0 +1,54 @@
+
+
+           ************************************************************
+           *        Program running with 8 parallel MPI-processes     *
+           *              working on a common directory               *
+           ************************************************************
+------------------------------------------------------------------------------
+                         ORCA SCF GRADIENT CALCULATION
+------------------------------------------------------------------------------
+
+Nuc. rep. gradient        (SHARK) ... done (  0.0 sec)
+HCore & Overlap gradient  (SHARK) ... done (  0.0 sec)
+Split-RIJ-J gradient      (SHARK) ... done (  0.3 sec)
+COSX-gradient                     ... done ( 10.7 sec)
+XC gradient                       ... done (  1.5 sec)
+NL correlation gradient           ... done (  0.8 sec)
+
+------------------
+CARTESIAN GRADIENT
+------------------
+
+   1   O   :    0.004368013    0.006448426   -0.000099100
+   2   O   :   -0.012240412   -0.010868913    0.000282071
+   3   C   :    0.001076116    0.000504900   -0.000024897
+   4   C   :    0.005174240    0.005320719   -0.000118080
+   5   H   :    0.002034817    0.000813075   -0.002140147
+   6   H   :    0.002131439    0.000812395    0.002039995
+   7   H   :    0.000466513   -0.002671798   -0.000011321
+   8   H   :   -0.003010726   -0.000358803    0.000071478
+
+Difference to translation invariance:
+           :   -0.0000000000    0.0000000000   -0.0000000000
+
+Difference to rotation invariance:
+           :   -0.0000003185    0.0000014521   -0.0000209089
+
+Norm of the Cartesian gradient     ...    0.0205066668
+RMS gradient                       ...    0.0041859058
+MAX gradient                       ...    0.0122404121
+
+-------
+TIMINGS
+-------
+
+Total SCF gradient time     ....       13.381 sec
+
+Densities                   ....       0.001 sec  (  0.0%)
+One electron gradient       ....       0.046 sec  (  0.3%)
+RI-J Coulomb gradient       ....       0.314 sec  (  2.3%)
+COSX gradient               ....      10.708 sec  ( 80.0%)
+XC gradient                 ....       1.480 sec  ( 11.1%)
+NL correlation gradient     ....       0.833 sec  (  6.2%)
+
+Maximum memory used throughout the entire SCFGRAD-calculation: 19.1 MB

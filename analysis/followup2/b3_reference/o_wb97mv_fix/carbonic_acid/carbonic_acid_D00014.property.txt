@@ -1,0 +1,74 @@
+*************************************************
+******************* ORCA 6.1.1 ******************
+*************************************************
+$Geometry
+   &GeometryIndex 1
+   &NAtoms [&Type "Integer"] 6
+   &NCorelessECP [&Type "Integer"] 0
+   &NGhostAtoms [&Type "Integer"] 0
+   &CartesianCoordinates [&Type "Coordinates", &Dim(6,4), &Units "Bohr"] 
+              O     -2.157111480608   -1.232436866083    0.288189384403
+              O     -0.192439086950    2.392041381689    0.304363028441
+              O      2.043547709989   -1.155743235661   -0.592662544949
+              C      0.088281376384   -0.103290779426   -0.052595114006
+              H     -1.864241269138   -3.018935314943    0.013175193093
+              H      1.465345077297    3.123553775322    0.040500825364
+$End
+$Calculation_Status
+   &GeometryIndex 1
+   &version [&Type "String"] "6.1.1"
+   &progName [&Type "String"] "LeanSCF"
+   &Status [&Type "String"] "NORMAL TERMINATION"
+$End
+$SCF_Energy
+   &GeometryIndex 1
+   &Method [&Type "String"] "SCF"
+   &totalEnergy [&Type "ArrayOfDoubles", &Dim (1,1)] "Total energy of each state"
+                                                         0
+
+0                                     -2.6505706916937038e+02
+   &Mult [&Type "ArrayOfIntegers", &Dim (1,1)] "Multiplicity of each state"
+                                                         0
+
+0                                                        1
+$End
+$DFT_Energy
+   &GeometryIndex 1
+   &nAlphaEl [&Type "Integer"] 16
+   &nBetaEl [&Type "Integer"] 16
+   &nTotalEl [&Type "Integer"] 32
+   &finalEn [&Type "Double"]      -2.6505706916937038e+02  "No Van der Waals correction"
+   &eExchange [&Type "Double"]       0.0000000000000000e+00
+   &eCorr [&Type "Double"]       0.0000000000000000e+00
+   &eXC [&Type "Double"]      -2.2973583538847748e+01
+   &eCNL [&Type "Double"]       1.2996704345905344e-01
+$End
+$SCF_Timings
+   &GeometryIndex 1
+   &TOTAL [&Type "Double"]       8.6161734000000010e+01
+   &PREP [&Type "Double"]       8.7222000000000036e-02
+   &FOCK [&Type "Double"]       7.7282288999999992e+01
+   &DENS [&Type "Double"]       3.7430000000000518e-03
+   &ETOT [&Type "Double"]       1.2920000000047338e-03
+   &TRAFO [&Type "Double"]       4.7899999999998499e-03
+   &DIIS [&Type "Double"]       5.5019999999998959e-03
+   &SOSCF [&Type "Double"]       2.2010000000022956e-02
+   &XC [&Type "Double"]       3.5002564999999983e+01
+   &FOCKSTART [&Type "Double"]       1.1719999999898340e-03
+   &INT_PREP [&Type "Double"]       1.2165569999999484e+00
+   &INT_PRESCREEN [&Type "Double"]       1.1461509999999802e+00
+   &INT_BF [&Type "Double"]       2.1740419999999915e+01
+   &INT_DENS [&Type "Double"]       4.4140830000001525e+00
+   &INT_DENSIO [&Type "Double"]       3.6130092994099972e+05
+   &INT_FUNC [&Type "Double"]       1.0886150000002210e+00
+   &INT_POT [&Type "Double"]       5.2231459999998409e+00
+   &INT_POTIO [&Type "Double"]       4.2271000000178915e-02
+   &INT_SUM [&Type "Double"]       1.9999999985031991e-06
+   &SPLITRIJ [&Type "Double"]       6.4267800000000863e-01
+   &COSX [&Type "Double"]       5.0396475000000002e+01
+$End
+$Single_Point_Data
+   &GeometryIndex 1
+   &FinalEnergy [&Type "Double"]      -2.6505706916937038e+02  "Final single point energy"
+   &Converged [&Type "Boolean"] true
+$End
