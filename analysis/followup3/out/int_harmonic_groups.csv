@@ -1,0 +1,6 @@
+"harmonic intensity, pooled over energy models: MAE / within 2x",POLAR-1,MDP,MACE4IR
+acids,6.7 / 93 % n632,9.8 / 88 % n632,13.8 / 85 % n632
+amino acid,13.2 / 98 % n80,16.2 / 95 % n80,23.1 / 92 % n80
+alcohols,7.4 / 81 % n580,6.4 / 85 % n580,7.2 / 82 % n580
+small molecules,22.2 / 83 % n141,27.9 / 83 % n141,33.3 / 86 % n141
+sugar,13.5 / 81 % n189,14.3 / 82 % n189,14.3 / 81 % n189

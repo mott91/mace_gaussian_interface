@@ -193,7 +193,8 @@ def assign_band_origins(
     ----------
     bands:
         Entries from ``band_origins.json``; ``degeneracy`` (default 1) is how many
-        DFT modes a band may take, ``modes`` (1-based) forces the assignment.
+        DFT modes a band may take, ``modes`` (1-based) forces the assignment, and a band
+        with ``exclude`` (the reason, as text) takes no mode at all.
     reference:
         {DFT mode index: reference frequency} used for nearest matching.
 
@@ -201,6 +202,7 @@ def assign_band_origins(
     -------
     {DFT mode index: band dict + ``assignment`` ("explicit" | "nearest")}
     """
+    bands = [b for b in bands if not b.get("exclude")]
     taken: dict[int, dict] = {}
     candidates: list[tuple[float, int, int]] = []  # (distance, band index, dft mode)
     for b_i, band in enumerate(bands):

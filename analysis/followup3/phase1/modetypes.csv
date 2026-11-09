@@ -1,0 +1,506 @@
+molecule,i,freq,kind
+1-butanol,1,110.509945,bend/tors
+1-butanol,2,116.076067,bend/tors
+1-butanol,3,185.544169,bend/tors
+1-butanol,4,251.103481,bend/tors
+1-butanol,5,275.411519,bend/tors
+1-butanol,6,394.538388,bend/tors
+1-butanol,7,438.884863,bend/tors
+1-butanol,8,750.309076,bend/tors
+1-butanol,9,818.763238,bend/tors
+1-butanol,10,908.941452,bend/tors
+1-butanol,11,959.38023,bend/tors
+1-butanol,12,1005.07962,C-C str
+1-butanol,13,1061.57066,C-C str
+1-butanol,14,1076.00898,C-O str
+1-butanol,15,1122.08751,C-C str
+1-butanol,16,1195.76525,bend/tors
+1-butanol,17,1249.16357,bend/tors
+1-butanol,18,1254.7458,bend/tors
+1-butanol,19,1320.37173,bend/tors
+1-butanol,20,1321.22394,bend/tors
+1-butanol,21,1330.22299,bend/tors
+1-butanol,22,1401.62267,bend/tors
+1-butanol,23,1427.98785,bend/tors
+1-butanol,24,1470.802,bend/tors
+1-butanol,25,1503.81148,bend/tors
+1-butanol,26,1511.65982,bend/tors
+1-butanol,27,1514.09992,bend/tors
+1-butanol,28,1524.49255,bend/tors
+1-butanol,29,1544.28282,bend/tors
+1-butanol,30,2965.06976,C-H str
+1-butanol,31,2991.66318,C-H str
+1-butanol,32,3020.38399,C-H str
+1-butanol,33,3036.77976,C-H str
+1-butanol,34,3040.91315,C-H str
+1-butanol,35,3048.56991,C-H str
+1-butanol,36,3083.72013,C-H str
+1-butanol,37,3108.38734,C-H str
+1-butanol,38,3112.14527,C-H str
+1-butanol,39,3823.00159,O-H str
+1-propanol,1,128.326883,bend/tors
+1-propanol,2,233.58088,bend/tors
+1-propanol,3,273.502047,bend/tors
+1-propanol,4,274.005826,bend/tors
+1-propanol,5,456.961566,bend/tors
+1-propanol,6,771.70493,bend/tors
+1-propanol,7,890.929485,bend/tors
+1-propanol,8,906.470635,bend/tors
+1-propanol,9,1043.58321,C-C str
+1-propanol,10,1069.56333,C-O str
+1-propanol,11,1107.02381,C-O str
+1-propanol,12,1193.22213,bend/tors
+1-propanol,13,1263.75873,bend/tors
+1-propanol,14,1272.17151,bend/tors
+1-propanol,15,1324.64847,bend/tors
+1-propanol,16,1356.93024,bend/tors
+1-propanol,17,1428.27643,bend/tors
+1-propanol,18,1470.70974,bend/tors
+1-propanol,19,1508.53443,bend/tors
+1-propanol,20,1515.23752,bend/tors
+1-propanol,21,1522.98319,bend/tors
+1-propanol,22,1543.96191,bend/tors
+1-propanol,23,2964.14413,C-H str
+1-propanol,24,2990.85365,C-H str
+1-propanol,25,3038.86009,C-H str
+1-propanol,26,3048.30457,C-H str
+1-propanol,27,3082.59286,C-H str
+1-propanol,28,3108.62244,C-H str
+1-propanol,29,3117.41009,C-H str
+1-propanol,30,3823.87875,O-H str
+acetic_acid,1,79.0482066,bend/tors
+acetic_acid,2,419.574943,bend/tors
+acetic_acid,3,543.265193,bend/tors
+acetic_acid,4,581.898688,bend/tors
+acetic_acid,5,682.978916,bend/tors
+acetic_acid,6,865.825568,C-C str
+acetic_acid,7,1002.28675,bend/tors
+acetic_acid,8,1069.88918,bend/tors
+acetic_acid,9,1217.12821,bend/tors
+acetic_acid,10,1355.72195,bend/tors
+acetic_acid,11,1422.44431,C-C str
+acetic_acid,12,1484.32766,bend/tors
+acetic_acid,13,1490.19895,bend/tors
+acetic_acid,14,1855.38244,C-O str
+acetic_acid,15,3067.77054,C-H str
+acetic_acid,16,3133.58492,C-H str
+acetic_acid,17,3185.55206,C-H str
+acetic_acid,18,3753.41104,O-H str
+ammonia,1,1089.36845,bend/tors
+ammonia,2,1693.91352,bend/tors
+ammonia,3,1693.91844,bend/tors
+ammonia,4,3461.39018,N-H str
+ammonia,5,3589.93487,N-H str
+ammonia,6,3589.9438,N-H str
+beta_glucose,1,71.9420282,bend/tors
+beta_glucose,2,105.668166,bend/tors
+beta_glucose,3,118.326726,bend/tors
+beta_glucose,4,151.330287,bend/tors
+beta_glucose,5,191.42717,bend/tors
+beta_glucose,6,222.477793,bend/tors
+beta_glucose,7,238.844246,bend/tors
+beta_glucose,8,268.722798,bend/tors
+beta_glucose,9,295.642506,bend/tors
+beta_glucose,10,320.488035,bend/tors
+beta_glucose,11,339.261649,bend/tors
+beta_glucose,12,361.370687,bend/tors
+beta_glucose,13,382.465944,bend/tors
+beta_glucose,14,401.45452,bend/tors
+beta_glucose,15,428.119455,bend/tors
+beta_glucose,16,437.397354,bend/tors
+beta_glucose,17,457.299665,bend/tors
+beta_glucose,18,466.862742,bend/tors
+beta_glucose,19,500.910684,bend/tors
+beta_glucose,20,565.805742,bend/tors
+beta_glucose,21,604.70272,bend/tors
+beta_glucose,22,638.684956,bend/tors
+beta_glucose,23,645.14113,bend/tors
+beta_glucose,24,893.30722,bend/tors
+beta_glucose,25,995.832782,C-C str
+beta_glucose,26,1019.07253,C-C str
+beta_glucose,27,1036.34121,C-C str
+beta_glucose,28,1056.66383,bend/tors
+beta_glucose,29,1069.08751,C-O str
+beta_glucose,30,1083.10281,C-O str
+beta_glucose,31,1111.4802,C-O str
+beta_glucose,32,1113.5639,C-C str
+beta_glucose,33,1134.17491,C-O str
+beta_glucose,34,1139.49983,C-O str
+beta_glucose,35,1153.63822,C-C str
+beta_glucose,36,1187.57374,C-O str
+beta_glucose,37,1211.47633,bend/tors
+beta_glucose,38,1231.84871,bend/tors
+beta_glucose,39,1237.21094,bend/tors
+beta_glucose,40,1251.39171,bend/tors
+beta_glucose,41,1282.51306,bend/tors
+beta_glucose,42,1301.95054,bend/tors
+beta_glucose,43,1344.16098,bend/tors
+beta_glucose,44,1356.29112,bend/tors
+beta_glucose,45,1381.05806,bend/tors
+beta_glucose,46,1384.07334,bend/tors
+beta_glucose,47,1399.00087,bend/tors
+beta_glucose,48,1405.46162,bend/tors
+beta_glucose,49,1427.57704,bend/tors
+beta_glucose,50,1437.23832,bend/tors
+beta_glucose,51,1444.6755,bend/tors
+beta_glucose,52,1445.68243,bend/tors
+beta_glucose,53,1462.49729,bend/tors
+beta_glucose,54,1515.99037,bend/tors
+beta_glucose,55,2922.46417,C-H str
+beta_glucose,56,2940.94236,C-H str
+beta_glucose,57,2956.42893,C-H str
+beta_glucose,58,2994.28464,C-H str
+beta_glucose,59,3017.24407,C-H str
+beta_glucose,60,3079.51841,C-H str
+beta_glucose,61,3114.86993,C-H str
+beta_glucose,62,3776.52396,O-H str
+beta_glucose,63,3783.36076,O-H str
+beta_glucose,64,3785.79978,O-H str
+beta_glucose,65,3788.0356,O-H str
+beta_glucose,66,3806.63269,O-H str
+butyric_acid,1,41.1406753,bend/tors
+butyric_acid,2,97.4815626,bend/tors
+butyric_acid,3,177.925092,bend/tors
+butyric_acid,4,246.739534,bend/tors
+butyric_acid,5,343.91677,bend/tors
+butyric_acid,6,448.391119,bend/tors
+butyric_acid,7,521.070818,bend/tors
+butyric_acid,8,633.359747,bend/tors
+butyric_acid,9,671.606945,bend/tors
+butyric_acid,10,753.581864,bend/tors
+butyric_acid,11,868.408673,C-C str
+butyric_acid,12,889.890668,bend/tors
+butyric_acid,13,934.244109,bend/tors
+butyric_acid,14,1053.28827,C-C str
+butyric_acid,15,1117.02897,C-C str
+butyric_acid,16,1128.07702,bend/tors
+butyric_acid,17,1174.04321,C-O str
+butyric_acid,18,1255.59877,bend/tors
+butyric_acid,19,1293.99419,bend/tors
+butyric_acid,20,1328.93539,bend/tors
+butyric_acid,21,1367.49377,bend/tors
+butyric_acid,22,1429.63976,bend/tors
+butyric_acid,23,1431.50901,C-C str
+butyric_acid,24,1473.24599,bend/tors
+butyric_acid,25,1503.93916,bend/tors
+butyric_acid,26,1514.86849,bend/tors
+butyric_acid,27,1522.57987,bend/tors
+butyric_acid,28,1844.57988,C-O str
+butyric_acid,29,3037.51191,C-H str
+butyric_acid,30,3041.26633,C-H str
+butyric_acid,31,3060.38828,C-H str
+butyric_acid,32,3069.83613,C-H str
+butyric_acid,33,3089.98097,C-H str
+butyric_acid,34,3112.56809,C-H str
+butyric_acid,35,3116.61384,C-H str
+butyric_acid,36,3751.72434,O-H str
+caproic_acid,1,32.2331446,bend/tors
+caproic_acid,2,57.70102,bend/tors
+caproic_acid,3,96.8604756,bend/tors
+caproic_acid,4,114.331042,bend/tors
+caproic_acid,5,137.084929,bend/tors
+caproic_acid,6,225.386961,bend/tors
+caproic_acid,7,249.576161,bend/tors
+caproic_acid,8,304.371319,bend/tors
+caproic_acid,9,404.062196,bend/tors
+caproic_acid,10,506.821571,bend/tors
+caproic_acid,11,519.939129,bend/tors
+caproic_acid,12,633.709785,bend/tors
+caproic_acid,13,671.609442,bend/tors
+caproic_acid,14,735.041113,bend/tors
+caproic_acid,15,767.837086,bend/tors
+caproic_acid,16,858.236247,bend/tors
+caproic_acid,17,870.470464,C-C str
+caproic_acid,18,919.985841,bend/tors
+caproic_acid,19,978.715463,bend/tors
+caproic_acid,20,1019.99168,C-C str
+caproic_acid,21,1061.80528,C-C str
+caproic_acid,22,1069.58498,C-C str
+caproic_acid,23,1127.05188,C-C str
+caproic_acid,24,1138.34331,bend/tors
+caproic_acid,25,1167.60672,C-O str
+caproic_acid,26,1231.3389,bend/tors
+caproic_acid,27,1266.81208,bend/tors
+caproic_acid,28,1295.6284,bend/tors
+caproic_acid,29,1317.97784,bend/tors
+caproic_acid,30,1332.3554,bend/tors
+caproic_acid,31,1339.18309,bend/tors
+caproic_acid,32,1370.787,bend/tors
+caproic_acid,33,1413.38726,bend/tors
+caproic_acid,34,1427.04521,bend/tors
+caproic_acid,35,1432.54501,C-C str
+caproic_acid,36,1473.00504,bend/tors
+caproic_acid,37,1499.38928,bend/tors
+caproic_acid,38,1503.05398,bend/tors
+caproic_acid,39,1514.31422,bend/tors
+caproic_acid,40,1515.3267,bend/tors
+caproic_acid,41,1526.26746,bend/tors
+caproic_acid,42,1844.50606,C-O str
+caproic_acid,43,3008.76475,C-H str
+caproic_acid,44,3025.7554,C-H str
+caproic_acid,45,3036.34148,C-H str
+caproic_acid,46,3037.26922,C-H str
+caproic_acid,47,3040.76311,C-H str
+caproic_acid,48,3052.20537,C-H str
+caproic_acid,49,3061.34141,C-H str
+caproic_acid,50,3070.72848,C-H str
+caproic_acid,51,3096.03157,C-H str
+caproic_acid,52,3105.46716,C-H str
+caproic_acid,53,3111.70646,C-H str
+caproic_acid,54,3751.74603,O-H str
+carbon_dioxide,1,640.027764,bend/tors
+carbon_dioxide,2,640.027764,bend/tors
+carbon_dioxide,3,1372.01982,C-O str
+carbon_dioxide,4,2436.27775,C-O str
+carbonic_acid,1,531.480239,bend/tors
+carbonic_acid,2,544.382794,bend/tors
+carbonic_acid,3,599.329989,bend/tors
+carbonic_acid,4,608.028411,bend/tors
+carbonic_acid,5,788.031757,bend/tors
+carbonic_acid,6,988.70078,C-O str
+carbonic_acid,7,1166.48831,bend/tors
+carbonic_acid,8,1300.61709,bend/tors
+carbonic_acid,9,1491.57869,C-O str
+carbonic_acid,10,1866.52007,C-O str
+carbonic_acid,11,3809.37001,O-H str
+carbonic_acid,12,3812.36956,O-H str
+ethanol,1,249.459985,bend/tors
+ethanol,2,293.499879,bend/tors
+ethanol,3,416.507949,bend/tors
+ethanol,4,824.939654,bend/tors
+ethanol,5,908.556893,bend/tors
+ethanol,6,1037.05237,C-C str
+ethanol,7,1121.41455,C-O str
+ethanol,8,1188.89174,bend/tors
+ethanol,9,1279.48777,bend/tors
+ethanol,10,1303.58243,bend/tors
+ethanol,11,1413.85058,bend/tors
+ethanol,12,1470.30553,bend/tors
+ethanol,13,1497.77271,bend/tors
+ethanol,14,1516.5988,bend/tors
+ethanol,15,1546.48667,bend/tors
+ethanol,16,2974.03824,C-H str
+ethanol,17,2999.89457,C-H str
+ethanol,18,3052.45891,C-H str
+ethanol,19,3127.6635,C-H str
+ethanol,20,3132.33364,C-H str
+ethanol,21,3822.38865,O-H str
+formic_acid_cis,1,528.709861,bend/tors
+formic_acid_cis,2,658.909607,bend/tors
+formic_acid_cis,3,1042.48994,bend/tors
+formic_acid_cis,4,1130.51334,bend/tors
+formic_acid_cis,5,1284.20217,bend/tors
+formic_acid_cis,6,1443.50545,bend/tors
+formic_acid_cis,7,1898.81266,C-O str
+formic_acid_cis,8,2965.84067,C-H str
+formic_acid_cis,9,3790.62414,O-H str
+formic_acid_trans,1,626.44159,bend/tors
+formic_acid_trans,2,703.065377,bend/tors
+formic_acid_trans,3,1055.69491,bend/tors
+formic_acid_trans,4,1142.63044,C-O str
+formic_acid_trans,5,1320.24025,bend/tors
+formic_acid_trans,6,1416.67268,bend/tors
+formic_acid_trans,7,1851.92844,C-O str
+formic_acid_trans,8,3070.04168,C-H str
+formic_acid_trans,9,3732.37289,O-H str
+glycine,1,63.1991358,bend/tors
+glycine,2,231.335574,bend/tors
+glycine,3,259.591566,bend/tors
+glycine,4,463.530693,bend/tors
+glycine,5,509.632644,bend/tors
+glycine,6,636.930466,bend/tors
+glycine,7,671.775706,bend/tors
+glycine,8,830.055553,C-C str
+glycine,9,926.073535,bend/tors
+glycine,10,944.164074,bend/tors
+glycine,11,1140.46719,C-N str
+glycine,12,1175.64666,bend/tors
+glycine,13,1184.89729,bend/tors
+glycine,14,1319.64906,bend/tors
+glycine,15,1392.66133,bend/tors
+glycine,16,1413.1594,C-C str
+glycine,17,1470.04967,bend/tors
+glycine,18,1687.47445,bend/tors
+glycine,19,1846.52814,C-O str
+glycine,20,3053.55033,C-H str
+glycine,21,3091.00941,C-H str
+glycine,22,3497.75774,N-H str
+glycine,23,3572.4985,N-H str
+glycine,24,3747.3741,O-H str
+hydrogen_peroxide,1,342.600215,bend/tors
+hydrogen_peroxide,2,955.112885,O-O str
+hydrogen_peroxide,3,1311.43363,bend/tors
+hydrogen_peroxide,4,1447.56333,bend/tors
+hydrogen_peroxide,5,3761.62447,O-H str
+hydrogen_peroxide,6,3762.69259,O-H str
+isopropanol,1,223.82787,bend/tors
+isopropanol,2,268.554786,bend/tors
+isopropanol,3,313.142724,bend/tors
+isopropanol,4,360.514653,bend/tors
+isopropanol,5,414.212768,bend/tors
+isopropanol,6,482.011968,bend/tors
+isopropanol,7,825.979685,C-C str
+isopropanol,8,931.94521,bend/tors
+isopropanol,9,951.836977,bend/tors
+isopropanol,10,972.730425,C-O str
+isopropanol,11,1089.46657,bend/tors
+isopropanol,12,1169.15886,bend/tors
+isopropanol,13,1193.6774,bend/tors
+isopropanol,14,1285.56839,bend/tors
+isopropanol,15,1385.65944,bend/tors
+isopropanol,16,1403.09315,bend/tors
+isopropanol,17,1424.69957,bend/tors
+isopropanol,18,1441.84755,C-C str
+isopropanol,19,1496.26817,bend/tors
+isopropanol,20,1502.17761,bend/tors
+isopropanol,21,1512.15437,bend/tors
+isopropanol,22,1524.47267,bend/tors
+isopropanol,23,2964.63937,C-H str
+isopropanol,24,3033.62549,C-H str
+isopropanol,25,3050.4865,C-H str
+isopropanol,26,3101.16328,C-H str
+isopropanol,27,3118.96589,C-H str
+isopropanol,28,3126.59629,C-H str
+isopropanol,29,3133.04066,C-H str
+isopropanol,30,3809.99296,O-H str
+methanol,1,337.441557,bend/tors
+methanol,2,1061.63824,C-O str
+methanol,3,1094.77329,C-O str
+methanol,4,1179.03037,bend/tors
+methanol,5,1385.38743,bend/tors
+methanol,6,1499.62491,bend/tors
+methanol,7,1508.59862,bend/tors
+methanol,8,1526.57118,bend/tors
+methanol,9,2988.35794,C-H str
+methanol,10,3033.99174,C-H str
+methanol,11,3121.94358,C-H str
+methanol,12,3825.2767,O-H str
+nitric_acid,1,500.114655,bend/tors
+nitric_acid,2,580.913757,bend/tors
+nitric_acid,3,652.277561,N-O str
+nitric_acid,4,769.298738,bend/tors
+nitric_acid,5,917.350686,N-O str
+nitric_acid,6,1332.56069,bend/tors
+nitric_acid,7,1371.65234,N-O str
+nitric_acid,8,1799.14059,N-O str
+nitric_acid,9,3724.07062,O-H str
+phosphine,1,1036.73854,bend/tors
+phosphine,2,1155.06722,bend/tors
+phosphine,3,1155.11885,bend/tors
+phosphine,4,2393.99275,P-H str
+phosphine,5,2408.69074,P-H str
+phosphine,6,2408.71958,P-H str
+propionic_acid,1,50.1583098,bend/tors
+propionic_acid,2,205.737402,bend/tors
+propionic_acid,3,250.423273,bend/tors
+propionic_acid,4,465.360233,bend/tors
+propionic_acid,5,517.761804,bend/tors
+propionic_acid,6,612.521195,bend/tors
+propionic_acid,7,670.421078,bend/tors
+propionic_acid,8,816.304082,bend/tors
+propionic_acid,9,819.318224,C-C str
+propionic_acid,10,1013.27175,C-C str
+propionic_acid,11,1089.63692,C-C str
+propionic_acid,12,1112.83255,bend/tors
+propionic_acid,13,1178.47353,C-O str
+propionic_acid,14,1284.87536,bend/tors
+propionic_acid,15,1316.22903,bend/tors
+propionic_acid,16,1418.76495,C-C str
+propionic_acid,17,1433.83981,bend/tors
+propionic_acid,18,1474.7754,bend/tors
+propionic_acid,19,1508.47594,bend/tors
+propionic_acid,20,1515.48411,bend/tors
+propionic_acid,21,1846.67252,C-O str
+propionic_acid,22,3051.57577,C-H str
+propionic_acid,23,3062.45098,C-H str
+propionic_acid,24,3082.90131,C-H str
+propionic_acid,25,3135.64303,C-H str
+propionic_acid,26,3141.62495,C-H str
+propionic_acid,27,3753.045,O-H str
+sulfur_dioxide,1,502.746048,bend/tors
+sulfur_dioxide,2,1140.9827,O-S str
+sulfur_dioxide,3,1338.15453,O-S str
+tert-butanol,1,207.29195,bend/tors
+tert-butanol,2,261.632936,bend/tors
+tert-butanol,3,271.968584,bend/tors
+tert-butanol,4,316.001911,bend/tors
+tert-butanol,5,338.097824,bend/tors
+tert-butanol,6,340.829777,bend/tors
+tert-butanol,7,413.473442,bend/tors
+tert-butanol,8,459.938117,bend/tors
+tert-butanol,9,464.899019,bend/tors
+tert-butanol,10,749.112675,C-C str
+tert-butanol,11,911.971286,bend/tors
+tert-butanol,12,925.769852,bend/tors
+tert-butanol,13,938.842137,C-O str
+tert-butanol,14,962.171658,bend/tors
+tert-butanol,15,1031.62314,bend/tors
+tert-butanol,16,1049.93805,bend/tors
+tert-butanol,17,1165.85947,bend/tors
+tert-butanol,18,1248.21149,C-O str
+tert-butanol,19,1264.81561,C-C str
+tert-butanol,20,1373.05881,bend/tors
+tert-butanol,21,1410.83921,bend/tors
+tert-butanol,22,1416.9807,C-C str
+tert-butanol,23,1437.90793,bend/tors
+tert-butanol,24,1487.1112,bend/tors
+tert-butanol,25,1496.38441,bend/tors
+tert-butanol,26,1499.93939,bend/tors
+tert-butanol,27,1511.73113,bend/tors
+tert-butanol,28,1519.51856,bend/tors
+tert-butanol,29,1531.19093,bend/tors
+tert-butanol,30,3030.87549,C-H str
+tert-butanol,31,3036.19677,C-H str
+tert-butanol,32,3052.5566,C-H str
+tert-butanol,33,3097.61047,C-H str
+tert-butanol,34,3104.67533,C-H str
+tert-butanol,35,3123.64241,C-H str
+tert-butanol,36,3124.24129,C-H str
+tert-butanol,37,3131.20585,C-H str
+tert-butanol,38,3131.91454,C-H str
+tert-butanol,39,3797.70464,O-H str
+valeric_acid,1,34.2590976,bend/tors
+valeric_acid,2,81.5490812,bend/tors
+valeric_acid,3,125.141984,bend/tors
+valeric_acid,4,126.237696,bend/tors
+valeric_acid,5,248.225724,bend/tors
+valeric_acid,6,299.448068,bend/tors
+valeric_acid,7,332.550183,bend/tors
+valeric_acid,8,500.065722,bend/tors
+valeric_acid,9,520.08545,bend/tors
+valeric_acid,10,629.487336,bend/tors
+valeric_acid,11,671.935103,bend/tors
+valeric_acid,12,738.111585,bend/tors
+valeric_acid,13,809.358336,bend/tors
+valeric_acid,14,877.50431,C-C str
+valeric_acid,15,916.849558,bend/tors
+valeric_acid,16,942.725549,bend/tors
+valeric_acid,17,1034.32961,C-C str
+valeric_acid,18,1073.81226,C-C str
+valeric_acid,19,1119.14296,C-O str
+valeric_acid,20,1135.21041,bend/tors
+valeric_acid,21,1170.63786,C-O str
+valeric_acid,22,1240.34282,bend/tors
+valeric_acid,23,1278.69946,bend/tors
+valeric_acid,24,1316.77218,bend/tors
+valeric_acid,25,1334.43252,bend/tors
+valeric_acid,26,1337.98593,bend/tors
+valeric_acid,27,1398.69395,bend/tors
+valeric_acid,28,1426.88924,bend/tors
+valeric_acid,29,1434.05675,C-C str
+valeric_acid,30,1473.01233,bend/tors
+valeric_acid,31,1500.4278,bend/tors
+valeric_acid,32,1510.19551,bend/tors
+valeric_acid,33,1514.06472,bend/tors
+valeric_acid,34,1525.15862,bend/tors
+valeric_acid,35,1844.59477,C-O str
+valeric_acid,36,3019.65552,C-H str
+valeric_acid,37,3038.70939,C-H str
+valeric_acid,38,3040.86079,C-H str
+valeric_acid,39,3048.46772,C-H str
+valeric_acid,40,3051.76827,C-H str
+valeric_acid,41,3069.69527,C-H str
+valeric_acid,42,3094.36931,C-H str
+valeric_acid,43,3109.17302,C-H str
+valeric_acid,44,3113.6589,C-H str
+valeric_acid,45,3751.89675,O-H str

@@ -67,15 +67,15 @@
       {"label": "ν1", "symmetry": "a'", "description": "OH stretch", "freq_cm": 3681, "rating": "A", "degeneracy": 1},
       {"label": "ν2", "symmetry": "a'", "description": "CH3 d-stretch", "freq_cm": 3000, "rating": "C", "degeneracy": 1},
       {"label": "ν3", "symmetry": "a'", "description": "CH3 s-stretch", "freq_cm": 2844, "rating": "A", "degeneracy": 1},
-      {"label": "ν4", "symmetry": "a'", "description": "CH3 d-deform", "freq_cm": 1477, "rating": "B", "degeneracy": 1},
+      {"label": "ν4", "symmetry": "a'", "description": "CH3 d-deform", "freq_cm": 1477, "rating": "B", "degeneracy": 1, "modes": [8], "note": "a', mode 8; checked against the source symmetry species and mode description (follow-up 3, 2026-11-09)"},
       {"label": "ν5", "symmetry": "a'", "description": "CH3 s-deform", "freq_cm": 1455, "rating": "A", "degeneracy": 1},
       {"label": "ν6", "symmetry": "a'", "description": "OH bend", "freq_cm": 1345, "rating": "B", "degeneracy": 1},
       {"label": "ν7", "symmetry": "a'", "description": "CH3 rock", "freq_cm": 1060, "rating": "D", "degeneracy": 1},
       {"label": "ν8", "symmetry": "a'", "description": "CO stretch", "freq_cm": 1033, "rating": "A", "degeneracy": 1},
       {"label": "ν9", "symmetry": "a''", "description": "CH3 d-stretch", "freq_cm": 2960, "rating": "C", "degeneracy": 1},
-      {"label": "ν10", "symmetry": "a''", "description": "CH3 d-deform", "freq_cm": 1477, "rating": "B", "degeneracy": 1},
-      {"label": "ν11", "symmetry": "a''", "description": "CH3 rock", "freq_cm": 1165, "rating": "C", "degeneracy": 1},
-      {"label": "ν12", "symmetry": "a''", "description": "torsion", "freq_cm": 295, "rating": "A", "degeneracy": 1, "note": "large-amplitude internal rotation; VPT2 not expected to be reliable"}
+      {"label": "ν10", "symmetry": "a''", "description": "CH3 d-deform", "freq_cm": 1477, "rating": "B", "degeneracy": 1, "modes": [7], "note": "a'', mode 7; checked against the source symmetry species and mode description (follow-up 3, 2026-11-09)"},
+      {"label": "ν11", "symmetry": "a''", "description": "CH3 rock", "freq_cm": 1165, "rating": "C", "degeneracy": 1, "exclude": "gas-phase value missing in the source; 1165 is the liquid value"},
+      {"label": "ν12", "symmetry": "a''", "description": "torsion", "freq_cm": 295, "rating": "A", "degeneracy": 1, "note": "large-amplitude internal rotation; VPT2 not expected to be reliable", "exclude": "NIST: value undefined because of large coupling between internal and overall rotation"}
     ]
   },
   "formic_acid": {
@@ -146,19 +146,19 @@
       {"label": "ν2", "symmetry": "a'", "description": "CH3 d-str", "freq_cm": 3051.0, "rating": "B", "degeneracy": 1},
       {"label": "ν3", "symmetry": "a'", "description": "CH3 s-str", "freq_cm": 2944.0, "rating": "B", "degeneracy": 1},
       {"label": "ν4", "symmetry": "a'", "description": "C=O str", "freq_cm": 1788.0, "rating": "B", "degeneracy": 1},
-      {"label": "ν5", "symmetry": "a'", "description": "CH3 d-deform", "freq_cm": 1430.0, "rating": "C", "degeneracy": 1, "note": "Shimanouchi SF(ν14): shared value with the partner band"},
+      {"label": "ν5", "symmetry": "a'", "description": "CH3 d-deform", "freq_cm": 1430.0, "rating": "C", "degeneracy": 1, "note": "a', mode 12; Shimanouchi SF(ν14): shared value with the partner band; checked against the source symmetry species and mode description (follow-up 3, 2026-11-09)", "modes": [12]},
       {"label": "ν6", "symmetry": "a'", "description": "CH3 s-deform", "freq_cm": 1382.0, "rating": "B", "degeneracy": 1},
       {"label": "ν7", "symmetry": "a'", "description": "OH bend", "freq_cm": 1264.0, "rating": "B", "degeneracy": 1},
       {"label": "ν8", "symmetry": "a'", "description": "C-O str", "freq_cm": 1182.0, "rating": "B", "degeneracy": 1},
       {"label": "ν9", "symmetry": "a'", "description": "CH3 rock", "freq_cm": 989.0, "rating": "B", "degeneracy": 1},
       {"label": "ν10", "symmetry": "a'", "description": "CC str", "freq_cm": 847.0, "rating": "B", "degeneracy": 1},
-      {"label": "ν11", "symmetry": "a'", "description": "OCO deform", "freq_cm": 657.0, "rating": "B", "degeneracy": 1},
-      {"label": "ν12", "symmetry": "a'", "description": "CCO deform", "freq_cm": 581.0, "rating": "B", "degeneracy": 1},
+      {"label": "ν11", "symmetry": "a'", "description": "OCO deform", "freq_cm": 657.0, "rating": "B", "degeneracy": 1, "exclude": "a' band without an a' partner: the nearby B3LYP a' modes are 420 (no band) and 582 cm-1 (ν12)"},
+      {"label": "ν12", "symmetry": "a'", "description": "CCO deform", "freq_cm": 581.0, "rating": "B", "degeneracy": 1, "modes": [4], "note": "a', mode 4; checked against the source symmetry species and mode description (follow-up 3, 2026-11-09)"},
       {"label": "ν13", "symmetry": "a", "description": "CH3 d-str", "freq_cm": 2996.0, "rating": "B", "degeneracy": 1},
-      {"label": "ν14", "symmetry": "a", "description": "CH3 d-deform", "freq_cm": 1430.0, "rating": "C", "degeneracy": 1, "note": "Shimanouchi SF(ν5): shared value with the partner band"},
+      {"label": "ν14", "symmetry": "a", "description": "CH3 d-deform", "freq_cm": 1430.0, "rating": "C", "degeneracy": 1, "note": "a'', mode 13; Shimanouchi SF(ν5): shared value with the partner band; checked against the source symmetry species and mode description (follow-up 3, 2026-11-09)", "modes": [13]},
       {"label": "ν15", "symmetry": "a", "description": "CH3 rock", "freq_cm": 1048.0, "rating": "B", "degeneracy": 1},
-      {"label": "ν16", "symmetry": "a", "description": "C=O op-bend", "freq_cm": 642.0, "rating": "B", "degeneracy": 1},
-      {"label": "ν17", "symmetry": "a", "description": "C-O torsion", "freq_cm": 534.0, "rating": "B", "degeneracy": 1}
+      {"label": "ν16", "symmetry": "a", "description": "C=O op-bend", "freq_cm": 642.0, "rating": "B", "degeneracy": 1, "modes": [5], "note": "a'', mode 5; checked against the source symmetry species and mode description (follow-up 3, 2026-11-09)"},
+      {"label": "ν17", "symmetry": "a", "description": "C-O torsion", "freq_cm": 534.0, "rating": "B", "degeneracy": 1, "modes": [3], "note": "a'', mode 3; checked against the source symmetry species and mode description (follow-up 3, 2026-11-09)"}
     ]
   },
   "phosphine": {
@@ -166,9 +166,9 @@
     "symmetry": "C3v",
     "source": "Shimanouchi 1972 via NIST WebBook (gas phase)",
     "bands": [
-      {"label": "ν1", "symmetry": "a1", "description": "Sym str", "freq_cm": 2323.0, "rating": "A", "degeneracy": 1},
+      {"label": "ν1", "symmetry": "a1", "description": "Sym str", "freq_cm": 2323.0, "rating": "A", "degeneracy": 1, "modes": [4], "note": "a1 stretch, mode 4; checked against the source symmetry species and mode description (follow-up 3, 2026-11-09)"},
       {"label": "ν2", "symmetry": "a1", "description": "Sym deform", "freq_cm": 992.0, "rating": "B", "degeneracy": 1},
-      {"label": "ν3", "symmetry": "e", "description": "Deg str", "freq_cm": 2328.0, "rating": "B", "degeneracy": 2},
+      {"label": "ν3", "symmetry": "e", "description": "Deg str", "freq_cm": 2328.0, "rating": "B", "degeneracy": 2, "modes": [5, 6], "note": "e stretch, modes 5+6; checked against the source symmetry species and mode description (follow-up 3, 2026-11-09)"},
       {"label": "ν4", "symmetry": "e", "description": "Deg deform", "freq_cm": 1118.0, "rating": "A", "degeneracy": 2}
     ]
   },

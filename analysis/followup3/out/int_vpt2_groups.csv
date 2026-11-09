@@ -1,0 +1,6 @@
+"vpt2 intensity, pooled over energy models: MAE / within 2x",POLAR-1,MDP,MACE4IR
+acids,10.7 / 76 % n624,13.0 / 72 % n624,24.1 / 60 % n624
+amino acid,15.3 / 80 % n80,15.1 / 86 % n80,17.6 / 80 % n80
+alcohols,10.6 / 67 % n552,11.5 / 67 % n552,19.8 / 60 % n552
+small molecules,20.5 / 86 % n117,29.6 / 84 % n117,39.1 / 88 % n117
+sugar,20.6 / 50 % n189,21.4 / 53 % n189,20.2 / 58 % n189
