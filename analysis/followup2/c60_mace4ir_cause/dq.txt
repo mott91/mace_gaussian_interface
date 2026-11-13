@@ -1,0 +1,11 @@
+cutoff 5.0 interactions 2
+== C60: max |dq_i/dr_j| 0.591 e/A; sum_i |dq_i/dr_j| per moved atom: median 11.26, max 11.26 e/A
+   pairs at 0-1.6 A: n   240, mean |dq_i/dr_j| 0.498, max 0.591
+   pairs at 1.6-3.0 A: n   480, mean |dq_i/dr_j| 0.353, max 0.452
+   pairs at 3.0-5.0 A: n  1080, mean |dq_i/dr_j| 0.208, max 0.307
+   pairs at 5.0-8.0 A: n  1800, mean |dq_i/dr_j| 0.090, max 0.169
+== glycine: max |dq_i/dr_j| 0.626 e/A; sum_i |dq_i/dr_j| per moved atom: median 0.28, max 1.66 e/A
+   pairs at 0-1.6 A: n    28, mean |dq_i/dr_j| 0.128, max 0.626
+   pairs at 1.6-3.0 A: n    50, mean |dq_i/dr_j| 0.028, max 0.159
+   pairs at 3.0-5.0 A: n    22, mean |dq_i/dr_j| 0.013, max 0.041
+   pairs at 5.0-8.0 A: n     0, mean |dq_i/dr_j| 0.000, max 0.000

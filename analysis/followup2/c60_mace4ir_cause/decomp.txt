@@ -1,0 +1,16 @@
+== C60 (B3LYP geometry): n=60, radius max 3.55 A
+   q: min -0.0002 max +0.0001 sum -8.88e-16 e
+   check: |split - model APT| max 7.7e-14, mu_err 1.1e-16, sum dq 4.4e-14
+   charge: max |elem|    0.000 e   Frobenius     0.00
+   cflux : max |elem|   11.649 e   Frobenius   109.21
+   dflux : max |elem|    0.427 e   Frobenius     4.18
+   total : max |elem|   11.479 e   Frobenius   107.61
+   B3LYP : max |elem|    0.156 e   Frobenius     1.49
+== glycine (B3LYP geometry): n=10, radius max 2.70 A
+   q: min -0.1641 max +0.1154 sum -5.00e-16 e
+   check: |split - model APT| max 1.9e-15, mu_err 8.3e-17, sum dq 5.8e-16
+   charge: max |elem|    0.164 e   Frobenius     0.51
+   cflux : max |elem|    0.928 e   Frobenius     1.84
+   dflux : max |elem|    0.719 e   Frobenius     1.52
+   total : max |elem|    1.681 e   Frobenius     3.47
+   B3LYP : max |elem|    1.402 e   Frobenius     3.08
