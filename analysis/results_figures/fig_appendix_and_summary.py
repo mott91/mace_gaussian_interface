@@ -21,15 +21,17 @@ import fig_spectra_cost_c60 as base
 mtf, style, ROOT, CAMP, ELAB, E = base.mtf, base.style, base.ROOT, base.CAMP, base.ELAB, base.E
 STATS = ROOT / "analysis" / "followup3" / "out"
 KEY = {"mace_anicc": "ANI-cc", "mace_omol": "OMOL", "mace_off": "OFF", "mace_polar": "POLAR"}
-# overlap matrices follow the harmonic MAE (Table 4.1); the spectra the fixed order (base.SPECTRA_ORDER)
-OVERLAP_ORDER = ["mace_anicc", "mace_omol", "mace_polar", "mace_off"]
+# overlap matrices: the fixed chapter order, as the spectra on the same Appendix E page
+# (decided 2026-11-13; kept separate from base.SPECTRA_ORDER on purpose)
+OVERLAP_ORDER = ["mace_anicc", "mace_omol", "mace_off", "mace_polar"]
 
 
 def gallery(out: Path) -> None:
     style.MODEL_LABEL.update(ELAB)
     mtf.ANALYSIS, mtf.COMPARISON, mtf.OUT = CAMP / "analysis_results", CAMP / "comparison_results", out
     mtf.DIPOLE_PREF[:] = ["mace_polar1", "mace_mdp", "mace_ml"]
-    mtf.MODEL_ORDER[:] = base.SPECTRA_BOTTOM_UP  # spectra: fixed order from the top
+    mtf.MODEL_ORDER[:] = base.SPECTRA_ORDER  # spectra: fixed order from the bottom up, above B3LYP
+    mtf.BAND_LINES = base.experiment_lines()
     mols = sorted(p.name for p in (CAMP / "analysis_results").iterdir() if (p / "report_data.json").exists())
     for mol in mols:
         mtf.fig_stacked_spectra(mol)

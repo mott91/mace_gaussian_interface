@@ -25,10 +25,23 @@ import mace_gaussian.analysis.thesis_style as style  # noqa: E402
 CAMP = ROOT / "campaigns" / "2026"
 ELAB = {"mace_anicc": "MACE-ANICC", "mace_omol": "MACE-OMOL-0", "mace_off": "MACE-OFF23", "mace_polar": "MACE-POLAR-1"}
 E = list(ELAB)
-# stacked spectra: fixed chapter order from the top (ANICC, OMOL-0, OFF23, POLAR-1, then B3LYP and
-# experiment); fig_stacked_spectra draws its MODEL_ORDER from the bottom up, hence reversed
+# stacked spectra, from the bottom up: experiment, B3LYP (VPT2), then the fixed chapter order, so that
+# MACE-ANICC sits directly above the reference (decided 2026-11-13); fig_stacked_spectra draws its
+# MODEL_ORDER from the bottom up above B3LYP
 SPECTRA_ORDER = ["mace_anicc", "mace_omol", "mace_off", "mace_polar"]
-SPECTRA_BOTTOM_UP = SPECTRA_ORDER[::-1]
+EXPERIMENT_BANDS = ROOT / "analysis" / "followup3" / "out" / "experiment_bands.csv"
+
+
+def experiment_lines() -> dict[str, list[tuple[str, float]]]:
+    """Dotted lines = exactly the bands of the experiment comparison (thesis_stats.section_experiment,
+    'with NH3/PH3' set): excluded bands and CO2 nu1 (Fermi dyad, dropped there as co2_nu1) get none;
+    a degenerate band is one row."""
+    import pandas as pd
+
+    e = pd.read_csv(EXPERIMENT_BANDS)
+    e = e[~e.assignment.astype(str).str.startswith("excluded")]
+    e = e[~((e.molecule == "carbon_dioxide") & (e.label == "ν1"))]
+    return {m: list(zip(g.label, g.exp.astype(float))) for m, g in e.groupby("molecule")}
 ACIDS = ["formic_acid_trans", "acetic_acid", "propionic_acid", "butyric_acid", "valeric_acid", "caproic_acid"]
 
 
@@ -47,7 +60,8 @@ def spectra(out: Path) -> None:
     style.MODEL_LABEL.update(ELAB)
     mtf.ANALYSIS, mtf.COMPARISON, mtf.OUT = CAMP / "analysis_results", CAMP / "comparison_results", out
     mtf.DIPOLE_PREF[:] = ["mace_polar1", "mace_mdp", "mace_ml"]
-    mtf.MODEL_ORDER[:] = SPECTRA_BOTTOM_UP
+    mtf.MODEL_ORDER[:] = SPECTRA_ORDER
+    mtf.BAND_LINES = experiment_lines()
     for mol in ("caproic_acid", "methanol", "glycine", "acetic_acid"):
         reps = mtf.representative_runs(mtf.load_report(mol))
         print(mol, {k: v["name"] for k, v in reps.items()})

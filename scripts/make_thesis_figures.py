@@ -135,14 +135,25 @@ def exp_on_grid(report: dict, grid, smooth_fwhm: float | None):
     return y / peak if peak > 0 else y
 
 
-def band_labels(report: dict) -> list[tuple[str, float]]:
+# Optional {molecule: [(label, freq_cm)]} of experimental band origins for the dotted lines of the
+# stacked spectra; when set (results chapter: the bands of the experiment comparison), it replaces
+# the band origins of the report's master table. A molecule missing from it gets no lines.
+BAND_LINES: dict[str, list[tuple[str, float]]] | None = None
+
+
+def band_labels(report: dict, mol: str | None = None) -> list[tuple[str, float]]:
     seen: dict[str, float] = {}
-    for r in report.get("master_table", {}).get("rows", []):
-        e = r.get("experimental")
-        if e and e.get("freq_cm") is not None:
-            seen.setdefault(e["label"], float(e["freq_cm"]))
+    if BAND_LINES is not None:
+        for label, f in BAND_LINES.get(mol, []):
+            seen.setdefault(label, float(f))
+    else:
+        for r in report.get("master_table", {}).get("rows", []):
+            e = r.get("experimental")
+            if e and e.get("freq_cm") is not None:
+                seen.setdefault(e["label"], float(e["freq_cm"]))
     out: list[tuple[str, float]] = []
-    for label, f in sorted(seen.items(), key=lambda kv: kv[1]):
+    num = lambda lab: int(lab[1:]) if lab[1:].isdigit() else 0  # noqa: E731
+    for label, f in sorted(seen.items(), key=lambda kv: (kv[1], num(kv[0]))):
         if out and abs(f - out[-1][1]) <= 8:
             out[-1] = (out[-1][0] + "/" + label, (out[-1][1] + f) / 2)
         else:
@@ -281,17 +292,31 @@ def fig_stacked_spectra(mol: str, smooth_small: bool = True):
         trace_label(tex(MODEL_LABEL[m]), model_color(m))
         baselines.append(level)
     top = level + 1.05
-    prev_f, tier = None, 0
-    labels = [(lab, f) for lab, f in band_labels(report) if grid[0] <= f <= grid[-1]]
-    for label, f in labels:
-        # neighbours closer than ~90 cm^-1 alternate between two label heights
+    labels = [(lab, f) for lab, f in band_labels(report, mol) if grid[0] <= f <= grid[-1]]
+    # placement: neighbours closer than ~90 cm^-1 alternate between two label heights; a pair closer
+    # than CLOSE_CM would have the upper label's line run through the lower label, so such a pair
+    # stays on one height with each label set beside its own line (left one left, right one right)
+    CLOSE_CM, SIDE_PT = 30.0, 4.5
+    place, k, prev_f, tier = [], 0, None, 0
+    while k < len(labels):
+        lab, f = labels[k]
+        nxt = labels[k + 1] if k + 1 < len(labels) else None
+        after = labels[k + 2] if k + 2 < len(labels) else None
+        if nxt and nxt[1] - f < CLOSE_CM and not (after and after[1] - nxt[1] < CLOSE_CM):
+            # ascending frequency: f is the right-hand line on the reversed axis
+            place += [(lab, f, 0, SIDE_PT), (nxt[0], nxt[1], 0, -SIDE_PT)]
+            prev_f, tier, k = nxt[1], 0, k + 2
+            continue
         tier = (tier + 1) % 2 if prev_f is not None and abs(f - prev_f) < 90 else 0
-        prev_f = f
+        place.append((lab, f, tier, 0.0))
+        prev_f, k = f, k + 1
+    for label, f, tier, dx in place:
         ax.vlines(f, -0.05, top + 0.55 * tier, color=INK_MUTED, lw=0.6, ls=(0, (1, 2)), zorder=0)
-        ax.text(
-            f,
-            top + 0.04 + 0.55 * tier,
+        ax.annotate(
             nu_tex(label),
+            xy=(f, top + 0.04 + 0.55 * tier),
+            xytext=(dx, 0),
+            textcoords="offset points",
             fontsize=ANNOT_FS - 1,
             color=INK_MUTED,
             ha="center",
