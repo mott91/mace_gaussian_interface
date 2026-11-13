@@ -1,4 +1,4 @@
-# ruff: noqa: RUF001, RUF002  (Greek nu in labels is intentional; long f-strings)
+
 #!/usr/bin/env python3
 """Generate every thesis figure into thesis/figures/ plus a review gallery.
 
@@ -27,12 +27,12 @@ import numpy as np
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
-import matplotlib.pyplot as plt  # noqa: E402
-from matplotlib.lines import Line2D  # noqa: E402
-from matplotlib.ticker import ScalarFormatter  # noqa: E402
+import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
+from matplotlib.ticker import ScalarFormatter
 
-from mace_gaussian.analysis.master_table import split_method  # noqa: E402
-from mace_gaussian.analysis.thesis_style import (  # noqa: E402
+from mace_gaussian.analysis.master_table import split_method
+from mace_gaussian.analysis.thesis_style import (
     ANNOT_FS,
     DIPOLE_LABEL,
     INK,
@@ -1356,7 +1356,7 @@ def fig_overlap_matrices(mol: str = "methane"):
             side.set_edgecolor(INK)
             side.set_linewidth(0.8)
     axes[0].set_ylabel(r"B3LYP harmonic mode / cm$^{-1}$")
-    axes[len(axes) // 2].set_xlabel(r"ML harmonic mode / cm$^{-1}$")
+    axes[len(axes) // 2].set_xlabel(r"MACE harmonic mode / cm$^{-1}$")
     cb = fig.colorbar(im, ax=list(axes), pad=0.02, fraction=0.03)
     cb.set_label("overlap")
     cb.outline.set_visible(False)
@@ -1365,7 +1365,7 @@ def fig_overlap_matrices(mol: str = "methane"):
         f"overlap_matrices_{mol}",
         1.0,
         figwidth(1.0) / n + 0.8,
-        f"{mol}: mass-weighted eigenvector overlap between every ML and B3LYP harmonic normal "
+        f"{mol}: mass-weighted eigenvector overlap between every MACE and B3LYP harmonic normal "
         "mode. Degenerate sets appear as blocks; the Hungarian assignment picks one mode per "
         "row and column, the subspace overlap of a block is what is compared for degenerate modes.",
         "5.3 degeneracy",
