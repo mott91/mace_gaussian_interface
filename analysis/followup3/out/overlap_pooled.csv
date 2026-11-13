@@ -1,0 +1,5 @@
+overlap of assigned pairs,n,median,share >= 0.9 / %,n < 0.9,n < 0.7,min,worst
+ANI-cc,493,0.998,93.7,31,2,0.565,"beta_glucose mode 16, 437 cm-1"
+OMOL,500,0.998,94.0,30,2,0.614,"beta_glucose mode 18, 467 cm-1"
+OFF,500,0.998,93.4,33,3,0.506,"beta_glucose mode 16, 437 cm-1"
+POLAR,434,0.999,97.9,9,0,0.716,"caproic_acid mode 34, 1427 cm-1"

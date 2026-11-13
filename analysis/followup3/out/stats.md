@@ -617,6 +617,16 @@ CO2 bend overtones/combinations removed: 4 per energy model.
 | 2700-3200 | 27.1 | 31.2 | 28.4 | 31.4 | 25.9 |
 | > 3200 | 52.5 | 41.2 | 60.8 | 42.7 | 29.9 |
 
+## scaled_harmonic_regions_allfit
+
+| scaled (all-fit): MAE (median) n | ANI-cc | OMOL | OFF | POLAR | B3LYP |
+|---|---|---|---|---|---|
+| < 500 | 24.0 (13.5) n82 | 25.2 (12.9) n82 | 25.1 (13.9) n82 | 23.8 (12.7) n64 | 23.8 (13.7) n82 |
+| 500-1600 | 23.5 (23.3) n283 | 28.6 (29.8) n286 | 29.9 (30.5) n286 | 29.2 (30.9) n250 | 20.3 (20.4) n286 |
+| 1600-2700 | 67.7 (67.8) n12 | 51.5 (52.1) n12 | 62.3 (57.1) n12 | 49.6 (50.5) n12 | 37.6 (40.6) n12 |
+| 2700-3200 | 27.2 (20.4) n86 | 31.3 (26.1) n86 | 28.5 (21.0) n86 | 31.6 (28.0) n79 | 25.9 (20.1) n86 |
+| > 3200 | 52.2 (54.1) n26 | 41.0 (42.3) n26 | 60.3 (60.0) n26 | 42.6 (43.2) n21 | 29.9 (32.4) n26 |
+
 ## experiment_headline
 
 | experiment, headline | n | molecules | MAE | median | bias | max | worst |
@@ -672,3 +682,76 @@ bands: 58 listed, 55 assigned ({'nearest': 34, 'explicit': 21, 'excluded': 3}); 
 | OMOL | 23 | 15.3 | 14.3 | -4.0 | 35.7 |
 | OFF | 23 | 13.7 | 8.9 | -6.2 | 64.9 |
 | POLAR | 23 | 15.8 | 13.7 | -4.1 | 36.7 |
+
+## overlap_pooled
+
+| overlap of assigned pairs | n | median | share >= 0.9 / % | n < 0.9 | n < 0.7 | min | worst |
+|---|---|---|---|---|---|---|---|
+| ANI-cc | 493 | 0.998 | 93.7 | 31 | 2 | 0.565 | beta_glucose mode 16, 437 cm-1 |
+| OMOL | 500 | 0.998 | 94.0 | 30 | 2 | 0.614 | beta_glucose mode 18, 467 cm-1 |
+| OFF | 500 | 0.998 | 93.4 | 33 | 3 | 0.506 | beta_glucose mode 16, 437 cm-1 |
+| POLAR | 434 | 0.999 | 97.9 | 9 | 0 | 0.716 | caproic_acid mode 34, 1427 cm-1 |
+
+## overlap_beta_glucose
+
+| beta-glucose | pairs | < 0.9 | < 0.7 | min | B3LYP mode | B3LYP / cm-1 | MACE / cm-1 | type |
+|---|---|---|---|---|---|---|---|---|
+| ANI-cc | 66 | 13 | 2 | 0.565 | 16 | 437.4 | 421.1 | internal rotation |
+| OMOL | 66 | 19 | 2 | 0.614 | 18 | 466.9 | 413.6 | internal rotation |
+| OFF | 66 | 19 | 3 | 0.506 | 16 | 437.4 | 414.7 | internal rotation |
+
+## overlap_beta_glucose_below_0.9
+
+| beta-glucose, any model < 0.9 | ANI-cc | OMOL | OFF |
+|---|---|---|---|
+| mode 10, 320.5 cm-1, internal rotation | 0.950 | 0.893 | 0.885 |
+| mode 11, 339.3 cm-1, internal rotation | 0.707 | 0.825 | 0.754 |
+| mode 12, 361.4 cm-1, internal rotation | 0.742 | 0.812 | 0.779 |
+| mode 14, 401.5 cm-1, internal rotation | 0.890 | 0.813 | 0.871 |
+| mode 16, 437.4 cm-1, internal rotation | 0.565 | 0.661 | 0.506 |
+| mode 17, 457.3 cm-1, internal rotation | 0.777 | 0.758 | 0.732 |
+| mode 18, 466.9 cm-1, internal rotation | 0.713 | 0.614 | 0.714 |
+| mode 22, 638.7 cm-1 | 0.928 | 0.983 | 0.745 |
+| mode 23, 645.1 cm-1 | 0.927 | 0.981 | 0.746 |
+| mode 28, 1056.7 cm-1 | 0.947 | 0.888 | 0.895 |
+| mode 31, 1111.5 cm-1 | 0.859 | 0.908 | 0.881 |
+| mode 32, 1113.6 cm-1 | 0.818 | 0.898 | 0.855 |
+| mode 34, 1139.5 cm-1 | 0.945 | 0.888 | 0.953 |
+| mode 45, 1381.1 cm-1 | 0.671 | 0.796 | 0.802 |
+| mode 46, 1384.1 cm-1 | 0.709 | 0.881 | 0.914 |
+| mode 47, 1399.0 cm-1 | 0.900 | 0.743 | 0.706 |
+| mode 48, 1405.5 cm-1 | 0.944 | 0.756 | 0.774 |
+| mode 49, 1427.6 cm-1 | 0.942 | 0.880 | 0.809 |
+| mode 50, 1437.2 cm-1 | 0.925 | 0.854 | 0.781 |
+| mode 51, 1444.7 cm-1 | 0.934 | 0.928 | 0.660 |
+| mode 52, 1445.7 cm-1 | 0.954 | 0.898 | 0.643 |
+| mode 56, 2940.9 cm-1 | 0.758 | 0.760 | 0.906 |
+| mode 57, 2956.4 cm-1 | 0.764 | 0.766 | 0.922 |
+
+## overlap_below_0.9_molecules
+
+| pairs < 0.9 | ANI-cc | OMOL | OFF | POLAR |
+|---|---|---|---|---|
+| beta_glucose | 13 | 19 | 19 | 0 |
+| caproic_acid | 7 | 2 | 5 | 2 |
+| valeric_acid | 3 | 3 | 4 | 3 |
+| butyric_acid | 2 | 2 | 2 | 2 |
+| propionic_acid | 2 | 2 | 2 | 0 |
+| carbon_dioxide | 1 | 1 | 1 | 0 |
+| ammonia | 0 | 0 | 0 | 1 |
+| 1-butanol | 3 | 0 | 0 | 0 |
+| phosphine | 0 | 0 | 0 | 1 |
+| tert-butanol | 0 | 1 | 0 | 0 |
+| total | 31 | 30 | 33 | 9 |
+| bands | 493 | 500 | 500 | 434 |
+
+## overlap_below_0.9_regions
+
+| < 0.9 / bands (of which beta-glucose) | ANI-cc | OMOL | OFF | POLAR |
+|---|---|---|---|---|
+| < 500 internal rotations | 6 / 35 (6) | 8 / 35 (7) | 7 / 35 (7) | 0 / 22 (0) |
+| < 500 other | 0 / 47 (0) | 0 / 47 (0) | 0 / 47 (0) | 0 / 42 (0) |
+| 500-1600 | 15 / 284 (5) | 19 / 289 (10) | 21 / 289 (12) | 6 / 253 (0) |
+| 1600-2700 | 0 / 13 (0) | 0 / 15 (0) | 0 / 15 (0) | 1 / 15 (0) |
+| 2700-3200 | 10 / 86 (2) | 3 / 86 (2) | 5 / 86 (0) | 1 / 79 (0) |
+| > 3200 | 0 / 28 (0) | 0 / 28 (0) | 0 / 28 (0) | 1 / 23 (0) |

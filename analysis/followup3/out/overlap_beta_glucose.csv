@@ -1,0 +1,4 @@
+beta-glucose,pairs,< 0.9,< 0.7,min,B3LYP mode,B3LYP / cm-1,MACE / cm-1,type
+ANI-cc,66,13,2,0.565,16,437.4,421.1,internal rotation
+OMOL,66,19,2,0.614,18,466.9,413.6,internal rotation
+OFF,66,19,3,0.506,16,437.4,414.7,internal rotation

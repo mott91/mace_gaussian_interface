@@ -20,11 +20,14 @@ Rules (Methods 3.6, thesis repo latex/chapters/03-methods.tex, as of 2026-11-09)
 - pooled over each model's own molecules, each band once; groups of Table 3.3; per molecule; and the
   common set of all models as a check;
 - per-molecule win counts (molecules in which the row model has the lower MAE than the column model);
-- scaled harmonic: lambda = sum(w nu) / sum(w^2) against B3LYP VPT2 fundamentals, leave-one-molecule-out
-  (the text) and fitted on all molecules (for comparison); B3LYP harmonic the same way;
+- scaled harmonic: lambda = sum(w nu) / sum(w^2) against B3LYP VPT2 fundamentals, one factor per model
+  fitted on all molecules without NH3/PH3 (the text, decided 2026-11-11) and leave-one-molecule-out
+  (check only); B3LYP harmonic the same way;
 - experiment: band_origins.json (explicit modes where given, else nearest B3LYP VPT2 within 200 cm-1,
   excluded bands dropped), B3LYP harmonic scaled by 0.9614, headline without NH3/PH3 and CO2 nu1;
 - VCI: the character-paired table of scripts/vci_comparison.py, clean rows only.
+- mode overlap: the overlap column of the band table (runs with MACE4IR dipoles, degenerate pairs
+  averaged, NH3/PH3 kept), as in the "Normal Modes" paragraph of 4.1; pairs below 0.9 and 0.7.
 
 Outputs (next to this script, in out/): stats.md with every table, and one CSV per table.
 Run:  python analysis/followup3/thesis_stats.py   (environment with pandas; reads campaign data only)
@@ -431,6 +434,14 @@ def section_scaling(fund):
         for r, x in e.groupby("region"):
             reg.setdefault(r, {})[name] = f"{x.err.abs().mean():.1f}"
     table("scaled_harmonic_regions", pd.DataFrame(reg).T.reindex([lab for *_, lab in REGIONS]).rename_axis("scaled (LOO) MAE"))
+    # by region, one factor fitted on all molecules (the numbers the text quotes)
+    reg_all = {}
+    for name, g, col in sources:
+        e = g.assign(err=lams[name] * g[col] - g.dft_anharmonic)
+        for r, x in e.groupby("region"):
+            reg_all.setdefault(r, {})[name] = f"{x.err.abs().mean():.1f} ({x.err.abs().median():.1f}) n{len(x)}"
+    table("scaled_harmonic_regions_allfit",
+          pd.DataFrame(reg_all).T.reindex([lab for *_, lab in REGIONS]).rename_axis("scaled (all-fit): MAE (median) n"))
 
 
 def section_experiment(fund):
@@ -512,6 +523,54 @@ def section_vci():
     table("vci_harmonic", pd.DataFrame(t).T.rename_axis("harmonic vs CCSD(T)-F12 harmonic"))
 
 
+def section_overlap(fund):
+    """Mode overlap of the assigned pairs (Section 3.6, "Normal Modes" in 4.1)."""
+    f = fund[fund.dipole_model == "mace_ml"].copy()
+    f["type"] = np.where(f.rotor, "internal rotation", "")
+    pooled = {}
+    for m in E_MODELS:
+        g = f[f.energy_model == m]
+        w = g.loc[g.overlap.idxmin()]
+        pooled[LAB[m]] = {"n": len(g), "median": f"{g.overlap.median():.3f}",
+                          "share >= 0.9 / %": f"{(g.overlap >= 0.9).mean() * 100:.1f}",
+                          "n < 0.9": int((g.overlap < 0.9).sum()), "n < 0.7": int((g.overlap < 0.7).sum()),
+                          "min": f"{w.overlap:.3f}", "worst": f"{w.molecule} {w.band}"}  # fmt: skip
+    table("overlap_pooled", pd.DataFrame(pooled).T.rename_axis("overlap of assigned pairs"))
+
+    bg = f[f.molecule == "beta_glucose"]
+    rows = {}
+    for m in E_MODELS:
+        g = bg[bg.energy_model == m]
+        if not len(g):
+            continue
+        w = g.loc[g.overlap.idxmin()]
+        rows[LAB[m]] = {"pairs": len(g), "< 0.9": int((g.overlap < 0.9).sum()), "< 0.7": int((g.overlap < 0.7).sum()),
+                        "min": f"{w.overlap:.3f}", "B3LYP mode": int(w.i), "B3LYP / cm-1": f"{w.dft_harmonic:.1f}",
+                        "MACE / cm-1": f"{w.ml_harmonic:.1f}", "type": w.type or "–"}  # fmt: skip
+    table("overlap_beta_glucose", pd.DataFrame(rows).T.rename_axis("beta-glucose"))
+    low = bg[bg.overlap < 0.9].i.unique()
+    w = bg[bg.i.isin(low)].pivot_table(index=["i", "dft_harmonic", "type"], columns="energy_model", values="overlap")
+    w = w[[m for m in E_MODELS if m in w.columns]].rename(columns=LAB).map(lambda v: f"{v:.3f}")
+    w.index = [f"mode {i}, {fr:.1f} cm-1" + (f", {t}" if t else "") for i, fr, t in w.index]
+    table("overlap_beta_glucose_below_0.9", w.rename_axis("beta-glucose, any model < 0.9"))
+
+    lo = f[f.overlap < 0.9]
+    mol = lo.groupby(["molecule", "energy_model"]).size().unstack().reindex(columns=E_MODELS).fillna(0).astype(int)
+    mol = mol.rename(columns=LAB).sort_values("OFF", ascending=False)
+    mol.loc["total"] = mol.sum()
+    mol.loc["bands"] = [len(f[f.energy_model == m]) for m in E_MODELS]
+    table("overlap_below_0.9_molecules", mol.rename_axis("pairs < 0.9"))
+    reg = {}
+    for (r, rot), g in f.groupby(["region", "rotor"]):
+        lab = r + (" internal rotations" if rot else " other" if r == "< 500" else "")
+        for m in E_MODELS:
+            x = g[g.energy_model == m]
+            k, kb = int((x.overlap < 0.9).sum()), int(((x.overlap < 0.9) & (x.molecule == "beta_glucose")).sum())
+            reg.setdefault(lab, {})[LAB[m]] = f"{k} / {len(x)} ({kb})"
+    order = ["< 500 internal rotations", "< 500 other"] + [lab for *_, lab in REGIONS[1:]]
+    table("overlap_below_0.9_regions", pd.DataFrame(reg).T.reindex(order).rename_axis("< 0.9 / bands (of which beta-glucose)"))
+
+
 def main():
     OUT.mkdir(exist_ok=True)
     bands, chi, fund, harm, rotors = load()
@@ -522,6 +581,7 @@ def main():
     section_scaling(fund)
     section_experiment(fund)
     section_vci()
+    section_overlap(fund)
     text = ["# Follow-up 3 statistics (generated by thesis_stats.py)", "",
             f"Rotor labels (hand-checked): {len(rotors)} X-H internal rotations below 500 cm-1.", ""]  # fmt: skip
     for name, df in TABLES:
