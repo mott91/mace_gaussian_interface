@@ -1,4 +1,4 @@
-"""Stacked spectra (methanol, glycine, acetic acid), cost scaling and the C60 spectrum for the results chapter.
+"""Stacked spectra (caproic acid = opening figure of Chapter 4, methanol, glycine, acetic acid), cost scaling and the C60 spectrum for the results chapter.
 
 The stacked spectra reuse fig_stacked_spectra of scripts/make_thesis_figures.py on the 2026 campaign,
 with the model names of the thesis text and MACE-POLAR-1 as the dipole model.
@@ -25,6 +25,10 @@ import mace_gaussian.analysis.thesis_style as style  # noqa: E402
 CAMP = ROOT / "campaigns" / "2026"
 ELAB = {"mace_anicc": "MACE-ANICC", "mace_omol": "MACE-OMOL-0", "mace_off": "MACE-OFF23", "mace_polar": "MACE-POLAR-1"}
 E = list(ELAB)
+# stacked spectra: fixed chapter order from the top (ANICC, OMOL-0, OFF23, POLAR-1, then B3LYP and
+# experiment); fig_stacked_spectra draws its MODEL_ORDER from the bottom up, hence reversed
+SPECTRA_ORDER = ["mace_anicc", "mace_omol", "mace_off", "mace_polar"]
+SPECTRA_BOTTOM_UP = SPECTRA_ORDER[::-1]
 ACIDS = ["formic_acid_trans", "acetic_acid", "propionic_acid", "butyric_acid", "valeric_acid", "caproic_acid"]
 
 
@@ -43,8 +47,8 @@ def spectra(out: Path) -> None:
     style.MODEL_LABEL.update(ELAB)
     mtf.ANALYSIS, mtf.COMPARISON, mtf.OUT = CAMP / "analysis_results", CAMP / "comparison_results", out
     mtf.DIPOLE_PREF[:] = ["mace_polar1", "mace_mdp", "mace_ml"]
-    mtf.MODEL_ORDER[:] = ["mace_omol", "mace_off", "mace_anicc", "mace_polar"]
-    for mol in ("methanol", "glycine", "acetic_acid"):
+    mtf.MODEL_ORDER[:] = SPECTRA_BOTTOM_UP
+    for mol in ("caproic_acid", "methanol", "glycine", "acetic_acid"):
         reps = mtf.representative_runs(mtf.load_report(mol))
         print(mol, {k: v["name"] for k, v in reps.items()})
         mtf.fig_stacked_spectra(mol)

@@ -246,7 +246,8 @@ def fig_stacked_spectra(mol: str, smooth_small: bool = True):
         ml_traces.append((m, y, peak / dft_peak if dft_peak else 1.0))
     offset = 1.1 * max([1.0, *(r for _m, _y, r in ml_traces)])
     n_traces = len(models) + 1 + (1 if exp is not None else 0)
-    fig, ax = plt.subplots(figsize=(figwidth(1.0), 0.42 * n_traces + 1.1))
+    height = 0.42 * n_traces + 1.1
+    fig, ax = plt.subplots(figsize=(figwidth(1.0), height))
     clean_axes(ax, grid=False)
     level = 0.0
     baselines: list[float] = []
@@ -281,9 +282,8 @@ def fig_stacked_spectra(mol: str, smooth_small: bool = True):
         baselines.append(level)
     top = level + 1.05
     prev_f, tier = None, 0
-    for label, f in band_labels(report):
-        if not (grid[0] <= f <= grid[-1]):
-            continue
+    labels = [(lab, f) for lab, f in band_labels(report) if grid[0] <= f <= grid[-1]]
+    for label, f in labels:
         # neighbours closer than ~90 cm^-1 alternate between two label heights
         tier = (tier + 1) % 2 if prev_f is not None and abs(f - prev_f) < 90 else 0
         prev_f = f
@@ -299,19 +299,27 @@ def fig_stacked_spectra(mol: str, smooth_small: bool = True):
             rotation=90,
         )
     ax.set_xlim(4000, 400)
-    ax.set_ylim(-0.05, top + 1.3)
+    head = 1.3 if labels else 0.15  # room for the band-origin labels, if there are any
+    ax.set_ylim(-0.05, top + head)
     # y axis stays: one tick per trace baseline, the first one scaled 0 to 1
     ax.set_yticks(baselines)
     ax.set_yticklabels(["0"] + [""] * (len(baselines) - 1))
     ax.set_ylabel(r"absorbance (DFT peak $=1$)")
     ax.set_xlabel(r"wavenumber $\tilde{\nu}$ / cm$^{-1}$")
     fig.tight_layout()
+    if not labels:
+        # without labels, cut the unused headroom from the figure height so that one unit of
+        # absorbance keeps the same height in inches as in the labelled figures
+        axh = ax.get_position().height * height
+        height -= axh * (1 - (top + head + 0.05) / (top + 1.35))
+        fig.set_figheight(height)
+        fig.tight_layout()
     fig.subplots_adjust(right=0.80)
     save(fig, OUT, f"spectra_stacked_{mol}")
     register(
         f"spectra_stacked_{mol}",
         1.0,
-        0.42 * n_traces + 1.1,
+        height,
         f"{mol}: VPT2 spectra of the five energy models (MACE4IR dipoles) stacked above the "
         "B3LYP reference and the NIST gas-phase spectrum. All calculated traces share one scale "
         "(B3LYP peak = 1), so relative band strengths are comparable. The experimental trace is "
