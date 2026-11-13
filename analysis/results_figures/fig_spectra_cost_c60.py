@@ -20,7 +20,7 @@ spec = importlib.util.spec_from_file_location("make_thesis_figures", ROOT / "scr
 mtf = importlib.util.module_from_spec(spec)
 sys.modules["make_thesis_figures"] = mtf
 spec.loader.exec_module(mtf)
-import mace_gaussian.analysis.thesis_style as style
+import mace_gaussian.analysis.thesis_style as style  # noqa: E402
 
 CAMP = ROOT / "campaigns" / "2026"
 ELAB = {"mace_anicc": "MACE-ANICC", "mace_omol": "MACE-OMOL-0", "mace_off": "MACE-OFF23", "mace_polar": "MACE-POLAR-1"}
