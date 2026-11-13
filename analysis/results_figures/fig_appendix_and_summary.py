@@ -21,6 +21,8 @@ import fig_spectra_cost_c60 as base
 mtf, style, ROOT, CAMP, ELAB, E = base.mtf, base.style, base.ROOT, base.CAMP, base.ELAB, base.E
 STATS = ROOT / "analysis" / "followup3" / "out"
 KEY = {"mace_anicc": "ANI-cc", "mace_omol": "OMOL", "mace_off": "OFF", "mace_polar": "POLAR"}
+# overlap matrices follow the harmonic MAE (Table 4.1); the spectra keep MODEL_ORDER below
+OVERLAP_ORDER = ["mace_anicc", "mace_omol", "mace_polar", "mace_off"]
 
 
 def gallery(out: Path) -> None:
@@ -31,7 +33,7 @@ def gallery(out: Path) -> None:
     mols = sorted(p.name for p in (CAMP / "analysis_results").iterdir() if (p / "report_data.json").exists())
     for mol in mols:
         mtf.fig_stacked_spectra(mol)
-        mtf.fig_overlap_matrices(mol)
+        mtf.fig_overlap_matrices(mol, OVERLAP_ORDER)
         plt.close("all")
     made = sorted(p.stem for p in out.glob("*.pdf"))
     print(len(mols), "molecules;", sum(m.startswith("spectra") for m in made), "spectra,", sum(m.startswith("overlap") for m in made), "overlap figures")

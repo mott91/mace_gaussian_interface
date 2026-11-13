@@ -57,6 +57,7 @@ DIPOLE_PREF = ["mace_ml", "mace_polar1", "mace_mdp", "espaloma"]
 FWHM = 10.0  # cm^-1, Lorentzian, as in the report
 
 FIGURES: list[dict] = []  # gallery entries
+GRID_LINE = "#c4c4c4"  # region lines in the overlap matrices
 
 
 def register(name: str, width_frac: float, height_in: float, caption: str, section: str):
@@ -1304,7 +1305,27 @@ def fig_central_vs_experiment(mols: list[str]):
     )
 
 
-def fig_overlap_matrices(mol: str = "methane"):
+REGION_LIMITS = (500, 1600, 2700, 3200)  # cm-1, the five spectral regions of Section 3.6
+OVERLAP_TICKS = "modes"  # "modes": frequencies of every k-th mode; "limits": ticks at the region lines
+OVERLAP_LINES_MIN_MODES = 7  # no region lines for the small molecules (3-6 modes): they only look like cell borders
+
+
+def _region_lines(freqs, n_max):
+    """{position: [limits]} of the lines between the last mode below and the first above a limit.
+
+    Positions are in cell units (modes sorted by frequency); limits that fall between the same two
+    modes share one line. Limits below the first or above the last mode give no line."""
+    out: dict[float, list[int]] = {}
+    for lim in REGION_LIMITS:
+        k = int(np.sum(np.asarray(freqs) < lim))
+        if 0 < k < n_max:
+            out.setdefault(k - 0.5, []).append(lim)
+    return out
+
+
+def fig_overlap_matrices(mol: str = "methane", order: list[str] | None = None):
+    from matplotlib.colors import LinearSegmentedColormap
+
     from mace_gaussian.analysis.mode_matching import (
         align_modes_to_reference,
         create_alignment_matrix,
@@ -1319,13 +1340,15 @@ def fig_overlap_matrices(mol: str = "methane"):
     modes_dft, freqs_dft, coords_dft, _, _ = extract_mode_data_from_checkpoint(
         str(dft_fchk), force_harmonic=True
     )
+    assert np.all(np.diff(freqs_dft) >= 0), "B3LYP modes not sorted by frequency"
     panels = []
-    for m in MODEL_ORDER:
+    for m in order or MODEL_ORDER:
         f = base / f"{m}_mace_ml" / "gaussian_freq.fchk"
         if f.exists():
             modes_ml, freqs_ml, coords_ml, _, _ = extract_mode_data_from_checkpoint(
                 str(f), force_harmonic=True
             )
+            assert np.all(np.diff(freqs_ml) >= 0), f"{m} modes not sorted by frequency"
             # ML and B3LYP runs sit in different orientations; rotate the ML modes into
             # the B3LYP frame first (as the reports do), or the overlaps are meaningless
             modes_ml, _ = align_modes_to_reference(modes_ml, coords_ml, coords_dft)
@@ -1333,41 +1356,79 @@ def fig_overlap_matrices(mol: str = "methane"):
     if not panels:
         return
     n = len(panels)
-    fig, axes = plt.subplots(1, n, figsize=(figwidth(1.0), figwidth(1.0) / n + 0.8), sharey=True)
-    axes = np.atleast_1d(axes)
-    from matplotlib.colors import LinearSegmentedColormap
+    nmodes = len(freqs_dft)
+    lines = nmodes >= OVERLAP_LINES_MIN_MODES
+    tick_fs = 8.0  # minimum size at \textwidth
 
-    cmap = LinearSegmentedColormap.from_list("ov", ["#ffffff", SERIES[0]])
-    for ax, (m, mat, freqs_ml) in zip(axes, panels):
-        # rows = B3LYP modes (shared by every panel), columns = this model's own modes
-        im = ax.imshow(mat.T, cmap=cmap, vmin=0, vmax=1, aspect="equal", origin="lower")
-        ax.set_title(tex(MODEL_LABEL[m]), fontsize=ANNOT_FS, color=model_color(m))
-        # label every k-th mode only (about 10 per axis), or the labels overlap
-        step = max(1, int(np.ceil(max(mat.shape) / 10)))
-        ax.set_xticks(range(0, mat.shape[0], step))
-        ax.set_xticklabels(
-            [f"{f:.0f}" for f in freqs_ml[::step]], rotation=90, fontsize=ANNOT_FS - 2.5
-        )
-        ax.set_yticks(range(0, mat.shape[1], step))
-        ax.set_yticklabels([f"{f:.0f}" for f in freqs_dft[::step]], fontsize=ANNOT_FS - 2.5)
-        ax.tick_params(length=0)
-        for side in ax.spines.values():
-            side.set_visible(True)
-            side.set_edgecolor(INK)
-            side.set_linewidth(0.8)
-    axes[0].set_ylabel(r"B3LYP harmonic mode / cm$^{-1}$")
-    axes[len(axes) // 2].set_xlabel(r"MACE harmonic mode / cm$^{-1}$")
-    cb = fig.colorbar(im, ax=list(axes), pad=0.02, fraction=0.03)
-    cb.set_label("overlap")
-    cb.outline.set_visible(False)
+    # fixed geometry in inches: one row of square panels over the full width, a horizontal
+    # colour bar under each panel, below the shared x label
+    W = figwidth(1.0)
+    left, right, gap = 0.70, 0.04, 0.14
+    side = (W - left - right - (n - 1) * gap) / n
+    top = 0.26  # titles
+    ticks_h = 0.31 if OVERLAP_TICKS == "modes" else 0.40
+    xlab_h, cb_gap, cb_h, cb_lab_h = 0.17, 0.12, 0.07, 0.34
+    bottom = ticks_h + xlab_h + cb_gap + cb_h + cb_lab_h
+    H = top + side + bottom
+    fig = plt.figure(figsize=(W, H))
+    axes = []
+    for j, (m, mat, freqs_ml) in enumerate(panels):
+        x0 = left + j * (side + gap)
+        ax = fig.add_axes([x0 / W, bottom / H, side / W, side / H])
+        axes.append(ax)
+        color = model_color(m)
+        cmap = LinearSegmentedColormap.from_list(f"ov_{m}", ["#ffffff", color])
+        # rows = B3LYP modes (shared by every panel), columns = this model's own modes;
+        # vector cells (pcolormesh), not a bitmap
+        edges_x, edges_y = np.arange(mat.shape[0] + 1) - 0.5, np.arange(mat.shape[1] + 1) - 0.5
+        im = ax.pcolormesh(edges_x, edges_y, mat.T, cmap=cmap, vmin=0, vmax=1,
+                           edgecolors="none", linewidth=0, antialiased=False)  # fmt: skip
+        ax.set_xlim(edges_x[0], edges_x[-1])
+        ax.set_ylim(edges_y[0], edges_y[-1])
+        ax.set_aspect("equal")
+        ax.set_title(tex(MODEL_LABEL[m]), fontsize=ANNOT_FS + 1, color=color, pad=4)
+        hl, vl = _region_lines(freqs_dft, mat.shape[1]), _region_lines(freqs_ml, mat.shape[0])
+        if lines:
+            for p in hl:
+                ax.axhline(p, color=GRID_LINE, lw=0.6, zorder=3)
+            for p in vl:
+                ax.axvline(p, color=GRID_LINE, lw=0.6, zorder=3)
+        if OVERLAP_TICKS == "limits" and lines:
+            ax.set_xticks(list(vl), ["/".join(map(str, v)) for v in vl.values()],
+                          rotation=90, fontsize=tick_fs)  # fmt: skip
+            ax.set_yticks(list(hl), ["/".join(map(str, v)) for v in hl.values()], fontsize=tick_fs)
+        else:
+            step = max(1, int(np.ceil(max(mat.shape) / 6)))
+            ax.set_xticks(range(0, mat.shape[0], step),
+                          [f"{f:.0f}" for f in freqs_ml[::step]], rotation=90, fontsize=tick_fs)  # fmt: skip
+            ax.set_yticks(range(0, mat.shape[1], step),
+                          [f"{f:.0f}" for f in freqs_dft[::step]], fontsize=tick_fs)  # fmt: skip
+        if j:
+            ax.tick_params(labelleft=False)
+        ax.tick_params(length=0, pad=2)
+        for sp in ax.spines.values():
+            sp.set_visible(True)
+            sp.set_edgecolor(INK)
+            sp.set_linewidth(0.8)
+        # colour bar under the panel, below the shared x label
+        cw = side * 0.8
+        cax = fig.add_axes([(x0 + (side - cw) / 2) / W, cb_lab_h / H, cw / W, cb_h / H])
+        cb = fig.colorbar(im, cax=cax, orientation="horizontal", ticks=[0, 0.5, 1])
+        cb.ax.set_xticklabels(["0", "0.5", "1"])
+        cb.ax.tick_params(labelsize=tick_fs, length=2, width=0.5, pad=1.5)
+        cb.set_label("overlap", fontsize=tick_fs, labelpad=1.5)
+        cb.outline.set_visible(False)
+    axes[0].set_ylabel("B3LYP harmonic\nmode / cm$^{-1}$", fontsize=ANNOT_FS + 1, labelpad=3)
+    fig.text((left + (W - left - right) / 2) / W, (cb_lab_h + cb_h + cb_gap) / H,
+             r"MACE harmonic mode / cm$^{-1}$", ha="center", va="bottom", fontsize=ANNOT_FS + 1)  # fmt: skip
     save(fig, OUT, f"overlap_matrices_{mol}")
     register(
         f"overlap_matrices_{mol}",
         1.0,
-        figwidth(1.0) / n + 0.8,
+        H,
         f"{mol}: mass-weighted eigenvector overlap between every MACE and B3LYP harmonic normal "
-        "mode. Degenerate sets appear as blocks; the Hungarian assignment picks one mode per "
-        "row and column, the subspace overlap of a block is what is compared for degenerate modes.",
+        "mode, each panel in the colour of its model; light lines at the region limits "
+        "500, 1600, 2700 and 3200 cm$^{-1}$.",
         "5.3 degeneracy",
     )
 
