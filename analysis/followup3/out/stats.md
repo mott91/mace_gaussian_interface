@@ -687,10 +687,10 @@ bands: 58 listed, 55 assigned ({'nearest': 34, 'explicit': 21, 'excluded': 3}); 
 
 | overlap of assigned pairs | n | median | share >= 0.9 / % | n < 0.9 | n < 0.7 | min | worst |
 |---|---|---|---|---|---|---|---|
-| ANI-cc | 493 | 0.998 | 93.7 | 31 | 2 | 0.565 | beta_glucose mode 16, 437 cm-1 |
-| OMOL | 500 | 0.998 | 94.0 | 30 | 2 | 0.614 | beta_glucose mode 18, 467 cm-1 |
-| OFF | 500 | 0.998 | 93.4 | 33 | 3 | 0.506 | beta_glucose mode 16, 437 cm-1 |
-| POLAR | 434 | 0.999 | 97.9 | 9 | 0 | 0.716 | caproic_acid mode 34, 1427 cm-1 |
+| ANI-cc | 493 | 0.998 | 93.9 | 30 | 2 | 0.565 | beta_glucose mode 16, 437 cm-1 |
+| OMOL | 500 | 0.999 | 94.2 | 29 | 2 | 0.614 | beta_glucose mode 18, 467 cm-1 |
+| OFF | 500 | 0.998 | 93.6 | 32 | 3 | 0.506 | beta_glucose mode 16, 437 cm-1 |
+| POLAR | 434 | 0.999 | 98.4 | 7 | 0 | 0.716 | caproic_acid mode 34, 1427 cm-1 |
 
 ## overlap_beta_glucose
 
@@ -735,14 +735,11 @@ bands: 58 listed, 55 assigned ({'nearest': 34, 'explicit': 21, 'excluded': 3}); 
 | beta_glucose | 13 | 19 | 19 | 0 |
 | caproic_acid | 7 | 2 | 5 | 2 |
 | valeric_acid | 3 | 3 | 4 | 3 |
-| butyric_acid | 2 | 2 | 2 | 2 |
 | propionic_acid | 2 | 2 | 2 | 0 |
-| carbon_dioxide | 1 | 1 | 1 | 0 |
-| ammonia | 0 | 0 | 0 | 1 |
+| butyric_acid | 2 | 2 | 2 | 2 |
 | 1-butanol | 3 | 0 | 0 | 0 |
-| phosphine | 0 | 0 | 0 | 1 |
 | tert-butanol | 0 | 1 | 0 | 0 |
-| total | 31 | 30 | 33 | 9 |
+| total | 30 | 29 | 32 | 7 |
 | bands | 493 | 500 | 500 | 434 |
 
 ## overlap_below_0.9_regions
@@ -751,7 +748,7 @@ bands: 58 listed, 55 assigned ({'nearest': 34, 'explicit': 21, 'excluded': 3}); 
 |---|---|---|---|---|
 | < 500 internal rotations | 6 / 35 (6) | 8 / 35 (7) | 7 / 35 (7) | 0 / 22 (0) |
 | < 500 other | 0 / 47 (0) | 0 / 47 (0) | 0 / 47 (0) | 0 / 42 (0) |
-| 500-1600 | 15 / 284 (5) | 19 / 289 (10) | 21 / 289 (12) | 6 / 253 (0) |
-| 1600-2700 | 0 / 13 (0) | 0 / 15 (0) | 0 / 15 (0) | 1 / 15 (0) |
+| 500-1600 | 14 / 284 (5) | 18 / 289 (10) | 20 / 289 (12) | 6 / 253 (0) |
+| 1600-2700 | 0 / 13 (0) | 0 / 15 (0) | 0 / 15 (0) | 0 / 15 (0) |
 | 2700-3200 | 10 / 86 (2) | 3 / 86 (2) | 5 / 86 (0) | 1 / 79 (0) |
-| > 3200 | 0 / 28 (0) | 0 / 28 (0) | 0 / 28 (0) | 1 / 23 (0) |
+| > 3200 | 0 / 28 (0) | 0 / 28 (0) | 0 / 28 (0) | 0 / 23 (0) |

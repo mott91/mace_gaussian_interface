@@ -26,8 +26,9 @@ Rules (Methods 3.6, thesis repo latex/chapters/03-methods.tex, as of 2026-11-09)
 - experiment: band_origins.json (explicit modes where given, else nearest B3LYP VPT2 within 200 cm-1,
   excluded bands dropped), B3LYP harmonic scaled by 0.9614, headline without NH3/PH3 and CO2 nu1;
 - VCI: the character-paired table of scripts/vci_comparison.py, clean rows only.
-- mode overlap: the overlap column of the band table (runs with MACE4IR dipoles, degenerate pairs
-  averaged, NH3/PH3 kept), as in the "Normal Modes" paragraph of 4.1; pairs below 0.9 and 0.7.
+- mode overlap: the overlap column of the band table (runs with MACE4IR dipoles, NH3/PH3 kept), as in
+  the "Normal Modes" paragraph of 4.1; pairs below 0.9 and 0.7. A degenerate pair has the subspace
+  overlap of the pair, sqrt(sum of the squared 2x2 overlaps / 2) (degenerate_overlap.csv).
 
 Outputs (next to this script, in out/): stats.md with every table, and one CSV per table.
 Run:  python analysis/followup3/thesis_stats.py   (environment with pandas; reads campaign data only)
@@ -218,6 +219,15 @@ def load():
     fund_m = merge_degenerate(fund, ["dft_harmonic", "dft_anharmonic", "ml_harmonic", "ml_anharmonic", "overlap"],
                               ["dft_intensity", "ml_intensity"], keys)  # fmt: skip
     harm_m = merge_degenerate(harm, ["dft_harmonic", "ml_harmonic"], ["dft_int", "ml_int"], keys)
+    # a degenerate pair counts as one band: its overlap is the subspace overlap of the pair
+    # (decided 2026-11-13), not the mean of the two basis-dependent single-mode overlaps;
+    # written by analysis/results_figures/overlap_blocks.py (degenerate)
+    sub = pd.read_csv(HERE / "degenerate_overlap.csv").set_index(keys + ["i"]).subspace
+    deg = fund_m.ndeg > 1
+    idx = pd.MultiIndex.from_frame(fund_m.loc[deg, keys + ["i"]])
+    assert idx.isin(sub.index).all(), "degenerate band without a subspace overlap"
+    fund_m["overlap_single"] = fund_m.overlap
+    fund_m.loc[deg, "overlap"] = sub.loc[idx].to_numpy()
     rot = pd.read_csv(HERE / "rotor_labels.csv")
     rotors = {(r.molecule, r.i) for r in rot.itertuples() if r.rotor}
     for df in (fund_m, harm_m):

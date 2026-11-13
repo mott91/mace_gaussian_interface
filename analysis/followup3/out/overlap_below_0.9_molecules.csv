@@ -2,12 +2,9 @@ pairs < 0.9,ANI-cc,OMOL,OFF,POLAR
 beta_glucose,13,19,19,0
 caproic_acid,7,2,5,2
 valeric_acid,3,3,4,3
-butyric_acid,2,2,2,2
 propionic_acid,2,2,2,0
-carbon_dioxide,1,1,1,0
-ammonia,0,0,0,1
+butyric_acid,2,2,2,2
 1-butanol,3,0,0,0
-phosphine,0,0,0,1
 tert-butanol,0,1,0,0
-total,31,30,33,9
+total,30,29,32,7
 bands,493,500,500,434

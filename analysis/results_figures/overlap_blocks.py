@@ -10,8 +10,8 @@ Hungarian pairs and their overlaps equal the band table, and then describes the 
   energy) on hydroxyl H, on C-H hydrogens and on the heavy atoms (C, O).
 
 Also: subspace overlap of the degenerate B3LYP pairs (CO2 bend, NH3/PH3 E modes), where the
-overlap of a single mode depends on the arbitrary basis inside the pair:
-sqrt(sum of squared overlaps between the pair and its assigned MACE modes / 2).
+overlap of a single mode depends on the arbitrary basis inside the pair (see degenerate()); writes
+analysis/followup3/degenerate_overlap.csv, which thesis_stats.load() uses for the merged bands.
 
 python analysis/results_figures/overlap_blocks.py [molecule ...]   (default beta_glucose)
 Run from a scratch directory (importing mace_gaussian writes .model.pt into the cwd).
@@ -129,8 +129,22 @@ def main(mols):
                   + ("  rotor" if (mol, i + 1) in rot else ""))  # fmt: skip
 
 
+DEGENERATE_CSV = ROOT / "analysis" / "followup3" / "degenerate_overlap.csv"
+
+
 def degenerate(mols=("carbon_dioxide", "ammonia", "phosphine")):
-    print("\n### degenerate pairs: single-mode overlap (band table) and subspace overlap\n")
+    """Subspace overlap of every degenerate B3LYP pair, for every run; writes DEGENERATE_CSV.
+
+    For a pair D of B3LYP modes and the two MACE modes M assigned to them, S = |Q_M^T Q_D| is the
+    2 x 2 block of the overlap matrix (mass-weighted, normalised vectors). The subspace overlap is
+    sqrt(sum S_kl^2 / 2) = sqrt(mean of the squared singular values of S), i.e. the root mean
+    square of the cosines of the two principal angles between the planes. For one mode it reduces
+    to the single-mode overlap |q_M . q_D|; it does not depend on the basis chosen inside the pair.
+    """
+    bands = pd.read_csv(ts.DATA / "bands.csv")
+    bands = bands[bands.band_type == "fundamental"]
+    rows = []
+    print("\n### degenerate pairs: 2 x 2 overlap block, singular values, subspace overlap\n")
     for mol in mols:
         base = CAMP / "comparison_results" / mol
         md, fd, xd, _, _ = extract_mode_data_from_checkpoint(str(sorted(base.glob("b3lyp*/*.fchk"))[0]), force_harmonic=True)
@@ -141,20 +155,37 @@ def degenerate(mols=("carbon_dioxide", "ammonia", "phosphine")):
                 groups[-1].append(i)
             else:
                 groups.append([i])
-        for m in ORDER:
-            fchk = base / f"{m}_mace_ml" / "gaussian_freq.fchk"
-            if not fchk.exists():
-                continue
-            mm, _, xm, _, _ = extract_mode_data_from_checkpoint(str(fchk), force_harmonic=True)
+        for run in sorted(p.parent for p in base.glob("mace_*/gaussian_freq.fchk")):
+            m, d = next((e, run.name[len(e) + 1:]) for e in ORDER if run.name.startswith(e + "_"))
+            mm, fm, xm, _, _ = extract_mode_data_from_checkpoint(str(run / "gaussian_freq.fchk"), force_harmonic=True)
             mm, _ = align_modes_to_reference(mm, xm, xd)
-            ov = np.abs(create_alignment_matrix(mm, md))
+            unit = lambda q: (q := np.asarray(q).reshape(len(q), -1)) / np.linalg.norm(q, axis=1, keepdims=True)  # noqa: E731
+            signed = unit(mm) @ unit(md).T  # create_alignment_matrix returns only |.|
+            ov = np.abs(signed)
+            assert np.allclose(ov, create_alignment_matrix(mm, md), atol=1e-9)
             r, c = linear_sum_assignment(-ov)
             inv = {b: a for a, b in zip(r, c)}
+            bt = bands[(bands.molecule == mol) & (bands.energy_model == m) & (bands.dipole_model == d)]
             for g in (g for g in groups if len(g) > 1):
-                sub = np.sqrt((ov[np.ix_([inv[b] for b in g], g)] ** 2).sum() / len(g))
-                single = np.mean([ov[inv[b], b] for b in g])
-                print(f"   {mol:15s} {m:11s} modes {g[0] + 1}-{g[-1] + 1} ({fd[g[0]]:.0f} cm-1): "
-                      f"single {single:.3f}, subspace {sub:.4f}")  # fmt: skip
+                M = [inv[b] for b in g]
+                # the same pairs as the band table: MACE frequencies and single overlaps agree
+                for b in g:
+                    row = bt[bt.i == b + 1].iloc[0]
+                    assert abs(row.ml_harmonic - fm[inv[b]]) < 0.05 and abs(row.overlap - ov[inv[b], b]) < 0.005, (run.name, b)
+                blk = ov[np.ix_(M, g)]
+                sv = np.linalg.svd(signed[np.ix_(M, g)], compute_uv=False)  # signed: cosines of the principal angles
+                sub = float(np.sqrt((blk**2).sum() / len(g)))
+                single = float(np.mean([ov[inv[b], b] for b in g]))
+                rows.append(dict(molecule=mol, energy_model=m, dipole_model=d, i=g[0] + 1, ndeg=len(g),
+                                 dft_harmonic=float(fd[g].mean()), single_mean=single, subspace=sub,
+                                 sv_max=float(sv[0]), sv_min=float(sv[-1]), offdiag_mean=float(blk[~np.eye(len(g), dtype=bool)].mean())))  # fmt: skip
+                if d == "mace_ml":
+                    print(f"   {mol:15s} {m:11s} modes {g[0] + 1}-{g[-1] + 1} ({fd[g[0]]:.0f} cm-1): block "
+                          + " ".join(f"{v:.3f}" for v in blk.ravel())
+                          + f" | singular values {sv[0]:.4f} {sv[-1]:.4f} | single {single:.3f} subspace {sub:.4f}")  # fmt: skip
+    df = pd.DataFrame(rows).sort_values(["molecule", "energy_model", "dipole_model", "i"])
+    df.to_csv(DEGENERATE_CSV, index=False, float_format="%.6f")
+    print(f"\nwrote {DEGENERATE_CSV.relative_to(ROOT)} ({len(df)} pairs, all dipole runs)")
 
 
 if __name__ == "__main__":
