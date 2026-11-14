@@ -226,6 +226,40 @@ Rotor labels (hand-checked): 35 X-H internal rotations below 500 cm-1.
 | small molecules | 1.8 / R2 0.97 n29 | 5.8 / R2 0.51 n32 | 4.8 / R2 0.73 n32 | 4.3 / R2 0.76 n32 |
 | sugar | 1.5 / R2 0.99 n66 | 4.0 / R2 0.82 n66 | 2.9 / R2 0.95 n66 | – |
 
+## xii_most_negative
+
+| B3LYP x_ii < -70 | B3LYP harmonic | type | B3LYP | ANI-cc | OMOL | OFF | POLAR |
+|---|---|---|---|---|---|---|---|
+| methanol mode 12 | 3825.3 | O-H stretch (0.94) | -87.2 | -90.8 | -83.4 | -61.1 | -51.9 |
+| tert-butanol mode 39 | 3797.7 | O-H stretch (0.94) | -86.4 | -87.6 | -92.9 | -68.9 | -39.3 |
+| beta_glucose mode 64 | 3785.8 | O-H stretch (0.94) | -86.0 | -88.4 | -100.8 | -70.7 | – |
+| 1-butanol mode 39 | 3823.0 | O-H stretch (0.94) | -86.0 | -90.0 | -79.4 | -62.6 | -44.3 |
+| beta_glucose mode 65 | 3788.0 | O-H stretch (0.94) | -85.9 | -84.2 | -128.1 | -58.0 | – |
+| 1-propanol mode 30 | 3823.9 | O-H stretch (0.94) | -85.8 | -90.1 | -81.3 | -62.7 | -45.2 |
+| isopropanol mode 30 | 3810.0 | O-H stretch (0.94) | -85.8 | -88.7 | -97.6 | -67.0 | -40.7 |
+| ethanol mode 21 | 3822.4 | O-H stretch (0.94) | -85.8 | -89.7 | -94.1 | -63.7 | -43.1 |
+| glycine mode 24 | 3747.4 | O-H stretch (0.94) | -85.6 | -82.7 | -86.9 | -72.1 | -57.3 |
+| formic_acid_cis mode 9 | 3790.6 | O-H stretch (0.94) | -84.9 | -83.0 | -92.0 | -80.9 | -61.4 |
+| beta_glucose mode 66 | 3806.6 | O-H stretch (0.94) | -84.6 | -84.1 | -91.2 | -77.1 | – |
+| valeric_acid mode 45 | 3751.9 | O-H stretch (0.94) | -84.5 | -83.1 | -85.9 | -69.7 | -52.9 |
+| acetic_acid mode 18 | 3753.4 | O-H stretch (0.94) | -84.2 | -82.5 | -82.7 | -72.0 | -54.4 |
+| butyric_acid mode 36 | 3751.7 | O-H stretch (0.94) | -84.1 | -83.2 | -84.0 | -69.8 | -53.3 |
+| formic_acid_trans mode 9 | 3732.4 | O-H stretch (0.94) | -84.1 | -81.3 | -70.0 | -77.1 | -53.0 |
+| caproic_acid mode 54 | 3751.7 | O-H stretch (0.94) | -84.0 | -83.1 | -88.8 | -69.8 | -52.6 |
+| propionic_acid mode 27 | 3753.0 | O-H stretch (0.94) | -83.9 | -83.4 | -85.5 | -70.6 | -54.0 |
+| nitric_acid mode 9 | 3724.1 | O-H stretch (0.94) | -80.1 | -88.6 | -25.4 | -38.6 | -64.3 |
+| beta_glucose mode 62 | 3776.5 | O-H stretch (0.94) | -79.4 | -85.7 | -67.6 | -71.7 | – |
+| beta_glucose mode 63 | 3783.4 | O-H stretch (0.94) | -79.4 | -85.5 | -98.5 | -80.3 | – |
+
+## xii_deviation_counts
+
+| x_ii, MACE minus B3LYP, abs. / cm-1 | n | > 10 | > 20 | > 10 / % | > 20 / % | max |
+|---|---|---|---|---|---|---|
+| ANI-cc | 488 | 7 | 0 | 1.4 | 0.0 | 18.3 |
+| OMOL | 491 | 37 | 11 | 7.5 | 2.2 | 89.8 |
+| OFF | 491 | 28 | 7 | 5.7 | 1.4 | 41.5 |
+| POLAR | 425 | 87 | 71 | 20.5 | 16.7 | 100.9 |
+
 ## overtones_all_pooled
 
 | overtones, all | n | median | MAE | bias | RMSE | max | worst | >100 % | R2 |

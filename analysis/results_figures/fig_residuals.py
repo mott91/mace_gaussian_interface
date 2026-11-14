@@ -1,6 +1,7 @@
 """Residuals of the fundamentals against B3LYP.
 
-  residuals_fundamentals   harmonic (top) and VPT2 (bottom), one column per energy model, fixed chapter order
+  residuals_fundamentals   harmonic (top) and VPT2 (bottom), one column per energy model, fixed chapter order;
+                           the harmonic row is drawn faded (reference on the same scale; HARM_FADE)
   residuals_harmonic       harmonic row alone with its own y-range, panels in the harmonic MAE order (Section 4.1)
 
 Uses the band tables of analysis/followup3/thesis_stats.py, so the points are the ones behind the
@@ -36,10 +37,27 @@ LABEL = {"mace_anicc": "MACE-ANICC", "mace_omol": "MACE-OMOL-0", "mace_off": "MA
 EDGES = [500, 1600, 2700, 3200]
 YLIM = (-330, 500)
 H_ORDER = ["mace_anicc", "mace_omol", "mace_polar", "mace_off"]  # harmonic MAE order of Table 4.1
+# harmonic row of residuals_fundamentals: "tint" (lighter tint of the model colour) + light frame and
+# labels; "alpha" (transparent points) and "tint_alpha" (both) were tried (report figures-4-2)
+HARM_FADE = "tint"
+FADE_FRAME = "#bdbdbd"
+
+
+def lighten(color: str, f: float) -> str:
+    """Mix a hex colour with white; f = share of white."""
+    r, g, b = (int(color[k : k + 2], 16) for k in (1, 3, 5))
+    return "#" + "".join(f"{round(v + (255 - v) * f):02x}" for v in (r, g, b))
+
+
+def faded(model: str) -> dict:
+    c = style.model_color(model)
+    return {"alpha": dict(color=c, alpha=0.25), "tint": dict(color=lighten(c, 0.55), alpha=0.75),
+            "tint_alpha": dict(color=lighten(c, 0.4), alpha=0.4)}[HARM_FADE]  # fmt: skip
+
 H_YLIM = (-130, 200)  # data: -115.3 (PH3, MACE-OFF23) to +176.9 (P-H stretch of PH3, MACE-OFF23)
 
 
-def main(out_dir: Path) -> None:
+def main(out_dir: Path, name: str = "residuals_fundamentals") -> None:
     _, _, fund, harm, _ = ts.load()
     f = fund[(fund.dipole_model == "mace_ml") & ~fund.molecule.isin(ts.SYMTOP)]
     h = harm[harm.dipole_model == "mace_ml"]
@@ -54,22 +72,28 @@ def main(out_dir: Path) -> None:
             assert err.min() > YLIM[0] and err.max() < YLIM[1], (level, model, err.min(), err.max())
             for e in EDGES:
                 ax.axvline(e, color=style.GRID, lw=0.6, zorder=0)
-            ax.axhline(0, color=style.INK_MUTED, lw=0.8, ls="--", zorder=1)
-            ax.plot(d.dft_harmonic, err, "o", ms=2.6, mec="none", alpha=0.6, color=style.model_color(model), zorder=2)
+            fade = r == 0
+            ax.axhline(0, color=FADE_FRAME if fade else style.INK_MUTED, lw=0.8, ls="--", zorder=1)
+            pts = faded(model) if fade else dict(color=style.model_color(model), alpha=0.6)
+            ax.plot(d.dft_harmonic, err, "o", ms=2.6, mec="none", zorder=2, **pts)
             style.clean_axes(ax, grid=False)
+            if fade:  # the frame and labels of the reference row recede as well
+                for sp in ax.spines.values():
+                    sp.set_color(FADE_FRAME)
+                ax.tick_params(color=FADE_FRAME, labelcolor=style.INK_MUTED)
             ax.text(0.04, 0.93, f"MAE {err.abs().mean():.1f}", transform=ax.transAxes, ha="left", va="top",
-                    fontsize=style.ANNOT_FS, color=style.INK)  # fmt: skip
+                    fontsize=style.ANNOT_FS, color=style.INK_MUTED if fade else style.INK)  # fmt: skip
             if r == 0:
                 ax.set_title(style.tex(LABEL[model]), color=style.model_color(model), fontsize=style.BASE_FS)
             print(f"{level:9s} {model:11s} n {len(d):4d}  MAE {err.abs().mean():5.1f}  min {err.min():7.1f}  max {err.max():6.1f}")
-        axes[r, 0].set_ylabel(f"{level} error / cm$^{{-1}}$")
+        axes[r, 0].set_ylabel(f"{level} error / cm$^{{-1}}$", color=style.INK_MUTED if r == 0 else style.INK)
     axes[0, 0].set_ylim(*YLIM)
     axes[0, 0].set_xlim(0, 4000)
     axes[0, 0].set_xticks([0, 1500, 3000])
     axes[0, 0].set_yticks([-250, 0, 250, 500])
     fig.supxlabel("B3LYP harmonic frequency / cm$^{-1}$", fontsize=style.BASE_FS)
     fig.tight_layout(w_pad=0.6, h_pad=0.8)
-    style.save(fig, out_dir, "residuals_fundamentals")
+    style.save(fig, out_dir, name)
 
 
 

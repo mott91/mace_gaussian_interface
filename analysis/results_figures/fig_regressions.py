@@ -1,8 +1,10 @@
 """Regression plots (MACE value against B3LYP value, parity line) for the results chapter.
 
-  regression_harmonic        harmonic frequencies, one panel per energy model
-  regression_vpt2            VPT2 fundamentals, one panel per energy model
+  regression_harmonic        harmonic frequencies, one panel per energy model (MAE and R2)
+  regression_vpt2            VPT2 fundamentals, one panel per energy model (MAE and R2)
   regression_anharmonicity   anharmonic shift (top) and chi_ii (bottom), one column per energy model
+  regression_shift           the top row of regression_anharmonicity on its own
+  regression_xii             the bottom row of regression_anharmonicity on its own
   regression_intensities     harmonic intensities, one panel per dipole model (pooled over energy models)
 
 Same band sets as the tables of analysis/followup3/thesis_stats.py; the MAE in each panel must equal
@@ -36,13 +38,24 @@ DLAB = {"mace_polar1": "MACE-POLAR-1", "mace_mdp": "MACE-MDP", "mace_ml": "MACE4
 DOT = dict(ms=2.6, mec="none", alpha=0.6)
 # harmonic MAE order of Table 4.1 (OMOL and POLAR tie at 12.5 and keep the chapter order)
 H_ORDER = ["mace_anicc", "mace_omol", "mace_polar", "mace_off"]
+# R2 decimals in the two frequency plots: two give 1.00 and three give 1.000 for three of the four
+# harmonic panels (R2 0.9995-0.9998), so four, in both plots (report figures-4-2)
+FREQ_R2_DECIMALS = 4
 
 
 def note(ax, text):
-    ax.text(0.05, 0.94, text, transform=ax.transAxes, ha="left", va="top", fontsize=style.ANNOT_FS, color=style.INK)
+    # white backing: points must not run through the label (POLAR-1 shifts reach +330 cm-1)
+    ax.text(0.05, 0.94, text, transform=ax.transAxes, ha="left", va="top", fontsize=style.ANNOT_FS, color=style.INK,
+            zorder=5, bbox=dict(boxstyle="square,pad=0.15", fc="white", ec="none", alpha=0.8))  # fmt: skip
 
 
-def parity_row(axes, frames, xcol, ycol, lim, ticks, r2=False):
+def num(v: float, nd: int) -> str:
+    """Number for a panel label, with a typographic minus."""
+    return f"{v:.{nd}f}".replace("-", "$-$")
+
+
+def parity_row(axes, frames, xcol, ycol, lim, ticks, r2: int | None = None):
+    """r2: decimals of the R2 (against y = x) under the MAE label; None = no R2."""
     for ax, (model, d) in zip(axes, frames):
         x, y = d[xcol], d[ycol]
         assert x.between(*lim).all() and y.between(*lim).all(), (model, xcol, x.min(), x.max(), y.min(), y.max())
@@ -50,10 +63,10 @@ def parity_row(axes, frames, xcol, ycol, lim, ticks, r2=False):
         ax.plot(x, y, "o", color=style.model_color(model), zorder=2, **DOT)
         style.clean_axes(ax)
         mae = (y - x).abs().mean()
-        note(ax, f"MAE {mae:.1f}" + (f"\n$R^2$ {ts.r2(x, y):.2f}" if r2 else ""))
+        note(ax, f"MAE {mae:.1f}" + (f"\n$R^2$ {num(ts.r2(x, y), r2)}" if r2 is not None else ""))
         ax.set_xlim(*lim), ax.set_ylim(*lim), ax.set_xticks(ticks), ax.set_yticks(ticks)
         ax.set_aspect("equal")
-        print(f"{ycol:14s} {model:11s} n {len(d):4d} MAE {mae:5.1f}")
+        print(f"{ycol:14s} {model:11s} n {len(d):4d} MAE {mae:5.1f} R2 {ts.r2(x, y):.4f}")
 
 
 def titles(axes, models):
@@ -75,19 +88,33 @@ def main(out: Path) -> None:
     for name, df, xc, yc, lab, order in (("regression_harmonic", h, "dft_harmonic", "ml_harmonic", "harmonic frequency", H_ORDER),
                                          ("regression_vpt2", f, "dft_anharmonic", "ml_anharmonic", "VPT2 fundamental", E)):
         fig, axes = plt.subplots(1, 4, figsize=(W, 2.15), sharex=True, sharey=True)
-        parity_row(axes, [(m, df[df.energy_model == m]) for m in order], xc, yc, (0, 4200), [0, 2000, 4000])
+        parity_row(axes, [(m, df[df.energy_model == m]) for m in order], xc, yc, (0, 4200), [0, 2000, 4000],
+                   r2=FREQ_R2_DECIMALS)
         titles(axes, order)
         axes[0].set_ylabel("MACE / cm$^{-1}$")
         fig.supxlabel(f"B3LYP {lab} / cm$^{{-1}}$", fontsize=style.BASE_FS)
         fig.tight_layout(w_pad=0.6)
         style.save(fig, out, name)
 
-    fig, axes = plt.subplots(2, 4, figsize=(W, 3.9), sharex="row", sharey="row")
-    parity_row(axes[0], [(m, f[f.energy_model == m]) for m in E], "dft_shift", "ml_shift", (-480, 480), [-400, 0, 400], r2=True)
     both = pd.concat([x.dft_xmatrix, x.ml_xmatrix])
     clim = (np.floor(both.min() / 25) * 25 - 5, np.ceil(both.max() / 25) * 25 + 5)
-    parity_row(axes[1], [(m, x[x.energy_model == m]) for m in E], "dft_xmatrix", "ml_xmatrix", clim,
-               [t for t in (-200, -100, 0, 100) if clim[0] < t < clim[1]], r2=True)
+    shift_row = ([(m, f[f.energy_model == m]) for m in E], "dft_shift", "ml_shift", (-480, 480), [-400, 0, 400])
+    xii_row = ([(m, x[x.energy_model == m]) for m in E], "dft_xmatrix", "ml_xmatrix", clim,
+               [t for t in (-200, -100, 0, 100) if clim[0] < t < clim[1]])  # fmt: skip
+    # the two rows on their own (Section 4.2 cites them in separate paragraphs); same ranges
+    for name, row, ylab, xlab in (("regression_shift", shift_row, "MACE shift / cm$^{-1}$", "B3LYP anharmonic shift / cm$^{-1}$"),
+                                  ("regression_xii", xii_row, r"MACE $\chi_{ii}$ / cm$^{-1}$", r"B3LYP $\chi_{ii}$ / cm$^{-1}$")):  # fmt: skip
+        fig, axes = plt.subplots(1, 4, figsize=(W, 2.15), sharex=True, sharey=True)
+        parity_row(axes, *row, r2=2)
+        titles(axes, E)
+        axes[0].set_ylabel(ylab)
+        fig.supxlabel(xlab, fontsize=style.BASE_FS)
+        fig.tight_layout(w_pad=0.6)
+        style.save(fig, out, name)
+
+    fig, axes = plt.subplots(2, 4, figsize=(W, 3.9), sharex="row", sharey="row")
+    parity_row(axes[0], *shift_row, r2=2)
+    parity_row(axes[1], *xii_row, r2=2)
     titles(axes[0], E)
     axes[0, 0].set_ylabel("MACE shift / cm$^{-1}$"), axes[1, 0].set_ylabel(r"MACE $\chi_{ii}$ / cm$^{-1}$")
     for ax, lab in ((axes[0, 1], "B3LYP anharmonic shift / cm$^{-1}$"), (axes[1, 1], r"B3LYP $\chi_{ii}$ / cm$^{-1}$")):

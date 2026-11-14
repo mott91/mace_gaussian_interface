@@ -36,6 +36,7 @@ Run:  python analysis/followup3/thesis_stats.py   (environment with pandas; read
 
 from __future__ import annotations
 
+import functools
 import json
 import sys
 from itertools import combinations
@@ -313,6 +314,33 @@ def section_frequencies(fund, harm):
     return anh
 
 
+XII_STRONG = -70.0  # cm-1
+
+
+@functools.lru_cache(maxsize=None)
+def _b3lyp_modes(mol: str):
+    from mace_gaussian.analysis.mode_matching import extract_mode_data_from_checkpoint
+
+    fchk = next(iter(sorted((CAMP / "comparison_results" / mol).glob("b3lyp*/*.fchk"))))
+    md, fd, xd, masses, _ = extract_mode_data_from_checkpoint(str(fchk), force_harmonic=True)
+    return np.asarray(md).reshape(len(md), -1, 3), np.asarray(fd), np.asarray(xd), np.round(masses).astype(int)
+
+
+def hydrogen_character(mol: str, i: int) -> str:
+    """Which hydrogens carry B3LYP mode i (1-based): share of the mass-weighted displacement on H
+    bonded to O, N or C; named an X-H stretch above 2500 cm-1, else 'other (X-H share)'."""
+    md, fd, xd, z = _b3lyp_modes(mol)
+    q2 = (md[i - 1] ** 2).sum(1)
+    q2 = q2 / q2.sum()
+    d = np.linalg.norm(xd[:, None] - xd[None], axis=-1)
+    share = {"O-H": 0.0, "N-H": 0.0, "C-H": 0.0}
+    for a in np.where(z == 1)[0]:
+        partner = min((b for b in range(len(z)) if b != a), key=lambda b: d[a, b])
+        share[{8: "O-H", 16: "O-H", 7: "N-H", 14: "N-H", 6: "C-H", 12: "C-H"}[int(z[partner])]] += q2[a]
+    k = max(share, key=share.get)
+    return f"{k} stretch ({share[k]:.2f})" if fd[i - 1] > 2500 and share[k] > 0.5 else f"other ({k} {share[k]:.2f})"
+
+
 def section_anharmonicity(fund, chi):
     f = fund[(fund.dipole_model == "mace_ml") & ~fund.molecule.isin(SYMTOP)].copy()
     f["dft_shift"], f["ml_shift"] = f.dft_anharmonic - f.dft_harmonic, f.ml_anharmonic - f.ml_harmonic
@@ -349,6 +377,24 @@ def section_anharmonicity(fund, chi):
                     for m in E_MODELS for x in [g[g.energy_model == m]] if len(x)}  # fmt: skip
         order = [lab for *_, lab in REGIONS] if key == "region" else list(GROUPS)
         table(name, pd.DataFrame(t).T.reindex([o for o in order if o in t]).rename_axis("x_ii MAE / R2"))
+    # the most negative B3LYP constants (< -70 cm-1) with all four models, and the type of each mode
+    low = c[c.dft_xmatrix < XII_STRONG]
+    w = low.pivot_table(index=["molecule", "i"], columns="energy_model", values="ml_xmatrix").reindex(columns=E_MODELS)
+    w = w.rename(columns=LAB)
+    w.insert(0, "B3LYP", low.groupby(["molecule", "i"]).dft_xmatrix.first())
+    w.insert(0, "type", [hydrogen_character(m, i) for m, i in w.index])
+    w.insert(0, "B3LYP harmonic", [harmf[(m, i)] for m, i in w.index])
+    w = w.sort_values("B3LYP")
+    w.index = [f"{m} mode {i}" for m, i in w.index]
+    table("xii_most_negative", w.rename_axis(f"B3LYP x_ii < {XII_STRONG:.0f}"))
+    # how many modes deviate strongly, per model
+    c["dev"] = (c.ml_xmatrix - c.dft_xmatrix).abs()
+    t = {LAB[m]: {"n": len(g), "> 10": int((g.dev > 10).sum()), "> 20": int((g.dev > 20).sum()),
+                  "> 10 / %": 100 * (g.dev > 10).mean(), "> 20 / %": 100 * (g.dev > 20).mean(), "max": g.dev.max()}
+         for m in E_MODELS for g in [c[c.energy_model == m]]}  # fmt: skip
+    t = pd.DataFrame(t).T
+    t[["> 10", "> 20"]] = t[["> 10", "> 20"]].map(lambda v: str(int(v)))  # counts, not 1-decimal floats
+    table("xii_deviation_counts", t.rename_axis("x_ii, MACE minus B3LYP, abs. / cm-1"))
 
 
 def section_overtones(bands):
