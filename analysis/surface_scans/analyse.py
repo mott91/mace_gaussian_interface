@@ -297,6 +297,17 @@ if __name__ == "__main__":
     out = Path(sys.argv[1]) if len(sys.argv) > 1 else c.HERE / "out"
     res, curves = analyse()
     res.to_csv(c.DATA / "results.csv", index=False)
+    # estimate of the diagonal VPT2 term of chi_ii, (phi_iiii - 5 phi_iii^2 / 3 omega) / 16 in reduced
+    # units (Gaussian's FI/k ratio of the run converts), at each step and from the smooth fit; "rest" =
+    # benchmark chi_ii minus the term at the default step (couplings, held fixed: an approximation)
+    est = []
+    for _, x in res.iterrows():
+        r4 = x.quartic_FI_gauss / x.quartic_gauss
+        r3 = x.cubic_FI_gauss / x.cubic_gauss if abs(x.cubic_gauss) > 0.05 else 0.0
+        diag = lambda c3, c4: (c4 * r4 - 5 / 3 * (c3 * r3) ** 2 / x.freq) / 16  # noqa: B023, E731
+        d = {f"Q{h}": diag(x[f"cubic_h{h}"], x[f"quartic_h{h}"]) for h in STEPS_Q} | {"fit": diag(x.cubic_fit, x.quartic_fit)}
+        est.append({"key": x.key, "method": x.method, "chi_ii": x.chi_ii, **d, "rest": x.chi_ii - d["Q0.01"]})
+    pd.DataFrame(est).round(1).to_csv(c.DATA / "chi_diag_estimate.csv", index=False)
     (c.DATA / "tables.md").write_text(tables(res))
     print(tables(res))
     figure(curves, res, out, "energy")
