@@ -192,12 +192,66 @@ def degenerate_groups(freqs: pd.Series) -> dict[int, int]:
     return out
 
 
-def merge_degenerate(df: pd.DataFrame, mean_cols: list[str], sum_cols: list[str], keys: list[str]) -> pd.DataFrame:
-    agg = {c: "mean" for c in mean_cols} | {c: "sum" for c in sum_cols} | {"i": "min", "ndeg": "size"}
+def merge_degenerate(df: pd.DataFrame, mean_cols: list[str], sum_cols: list[str], keys: list[str],
+                     any_cols: tuple[str, ...] = ()) -> pd.DataFrame:  # fmt: skip
+    agg = {c: "mean" for c in mean_cols} | {c: "sum" for c in sum_cols} | {c: "max" for c in any_cols}
+    agg |= {"i": "min", "ndeg": "size"}
     return df.assign(ndeg=1).groupby(keys + ["grp"], as_index=False).agg(agg)
 
 
-def load():
+RESONANCE_TYPES = ("1-1", "1-2", "1-3")
+
+
+@functools.lru_cache(maxsize=None)
+def resonant_freqs(log: Path) -> tuple[float, ...]:
+    """Harmonic wavenumbers of the fundamentals that Gaussian's GVPT2 treats in a resonance: a state of
+    one quantum, i(1), on either side of a 1-1, 1-2 or 1-3 entry of "Variational Matrix Definition"
+    (2-2 entries couple overtones/combinations only). Gaussian's anharmonic mode index i is turned into
+    its harmonic wavenumber with the QUADRATIC FORCE CONSTANTS table (the index follows symmetry
+    blocks, not the frequency order). No variational block: no resonance."""
+    import re
+
+    t = log.read_text(errors="replace")
+    v = t.find("Variational Matrix Definition")
+    if v < 0:
+        return ()
+    q0 = t.index("QUADRATIC FORCE CONSTANTS IN NORMAL MODES")
+    q1 = t.index("CUBIC FORCE CONSTANTS IN NORMAL MODES", q0)
+    freq = {int(a): float(f) for a, b, f in re.findall(r"^\s+(\d+)\s+(\d+)\s+(-?\d+\.\d+)\s", t[q0:q1], re.M) if a == b}
+    end = t.find("Projection of DVPT2", v)
+    modes = set()
+    for typ, s1, _, s2 in re.findall(r"^\s*(\d-\d)\s*\|([^|]*)\|([^|]*)\|(.*)$", t[v:end], re.M):
+        if typ not in RESONANCE_TYPES:
+            continue
+        for s in (s1, s2):
+            st = re.findall(r"(\d+)\((\d+)\)", s)
+            if len(st) == 1 and st[0][1] == "1":
+                modes.add(int(st[0][0]))
+    return tuple(sorted(freq[n] for n in modes))
+
+
+def _run_log(mol: str, run: str) -> Path:
+    d = CAMP / "comparison_results" / mol
+    if run == "b3lyp":
+        return next(iter(sorted(next(p for p in sorted(d.glob("b3lyp*")) if p.is_dir()).glob("*.log"))))
+    return d / run / "gaussian_freq.log"
+
+
+def resonance_flags(fund: pd.DataFrame, tol: float = 0.01) -> pd.DataFrame:
+    """dft_res / ml_res: the band's mode is in a resonance in the B3LYP run / in the model run
+    (energy_dipole), matched by harmonic wavenumber within tol cm-1."""
+    def hit(f, freqs):
+        return bool(freqs) and min(abs(f - x) for x in freqs) < tol
+
+    out = fund.copy()
+    out["dft_res"] = [hit(f, resonant_freqs(_run_log(m, "b3lyp"))) for m, f in zip(out.molecule, out.dft_harmonic)]
+    out["ml_res"] = [hit(f, resonant_freqs(_run_log(m, f"{e}_{d}")))
+                     for m, e, d, f in zip(out.molecule, out.energy_model, out.dipole_model, out.ml_harmonic)]  # fmt: skip
+    return out
+
+
+def load(resonance: bool = False):
+    """resonance=True adds dft_res / ml_res to the fundamentals (parses every VPT2 log; slow)."""
     bands = pd.read_csv(DATA / "bands.csv")
     chi = pd.read_csv(DATA / "chi.csv")
     harm = harmonic_table()
@@ -217,8 +271,11 @@ def load():
     assert (chk.ml_harmonic - chk.ml_harmonic_h).abs().max() < 0.05
 
     keys = ["molecule", "energy_model", "dipole_model"]
+    if resonance:
+        fund = resonance_flags(fund)
     fund_m = merge_degenerate(fund, ["dft_harmonic", "dft_anharmonic", "ml_harmonic", "ml_anharmonic", "overlap"],
-                              ["dft_intensity", "ml_intensity"], keys)  # fmt: skip
+                              ["dft_intensity", "ml_intensity"], keys,
+                              ("dft_res", "ml_res") if resonance else ())  # fmt: skip
     harm_m = merge_degenerate(harm, ["dft_harmonic", "ml_harmonic"], ["dft_int", "ml_int"], keys)
     # a degenerate pair counts as one band: its overlap is the subspace overlap of the pair
     # (decided 2026-11-13), not the mean of the two basis-dependent single-mode overlaps;
@@ -457,6 +514,72 @@ def section_intensities(fund, harm):
             table(f"int_{name}_wins_{LAB.get(e, e)}", wins(per_mol).rename_axis(f"{name}, {LAB.get(e, e)}: row lower in"))
 
 
+def section_intensity_resonance(fund, harm):
+    """VPT2 intensities (set of int_vpt2: NH3/PH3 out, B3LYP >= 1 km/mol), bands in a resonance
+    (resonant_freqs) against the others; resonance taken from the B3LYP run, the model run, or either.
+    Control: the harmonic intensities of the same bands, split the same way."""
+    d = fund[~fund.molecule.isin(SYMTOP) & (fund.dft_intensity >= INT_MIN)].copy()
+    d["either"] = d.dft_res | d.ml_res
+    keys = ["molecule", "energy_model", "dipole_model", "i"]
+    d = d.merge(harm[keys + ["dft_int", "ml_int"]], on=keys, how="left", validate="1:1")
+    assert d.dft_int.notna().all()
+    # the three dipole runs of one energy model must give the same resonances (same energy surface)
+    agree = d.groupby(["molecule", "energy_model", "i"]).ml_res.nunique().max() == 1
+    rows = {}
+    for dp in D_MODELS:
+        x = d[d.dipole_model == dp]
+        for flag, lab in (("dft_res", "B3LYP run"), ("ml_res", "model run"), ("either", "either run")):
+            for val, side in ((True, "in resonance"), (False, "not in resonance")):
+                rows[(LAB[dp], lab, side)] = int_metrics(x[x[flag] == val], "dft_intensity", "ml_intensity")
+    t = pd.DataFrame(rows).T.rename_axis(("dipole model", "resonance in", "bands"))
+    table("int_vpt2_resonance", t)
+    ctrl = {}
+    for dp in D_MODELS:
+        x = d[d.dipole_model == dp]
+        for val, side in ((True, "in resonance"), (False, "not in resonance")):
+            y = x[x.either == val]
+            ctrl[(LAB[dp], side, "VPT2")] = int_metrics(y, "dft_intensity", "ml_intensity")
+            ctrl[(LAB[dp], side, "harmonic")] = int_metrics(y, "dft_int", "ml_int")
+    table("int_vpt2_resonance_harmonic_control",
+          pd.DataFrame(ctrl).T.rename_axis(("dipole model", "either run", "intensities of the same bands")))
+    x = d[d.dipole_model == "mace_ml"]
+    per_e = {LAB[e]: {"bands": int((x.energy_model == e).sum()),
+                      "B3LYP run": int(x[x.energy_model == e].dft_res.sum()),
+                      "model run": int(x[x.energy_model == e].ml_res.sum()),
+                      "both": int((x[x.energy_model == e].dft_res & x[x.energy_model == e].ml_res).sum()),
+                      "either": int(x[x.energy_model == e].either.sum())} for e in E_MODELS}  # fmt: skip
+    table("int_vpt2_resonance_counts", pd.DataFrame(per_e).T.rename_axis("bands in resonance (VPT2 intensity set)"))
+    table("int_vpt2_resonance_note", "Resonance: the fundamental is a one-quantum state of a 1-1, 1-2 or 1-3 entry of "
+          f"Gaussian's 'Variational Matrix Definition'. Dipole runs of one energy model agree: {agree}.")  # fmt: skip
+
+
+IMPLAUSIBLE_SHARE = 0.15  # |VPT2 shift| above this share of the harmonic wavenumber, or any positive shift
+
+
+def section_rotor_list(fund):
+    """The hand-checked X-H internal rotations below 500 cm-1 (rotor_labels.csv), one row each: type,
+    B3LYP harmonic and VPT2 shift, whether that shift is implausible, and each energy model's harmonic
+    and VPT2 error (MACE minus B3LYP; runs with MACE4IR dipoles, the set of the frequency tables)."""
+    lab = pd.read_csv(HERE / "rotor_labels.csv").set_index(["molecule", "i"])
+    f = fund[(fund.dipole_model == "mace_ml") & fund.rotor & (fund.region == "< 500")]
+    rows = []
+    for (mol, i), g in f.groupby(["molecule", "i"], sort=True):
+        b = g.iloc[0]
+        shift = b.dft_anharmonic - b.dft_harmonic
+        row = {"molecule": mol, "mode": str(int(i)), "type": lab.loc[(mol, i), "group"], "B3LYP harm": b.dft_harmonic,
+               "B3LYP shift": shift, "implausible": "yes" if shift > 0 or -shift > IMPLAUSIBLE_SHARE * b.dft_harmonic else "no"}
+        for m in E_MODELS:
+            x = g[g.energy_model == m]
+            row[f"{LAB[m]} harm"] = (x.ml_harmonic - x.dft_harmonic).iloc[0] if len(x) else np.nan
+            row[f"{LAB[m]} VPT2"] = (x.ml_anharmonic - x.dft_anharmonic).iloc[0] if len(x) else np.nan
+        rows.append(row)
+    t = pd.DataFrame(rows).sort_values(["B3LYP harm"]).set_index(["molecule", "mode"])
+    table("rotor_list", t.rename_axis(("molecule", "B3LYP mode")))
+    n = {m: int(t[f"{LAB[m]} VPT2"].notna().sum()) for m in E_MODELS}
+    table("rotor_list_note", f"{len(t)} X-H internal rotations; implausible B3LYP shift (> 0 or |shift| > "
+          f"{IMPLAUSIBLE_SHARE:.0%} of the harmonic): {int((t.implausible == 'yes').sum())}; bands per model {n}.")  # fmt: skip
+
+
 def lam(w, nu):
     return float((w * nu).sum() / (w ** 2).sum())
 
@@ -629,11 +752,13 @@ def section_overlap(fund):
 
 def main():
     OUT.mkdir(exist_ok=True)
-    bands, chi, fund, harm, rotors = load()
+    bands, chi, fund, harm, rotors = load(resonance=True)
     section_frequencies(fund, harm)
     section_anharmonicity(fund, chi)
     section_overtones(bands)
     section_intensities(fund, harm)
+    section_intensity_resonance(fund, harm)
+    section_rotor_list(fund)
     section_scaling(fund)
     section_experiment(fund)
     section_vci()

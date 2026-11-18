@@ -631,6 +631,103 @@ CO2 bend overtones/combinations removed: 4 per energy model.
 | MDP | 3/20 | – | 17/20 |
 | MACE4IR | 3/20 | 3/20 | – |
 
+## int_vpt2_resonance
+
+| dipole model / resonance in / bands | n | MAE | within 2x % | R2 log10 | ML zero |
+|---|---|---|---|---|---|
+| POLAR-1 / B3LYP run / in resonance | 969 | 13.4 | 64.7 | 0.303 | 0 |
+| POLAR-1 / B3LYP run / not in resonance | 593 | 12.0 | 80.6 | 0.788 | 0 |
+| POLAR-1 / model run / in resonance | 941 | 13.8 | 64.5 | 0.326 | 0 |
+| POLAR-1 / model run / not in resonance | 621 | 11.4 | 80.2 | 0.752 | 0 |
+| POLAR-1 / either run / in resonance | 1069 | 13.5 | 65.4 | 0.351 | 0 |
+| POLAR-1 / either run / not in resonance | 493 | 11.3 | 82.4 | 0.812 | 0 |
+| MDP / B3LYP run / in resonance | 969 | 13.9 | 64.9 | 0.271 | 0 |
+| MDP / B3LYP run / not in resonance | 593 | 16.3 | 77.1 | 0.754 | 0 |
+| MDP / model run / in resonance | 941 | 14.4 | 64.4 | 0.283 | 0 |
+| MDP / model run / not in resonance | 621 | 15.5 | 77.3 | 0.734 | 0 |
+| MDP / either run / in resonance | 1069 | 14.3 | 65.2 | 0.321 | 0 |
+| MDP / either run / not in resonance | 493 | 16.0 | 78.9 | 0.776 | 0 |
+| MACE4IR / B3LYP run / in resonance | 969 | 23.7 | 54.4 | 0.092 | 0 |
+| MACE4IR / B3LYP run / not in resonance | 593 | 21.6 | 76.4 | 0.753 | 0 |
+| MACE4IR / model run / in resonance | 941 | 24.5 | 55.4 | 0.110 | 0 |
+| MACE4IR / model run / not in resonance | 621 | 20.4 | 73.9 | 0.721 | 0 |
+| MACE4IR / either run / in resonance | 1069 | 23.9 | 55.8 | 0.161 | 0 |
+| MACE4IR / either run / not in resonance | 493 | 20.8 | 77.7 | 0.778 | 0 |
+
+## int_vpt2_resonance_harmonic_control
+
+| dipole model / either run / intensities of the same bands | n | MAE | within 2x % | R2 log10 | ML zero |
+|---|---|---|---|---|---|
+| POLAR-1 / in resonance / VPT2 | 1069 | 13.5 | 65.4 | 0.351 | 0 |
+| POLAR-1 / in resonance / harmonic | 1023 | 9.1 | 87.7 | 0.840 | 0 |
+| POLAR-1 / not in resonance / VPT2 | 493 | 11.3 | 82.4 | 0.812 | 0 |
+| POLAR-1 / not in resonance / harmonic | 493 | 10.4 | 88.4 | 0.848 | 0 |
+| MDP / in resonance / VPT2 | 1069 | 14.3 | 65.2 | 0.321 | 0 |
+| MDP / in resonance / harmonic | 1023 | 8.9 | 89.4 | 0.857 | 0 |
+| MDP / not in resonance / VPT2 | 493 | 16.0 | 78.9 | 0.776 | 0 |
+| MDP / not in resonance / harmonic | 493 | 15.8 | 83.4 | 0.864 | 0 |
+| MACE4IR / in resonance / VPT2 | 1069 | 23.9 | 55.8 | 0.161 | 0 |
+| MACE4IR / in resonance / harmonic | 1023 | 10.7 | 85.3 | 0.805 | 0 |
+| MACE4IR / not in resonance / VPT2 | 493 | 20.8 | 77.7 | 0.778 | 0 |
+| MACE4IR / not in resonance / harmonic | 493 | 21.2 | 82.4 | 0.817 | 0 |
+
+## int_vpt2_resonance_counts
+
+| bands in resonance (VPT2 intensity set) | bands | B3LYP run | model run | both | either |
+|---|---|---|---|---|---|
+| ANI-cc | 404 | 256 | 245 | 222 | 279 |
+| OMOL | 407 | 256 | 250 | 223 | 283 |
+| OFF | 407 | 256 | 246 | 223 | 279 |
+| POLAR | 344 | 201 | 200 | 173 | 228 |
+
+## int_vpt2_resonance_note
+
+Resonance: the fundamental is a one-quantum state of a 1-1, 1-2 or 1-3 entry of Gaussian's 'Variational Matrix Definition'. Dipole runs of one energy model agree: True.
+
+## rotor_list
+
+| molecule / B3LYP mode | type | B3LYP harm | B3LYP shift | implausible | ANI-cc harm | ANI-cc VPT2 | OMOL harm | OMOL VPT2 | OFF harm | OFF VPT2 | POLAR harm | POLAR VPT2 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| acetic_acid / 1 | CH3 | 79.0 | 8.9 | yes | -3.5 | -6.9 | -6.2 | -11.7 | -4.1 | -9.6 | -6.9 | -8.7 |
+| propionic_acid / 2 | CH3 | 205.7 | -6.2 | no | 5.5 | 0.5 | 0.8 | -1.2 | 4.8 | 1.4 | 1.9 | 0.8 |
+| tert-butanol / 1 | CH3 | 207.3 | -13.1 | no | -0.3 | 4.4 | -3.7 | 12.7 | 1.0 | 16.3 | -4.8 | 16.1 |
+| beta_glucose / 6 | OH | 222.5 | 3.6 | yes | 7.6 | 29.8 | 7.4 | -29.8 | 12.6 | -29.7 | – | – |
+| isopropanol / 1 | CH3 | 223.8 | -43.0 | yes | -5.4 | -25.9 | -9.2 | 221.7 | -5.9 | -1.1 | -9.2 | -8.0 |
+| glycine / 2 | NH2 | 231.3 | -22.0 | no | -14.7 | -7.4 | -31.1 | -37.6 | -29.2 | -6.6 | -29.7 | -24.6 |
+| 1-propanol / 2 | CH3 | 233.6 | -68.5 | yes | 0.2 | -12.0 | -8.1 | -38.1 | -2.7 | 150.6 | -8.5 | 142.8 |
+| beta_glucose / 7 | OH | 238.8 | 12.1 | yes | 1.4 | -15.2 | 4.6 | -42.5 | 4.7 | -47.3 | – | – |
+| butyric_acid / 4 | CH3 | 246.7 | -9.2 | no | -3.3 | -3.6 | -3.9 | -4.0 | -2.8 | -3.6 | -5.2 | 3.3 |
+| valeric_acid / 5 | CH3 | 248.2 | -12.7 | no | -2.4 | -0.6 | -6.4 | -4.0 | -4.7 | -2.9 | -7.4 | 3.4 |
+| ethanol / 1 | CH3 (with OH) | 249.5 | -162.4 | yes | -14.0 | -35.2 | -16.4 | -56.7 | -14.3 | -64.7 | -16.7 | -63.0 |
+| caproic_acid / 7 | CH3 | 249.6 | -15.3 | no | -2.2 | 3.8 | -6.9 | 0.5 | -3.3 | 2.0 | -7.6 | 8.1 |
+| 1-butanol / 4 | CH3 | 251.1 | -41.3 | yes | -2.4 | 82.5 | -7.5 | 115.6 | -3.2 | 138.0 | -8.2 | 118.9 |
+| tert-butanol / 2 | CH3 | 261.6 | 7.1 | yes | -9.0 | -152.7 | -9.6 | -206.8 | -8.5 | -188.1 | -10.3 | -200.4 |
+| isopropanol / 2 | CH3 | 268.6 | -25.9 | no | -5.9 | -61.9 | -7.9 | -75.6 | -8.7 | -112.2 | -8.3 | 174.0 |
+| beta_glucose / 8 | OH | 268.7 | -54.5 | yes | -0.8 | -37.8 | -6.7 | 23.7 | -1.0 | 24.4 | – | – |
+| tert-butanol / 3 | CH3 | 272.0 | -10.6 | no | -0.0 | 0.1 | 0.1 | 1.1 | -0.7 | 1.2 | -0.8 | 6.2 |
+| 1-propanol / 3 | OH | 273.5 | 43.3 | yes | -3.1 | -14.8 | -20.2 | -8.9 | -19.8 | -199.7 | -19.4 | -190.8 |
+| 1-butanol / 5 | OH | 275.4 | 10.7 | yes | -6.5 | -110.5 | -20.1 | -158.7 | -20.6 | -183.4 | -19.4 | -163.1 |
+| ethanol / 2 | OH | 293.5 | 128.7 | yes | -4.4 | 6.0 | -19.3 | 12.8 | -20.4 | 17.4 | -18.4 | 18.4 |
+| beta_glucose / 9 | OH | 295.6 | -31.8 | no | 2.0 | 47.9 | -2.4 | 21.5 | -0.9 | 46.1 | – | – |
+| isopropanol / 3 | OH | 313.1 | 5.5 | yes | -20.3 | 93.1 | -31.5 | -174.8 | -32.9 | 88.8 | -32.0 | -174.3 |
+| tert-butanol / 4 | OH | 316.0 | -161.3 | yes | -23.7 | 274.1 | -31.8 | 276.4 | -30.9 | 278.9 | -31.2 | 285.9 |
+| beta_glucose / 10 | OH | 320.5 | -51.5 | yes | 0.5 | -38.5 | -12.2 | 1.3 | -10.1 | 25.0 | – | – |
+| methanol / 1 | CH3/OH | 337.4 | -57.2 | yes | -38.5 | -30.0 | -57.0 | -46.9 | -58.0 | -49.3 | -56.3 | -52.1 |
+| beta_glucose / 11 | OH | 339.3 | -27.8 | no | -33.1 | 30.4 | -36.2 | -45.2 | -35.3 | 30.3 | – | – |
+| tert-butanol / 6 | OH (with CH3) | 340.8 | 114.5 | yes | 0.9 | -142.7 | -0.2 | -120.4 | -0.1 | -126.7 | -0.8 | -121.3 |
+| hydrogen_peroxide / 1 | OH | 342.6 | -73.9 | yes | 44.5 | 53.8 | 58.8 | 76.3 | 56.0 | 71.1 | 63.6 | 72.7 |
+| beta_glucose / 12 | OH | 361.4 | 55.2 | yes | -14.1 | -28.9 | -20.4 | 45.5 | -20.8 | -57.4 | – | – |
+| beta_glucose / 13 | OH | 382.5 | -43.9 | no | -16.9 | -67.6 | -20.7 | 10.2 | -19.6 | 119.1 | – | – |
+| beta_glucose / 14 | OH | 401.5 | -29.3 | no | -6.8 | 91.0 | -9.2 | -0.3 | -5.1 | 3.5 | – | – |
+| beta_glucose / 15 | OH | 428.1 | -42.0 | no | -2.6 | 38.5 | -3.1 | 36.1 | -3.2 | -126.0 | – | – |
+| beta_glucose / 16 | OH | 437.4 | -89.9 | yes | -16.3 | -13.8 | 11.3 | 48.3 | -22.7 | -25.2 | – | – |
+| beta_glucose / 17 | OH | 457.3 | 14.3 | yes | -46.4 | -77.5 | -49.5 | -165.1 | -47.8 | -48.8 | – | – |
+| beta_glucose / 18 | OH | 466.9 | 62.6 | yes | -16.3 | -55.5 | -53.3 | -19.0 | -18.6 | -22.1 | – | – |
+
+## rotor_list_note
+
+35 X-H internal rotations; implausible B3LYP shift (> 0 or |shift| > 15% of the harmonic): 22; bands per model {'mace_anicc': 35, 'mace_omol': 35, 'mace_off': 35, 'mace_polar': 22}.
+
 ## scaled_harmonic
 
 | against B3LYP VPT2 fundamentals | n | lambda (all) | scaled MAE, LOO | median, LOO | scaled MAE, all-fit | median, all-fit | VPT2 MAE | VPT2 median |

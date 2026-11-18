@@ -1,0 +1,5 @@
+bands in resonance (VPT2 intensity set),bands,B3LYP run,model run,both,either
+ANI-cc,404,256,245,222,279
+OMOL,407,256,250,223,283
+OFF,407,256,246,223,279
+POLAR,344,201,200,173,228

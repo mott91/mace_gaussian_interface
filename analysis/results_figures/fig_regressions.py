@@ -18,6 +18,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from matplotlib.lines import Line2D
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -43,9 +44,11 @@ H_ORDER = ["mace_anicc", "mace_omol", "mace_polar", "mace_off"]
 FREQ_R2_DECIMALS = 4
 
 
-def note(ax, text):
+def note(ax, text, where="upper left"):
     # white backing: points must not run through the label (POLAR-1 shifts reach +330 cm-1)
-    ax.text(0.05, 0.94, text, transform=ax.transAxes, ha="left", va="top", fontsize=style.ANNOT_FS, color=style.INK,
+    x, ha = (0.05, "left") if "left" in where else (0.97, "right")
+    y, va = (0.94, "top") if "upper" in where else (0.04, "bottom")
+    ax.text(x, y, text, transform=ax.transAxes, ha=ha, va=va, fontsize=style.ANNOT_FS, color=style.INK,
             zorder=5, bbox=dict(boxstyle="square,pad=0.15", fc="white", ec="none", alpha=0.8))  # fmt: skip
 
 
@@ -74,8 +77,61 @@ def titles(axes, models):
         ax.set_title(style.tex(ELAB[m]), color=style.model_color(m), fontsize=style.BASE_FS)
 
 
+def intensity_levels(harm, fund, out: Path) -> None:
+    """regression_intensities_levels: harmonic intensities (top, the set of regression_intensities)
+    and VPT2 intensities of the fundamentals (bottom, the VPT2 column of int_vpt2: NH3/PH3 out), one
+    column per dipole model, pooled over the energy models, same axes in both rows. Bottom row: hollow
+    = the band is in a resonance in the B3LYP run or in the model run (ts.resonant_freqs). Labels from
+    ts.int_metrics, so they equal the table."""
+    rows = [("harmonic", harm[harm.dft_int >= ts.INT_MIN], "dft_int", "ml_int"),
+            ("VPT2", fund[~fund.molecule.isin(ts.SYMTOP) & (fund.dft_intensity >= ts.INT_MIN)],
+             "dft_intensity", "ml_intensity")]  # fmt: skip
+    ys = pd.concat([d[y] for _, d, _, y in rows])
+    xs_all = pd.concat([d[x] for _, d, x, _ in rows])
+    # two decades below the lowest point: the labels sit in the lower right below all data (the MACE-MDP
+    # VPT2 panel has a band at B3LYP 106 km/mol, MACE 0.002 km/mol)
+    lo, hi = 10 ** (np.floor(np.log10(ys.min())) - 2), 10 ** np.ceil(np.log10(max(ys.max(), xs_all.max())))
+    fig, axes = plt.subplots(2, 3, figsize=(style.figwidth(), 5.1), sharex=True, sharey=True)
+    for r, (lev, df, xc, yc) in enumerate(rows):
+        for ax, dm in zip(axes[r], ts.D_MODELS):
+            d = df[df.dipole_model == dm]
+            c = style.dipole_color(dm)
+            xs = np.array([1, hi])
+            ax.fill_between(xs, xs / 2, xs * 2, color=style.GRID, alpha=0.5, lw=0, zorder=0)
+            ax.plot(xs, xs, color=style.INK_MUTED, lw=0.8, ls="--", zorder=1)
+            if lev == "VPT2":
+                res = d.dft_res | d.ml_res
+                ax.plot(d[xc][~res], d[yc][~res], "o", color=c, zorder=2, ms=2.2, mec="none", alpha=0.45)
+                ax.plot(d[xc][res], d[yc][res], "o", color=c, zorder=2, ms=2.4, mfc="none", mew=0.45, alpha=0.6)
+            else:
+                ax.plot(d[xc], d[yc], "o", color=c, zorder=2, ms=2.2, mec="none", alpha=0.45)
+            assert d[xc].between(1, hi).all() and d[yc].between(lo, hi).all(), (lev, dm)
+            s = ts.int_metrics(d, xc, yc)
+            note(ax, f"MAE {s['MAE']:.1f}\nwithin $2\\times$: {s['within 2x %']:.0f} \\%\n"
+                     f"$R^2$(log) {num(s['R2 log10'], 2)}", where="lower right")  # fmt: skip
+            style.clean_axes(ax)
+            ax.set_xscale("log"), ax.set_yscale("log"), ax.set_xlim(1, hi), ax.set_ylim(lo, hi)
+            ax.set_yticks([10.0**k for k in range(int(np.log10(lo)), int(np.log10(hi)) + 1, 3)])
+            ax.xaxis.set_tick_params(labelbottom=True)
+            if r == 0:
+                ax.set_title(style.tex(DLAB[dm]), color=c, fontsize=style.BASE_FS)
+            print(f"int {lev:8s} {dm:11s} n {s['n']:4d} MAE {s['MAE']:5.1f} within2x {s['within 2x %']:.1f} "
+                  f"R2log {s['R2 log10']:.3f}")  # fmt: skip
+        axes[r, 0].set_ylabel(f"MACE {lev} intensity\n/ km mol$^{{-1}}$")
+        axes[r, 1].set_xlabel(f"B3LYP {lev} intensity / km mol$^{{-1}}$")
+    g = style.INK_MUTED
+    handles = [Line2D([], [], color=g, ls="none", marker="o", ms=3.2, mec="none", alpha=0.6, label="no resonance"),
+               Line2D([], [], color=g, ls="none", marker="o", ms=3.4, mfc="none", mew=0.6,
+                      label="in a resonance (B3LYP or model run)")]  # fmt: skip
+    fig.legend(handles=handles, loc="upper center", ncol=2, frameon=False, bbox_to_anchor=(0.5, 1.0),
+               fontsize=style.ANNOT_FS, handletextpad=0.3, columnspacing=1.5, title="VPT2 row:",
+               title_fontsize=style.ANNOT_FS, alignment="left")  # fmt: skip
+    fig.tight_layout(rect=(0, 0, 1, 0.93), w_pad=0.6, h_pad=1.2)
+    style.save(fig, out, "regression_intensities_levels")
+
+
 def main(out: Path) -> None:
-    _, chi, fund, harm, _ = ts.load()
+    _, chi, fund, harm, _ = ts.load(resonance=True)
     E = ts.E_MODELS
     h = harm[harm.dipole_model == "mace_ml"]
     f = fund[(fund.dipole_model == "mace_ml") & ~fund.molecule.isin(ts.SYMTOP)].copy()
@@ -142,6 +198,7 @@ def main(out: Path) -> None:
     axes[1].set_xlabel("B3LYP harmonic intensity / km mol$^{-1}$")
     fig.tight_layout(w_pad=0.6)
     style.save(fig, out, "regression_intensities")
+    intensity_levels(harm, fund, out)
 
     # checks for the prose of 4.1
     print("\nSO2 harmonic:")

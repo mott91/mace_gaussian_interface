@@ -53,7 +53,9 @@ def band_types(out: Path) -> None:
         print(m, [round(float(v), 1) for v in vals])
     ax.set_xticks(range(len(sets)), [s for s, _ in sets])
     ax.set_ylabel("MAE / cm$^{-1}$")
-    ax.legend(frameon=False, fontsize=style.ANNOT_FS, ncol=2, loc="upper left")
+    # legend above the axes: inside, the MACE-POLAR-1 bar of "overtones, all" (123.9) ran into it
+    ax.legend(frameon=False, fontsize=style.ANNOT_FS, ncol=4, loc="lower center", bbox_to_anchor=(0.5, 1.0),
+              handlelength=1.2, columnspacing=1.2)  # fmt: skip
     fig.tight_layout()
     style.save(fig, out, "band_types")
 
