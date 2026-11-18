@@ -10,8 +10,11 @@ curvature is exactly k(Q) = d^T H(x(Q)) d (attoJ amu^-1 Angstrom^-2, Gaussian's 
 dk/dQ = d3E/dQ3 and d2k/dQ2 = d4E/dQ4 are the cubic and quartic constants k(i,i,i), k(i,i,i,i)
 that Gaussian prints for the VPT2 run (attoJ amu^-3/2 A^-3, attoJ amu^-2 A^-4).
 
-Gaussian's VPT2 displacement h (default 0.010 Angstrom) is a Cartesian displacement along the unit
-vector e = d / |d|, i.e. Q = h / |d| (checked against the B3LYP log in analyse.py).
+Gaussian's VPT2 displacement ("Nuclear step= 0.010000 Angstroms" in the log) is 0.010 in the
+mass-weighted normal coordinate Q (amu^1/2 A), not 0.010 A of Cartesian displacement: proven from the
+nuclear repulsion energies Gaussian prints at each displaced point (step_unit_check.py) and by the
+printed constants (steps_q.py). STEPS / q_for_step below are the Cartesian reading this module first
+assumed; they only define the "steps" grid of the first scans. Gaussian's points are in steps_q.py.
 """
 
 from __future__ import annotations

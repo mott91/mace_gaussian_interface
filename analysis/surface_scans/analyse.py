@@ -6,8 +6,9 @@ the campaign VPT2 logs (vpt2_constants.py) and the band / chi tables of the camp
 Constants along the mode, in Gaussian's "k" units, with +Q = X-H stretching:
   - smooth fit: polynomial of degree FIT_DEG in Q through the curvature k(Q) on the fine grid
     (|dr| <= 0.05 A); cubic = dk/dQ(0), quartic = d2k/dQ2(0);
-  - finite differences at Gaussian's steps h (Cartesian A along the unit mode vector), exactly as
-    VPT2 forms them: cubic = [k(+h) - k(-h)] / 2Q_h, quartic = [k(+h) + k(-h) - 2 k(0)] / Q_h^2;
+  - finite differences at Gaussian's steps Q_h = 0.005 ... 0.040 amu^1/2 A in the normal coordinate
+    (steps_q.py; step_unit_check.py proves the unit), exactly as VPT2 forms them:
+    cubic = [k(+h) - k(-h)] / 2Q_h, quartic = [k(+h) + k(-h) - 2 k(0)] / Q_h^2;
   - Gaussian's printed k(i,i,i), k(i,i,i,i) of the campaign run (cubic times the phase of
     Gaussian's mode vector, so that the sign refers to stretching).
 Wobble: residual of k(Q) from a smooth polynomial of degree WOBBLE_DEG over the fine grid, as a

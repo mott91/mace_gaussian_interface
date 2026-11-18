@@ -13,6 +13,8 @@ thesis repo `docs/handoff/surface-scans-report.md`.
 | `zoom.py` | curvature on a 0.0002 Å grid within ±0.012 Å | GPU |
 | `scan_2d.py` | methanol O–H stretch × C–O–H bend, 21 × 21, energies | both |
 | `vpt2_constants.py` | k(i,i,i), k(i,i,i,i) of one mode from a Gaussian VPT2 log | – |
+| `step_unit_check.py <log> <fchk>` | the unit of Gaussian's step, from the V_nn it prints at each displaced point (`data/step_unit_check.txt`) | any env with numpy |
+| `step_figure.py <out dir>` | appendix figure `surface_step`: one stretch per model, Gaussian's three points and their parabola (`data/step_figure.csv`) | any env with matplotlib |
 | `analyse.py <out dir>` | constants, wobble, energy shape, tables (`data/`), figures `surface_*` | any env with matplotlib |
 
 Order: `scan_mace.py`, `scan_b3lyp.py`, `steps_q.py mace|b3lyp`, `zoom.py <target> <model> …`,
@@ -21,4 +23,7 @@ all results are in `data/` (JSON per scan, `results.csv`, `tables.md`, `chi_diag
 
 Gaussian's VPT2 displacement is 0.010 in the mass-weighted normal coordinate Q (amu^½ Å), not
 0.010 Å of Cartesian displacement: only that reproduces Gaussian's printed quartic constants on
-the rough MACE-OMOL-0 surface (`steps_q.py`, all 15 cases agree to the printed digits).
+the rough MACE-OMOL-0 surface (`steps_q.py`, all 15 cases agree to the printed digits), and the
+nuclear repulsion energies Gaussian prints at its displaced points match x0 ± s·L/√m to 6e-10 Hartree
+(Cartesian reading: off by up to 0.2 Hartree), for the default and for `freq=(anharm,step=N)`
+(`step_unit_check.py`). The log's label "Nuclear step= 0.010000 Angstroms" is therefore amu^½ Å.
