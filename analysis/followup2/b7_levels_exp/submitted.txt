@@ -1,0 +1,23 @@
+submitted 2026-11-18T21:58:02+01:00
+g_b3lyp_avtz_fix/ethanol 1150415
+g_pbe0_tzvp_fix/ethanol 1150416
+o_wb97mv_fix/ethanol 1150417
+o_wb97md3bj_fix/ethanol 1150418
+g_b3lyp_631gdp_harm/ethanol 1150419
+g_b3lyp_avtz_fix/isopropanol 1150420
+g_pbe0_tzvp_fix/isopropanol 1150421
+o_wb97mv_fix/isopropanol 1150422
+o_wb97md3bj_fix/isopropanol 1150423
+g_b3lyp_631gdp_harm/isopropanol 1150424
+g_b3lyp_avtz_fix/1-butanol 1150425
+g_pbe0_tzvp_fix/1-butanol 1150426
+o_wb97mv_fix/1-butanol 1150427
+o_wb97md3bj_fix/1-butanol 1150428
+g_b3lyp_631gdp_harm/1-butanol 1150429
+g_b3lyp_avtz_fix/sulfur_dioxide 1150430
+g_pbe0_tzvp_fix/sulfur_dioxide 1150431
+o_wb97mv_fix/sulfur_dioxide 1150432
+o_wb97md3bj_fix/sulfur_dioxide 1150433
+g_b3lyp_631gdp_harm/sulfur_dioxide 1150434
+g_b3lyp_631gdp_harm/methanol 1150435
+analysis 1150436 (afterok:1150415:1150416:1150417:1150418:1150419:1150420:1150421:1150422:1150423:1150424:1150425:1150426:1150427:1150428:1150429:1150430:1150431:1150432:1150433:1150434:1150435)

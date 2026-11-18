@@ -1,0 +1,9 @@
+! wB97M-V def2-TZVPD NumFreq TightSCF DefGrid3
+%pal nprocs 8 end
+%maxcore 4000
+%freq CentralDiff true end
+* xyz 0 1
+S     -0.0000000115    -0.4945051020     0.0000000000
+O      1.2617412486     0.2472525595     0.0000000000
+O     -1.2617412380     0.2472525526     0.0000000000
+*

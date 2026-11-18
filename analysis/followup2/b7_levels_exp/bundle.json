@@ -1,0 +1,1194 @@
+{
+ "mols": [
+  "methanol",
+  "ethanol",
+  "isopropanol",
+  "1-butanol",
+  "sulfur_dioxide"
+ ],
+ "dipoles": {
+  "mace_polar1": "POLAR-1",
+  "polar1_field": "POLAR-1 (field)",
+  "mace_mdp": "MDP",
+  "mace_ml": "MACE4IR"
+ },
+ "regions": {
+  "methanol": [
+   [
+    "575-1550 (fingerprint)",
+    575,
+    1550
+   ],
+   [
+    "2600-3300 (C-H)",
+    2600,
+    3300
+   ],
+   [
+    "3300-3975 (O-H)",
+    3300,
+    3975
+   ],
+   [
+    "575-3975 (all)",
+    575,
+    3975
+   ]
+  ],
+  "ethanol": [
+   [
+    "575-1550 (fingerprint)",
+    575,
+    1550
+   ],
+   [
+    "2600-3300 (C-H)",
+    2600,
+    3300
+   ],
+   [
+    "3300-3975 (O-H)",
+    3300,
+    3975
+   ],
+   [
+    "575-3975 (all)",
+    575,
+    3975
+   ]
+  ],
+  "isopropanol": [
+   [
+    "575-1550 (fingerprint)",
+    575,
+    1550
+   ],
+   [
+    "2600-3300 (C-H)",
+    2600,
+    3300
+   ],
+   [
+    "3300-3975 (O-H)",
+    3300,
+    3975
+   ],
+   [
+    "575-3975 (all)",
+    575,
+    3975
+   ]
+  ],
+  "1-butanol": [
+   [
+    "575-1550 (fingerprint)",
+    575,
+    1550
+   ],
+   [
+    "2600-3300 (C-H)",
+    2600,
+    3300
+   ],
+   [
+    "3300-3975 (O-H)",
+    3300,
+    3975
+   ],
+   [
+    "575-3975 (all)",
+    575,
+    3975
+   ]
+  ],
+  "sulfur_dioxide": [
+   [
+    "1050-1250 (nu1)",
+    1050,
+    1250
+   ],
+   [
+    "1250-1450 (nu3)",
+    1250,
+    1450
+   ],
+   [
+    "575-3975 (all)",
+    575,
+    3975
+   ]
+  ]
+ },
+ "exp": {
+  "methanol": {
+   "575-1550 (fingerprint)": 152.1456174555614,
+   "2600-3300 (C-H)": 133.38704212026306,
+   "3300-3975 (O-H)": 28.979150035680505,
+   "575-3975 (all)": 323.3643809384281
+  },
+  "ethanol": {
+   "575-1550 (fingerprint)": 197.3967674385124,
+   "2600-3300 (C-H)": 161.81199064056258,
+   "3300-3975 (O-H)": 21.258189353301336,
+   "575-3975 (all)": 385.04925326809297
+  },
+  "isopropanol": {
+   "575-1550 (fingerprint)": 240.8901814610151,
+   "2600-3300 (C-H)": 181.62266731052878,
+   "3300-3975 (O-H)": 18.854352075704774,
+   "575-3975 (all)": 449.2033797048929
+  },
+  "1-butanol": {
+   "575-1550 (fingerprint)": 208.4046942677558,
+   "2600-3300 (C-H)": 304.22989148220137,
+   "3300-3975 (O-H)": 27.105061785970463,
+   "575-3975 (all)": 551.5111615185167
+  },
+  "sulfur_dioxide": {
+   "1050-1250 (nu1)": 23.029461427778195,
+   "1250-1450 (nu3)": 179.4267853978004,
+   "575-3975 (all)": 204.9555495469065
+  }
+ },
+ "b4": {
+  "methanol": {
+   "575-1550 (fingerprint)": {
+    "experiment": 152.1,
+    "B3LYP harm": 163.7,
+    "B3LYP VPT2": 167.6,
+    "POLAR-1 harm (B3LYP modes)": 147.3,
+    "MDP harm (B3LYP modes)": 166.7,
+    "MACE4IR harm (B3LYP modes)": 160.3,
+    "POLAR-1 (field) harm": 172.1,
+    "POLAR-1 VPT2 (OMOL)": 154.8,
+    "MDP VPT2 (OMOL)": 168.1,
+    "MACE4IR VPT2 (OMOL)": 176.7
+   },
+   "2600-3300 (C-H)": {
+    "experiment": 133.4,
+    "B3LYP harm": 180.9,
+    "B3LYP VPT2": 195.4,
+    "POLAR-1 harm (B3LYP modes)": 129.7,
+    "MDP harm (B3LYP modes)": 140.7,
+    "MACE4IR harm (B3LYP modes)": 129.6,
+    "POLAR-1 (field) harm": 147.5,
+    "POLAR-1 VPT2 (OMOL)": 162.3,
+    "MDP VPT2 (OMOL)": 131.6,
+    "MACE4IR VPT2 (OMOL)": 425.1
+   },
+   "3300-3975 (O-H)": {
+    "experiment": 29.0,
+    "B3LYP harm": 13.2,
+    "B3LYP VPT2": 11.8,
+    "POLAR-1 harm (B3LYP modes)": 30.4,
+    "MDP harm (B3LYP modes)": 38.4,
+    "MACE4IR harm (B3LYP modes)": 41.1,
+    "POLAR-1 (field) harm": 33.4,
+    "POLAR-1 VPT2 (OMOL)": 33.7,
+    "MDP VPT2 (OMOL)": 35.3,
+    "MACE4IR VPT2 (OMOL)": 26.9
+   },
+   "575-3975 (all)": {
+    "experiment": 323.4,
+    "B3LYP harm": 357.7,
+    "B3LYP VPT2": 380.0,
+    "POLAR-1 harm (B3LYP modes)": 307.4,
+    "MDP harm (B3LYP modes)": 345.9,
+    "MACE4IR harm (B3LYP modes)": 331.0,
+    "POLAR-1 (field) harm": 352.9,
+    "POLAR-1 VPT2 (OMOL)": 354.9,
+    "MDP VPT2 (OMOL)": 339.2,
+    "MACE4IR VPT2 (OMOL)": 632.5
+   }
+  },
+  "ethanol": {
+   "575-1550 (fingerprint)": {
+    "experiment": 197.4,
+    "B3LYP harm": 207.0,
+    "B3LYP VPT2": 207.8,
+    "POLAR-1 harm (B3LYP modes)": 181.4,
+    "MDP harm (B3LYP modes)": 203.6,
+    "MACE4IR harm (B3LYP modes)": 200.7,
+    "POLAR-1 (field) harm": 211.0,
+    "POLAR-1 VPT2 (OMOL)": 187.3,
+    "MDP VPT2 (OMOL)": 202.4,
+    "MACE4IR VPT2 (OMOL)": 206.6
+   },
+   "2600-3300 (C-H)": {
+    "experiment": 161.8,
+    "B3LYP harm": 225.2,
+    "B3LYP VPT2": 246.6,
+    "POLAR-1 harm (B3LYP modes)": 160.3,
+    "MDP harm (B3LYP modes)": 183.1,
+    "MACE4IR harm (B3LYP modes)": 202.1,
+    "POLAR-1 (field) harm": 194.7,
+    "POLAR-1 VPT2 (OMOL)": 197.6,
+    "MDP VPT2 (OMOL)": 178.4,
+    "MACE4IR VPT2 (OMOL)": 497.7
+   },
+   "3300-3975 (O-H)": {
+    "experiment": 21.3,
+    "B3LYP harm": 11.6,
+    "B3LYP VPT2": 10.7,
+    "POLAR-1 harm (B3LYP modes)": 29.0,
+    "MDP harm (B3LYP modes)": 42.0,
+    "MACE4IR harm (B3LYP modes)": 43.8,
+    "POLAR-1 (field) harm": 33.7,
+    "POLAR-1 VPT2 (OMOL)": 33.9,
+    "MDP VPT2 (OMOL)": 36.9,
+    "MACE4IR VPT2 (OMOL)": 35.1
+   },
+   "575-3975 (all)": {
+    "experiment": 385.0,
+    "B3LYP harm": 443.9,
+    "B3LYP VPT2": 473.4,
+    "POLAR-1 harm (B3LYP modes)": 370.8,
+    "MDP harm (B3LYP modes)": 428.7,
+    "MACE4IR harm (B3LYP modes)": 446.6,
+    "POLAR-1 (field) harm": 439.4,
+    "POLAR-1 VPT2 (OMOL)": 425.7,
+    "MDP VPT2 (OMOL)": 424.4,
+    "MACE4IR VPT2 (OMOL)": 746.2
+   }
+  },
+  "isopropanol": {
+   "575-1550 (fingerprint)": {
+    "experiment": 240.9,
+    "B3LYP harm": 247.5,
+    "B3LYP VPT2": 256.2,
+    "POLAR-1 harm (B3LYP modes)": 233.9,
+    "MDP harm (B3LYP modes)": 256.0,
+    "MACE4IR harm (B3LYP modes)": 267.3,
+    "POLAR-1 (field) harm": 266.5,
+    "POLAR-1 VPT2 (OMOL)": 258.0,
+    "MDP VPT2 (OMOL)": 273.7,
+    "MACE4IR VPT2 (OMOL)": 279.3
+   },
+   "2600-3300 (C-H)": {
+    "experiment": 181.6,
+    "B3LYP harm": 222.6,
+    "B3LYP VPT2": 258.7,
+    "POLAR-1 harm (B3LYP modes)": 163.8,
+    "MDP harm (B3LYP modes)": 206.2,
+    "MACE4IR harm (B3LYP modes)": 229.1,
+    "POLAR-1 (field) harm": 203.5,
+    "POLAR-1 VPT2 (OMOL)": 220.5,
+    "MDP VPT2 (OMOL)": 226.5,
+    "MACE4IR VPT2 (OMOL)": 517.3
+   },
+   "3300-3975 (O-H)": {
+    "experiment": 18.9,
+    "B3LYP harm": 7.5,
+    "B3LYP VPT2": 7.7,
+    "POLAR-1 harm (B3LYP modes)": 20.3,
+    "MDP harm (B3LYP modes)": 33.3,
+    "MACE4IR harm (B3LYP modes)": 32.0,
+    "POLAR-1 (field) harm": 23.6,
+    "POLAR-1 VPT2 (OMOL)": 22.9,
+    "MDP VPT2 (OMOL)": 33.6,
+    "MACE4IR VPT2 (OMOL)": 25.8
+   },
+   "575-3975 (all)": {
+    "experiment": 449.2,
+    "B3LYP harm": 477.6,
+    "B3LYP VPT2": 531.0,
+    "POLAR-1 harm (B3LYP modes)": 418.0,
+    "MDP harm (B3LYP modes)": 495.6,
+    "MACE4IR harm (B3LYP modes)": 528.5,
+    "POLAR-1 (field) harm": 493.6,
+    "POLAR-1 VPT2 (OMOL)": 509.7,
+    "MDP VPT2 (OMOL)": 541.5,
+    "MACE4IR VPT2 (OMOL)": 830.8
+   }
+  },
+  "1-butanol": {
+   "575-1550 (fingerprint)": {
+    "experiment": 208.4,
+    "B3LYP harm": 209.5,
+    "B3LYP VPT2": 220.2,
+    "POLAR-1 harm (B3LYP modes)": 182.6,
+    "MDP harm (B3LYP modes)": 208.3,
+    "MACE4IR harm (B3LYP modes)": 212.7,
+    "POLAR-1 (field) harm": 219.0,
+    "POLAR-1 VPT2 (OMOL)": 214.1,
+    "MDP VPT2 (OMOL)": 238.1,
+    "MACE4IR VPT2 (OMOL)": 234.7
+   },
+   "2600-3300 (C-H)": {
+    "experiment": 304.2,
+    "B3LYP harm": 368.1,
+    "B3LYP VPT2": 421.1,
+    "POLAR-1 harm (B3LYP modes)": 274.0,
+    "MDP harm (B3LYP modes)": 322.4,
+    "MACE4IR harm (B3LYP modes)": 370.4,
+    "POLAR-1 (field) harm": 345.3,
+    "POLAR-1 VPT2 (OMOL)": 332.5,
+    "MDP VPT2 (OMOL)": 315.5,
+    "MACE4IR VPT2 (OMOL)": 793.4
+   },
+   "3300-3975 (O-H)": {
+    "experiment": 27.1,
+    "B3LYP harm": 11.8,
+    "B3LYP VPT2": 12.9,
+    "POLAR-1 harm (B3LYP modes)": 31.5,
+    "MDP harm (B3LYP modes)": 42.5,
+    "MACE4IR harm (B3LYP modes)": 56.3,
+    "POLAR-1 (field) harm": 37.0,
+    "POLAR-1 VPT2 (OMOL)": 36.9,
+    "MDP VPT2 (OMOL)": 37.4,
+    "MACE4IR VPT2 (OMOL)": 30.0
+   },
+   "575-3975 (all)": {
+    "experiment": 551.5,
+    "B3LYP harm": 589.4,
+    "B3LYP VPT2": 664.4,
+    "POLAR-1 harm (B3LYP modes)": 488.1,
+    "MDP harm (B3LYP modes)": 573.2,
+    "MACE4IR harm (B3LYP modes)": 639.3,
+    "POLAR-1 (field) harm": 601.4,
+    "POLAR-1 VPT2 (OMOL)": 592.3,
+    "MDP VPT2 (OMOL)": 600.2,
+    "MACE4IR VPT2 (OMOL)": 1070.7
+   }
+  },
+  "sulfur_dioxide": {
+   "1050-1250 (nu1)": {
+    "experiment": 23.0,
+    "B3LYP harm": 27.6,
+    "B3LYP VPT2": 26.7,
+    "POLAR-1 harm (B3LYP modes)": 38.5,
+    "MDP harm (B3LYP modes)": 33.7,
+    "MACE4IR harm (B3LYP modes)": 20.6,
+    "POLAR-1 (field) harm": 47.2,
+    "POLAR-1 VPT2 (OMOL)": 39.4,
+    "MDP VPT2 (OMOL)": 27.1,
+    "MACE4IR VPT2 (OMOL)": 19.5
+   },
+   "1250-1450 (nu3)": {
+    "experiment": 179.4,
+    "B3LYP harm": 165.2,
+    "B3LYP VPT2": 160.2,
+    "POLAR-1 harm (B3LYP modes)": 216.6,
+    "MDP harm (B3LYP modes)": 240.9,
+    "MACE4IR harm (B3LYP modes)": 201.9,
+    "POLAR-1 (field) harm": 273.0,
+    "POLAR-1 VPT2 (OMOL)": 219.6,
+    "MDP VPT2 (OMOL)": 235.1,
+    "MACE4IR VPT2 (OMOL)": 197.5
+   },
+   "575-3975 (all)": {
+    "experiment": 205.0,
+    "B3LYP harm": 192.8,
+    "B3LYP VPT2": 190.4,
+    "POLAR-1 harm (B3LYP modes)": 255.1,
+    "MDP harm (B3LYP modes)": 274.6,
+    "MACE4IR harm (B3LYP modes)": 222.5,
+    "POLAR-1 (field) harm": 320.1,
+    "POLAR-1 VPT2 (OMOL)": 261.3,
+    "MDP VPT2 (OMOL)": 264.0,
+    "MACE4IR VPT2 (OMOL)": 217.8
+   }
+  }
+ },
+ "ml_runs": {
+  "methanol": [
+   {
+    "energy": "mace_anicc",
+    "dipole": "mace_polar1",
+    "runtime_s": 55.75285315513611,
+    "gaussian_elapsed_s": 53.6,
+    "gaussian_cpu_s": 5.3,
+    "n_calls": 25,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_anicc",
+    "dipole": "mace_mdp",
+    "runtime_s": 51.00925612449646,
+    "gaussian_elapsed_s": 48.9,
+    "gaussian_cpu_s": 5.3,
+    "n_calls": 25,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_anicc",
+    "dipole": "mace_ml",
+    "runtime_s": 33.48292088508606,
+    "gaussian_elapsed_s": 31.3,
+    "gaussian_cpu_s": 5.3,
+    "n_calls": 25,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_omol",
+    "dipole": "mace_polar1",
+    "runtime_s": 72.89247179031372,
+    "gaussian_elapsed_s": 68.9,
+    "gaussian_cpu_s": 5.3,
+    "n_calls": 25,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_omol",
+    "dipole": "mace_mdp",
+    "runtime_s": 67.74002075195312,
+    "gaussian_elapsed_s": 63.8,
+    "gaussian_cpu_s": 5.3,
+    "n_calls": 25,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_omol",
+    "dipole": "mace_ml",
+    "runtime_s": 56.27451133728027,
+    "gaussian_elapsed_s": 49.3,
+    "gaussian_cpu_s": 5.3,
+    "n_calls": 25,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_off",
+    "dipole": "mace_polar1",
+    "runtime_s": 59.176209688186646,
+    "gaussian_elapsed_s": 56.6,
+    "gaussian_cpu_s": 5.3,
+    "n_calls": 25,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_off",
+    "dipole": "mace_mdp",
+    "runtime_s": 54.147204637527466,
+    "gaussian_elapsed_s": 51.5,
+    "gaussian_cpu_s": 5.3,
+    "n_calls": 25,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_off",
+    "dipole": "mace_ml",
+    "runtime_s": 47.76276659965515,
+    "gaussian_elapsed_s": 36.9,
+    "gaussian_cpu_s": 5.3,
+    "n_calls": 25,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_polar",
+    "dipole": "mace_polar1",
+    "runtime_s": 157.3597481250763,
+    "gaussian_elapsed_s": 150.3,
+    "gaussian_cpu_s": 5.3,
+    "n_calls": 25,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_polar",
+    "dipole": "mace_mdp",
+    "runtime_s": 153.74790263175964,
+    "gaussian_elapsed_s": 146.3,
+    "gaussian_cpu_s": 5.3,
+    "n_calls": 25,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_polar",
+    "dipole": "mace_ml",
+    "runtime_s": 142.00461387634277,
+    "gaussian_elapsed_s": 130.1,
+    "gaussian_cpu_s": 5.3,
+    "n_calls": 25,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   }
+  ],
+  "ethanol": [
+   {
+    "energy": "mace_anicc",
+    "dipole": "mace_polar1",
+    "runtime_s": 125.97608089447021,
+    "gaussian_elapsed_s": 123.4,
+    "gaussian_cpu_s": 18.2,
+    "n_calls": 43,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_anicc",
+    "dipole": "mace_mdp",
+    "runtime_s": 130.0426585674286,
+    "gaussian_elapsed_s": 127.5,
+    "gaussian_cpu_s": 18.2,
+    "n_calls": 43,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_anicc",
+    "dipole": "mace_ml",
+    "runtime_s": 83.82401847839355,
+    "gaussian_elapsed_s": 81.3,
+    "gaussian_cpu_s": 18.2,
+    "n_calls": 43,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_omol",
+    "dipole": "mace_polar1",
+    "runtime_s": 163.04966831207275,
+    "gaussian_elapsed_s": 159.2,
+    "gaussian_cpu_s": 18.3,
+    "n_calls": 43,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_omol",
+    "dipole": "mace_mdp",
+    "runtime_s": 166.4834578037262,
+    "gaussian_elapsed_s": 162.3,
+    "gaussian_cpu_s": 18.2,
+    "n_calls": 43,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_omol",
+    "dipole": "mace_ml",
+    "runtime_s": 122.50018072128296,
+    "gaussian_elapsed_s": 117.7,
+    "gaussian_cpu_s": 18.2,
+    "n_calls": 43,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_off",
+    "dipole": "mace_polar1",
+    "runtime_s": 134.74128985404968,
+    "gaussian_elapsed_s": 131.5,
+    "gaussian_cpu_s": 18.2,
+    "n_calls": 43,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_off",
+    "dipole": "mace_mdp",
+    "runtime_s": 137.92076992988586,
+    "gaussian_elapsed_s": 134.6,
+    "gaussian_cpu_s": 18.2,
+    "n_calls": 43,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_off",
+    "dipole": "mace_ml",
+    "runtime_s": 92.83651089668274,
+    "gaussian_elapsed_s": 88.7,
+    "gaussian_cpu_s": 18.3,
+    "n_calls": 43,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_polar",
+    "dipole": "mace_polar1",
+    "runtime_s": 376.14107489585876,
+    "gaussian_elapsed_s": 366.2,
+    "gaussian_cpu_s": 18.1,
+    "n_calls": 43,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_polar",
+    "dipole": "mace_mdp",
+    "runtime_s": 376.6711218357086,
+    "gaussian_elapsed_s": 367.0,
+    "gaussian_cpu_s": 18.2,
+    "n_calls": 43,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_polar",
+    "dipole": "mace_ml",
+    "runtime_s": 334.83922958374023,
+    "gaussian_elapsed_s": 324.6,
+    "gaussian_cpu_s": 18.2,
+    "n_calls": 43,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   }
+  ],
+  "isopropanol": [
+   {
+    "energy": "mace_anicc",
+    "dipole": "mace_polar1",
+    "runtime_s": 257.2337384223938,
+    "gaussian_elapsed_s": 249.4,
+    "gaussian_cpu_s": 55.5,
+    "n_calls": 61,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_anicc",
+    "dipole": "mace_mdp",
+    "runtime_s": 284.90175557136536,
+    "gaussian_elapsed_s": 277.4,
+    "gaussian_cpu_s": 55.5,
+    "n_calls": 61,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_anicc",
+    "dipole": "mace_ml",
+    "runtime_s": 199.52164840698242,
+    "gaussian_elapsed_s": 192.1,
+    "gaussian_cpu_s": 55.5,
+    "n_calls": 61,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_omol",
+    "dipole": "mace_polar1",
+    "runtime_s": 295.03382658958435,
+    "gaussian_elapsed_s": 290.2,
+    "gaussian_cpu_s": 55.4,
+    "n_calls": 61,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_omol",
+    "dipole": "mace_mdp",
+    "runtime_s": 322.3898663520813,
+    "gaussian_elapsed_s": 317.6,
+    "gaussian_cpu_s": 55.5,
+    "n_calls": 61,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_omol",
+    "dipole": "mace_ml",
+    "runtime_s": 237.41193914413452,
+    "gaussian_elapsed_s": 232.4,
+    "gaussian_cpu_s": 55.5,
+    "n_calls": 61,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_off",
+    "dipole": "mace_polar1",
+    "runtime_s": 246.29119634628296,
+    "gaussian_elapsed_s": 239.7,
+    "gaussian_cpu_s": 56.6,
+    "n_calls": 61,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_off",
+    "dipole": "mace_mdp",
+    "runtime_s": 273.9593994617462,
+    "gaussian_elapsed_s": 266.7,
+    "gaussian_cpu_s": 55.5,
+    "n_calls": 61,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_off",
+    "dipole": "mace_ml",
+    "runtime_s": 189.26566338539124,
+    "gaussian_elapsed_s": 182.3,
+    "gaussian_cpu_s": 55.7,
+    "n_calls": 61,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_polar",
+    "dipole": "mace_polar1",
+    "runtime_s": 702.7953636646271,
+    "gaussian_elapsed_s": 688.8,
+    "gaussian_cpu_s": 55.3,
+    "n_calls": 61,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_polar",
+    "dipole": "mace_mdp",
+    "runtime_s": 732.7072880268097,
+    "gaussian_elapsed_s": 719.0,
+    "gaussian_cpu_s": 55.6,
+    "n_calls": 61,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_polar",
+    "dipole": "mace_ml",
+    "runtime_s": 645.2509088516235,
+    "gaussian_elapsed_s": 631.0,
+    "gaussian_cpu_s": 55.3,
+    "n_calls": 61,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   }
+  ],
+  "1-butanol": [
+   {
+    "energy": "mace_anicc",
+    "dipole": "mace_polar1",
+    "runtime_s": 478.6206200122833,
+    "gaussian_elapsed_s": 472.8,
+    "gaussian_cpu_s": 140.5,
+    "n_calls": 79,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_anicc",
+    "dipole": "mace_mdp",
+    "runtime_s": 536.9801299571991,
+    "gaussian_elapsed_s": 531.6,
+    "gaussian_cpu_s": 141.0,
+    "n_calls": 79,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_anicc",
+    "dipole": "mace_ml",
+    "runtime_s": 400.23234724998474,
+    "gaussian_elapsed_s": 394.1,
+    "gaussian_cpu_s": 141.3,
+    "n_calls": 79,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_omol",
+    "dipole": "mace_polar1",
+    "runtime_s": 551.3434875011444,
+    "gaussian_elapsed_s": 546.7,
+    "gaussian_cpu_s": 140.1,
+    "n_calls": 79,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_omol",
+    "dipole": "mace_mdp",
+    "runtime_s": 609.3934004306793,
+    "gaussian_elapsed_s": 603.9,
+    "gaussian_cpu_s": 140.3,
+    "n_calls": 79,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_omol",
+    "dipole": "mace_ml",
+    "runtime_s": 474.3200852870941,
+    "gaussian_elapsed_s": 467.9,
+    "gaussian_cpu_s": 140.4,
+    "n_calls": 79,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_off",
+    "dipole": "mace_polar1",
+    "runtime_s": 423.4297318458557,
+    "gaussian_elapsed_s": 418.6,
+    "gaussian_cpu_s": 140.2,
+    "n_calls": 79,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_off",
+    "dipole": "mace_mdp",
+    "runtime_s": 481.36295104026794,
+    "gaussian_elapsed_s": 476.2,
+    "gaussian_cpu_s": 140.0,
+    "n_calls": 79,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_off",
+    "dipole": "mace_ml",
+    "runtime_s": 345.9747862815857,
+    "gaussian_elapsed_s": 339.9,
+    "gaussian_cpu_s": 139.8,
+    "n_calls": 79,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_polar",
+    "dipole": "mace_polar1",
+    "runtime_s": 1167.5806283950806,
+    "gaussian_elapsed_s": 1153.9,
+    "gaussian_cpu_s": 140.1,
+    "n_calls": 79,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_polar",
+    "dipole": "mace_mdp",
+    "runtime_s": 1222.8408513069153,
+    "gaussian_elapsed_s": 1208.8,
+    "gaussian_cpu_s": 139.7,
+    "n_calls": 79,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_polar",
+    "dipole": "mace_ml",
+    "runtime_s": 1092.7448403835297,
+    "gaussian_elapsed_s": 1078.2,
+    "gaussian_cpu_s": 139.5,
+    "n_calls": 79,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   }
+  ],
+  "sulfur_dioxide": [
+   {
+    "energy": "mace_omol",
+    "dipole": "mace_polar1",
+    "runtime_s": 17.143715858459473,
+    "gaussian_elapsed_s": 13.4,
+    "gaussian_cpu_s": 1.3,
+    "n_calls": 7,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_omol",
+    "dipole": "mace_mdp",
+    "runtime_s": 14.471546411514282,
+    "gaussian_elapsed_s": 10.7,
+    "gaussian_cpu_s": 1.3,
+    "n_calls": 7,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_omol",
+    "dipole": "mace_ml",
+    "runtime_s": 11.829339265823364,
+    "gaussian_elapsed_s": 7.7,
+    "gaussian_cpu_s": 1.3,
+    "n_calls": 7,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_off",
+    "dipole": "mace_polar1",
+    "runtime_s": 14.2367422580719,
+    "gaussian_elapsed_s": 11.8,
+    "gaussian_cpu_s": 1.3,
+    "n_calls": 7,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_off",
+    "dipole": "mace_mdp",
+    "runtime_s": 11.362532377243042,
+    "gaussian_elapsed_s": 9.3,
+    "gaussian_cpu_s": 1.3,
+    "n_calls": 7,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_off",
+    "dipole": "mace_ml",
+    "runtime_s": 8.169716835021973,
+    "gaussian_elapsed_s": 6.1,
+    "gaussian_cpu_s": 1.3,
+    "n_calls": 7,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_polar",
+    "dipole": "mace_polar1",
+    "runtime_s": 131.78899335861206,
+    "gaussian_elapsed_s": 25.8,
+    "gaussian_cpu_s": 1.3,
+    "n_calls": 7,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_polar",
+    "dipole": "mace_mdp",
+    "runtime_s": 130.48168873786926,
+    "gaussian_elapsed_s": 23.3,
+    "gaussian_cpu_s": 1.3,
+    "n_calls": 7,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   },
+   {
+    "energy": "mace_polar",
+    "dipole": "mace_ml",
+    "runtime_s": 118.56978631019592,
+    "gaussian_elapsed_s": 20.0,
+    "gaussian_cpu_s": 1.3,
+    "n_calls": 7,
+    "nproc_gaussian": 2,
+    "cpu": "Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz",
+    "gpu": "NVIDIA GeForce RTX 2070 SUPER",
+    "torch": "2.14.1+cu130",
+    "mace": "0.3.16"
+   }
+  ]
+ },
+ "b3_methanol_wall_s": {
+  "b3lyp_avtz": 46,
+  "pbe0_tzvp": 10,
+  "wb97mv_tzvpd": 273,
+  "wb97md3_tzvppd": 82
+ },
+ "campaign_b3lyp": {
+  "methanol": {
+   "elapsed_s": [
+    9.7,
+    140.8
+   ],
+   "nproc": 4,
+   "route": "# opt=verytight freq(anharm) b3lyp/6-31G(d,p) nosymm int=ultrafine"
+  },
+  "ethanol": {
+   "elapsed_s": [
+    14.7,
+    644.8
+   ],
+   "nproc": 4,
+   "route": "# opt=verytight freq(anharm) b3lyp/6-31G(d,p) nosymm int=ultrafine"
+  },
+  "isopropanol": {
+   "elapsed_s": [
+    41.2,
+    2050.7
+   ],
+   "nproc": 4,
+   "route": "# opt=verytight freq(anharm) b3lyp/6-31G(d,p) nosymm int=ultrafine"
+  },
+  "1-butanol": {
+   "elapsed_s": [
+    37.6,
+    4570.6
+   ],
+   "nproc": 4,
+   "route": "# opt=verytight freq(anharm) b3lyp/6-31G(d,p) nosymm int=ultrafine"
+  },
+  "sulfur_dioxide": {
+   "elapsed_s": [
+    7.6,
+    22.6
+   ],
+   "nproc": 4,
+   "route": "# opt=verytight freq(anharm) b3lyp/6-31G(d,p) nosymm int=ultrafine"
+  }
+ }
+}
