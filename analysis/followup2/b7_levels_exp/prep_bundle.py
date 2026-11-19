@@ -66,6 +66,31 @@ def b4_table_values():
     return out
 
 
+def call_times():
+    """Per-call wall times of the campaign ML runs, from the batch logs.
+
+    The pipeline prints "Gaussian call completed in X s" for every external call (energy,
+    forces, Hessian, dipole and APT, from the ZMQ request to the written answer). stdout was
+    buffered, so these lines are not interleaved with the logging lines of their run; they are in
+    call order, though. They are assigned to the runs in the order of the "Saved frequency results"
+    lines, each run taking as many lines as its gaussian_freq.log has external calls. The totals
+    must match exactly (checked)."""
+    out = {}
+    for lg in ("ml_alcohols", "ml_inorganic"):
+        t = (CAMP / "logs" / f"{lg}.log").read_text()
+        calls = [float(x) for x in re.findall(r"Gaussian call completed in ([\d.]+)s", t)]
+        k = 0
+        for r in re.findall(r"Saved frequency results to (\S+)", t):
+            n = (ROOT / r / "gaussian_freq.log").read_text().count("Running external command")
+            out[str((ROOT / r).resolve())] = calls[k : k + n]
+            k += n
+        assert k == len(calls), (lg, k, len(calls))
+    return out
+
+
+CALLS = call_times()
+
+
 def ml_runs(mol):
     rows = []
     for e in ENERGY:
@@ -82,7 +107,9 @@ def ml_runs(mol):
                              gaussian_elapsed_s=r["gaussian_timing"]["total_elapsed_s"],
                              gaussian_cpu_s=r["gaussian_timing"]["total_cpu_s"], n_calls=ncall,
                              nproc_gaussian=nproc, cpu=v["cpu_model"], gpu=v.get("gpu_name"),
-                             torch=v["torch_version"], mace=v["mace_version"]))  # fmt: skip
+                             torch=v["torch_version"], mace=v["mace_version"],
+                             calls_s=CALLS[str(p.resolve())]))  # fmt: skip
+            assert len(rows[-1]["calls_s"]) == ncall, (mol, e, d)
     return rows
 
 

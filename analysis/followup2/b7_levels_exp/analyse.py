@@ -314,12 +314,16 @@ def main():
       "in brackets). B3LYP/6-31G(d,p): harmonic freq at the same geometry (this follow-up). Methanol's "
       "four levels are the B3 runs. ωB97M-V is ORCA NumFreq (numerical Hessian, 6N gradients), not "
       "representative of an analytic implementation; the APT needs only that, or a field-derivative "
-      "run. ML: campaign VPT2 runs (local i7-6800K + RTX 2070 SUPER); one external call = one Hessian "
-      "and APT, so runtime / calls is the cost of one harmonic frequency + intensity calculation "
-      "(including Gaussian's per-call overhead).\n")  # fmt: skip
+      "run. ML: campaign VPT2 runs (local i7-6800K + RTX 2070 SUPER, Gaussian with 2 cores). One "
+      "external call computes energy, forces, Hessian, dipole and APT at one geometry, i.e. one "
+      "harmonic frequency + intensity calculation. Its wall time is printed per call in the batch "
+      "logs (ml_alcohols.log, ml_inorganic.log; prep_bundle.call_times). 'ML call' = median over the "
+      "runs of each run's median call (the first call of a run is listed apart; it includes warm-up); "
+      "'runtime/calls' = whole run / number of calls, for comparison.\n")  # fmt: skip
     cost_rows = []
     hdr = ["molecule", "atoms", "B3LYP/6-31G(d,p) harm", *[LEVELS[v] + (" (NumFreq)" if v in NUMERICAL else "") for v in LEVELS],
-           "ML per call (median, min–max over runs)", "ML runs", "ML VPT2 run (median)"]  # fmt: skip
+           "ML call (median; min–max over runs)", "ML first call (median)", "ML runtime/calls (median)",
+           "ML runs", "ML VPT2 run (median)"]  # fmt: skip
     w("| " + " | ".join(hdr) + " |")
     w("|---" * len(hdr) + "|")
     for mol in mols:
@@ -335,18 +339,29 @@ def main():
             cc.append(f"{hms(wl)} ({hms(t)}{'' if ok or t is None else ', not normal'})")
             crow[f"{lev}_wall_s"], crow[f"{lev}_prog_s"] = wl, t
         runs = meta["ml_runs"][mol]
+        call = np.array([np.median(r["calls_s"][1:]) for r in runs])
+        first = np.array([r["calls_s"][0] for r in runs])
         per = np.array([r["runtime_s"] / r["n_calls"] for r in runs])
         tot = np.array([r["runtime_s"] for r in runs])
-        cc += [f"{np.median(per):.2f} s ({per.min():.2f}–{per.max():.2f})", f"{len(runs)}", hms(np.median(tot))]
-        crow.update(ml_per_call_median_s=float(np.median(per)), ml_per_call_min_s=float(per.min()),
-                    ml_per_call_max_s=float(per.max()), ml_runs=len(runs), ml_vpt2_median_s=float(np.median(tot)))  # fmt: skip
+        cc += [f"{np.median(call):.2f} s ({call.min():.2f}–{call.max():.2f})", f"{np.median(first):.2f} s",
+               f"{np.median(per):.2f} s", f"{len(runs)}", hms(np.median(tot))]  # fmt: skip
+        crow.update(ml_call_median_s=float(np.median(call)), ml_call_min_s=float(call.min()),
+                    ml_call_max_s=float(call.max()), ml_first_call_median_s=float(np.median(first)),
+                    ml_runtime_per_call_median_s=float(np.median(per)), ml_runs=len(runs),
+                    ml_vpt2_median_s=float(np.median(tot)))  # fmt: skip
         cost_rows.append(crow)
         w(f"| {mol} | {n} | " + " | ".join(cc) + " |")
-    w("\nML per call by energy model (median over the dipole models, s): " + "; ".join(
-        f"{mol}: " + ", ".join(f"{e.replace('mace_', '')} {np.median([r['runtime_s'] / r['n_calls'] for r in meta['ml_runs'][mol] if r['energy'] == e]):.2f}"
-                               for e in ("mace_anicc", "mace_omol", "mace_off", "mace_polar")
-                               if any(r["energy"] == e for r in meta["ml_runs"][mol]))
-        for mol in mols))  # fmt: skip
+    combos = [(e, d) for e in ("mace_anicc", "mace_omol", "mace_off", "mace_polar")
+              for d in ("mace_polar1", "mace_mdp", "mace_ml")]  # fmt: skip
+    w("\nML call by energy × dipole model (median call of the run, s; '–' = no run, MACE-ANI-CC has no S):\n")
+    w("| energy model | dipole model | " + " | ".join(mols) + " |")
+    w("|---" * (2 + len(mols)) + "|")
+    for e, d in combos:
+        cc = []
+        for mol in mols:
+            r = [r for r in meta["ml_runs"][mol] if r["energy"] == e and r["dipole"] == d]
+            cc.append(f"{np.median(r[0]['calls_s'][1:]):.2f}" if r else "–")
+        w(f"| {e} | {d} | " + " | ".join(cc) + " |")
     w("\nCampaign B3LYP/6-31G(d,p) opt + VPT2 (4 cores), elapsed per link (s): " + "; ".join(
         f"{m}: {' + '.join(f'{v:.0f}' for v in meta['campaign_b3lyp'][m]['elapsed_s'])}" for m in mols))  # fmt: skip
     tot = 0.0
@@ -387,7 +402,7 @@ def figure(cells, rows):
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    fig, ax = plt.subplots(figsize=(9, 4.2))
+    fig, ax = plt.subplots(figsize=(9, 5.0))
     xs = np.arange(len(cells))
     mk = {REF: ("k", "s"), "b3lyp_avtz": ("0.35", "o"), "pbe0_tzvp": ("0.5", "^"), "wb97mv_tzvpd": ("0.65", "v"),
           "wb97md3_tzvppd": ("0.8", "D"), "mace_polar1": ("#9467bd", "o"), "mace_mdp": ("#2ca02c", "o"),
@@ -403,8 +418,8 @@ def figure(cells, rows):
     ax.set_xticks(xs)
     ax.set_xticklabels([f"{c['mol']}\n{c['region'].split('(')[-1].rstrip(')')}" for c in cells], rotation=90, fontsize=7)
     ax.set_ylabel("calc / exp")
-    ax.legend(fontsize=6, ncol=3, loc="upper left")
-    fig.tight_layout()
+    fig.legend(*ax.get_legend_handles_labels(), fontsize=6, ncol=5, loc="upper center", frameon=False)
+    fig.tight_layout(rect=(0, 0, 1, 0.9))
     fig.savefig(OUT / "b7_calc_exp.png", dpi=150)
 
 
