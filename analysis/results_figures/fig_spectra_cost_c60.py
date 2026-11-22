@@ -44,10 +44,9 @@ def experiment_lines() -> dict[str, list[tuple[str, float]]]:
     return {m: list(zip(g.label, g.exp.astype(float))) for m, g in e.groupby("molecule")}
 
 
-# dotted lines of the C60 figure: the four T1u values of Table 4.14 (room-temperature film values).
-# The para-H2 matrix values of wakabayashi2019c60 are 529.77, 578.24, 1184.7, 1432 (followup-1 report);
-# change here if the table switches (figures-ch4-final report, item 4)
-C60_EXP = (527, 576, 1183, 1429)
+# dotted lines of the C60 figure: the four T1u bands in a para-H2 matrix, wakabayashi2019c60
+# (followup-1 report, section D; decided 2026-11-22, replacing the film values 527/576/1183/1429)
+C60_EXP = (529.77, 578.24, 1184.7, 1432)
 
 
 def spectra(out: Path) -> None:
