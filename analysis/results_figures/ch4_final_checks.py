@@ -7,6 +7,9 @@
             gaussian_own_s) for every campaign run, and cpu/elapsed of the C60 runs
   speedup   item 5b: B3LYP time / model time per molecule (times as in fig_cost.py)
   logratio  item 5c: Table 4.11, mean |log10(calc/exp)| to four digits and 10 to that power
+  tables    tables-ch4-checks prompt: within-2x counts and n per energy model (Table 4.10), the Max
+            columns (Tables 4.1, 4.4, 4.12), counts above 100 cm-1 (Table 4.4), scaled B3LYP
+            against coupled cluster (Table 4.12)
 
     python analysis/results_figures/ch4_final_checks.py
 """
@@ -106,7 +109,49 @@ def logratio() -> None:
         print(f"{c:16s} n {len(rows)}  mean|log10| {m:.4f}  10^ {10**m:.4f}")
 
 
+def tables() -> None:
+    ts = _load("thesis_stats", ROOT / "analysis/followup3/thesis_stats.py")
+    _, _, fund, harm, _ = ts.load()
+    # 1. Table 4.10: same band sets and definition as ts.section_intensities / ts.int_metrics
+    sets = (("harmonic", harm, "dft_int", "ml_int"),
+            ("VPT2", fund[~fund.molecule.isin(ts.SYMTOP)], "dft_intensity", "ml_intensity"))  # fmt: skip
+    for lev, d, ref, ml in sets:
+        v = d[d[ref] >= ts.INT_MIN]
+        for dp in ts.D_MODELS:
+            x = v[v.dipole_model == dp]
+            ratio = np.where(x[ml] > 0, x[ml] / x[ref], 0)
+            k = int(((ratio >= 0.5) & (ratio <= 2)).sum())
+            per_e = x.groupby("energy_model").size().reindex(ts.E_MODELS).to_dict()
+            assert abs(100 * k / len(x) - ts.int_metrics(x, ref, ml)["within 2x %"]) < 1e-9
+            print(f"Table 4.10 {lev:8s} {dp:11s} within 2x {k}/{len(x)} = {100 * k / len(x):.2f} %  n per energy model {per_e}")
+    # 2./3. Tables 4.1 and 4.4: freq_metrics (max = largest |error|); the set of freq_*_pooled
+    f = fund[(fund.dipole_model == "mace_ml") & ~fund.molecule.isin(ts.SYMTOP)]
+    h = harm[harm.dipole_model == "mace_ml"]
+    for lev, d, ref, ml in (("harmonic", h, "dft_harmonic", "ml_harmonic"), ("VPT2", f, "dft_anharmonic", "ml_anharmonic")):
+        for m in ts.E_MODELS:
+            e = (d[d.energy_model == m][ml] - d[d.energy_model == m][ref])
+            big = int((e.abs() > ts.LARGE).sum())
+            met = ts.freq_metrics(d[d.energy_model == m], ref, ml)
+            assert met["max"] == e.abs().max() and abs(met[">100 %"] - 100 * big / len(e)) < 1e-9
+            print(f"Table {'4.1' if lev == 'harmonic' else '4.4'} {lev:8s} {m:11s} n {len(e)}  max|e| {e.abs().max():6.1f} "
+                  f"(signed min {e.min():+7.1f}, max {e.max():+7.1f})  >100: {big}/{len(e)} = {100 * big / len(e):.2f} %")  # fmt: skip
+    # 4. Table 4.12: scaled B3LYP harmonic against VCI, the 30 unflagged bands of ts.section_vci
+    v = pd.read_csv(ROOT / "campaigns/2026/experiment_2026-11-03/vci_comparison_character_paired.csv")
+    clean = v[v.flag.isna()]
+    rows = {"B3LYP VPT2": clean.B3LYP_vpt2 - clean.vci, "B3LYP harm x 0.9614": ts.SCALE_B3LYP_EXP * clean.B3LYP_h - clean.vci,
+            "MACE-ANICC VPT2": clean.mace_anicc_vpt2 - clean.vci}  # fmt: skip
+    t = Path.home() / "thesis/data/vci_comparison_campaign2026.csv"
+    if t.exists():
+        w = pd.read_csv(t)
+        w = w[w.flag.isna()]
+        rows["B3LYP harm x 0.9614 (thesis csv)"] = ts.SCALE_B3LYP_EXP * w.B3LYP_h - w.vci
+    for name, e in rows.items():
+        e = e.dropna()
+        print(f"Table 4.12 CC {name:34s} n {len(e)}  MAE {e.abs().mean():.2f}  median {e.abs().median():.2f}  "
+              f"bias {e.mean():+.2f}  max {e.abs().max():.2f}")  # fmt: skip
+
+
 if __name__ == "__main__":
-    for f in (glycine, cores, speedup, logratio):
+    for f in (glycine, cores, speedup, logratio, tables):
         print(f"\n## {f.__name__}")
         f()
