@@ -1,4 +1,4 @@
-"""Stacked spectra (caproic acid = opening figure of Chapter 4, methanol, glycine, acetic acid), cost scaling and the C60 spectrum for the results chapter.
+"""Stacked spectra (caproic acid = opening figure of Chapter 4, methanol, glycine, acetic acid) and the C60 spectrum for the results chapter (the cost figures: fig_cost.py).
 
 The stacked spectra reuse fig_stacked_spectra of scripts/make_thesis_figures.py on the 2026 campaign,
 with the model names of the thesis text and MACE-POLAR-1 as the dipole model.
@@ -42,18 +42,12 @@ def experiment_lines() -> dict[str, list[tuple[str, float]]]:
     e = e[~e.assignment.astype(str).str.startswith("excluded")]
     e = e[~((e.molecule == "carbon_dioxide") & (e.label == "ν1"))]
     return {m: list(zip(g.label, g.exp.astype(float))) for m, g in e.groupby("molecule")}
-ACIDS = ["formic_acid_trans", "acetic_acid", "propionic_acid", "butyric_acid", "valeric_acid", "caproic_acid"]
 
 
-def find(d, key):
-    if isinstance(d, dict):
-        if d.get(key) is not None:
-            return d[key]
-        for v in d.values():
-            r = find(v, key)
-            if r is not None:
-                return r
-    return None
+# dotted lines of the C60 figure: the four T1u values of Table 4.14 (room-temperature film values).
+# The para-H2 matrix values of wakabayashi2019c60 are 529.77, 578.24, 1184.7, 1432 (followup-1 report);
+# change here if the table switches (figures-ch4-final report, item 4)
+C60_EXP = (527, 576, 1183, 1429)
 
 
 def spectra(out: Path) -> None:
@@ -66,38 +60,6 @@ def spectra(out: Path) -> None:
         reps = mtf.representative_runs(mtf.load_report(mol))
         print(mol, {k: v["name"] for k, v in reps.items()})
         mtf.fig_stacked_spectra(mol)
-
-
-def cost(out: Path) -> None:
-    man = json.loads((CAMP / "comparison_results" / "batch_manifest.json").read_text())["molecules"]
-    pts = {m: [] for m in ["b3lyp", *E]}
-    for mol, info in man.items():
-        n = int(Path(info["xyz_path"]).read_text().splitlines()[0])
-        b = next((CAMP / "comparison_results" / mol).glob("b3lyp*/results.json"))
-        t = find(json.loads(b.read_text()), "total_elapsed_s")
-        if t:
-            pts["b3lyp"].append((mol, n, float(t)))
-        for e in E:
-            ts_ = [c["runtime_s"] for k, c in info["combinations"].items()
-                   if k.startswith(e + "_") and c.get("status") == "complete" and c.get("runtime_s")]
-            if len(ts_) == 3:
-                pts[e].append((mol, n, float(np.mean(ts_))))
-    fig, ax = plt.subplots(figsize=(style.figwidth(0.8), 3.4))
-    style.clean_axes(ax)
-    for key, rows in pts.items():
-        color = style.INK if key == "b3lyp" else style.model_color(key)
-        acid = sorted((n, t) for m, n, t in rows if m in ACIDS)
-        rest = [(n, t) for m, n, t in rows if m not in ACIDS]
-        slope = np.polyfit(np.log([a[0] for a in acid]), np.log([a[1] for a in acid]), 1)[0]
-        ax.plot(*zip(*rest), "o", ms=3.6, mfc="none", mec=color, mew=0.8, alpha=0.8)
-        ax.plot(*zip(*acid), "o-", ms=3.8, lw=1.0, color=color, label=f"{'B3LYP' if key == 'b3lyp' else ELAB[key]} ($N^{{{slope:.1f}}}$)")
-        print(f"{key:11s} exponent {slope:.2f}  caproic {dict((m, t) for m, n, t in rows)['caproic_acid'] / 60:.0f} min  n {len(rows)}")
-    ax.set_xscale("log"), ax.set_yscale("log")
-    ax.set_xticks([3, 5, 10, 20]), ax.set_xticklabels(["3", "5", "10", "20"])
-    ax.set_xlabel(r"number of atoms $N$"), ax.set_ylabel("wall time / s")
-    ax.legend(frameon=False, fontsize=style.ANNOT_FS, loc="upper left")
-    fig.tight_layout()
-    style.save(fig, out, "cost_scaling")
 
 
 def c60(out: Path) -> None:
@@ -116,19 +78,19 @@ def c60(out: Path) -> None:
     fig, ax = plt.subplots(figsize=(style.figwidth(), 2.9))
     style.clean_axes(ax, grid=False)
     off = 1.15 * max(1.0, float(np.max(yh)))
-    for x in (527, 576, 1183, 1429):
+    for x in C60_EXP:
         ax.axvline(x, color=style.INK_MUTED, lw=0.7, ls=":")
     c = style.model_color("mace_omol")
     ax.plot(grid, yh, color=style.INK_MUTED, lw=1.2), ax.plot(grid, yv + off, color=c, lw=1.2)
     ax.text(1690, 0.35, "harmonic", ha="right", fontsize=style.ANNOT_FS, color=style.INK_MUTED)
     ax.text(1690, off + 0.35, "VPT2", ha="right", fontsize=style.ANNOT_FS, color=c)
     ax.set_xlim(400, 1700), ax.set_yticks([0, off]), ax.set_yticklabels(["0", ""])
-    ax.set_xlabel(r"wavenumber $\tilde{\nu}$ / cm$^{-1}$"), ax.set_ylabel("absorbance (harmonic peak $=1$)")
-    fig.tight_layout()
+    ax.set_xlabel(r"wavenumber $\tilde{\nu}$ / cm$^{-1}$"), ax.set_ylabel("relative absorbance")
+    style.tight(fig)
     style.save(fig, out, "c60_spectrum")
 
 
 if __name__ == "__main__":
     out = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "analysis" / "results_figures" / "out"
     style.apply_style()
-    spectra(out), cost(out), c60(out)
+    spectra(out), c60(out)

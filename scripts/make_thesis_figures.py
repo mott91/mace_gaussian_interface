@@ -123,15 +123,22 @@ def exp_on_grid(report: dict, grid, smooth_fwhm: float | None):
     order = np.argsort(e["wavenumbers_cm"])
     xp = np.asarray(e["wavenumbers_cm"], float)[order]
     fp = np.asarray(e["absorbance_normalized"], float)[order]
-    y = np.interp(grid, xp, fp, left=0, right=0)
+    # only where the spectrum was measured: NaN outside (the trace ends there) instead of zero,
+    # which drew a false drop at the edge of the range (667 cm-1 for the Coblentz spectra of
+    # methanol and isopropanol, 450 cm-1 for the Sadtler ones)
+    inside = (grid >= xp[0]) & (grid <= xp[-1])
+    y = np.where(inside, np.interp(grid, xp, fp), np.nan)
     if smooth_fwhm:
         step = float(grid[1] - grid[0])
         sigma = smooth_fwhm / 2.3548 / step
         half = int(4 * sigma) + 1
         x = np.arange(-half, half + 1)
         k = np.exp(-0.5 * (x / sigma) ** 2)
-        y = np.convolve(y, k / k.sum(), mode="same")
-    peak = y.max()
+        # normalised convolution: the edges average over the measured points only
+        num = np.convolve(np.where(inside, y, 0.0), k, mode="same")
+        den = np.convolve(inside.astype(float), k, mode="same")
+        y = np.where(inside, num / np.where(den > 0, den, 1.0), np.nan)
+    peak = np.nanmax(y)
     return y / peak if peak > 0 else y
 
 
@@ -329,7 +336,7 @@ def fig_stacked_spectra(mol: str, smooth_small: bool = True):
     # y axis stays: one tick per trace baseline, the first one scaled 0 to 1
     ax.set_yticks(baselines)
     ax.set_yticklabels(["0"] + [""] * (len(baselines) - 1))
-    ax.set_ylabel(r"absorbance (DFT peak $=1$)")
+    ax.set_ylabel("relative absorbance")  # scaling (B3LYP peak = 1) in the caption
     ax.set_xlabel(r"wavenumber $\tilde{\nu}$ / cm$^{-1}$")
     fig.tight_layout()
     if not labels:
@@ -1396,7 +1403,7 @@ def fig_overlap_matrices(mol: str = "methane", order: list[str] | None = None):
     # fixed geometry in inches: one row of square panels over the full width, a horizontal
     # colour bar under each panel, below the shared x label
     W = figwidth(1.0)
-    left, right, gap = 0.70, 0.04, 0.14
+    left, right, gap = 0.70, 0.04, 0.36  # gap: room for the y tick labels of every panel
     side = (W - left - right - (n - 1) * gap) / n
     top = 0.26  # titles
     ticks_h = 0.31 if OVERLAP_TICKS == "modes" else 0.40
@@ -1411,16 +1418,16 @@ def fig_overlap_matrices(mol: str = "methane", order: list[str] | None = None):
         axes.append(ax)
         color = model_color(m)
         cmap = LinearSegmentedColormap.from_list(f"ov_{m}", ["#ffffff", color])
-        # rows = B3LYP modes (shared by every panel), columns = this model's own modes;
-        # vector cells (pcolormesh), not a bitmap
-        edges_x, edges_y = np.arange(mat.shape[0] + 1) - 0.5, np.arange(mat.shape[1] + 1) - 0.5
-        im = ax.pcolormesh(edges_x, edges_y, mat.T, cmap=cmap, vmin=0, vmax=1,
+        # x = B3LYP modes (shared by every panel, B3LYP on the x-axis as in every other figure),
+        # y = this model's own modes; mat is [model mode, B3LYP mode]; vector cells (pcolormesh)
+        edges_x, edges_y = np.arange(mat.shape[1] + 1) - 0.5, np.arange(mat.shape[0] + 1) - 0.5
+        im = ax.pcolormesh(edges_x, edges_y, mat, cmap=cmap, vmin=0, vmax=1,
                            edgecolors="none", linewidth=0, antialiased=False)  # fmt: skip
         ax.set_xlim(edges_x[0], edges_x[-1])
         ax.set_ylim(edges_y[0], edges_y[-1])
         ax.set_aspect("equal")
         ax.set_title(tex(MODEL_LABEL[m]), fontsize=ANNOT_FS + 1, color=color, pad=4)
-        hl, vl = _region_lines(freqs_dft, mat.shape[1]), _region_lines(freqs_ml, mat.shape[0])
+        hl, vl = _region_lines(freqs_ml, mat.shape[0]), _region_lines(freqs_dft, mat.shape[1])
         if lines:
             for p in hl:
                 ax.axhline(p, color=GRID_LINE, lw=0.6, zorder=3)
@@ -1432,12 +1439,11 @@ def fig_overlap_matrices(mol: str = "methane", order: list[str] | None = None):
             ax.set_yticks(list(hl), ["/".join(map(str, v)) for v in hl.values()], fontsize=tick_fs)
         else:
             step = max(1, int(np.ceil(max(mat.shape) / 6)))
-            ax.set_xticks(range(0, mat.shape[0], step),
-                          [f"{f:.0f}" for f in freqs_ml[::step]], rotation=90, fontsize=tick_fs)  # fmt: skip
-            ax.set_yticks(range(0, mat.shape[1], step),
-                          [f"{f:.0f}" for f in freqs_dft[::step]], fontsize=tick_fs)  # fmt: skip
-        if j:
-            ax.tick_params(labelleft=False)
+            ax.set_xticks(range(0, mat.shape[1], step),
+                          [f"{f:.0f}" for f in freqs_dft[::step]], rotation=90, fontsize=tick_fs)  # fmt: skip
+            ax.set_yticks(range(0, mat.shape[0], step),
+                          [f"{f:.0f}" for f in freqs_ml[::step]], fontsize=tick_fs)  # fmt: skip
+        # every panel keeps its own y tick labels: the y-axis carries that model's frequencies
         ax.tick_params(length=0, pad=2)
         for sp in ax.spines.values():
             sp.set_visible(True)
@@ -1451,9 +1457,9 @@ def fig_overlap_matrices(mol: str = "methane", order: list[str] | None = None):
         cb.ax.tick_params(labelsize=tick_fs, length=2, width=0.5, pad=1.5)
         cb.set_label("overlap", fontsize=tick_fs, labelpad=1.5)
         cb.outline.set_visible(False)
-    axes[0].set_ylabel("B3LYP harmonic\nmode / cm$^{-1}$", fontsize=ANNOT_FS + 1, labelpad=3)
+    axes[0].set_ylabel("MACE harmonic\nmode / cm$^{-1}$", fontsize=ANNOT_FS + 1, labelpad=3)
     fig.text((left + (W - left - right) / 2) / W, (cb_lab_h + cb_h + cb_gap) / H,
-             r"MACE harmonic mode / cm$^{-1}$", ha="center", va="bottom", fontsize=ANNOT_FS + 1)  # fmt: skip
+             r"B3LYP harmonic mode / cm$^{-1}$", ha="center", va="bottom", fontsize=ANNOT_FS + 1)  # fmt: skip
     save(fig, OUT, f"overlap_matrices_{mol}")
     register(
         f"overlap_matrices_{mol}",

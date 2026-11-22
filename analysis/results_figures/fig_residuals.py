@@ -86,13 +86,13 @@ def main(out_dir: Path, name: str = "residuals_fundamentals") -> None:
             if r == 0:
                 ax.set_title(style.tex(LABEL[model]), color=style.model_color(model), fontsize=style.BASE_FS)
             print(f"{level:9s} {model:11s} n {len(d):4d}  MAE {err.abs().mean():5.1f}  min {err.min():7.1f}  max {err.max():6.1f}")
-        axes[r, 0].set_ylabel(f"{level} error / cm$^{{-1}}$", color=style.INK_MUTED if r == 0 else style.INK)
+        axes[r, 0].set_ylabel(f"MACE $-$ B3LYP,\n{level} / cm$^{{-1}}$", color=style.INK_MUTED if r == 0 else style.INK)
     axes[0, 0].set_ylim(*YLIM)
     axes[0, 0].set_xlim(0, 4000)
     axes[0, 0].set_xticks([0, 1500, 3000])
     axes[0, 0].set_yticks([-250, 0, 250, 500])
     fig.supxlabel("B3LYP harmonic frequency / cm$^{-1}$", fontsize=style.BASE_FS)
-    fig.tight_layout(w_pad=0.6, h_pad=0.8)
+    style.tight(fig, w_pad=0.6, h_pad=0.8)
     style.save(fig, out_dir, name)
 
 
@@ -115,13 +115,13 @@ def harmonic(out_dir: Path) -> None:
                 fontsize=style.ANNOT_FS, color=style.INK)  # fmt: skip
         ax.set_title(style.tex(LABEL[model]), color=style.model_color(model), fontsize=style.BASE_FS)
         print(f"harmonic  {model:11s} n {len(d):4d}  MAE {err.abs().mean():5.1f}  min {err.min():7.1f}  max {err.max():6.1f}")
-    axes[0].set_ylabel("harmonic error / cm$^{-1}$")
+    axes[0].set_ylabel("MACE $-$ B3LYP,\nharmonic / cm$^{-1}$")
     axes[0].set_ylim(*H_YLIM)
     axes[0].set_xlim(0, 4000)
     axes[0].set_xticks([0, 1500, 3000])
     axes[0].set_yticks([-100, 0, 100, 200])
     fig.supxlabel("B3LYP harmonic frequency / cm$^{-1}$", fontsize=style.BASE_FS)
-    fig.tight_layout(w_pad=0.6)
+    style.tight(fig, w_pad=0.6)
     style.save(fig, out_dir, "residuals_harmonic")
 
 

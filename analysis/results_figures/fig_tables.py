@@ -40,6 +40,8 @@ GROUPS = [
 GROUPS_H = [(g, ms) if g != "small molecules" else
             (g, [ms[0], ms[1], ("ammonia", "NH$_3$"), ("phosphine", "PH$_3$"), *ms[2:]]) for g, ms in GROUPS]  # fmt: skip
 H_ORDER = ["mace_anicc", "mace_omol", "mace_polar", "mace_off"]  # harmonic MAE order of Table 4.1
+# molecule names and group labels in ink, about 1 pt larger than before (figures-ch4-final)
+NAME_FS, GROUP_FS = style.BASE_FS + 1.0, style.ANNOT_FS + 1.0
 
 
 def molecules(out: Path, level: str = "vpt2") -> None:
@@ -48,7 +50,7 @@ def molecules(out: Path, level: str = "vpt2") -> None:
     df = pd.read_csv(ROOT / "analysis" / "followup3" / "out" / f"freq_{level}_per_molecule.csv", index_col=0)
     order = [m for _, ms in groups for m, _ in ms]
     assert set(order) == set(df.index), set(order) ^ set(df.index)
-    fig, ax = plt.subplots(figsize=(style.figwidth(), 3.3))
+    fig, ax = plt.subplots(figsize=(style.figwidth(), 3.1))
     x = range(len(order))
     for model in models:
         y = pd.to_numeric(df.loc[order, key[model]], errors="coerce")
@@ -61,13 +63,16 @@ def molecules(out: Path, level: str = "vpt2") -> None:
         if pos:
             ax.axvline(pos - 0.5, color=style.INK_MUTED, lw=0.6)
         ax.text(pos + (len(ms) - 1) / 2, 1.02, name if len(ms) > 1 else name.replace(" ", "\n"), transform=ax.get_xaxis_transform(),
-                ha="center", va="bottom", fontsize=style.ANNOT_FS, color=style.INK_MUTED)
+                ha="center", va="bottom", fontsize=GROUP_FS, color=style.INK)
         pos += len(ms)
-    ax.set_xticks(list(x), [lab for _, ms in groups for _, lab in ms], rotation=60, ha="right", rotation_mode="anchor")
+    ax.set_xticks(list(x), [lab for _, ms in groups for _, lab in ms], rotation=60, ha="right", rotation_mode="anchor",
+                  fontsize=NAME_FS, color=style.INK)
     ax.set_xlim(-0.6, len(order) - 0.4), ax.set_ylim(0, 115)
     ax.set_ylabel(f"{'VPT2' if level == 'vpt2' else 'harmonic'} MAE / cm$^{{-1}}$")
-    fig.legend(loc="upper center", ncol=4, frameon=False, bbox_to_anchor=(0.5, 1.02), handletextpad=0.2, columnspacing=1.2)
-    fig.tight_layout(rect=(0, 0, 1, 0.9))
+    # legend directly above the group labels; borderpad 0: no blank band above the crop
+    fig.legend(loc="lower center", ncol=4, frameon=False, bbox_to_anchor=(0.5, 1.0), handletextpad=0.2, columnspacing=1.2,
+               borderpad=0)  # fmt: skip
+    style.tight(fig, pad=0.4)
     style.save(fig, out, f"molecules_{level}")
 
 
@@ -93,8 +98,9 @@ def time_split(out: Path) -> None:
         ax.tick_params(axis="x", labelrotation=60)
     axes[0].set_ylabel(r"share of wall time / \%")
     fig.supxlabel("number of atoms", fontsize=style.BASE_FS)
-    fig.legend(loc="upper center", ncol=4, frameon=False, bbox_to_anchor=(0.5, 1.03), handlelength=1.0, columnspacing=1.2)
-    fig.tight_layout(rect=(0, 0, 1, 0.9), w_pad=0.6)
+    fig.legend(loc="lower center", ncol=4, frameon=False, bbox_to_anchor=(0.5, 1.0), handlelength=1.0, columnspacing=1.2,
+               borderpad=0)  # fmt: skip
+    style.tight(fig, pad=0.4, w_pad=0.6)
     style.save(fig, out, "time_split")
 
 

@@ -127,9 +127,11 @@ def main(out: Path, layout: str = "2x2") -> None:
                Line2D([], [], color=g, lw=1.0, label="model"),
                Line2D([], [], color=g, ls="none", marker="o", ms=4.2, mec="white", label="Gaussian's points"),
                Line2D([], [], color=g, lw=0.8, ls=(0, (3, 2)), label="parabola through them")]  # fmt: skip
-    fig.legend(handles=handles, loc="upper center", ncol=4, frameon=False, bbox_to_anchor=(0.5, 1.0),
-               fontsize=style.ANNOT_FS, handlelength=1.8, columnspacing=1.2)  # fmt: skip
-    fig.tight_layout(rect=(0, 0, 1, 0.92 if layout == "row" else 0.95), w_pad=0.5, h_pad=0.8)
+    fig.legend(handles=handles, loc="lower center", ncol=4, frameon=False, bbox_to_anchor=(0.5, 1.0),
+               fontsize=style.ANNOT_FS, handlelength=1.8, columnspacing=1.2, borderpad=0)  # fmt: skip
+    # legend directly above the panels; small outer pad: the crop removes the margin, and the pad also
+    # sets the gap between the panels and the shared x label
+    style.tight(fig, pad=0.4, w_pad=0.5, h_pad=0.8)
     style.save(fig, out, "surface_step" if layout == "2x2" else "surface_step_row")
     pd.DataFrame(rows).to_csv(c.DATA / "step_figure.csv", index=False)
     print(pd.DataFrame(rows).round(5).to_string(index=False))

@@ -183,9 +183,9 @@ def figure(curves, res, out: Path, which: str = "energy"):
     axes[0, 0].set_ylabel(("$E - E_{\\min}$" if which == "energy" else "$E - E_{\\mathrm{harm}}$") + r" / $10^3$ cm$^{-1}$")
     axes[1, 0].set_ylabel(r"curvature, $\tilde\nu_{\mathrm{loc}}$" + "\n" + r"minus linear part / cm$^{-1}$")
     h, lab = axes[0, 0].get_legend_handles_labels()
-    fig.legend(h, lab, loc="upper center", ncol=5, frameon=False, bbox_to_anchor=(0.5, 1.01), handlelength=1.2,
-               columnspacing=0.8, fontsize=style.ANNOT_FS)  # fmt: skip
-    fig.tight_layout(rect=(0, 0, 1, 0.94), h_pad=1.2, w_pad=0.8)
+    fig.legend(h, lab, loc="lower center", ncol=5, frameon=False, bbox_to_anchor=(0.5, 1.0), handlelength=1.2,
+               columnspacing=0.8, fontsize=style.ANNOT_FS, borderpad=0)  # fmt: skip
+    style.tight(fig, pad=0.4, h_pad=1.2, w_pad=0.8)
     style.save(fig, out, "surface_scans" if which == "energy" else "surface_scans_anharmonic")
 
 
@@ -227,7 +227,7 @@ def zoom_figure(curves, res, out: Path):
     for r in range(nrow):
         axes[r, 0].set_ylabel(r"$\tilde\nu_{\mathrm{loc}}$, lin. part" + "\n" + r"removed / cm$^{-1}$", fontsize=style.ANNOT_FS)
     fig.supxlabel(r"$\Delta r$(X–H) / Å", fontsize=style.BASE_FS)
-    fig.tight_layout(w_pad=0.5, h_pad=0.8)
+    style.tight(fig, pad=0.4, w_pad=0.5, h_pad=0.8)
     style.save(fig, out, "surface_zoom")
 
 
@@ -264,7 +264,7 @@ def map2d(out: Path) -> dict:
     axes[0, 0].set_ylabel(r"$Q$(C–O–H bend)" + "\n" + r"/ amu$^{1/2}$ Å", fontsize=style.ANNOT_FS)
     axes[1, 0].set_ylabel(r"$Q$(C–O–H bend)" + "\n" + r"/ amu$^{1/2}$ Å", fontsize=style.ANNOT_FS)
     fig.supxlabel(r"$\Delta r$(O–H) / Å", fontsize=style.BASE_FS)
-    fig.tight_layout(rect=(0, 0, 0.86, 1), w_pad=0.3, h_pad=0.6)
+    style.tight(fig, rect=(0, 0, 0.86, 1), w_pad=0.3, h_pad=0.6)
     cax = fig.add_axes([0.875, 0.13, 0.015, 0.36])
     cb = fig.colorbar(im, cax=cax, ticks=[-600, -300, 0, 300, 600], extend="both")
     cb.set_label(r"coupling / cm$^{-1}$", fontsize=style.ANNOT_FS)

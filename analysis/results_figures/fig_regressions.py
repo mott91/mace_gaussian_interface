@@ -107,8 +107,8 @@ def intensity_levels(harm, fund, out: Path) -> None:
                 ax.plot(d[xc], d[yc], "o", color=c, zorder=2, ms=2.2, mec="none", alpha=0.45)
             assert d[xc].between(1, hi).all() and d[yc].between(lo, hi).all(), (lev, dm)
             s = ts.int_metrics(d, xc, yc)
-            note(ax, f"MAE {s['MAE']:.1f}\nwithin $2\\times$: {s['within 2x %']:.0f} \\%\n"
-                     f"$R^2$(log) {num(s['R2 log10'], 2)}", where="lower right")  # fmt: skip
+            # within-2x line removed (figures-ch4-final); the share stays in the stats tables
+            note(ax, f"MAE {s['MAE']:.1f}\n$R^2$(log) {num(s['R2 log10'], 2)}", where="lower right")
             style.clean_axes(ax)
             ax.set_xscale("log"), ax.set_yscale("log"), ax.set_xlim(1, hi), ax.set_ylim(lo, hi)
             ax.set_yticks([10.0**k for k in range(int(np.log10(lo)), int(np.log10(hi)) + 1, 3)])
@@ -125,8 +125,8 @@ def intensity_levels(harm, fund, out: Path) -> None:
                       label="in a resonance (B3LYP or model run)")]  # fmt: skip
     fig.legend(handles=handles, loc="upper center", ncol=2, frameon=False, bbox_to_anchor=(0.5, 1.0),
                fontsize=style.ANNOT_FS, handletextpad=0.3, columnspacing=1.5, title="VPT2 row:",
-               title_fontsize=style.ANNOT_FS, alignment="left")  # fmt: skip
-    fig.tight_layout(rect=(0, 0, 1, 0.93), w_pad=0.6, h_pad=1.2)
+               title_fontsize=style.ANNOT_FS, alignment="left", borderpad=0)  # fmt: skip
+    style.tight(fig, rect=(0, 0, 1, 0.93), w_pad=0.6, h_pad=1.2)
     style.save(fig, out, "regression_intensities_levels")
 
 
@@ -149,7 +149,7 @@ def main(out: Path) -> None:
         titles(axes, order)
         axes[0].set_ylabel("MACE / cm$^{-1}$")
         fig.supxlabel(f"B3LYP {lab} / cm$^{{-1}}$", fontsize=style.BASE_FS)
-        fig.tight_layout(w_pad=0.6)
+        style.tight(fig, w_pad=0.6)
         style.save(fig, out, name)
 
     both = pd.concat([x.dft_xmatrix, x.ml_xmatrix])
@@ -165,7 +165,7 @@ def main(out: Path) -> None:
         titles(axes, E)
         axes[0].set_ylabel(ylab)
         fig.supxlabel(xlab, fontsize=style.BASE_FS)
-        fig.tight_layout(w_pad=0.6)
+        style.tight(fig, w_pad=0.6)
         style.save(fig, out, name)
 
     fig, axes = plt.subplots(2, 4, figsize=(W, 3.9), sharex="row", sharey="row")
@@ -175,7 +175,7 @@ def main(out: Path) -> None:
     axes[0, 0].set_ylabel("MACE shift / cm$^{-1}$"), axes[1, 0].set_ylabel(r"MACE $\chi_{ii}$ / cm$^{-1}$")
     for ax, lab in ((axes[0, 1], "B3LYP anharmonic shift / cm$^{-1}$"), (axes[1, 1], r"B3LYP $\chi_{ii}$ / cm$^{-1}$")):
         ax.set_xlabel(lab, x=1.1)
-    fig.tight_layout(w_pad=0.6, h_pad=1.0)
+    style.tight(fig, w_pad=0.6, h_pad=1.0)
     style.save(fig, out, "regression_anharmonicity")
 
     vis = harm[harm.dft_int >= ts.INT_MIN]
@@ -196,7 +196,7 @@ def main(out: Path) -> None:
         print(f"int harmonic   {dm:11s} n {len(d):4d} MAE {(d.ml_int - d.dft_int).abs().mean():5.1f} within2x {within:.1f}  ml min {d.ml_int.min():.3g}")
     axes[0].set_ylabel("MACE intensity / km mol$^{-1}$")
     axes[1].set_xlabel("B3LYP harmonic intensity / km mol$^{-1}$")
-    fig.tight_layout(w_pad=0.6)
+    style.tight(fig, w_pad=0.6)
     style.save(fig, out, "regression_intensities")
     intensity_levels(harm, fund, out)
 
