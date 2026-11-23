@@ -57,9 +57,9 @@ def faded(model: str) -> dict:
 H_YLIM = (-130, 200)  # data: -115.3 (PH3, MACE-OFF23) to +176.9 (P-H stretch of PH3, MACE-OFF23)
 
 
-# y labels: "oneline" = "MACE harmonic error / cm-1" (figures-ch4-tweaks) needs about 131 pt per row, more
-# than the 101 pt of a row at the authored height 3.7 in, so the two labels collide there; "twoline" = the
-# label of the figures-ch4-final round ("MACE - B3LYP,\n<level> / cm-1")
+# y labels: "twoline" = the wording of residuals_harmonic broken after the level, "MACE harmonic\nerror / cm-1"
+# (figures-ch4-last-fixes); "oneline" = the same on one line, which needs about 131 pt per row, more than the
+# 101 pt of a row at 3.7 in, so the two labels collide there (figures-ch4-tweaks)
 def main(out_dir: Path, name: str = "residuals_fundamentals", height: float = 3.7, labels: str = "twoline") -> None:
     _, _, fund, harm, _ = ts.load()
     f = fund[(fund.dipole_model == "mace_ml") & ~fund.molecule.isin(ts.SYMTOP)]
@@ -89,7 +89,7 @@ def main(out_dir: Path, name: str = "residuals_fundamentals", height: float = 3.
             if r == 0:
                 ax.set_title(style.tex(LABEL[model]), color=style.model_color(model), fontsize=style.BASE_FS)
             print(f"{level:9s} {model:11s} n {len(d):4d}  MAE {err.abs().mean():5.1f}  min {err.min():7.1f}  max {err.max():6.1f}")
-        ylab = f"MACE {level} error / cm$^{{-1}}$" if labels == "oneline" else f"MACE $-$ B3LYP,\n{level} / cm$^{{-1}}$"
+        ylab = f"MACE {level}" + (" " if labels == "oneline" else "\n") + "error / cm$^{-1}$"
         axes[r, 0].set_ylabel(ylab, color=style.INK_MUTED if r == 0 else style.INK)
     axes[0, 0].set_ylim(*YLIM)
     axes[0, 0].set_xlim(0, 4000)
@@ -97,6 +97,11 @@ def main(out_dir: Path, name: str = "residuals_fundamentals", height: float = 3.
     axes[0, 0].set_yticks([-250, 0, 250, 500])
     fig.supxlabel("B3LYP harmonic frequency / cm$^{-1}$", fontsize=style.BASE_FS)
     style.tight(fig, w_pad=0.6, h_pad=0.8)
+    fig.canvas.draw()
+    up, lo = (axes[r, 0].yaxis.label.get_window_extent() for r in (0, 1))
+    gap = (up.y0 - lo.y1) * 72 / fig.dpi
+    print(f"gap between the two y labels {gap:.1f} pt (before the width fit)")
+    assert gap > 2, gap
     style.save(fig, out_dir, name)
 
 

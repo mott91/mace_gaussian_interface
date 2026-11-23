@@ -38,7 +38,8 @@ E = list(ELAB)
 KEY = {"b3lyp": "B3LYP", "mace_anicc": "ANI-cc", "mace_omol": "OMOL", "mace_off": "OFF", "mace_polar": "POLAR"}
 ACIDS = ["formic_acid_trans", "acetic_acid", "propionic_acid", "butyric_acid", "valeric_acid", "caproic_acid"]
 CC_SET = ["methanol", "formic_acid_trans", "carbon_dioxide", "carbonic_acid"]  # vci_vpt2 (30 bands)
-SYMTOP = ["ammonia", "phosphine"]  # out of the pooled VPT2 and experiment statistics
+SYMTOP = ["ammonia", "phosphine"]
+ACC_HEIGHT = 3.25  # in, cost_accuracy: the smallest height at which the squares fill the width (191 pt each)  # out of the pooled VPT2 and experiment statistics
 
 
 def color(k: str) -> str:
@@ -142,7 +143,9 @@ def cost_accuracy(t: pd.DataFrame, out: Path) -> None:
         ("(b) against experiment", exp_set, lambda k: exp.loc["B3LYP_vpt2" if k == "b3lyp" else KEY[k], "MAE"],
          [0.5, 1, 2, 3]),
     ]  # fmt: skip
-    fig, axes = plt.subplots(1, 2, figsize=(style.figwidth(), 2.35), sharey=True)
+    # square axes boxes (figures-ch4-last-fixes); the height is the smallest at which the two squares fill the
+    # width, so the only extra whitespace is the gap between the panels
+    fig, axes = plt.subplots(1, 2, figsize=(style.figwidth(), ACC_HEIGHT), sharey=True)
     for ax, (title, mols, mae, ticks) in zip(axes, panels):
         tm = t.loc[mols, ["b3lyp", *E]].mean()
         print(f"{title}: {len(mols)} molecules {mols}")
@@ -156,6 +159,7 @@ def cost_accuracy(t: pd.DataFrame, out: Path) -> None:
         ax.set_xticks(ticks, [f"{v:g}" for v in ticks])
         ax.xaxis.set_minor_locator(plt.NullLocator())
         style.clean_axes(ax)
+        ax.set_box_aspect(1)
         ax.set_title(title, fontsize=style.BASE_FS, loc="left")
     axes[0].set_ylim(0, 62), axes[0].set_yticks([0, 20, 40, 60])
     axes[0].set_ylabel("MAE of the VPT2\nfundamentals / cm$^{-1}$")
@@ -165,6 +169,8 @@ def cost_accuracy(t: pd.DataFrame, out: Path) -> None:
                fontsize=style.ANNOT_FS, handletextpad=0.2, columnspacing=1.0, borderpad=0)  # fmt: skip
     style.tight(fig, pad=0.4, w_pad=0.8)
     style.save(fig, out, "cost_accuracy")
+    w, h = (axes[0].get_window_extent().width, axes[0].get_window_extent().height)
+    print(f"cost_accuracy axes box {w * 72 / fig.dpi:.1f} x {h * 72 / fig.dpi:.1f} pt")
 
 
 if __name__ == "__main__":

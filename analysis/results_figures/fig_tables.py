@@ -107,7 +107,7 @@ def time_split(out: Path) -> None:
     # energy model in the colour of the panel's own model (None below); dipole model, Gaussian and the Python
     # interface in three greys (figures-ch4-tweaks: the old blue and green repeated the OMOL-0 and OFF23 titles).
     # CIELAB L*: 45.4 (#6b6b6b), 65.0 (#9e9e9e), 86.6 (#d8d8d8)
-    parts = [("energy_s", "energy model (panel colour)", None), ("dipole_s", "dipole model", DIPOLE_GREY),
+    parts = [("energy_s", "energy model", None), ("dipole_s", "dipole model", DIPOLE_GREY),
              ("gaussian_own_s", "Gaussian", style.INK_MUTED), ("python_s", "Python interface", style.GRID)]
     t = df.groupby(["energy_model", "size"], observed=True)[[p for p, *_ in parts]].sum()
     t = t.div(t.sum(axis=1), axis=0) * 100
