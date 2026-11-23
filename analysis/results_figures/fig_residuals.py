@@ -57,14 +57,17 @@ def faded(model: str) -> dict:
 H_YLIM = (-130, 200)  # data: -115.3 (PH3, MACE-OFF23) to +176.9 (P-H stretch of PH3, MACE-OFF23)
 
 
-def main(out_dir: Path, name: str = "residuals_fundamentals") -> None:
+# y labels: "oneline" = "MACE harmonic error / cm-1" (figures-ch4-tweaks) needs about 131 pt per row, more
+# than the 101 pt of a row at the authored height 3.7 in, so the two labels collide there; "twoline" = the
+# label of the figures-ch4-final round ("MACE - B3LYP,\n<level> / cm-1")
+def main(out_dir: Path, name: str = "residuals_fundamentals", height: float = 3.7, labels: str = "twoline") -> None:
     _, _, fund, harm, _ = ts.load()
     f = fund[(fund.dipole_model == "mace_ml") & ~fund.molecule.isin(ts.SYMTOP)]
     h = harm[harm.dipole_model == "mace_ml"]
     rows = [("harmonic", h, "ml_harmonic", "dft_harmonic"), ("VPT2", f, "ml_anharmonic", "dft_anharmonic")]
 
     style.apply_style()
-    fig, axes = plt.subplots(2, 4, figsize=(style.figwidth(), 3.7), sharex=True, sharey=True)
+    fig, axes = plt.subplots(2, 4, figsize=(style.figwidth(), height), sharex=True, sharey=True)
     for r, (level, df, ml, ref) in enumerate(rows):
         for c, model in enumerate(ts.E_MODELS):
             ax, d = axes[r, c], df[df.energy_model == model]
@@ -86,7 +89,8 @@ def main(out_dir: Path, name: str = "residuals_fundamentals") -> None:
             if r == 0:
                 ax.set_title(style.tex(LABEL[model]), color=style.model_color(model), fontsize=style.BASE_FS)
             print(f"{level:9s} {model:11s} n {len(d):4d}  MAE {err.abs().mean():5.1f}  min {err.min():7.1f}  max {err.max():6.1f}")
-        axes[r, 0].set_ylabel(f"MACE $-$ B3LYP,\n{level} / cm$^{{-1}}$", color=style.INK_MUTED if r == 0 else style.INK)
+        ylab = f"MACE {level} error / cm$^{{-1}}$" if labels == "oneline" else f"MACE $-$ B3LYP,\n{level} / cm$^{{-1}}$"
+        axes[r, 0].set_ylabel(ylab, color=style.INK_MUTED if r == 0 else style.INK)
     axes[0, 0].set_ylim(*YLIM)
     axes[0, 0].set_xlim(0, 4000)
     axes[0, 0].set_xticks([0, 1500, 3000])
@@ -115,7 +119,7 @@ def harmonic(out_dir: Path) -> None:
                 fontsize=style.ANNOT_FS, color=style.INK)  # fmt: skip
         ax.set_title(style.tex(LABEL[model]), color=style.model_color(model), fontsize=style.BASE_FS)
         print(f"harmonic  {model:11s} n {len(d):4d}  MAE {err.abs().mean():5.1f}  min {err.min():7.1f}  max {err.max():6.1f}")
-    axes[0].set_ylabel("MACE $-$ B3LYP,\nharmonic / cm$^{-1}$")
+    axes[0].set_ylabel("MACE harmonic error / cm$^{-1}$")
     axes[0].set_ylim(*H_YLIM)
     axes[0].set_xlim(0, 4000)
     axes[0].set_xticks([0, 1500, 3000])

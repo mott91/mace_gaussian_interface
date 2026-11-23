@@ -18,7 +18,6 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from matplotlib.lines import Line2D
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -42,13 +41,20 @@ H_ORDER = ["mace_anicc", "mace_omol", "mace_polar", "mace_off"]
 # R2 decimals in the two frequency plots: two give 1.00 and three give 1.000 for three of the four
 # harmonic panels (R2 0.9995-0.9998), so four, in both plots (report figures-4-2)
 FREQ_R2_DECIMALS = 4
+# MAE/R2 box of regression_intensities_levels: right edge and bottom in axes fractions. With the y-range a
+# quarter decade below the lowest point the lower right corner is no longer empty (MACE-MDP VPT2: caproic
+# acid, MACE-OFF23 run, B3LYP 106, MACE 0.002 km/mol); this spot, the same in all six panels, keeps the
+# largest smallest gap to the points (7.0 pt; grid search in figures-ch4-tweaks)
+INT_BOX = (0.60, 0.09)
 
 
-def note(ax, text, where="upper left"):
+def note(ax, text, where="upper left", xy=None):
     # white backing: points must not run through the label (POLAR-1 shifts reach +330 cm-1)
     x, ha = (0.05, "left") if "left" in where else (0.97, "right")
     y, va = (0.94, "top") if "upper" in where else (0.04, "bottom")
-    ax.text(x, y, text, transform=ax.transAxes, ha=ha, va=va, fontsize=style.ANNOT_FS, color=style.INK,
+    if xy is not None:
+        x, y = xy
+    return ax.text(x, y, text, transform=ax.transAxes, ha=ha, va=va, fontsize=style.ANNOT_FS, color=style.INK,
             zorder=5, bbox=dict(boxstyle="square,pad=0.15", fc="white", ec="none", alpha=0.8))  # fmt: skip
 
 
@@ -88,10 +94,16 @@ def intensity_levels(harm, fund, out: Path) -> None:
              "dft_intensity", "ml_intensity")]  # fmt: skip
     ys = pd.concat([d[y] for _, d, _, y in rows])
     xs_all = pd.concat([d[x] for _, d, x, _ in rows])
-    # two decades below the lowest point: the labels sit in the lower right below all data (the MACE-MDP
-    # VPT2 panel has a band at B3LYP 106 km/mol, MACE 0.002 km/mol)
-    lo, hi = 10 ** (np.floor(np.log10(ys.min())) - 2), 10 ** np.ceil(np.log10(max(ys.max(), xs_all.max())))
+    # a quarter decade below the lowest point of the figure, the same in all six panels (figures-ch4-tweaks);
+    # the lowest point is a MACE4IR VPT2 band of caproic acid (MACE-ANICC run): B3LYP 3.69, MACE 0.00069 km/mol
+    lo, hi = 10 ** (np.log10(ys.min()) - 0.25), 10 ** np.ceil(np.log10(max(ys.max(), xs_all.max())))
+    for lev, d, xc, yc in rows:
+        k = d[yc].idxmin()
+        print(f"lowest {lev:8s}: {d.loc[k, 'molecule']} {d.loc[k, 'energy_model']} {d.loc[k, 'dipole_model']} "
+              f"B3LYP {d.loc[k, xc]:.3f} model {d.loc[k, yc]:.5f}")  # fmt: skip
+    print(f"y range {lo:.3g} to {hi:.3g}")
     fig, axes = plt.subplots(2, 3, figsize=(style.figwidth(), 5.1), sharex=True, sharey=True)
+    boxes = []
     for r, (lev, df, xc, yc) in enumerate(rows):
         for ax, dm in zip(axes[r], ts.D_MODELS):
             d = df[df.dipole_model == dm]
@@ -108,10 +120,11 @@ def intensity_levels(harm, fund, out: Path) -> None:
             assert d[xc].between(1, hi).all() and d[yc].between(lo, hi).all(), (lev, dm)
             s = ts.int_metrics(d, xc, yc)
             # within-2x line removed (figures-ch4-final); the share stays in the stats tables
-            note(ax, f"MAE {s['MAE']:.1f}\n$R^2$(log) {num(s['R2 log10'], 2)}", where="lower right")
+            boxes.append((ax, note(ax, f"MAE {s['MAE']:.1f}\n$R^2$(log) {num(s['R2 log10'], 2)}", where="lower right", xy=INT_BOX),
+                          d[xc].to_numpy(), d[yc].to_numpy()))  # fmt: skip
             style.clean_axes(ax)
             ax.set_xscale("log"), ax.set_yscale("log"), ax.set_xlim(1, hi), ax.set_ylim(lo, hi)
-            ax.set_yticks([10.0**k for k in range(int(np.log10(lo)), int(np.log10(hi)) + 1, 3)])
+            ax.set_yticks([10.0**k for k in range(int(np.ceil(np.log10(lo))), int(np.log10(hi)) + 1)])
             ax.xaxis.set_tick_params(labelbottom=True)
             if r == 0:
                 ax.set_title(style.tex(DLAB[dm]), color=c, fontsize=style.BASE_FS)
@@ -119,14 +132,17 @@ def intensity_levels(harm, fund, out: Path) -> None:
                   f"R2log {s['R2 log10']:.3f}")  # fmt: skip
         axes[r, 0].set_ylabel(f"MACE {lev} intensity\n/ km mol$^{{-1}}$")
         axes[r, 1].set_xlabel(f"B3LYP {lev} intensity / km mol$^{{-1}}$")
-    g = style.INK_MUTED
-    handles = [Line2D([], [], color=g, ls="none", marker="o", ms=3.2, mec="none", alpha=0.6, label="no resonance"),
-               Line2D([], [], color=g, ls="none", marker="o", ms=3.4, mfc="none", mew=0.6,
-                      label="in a resonance (B3LYP or model run)")]  # fmt: skip
-    fig.legend(handles=handles, loc="upper center", ncol=2, frameon=False, bbox_to_anchor=(0.5, 1.0),
-               fontsize=style.ANNOT_FS, handletextpad=0.3, columnspacing=1.5, title="VPT2 row:",
-               title_fontsize=style.ANNOT_FS, alignment="left", borderpad=0)  # fmt: skip
-    style.tight(fig, rect=(0, 0, 1, 0.93), w_pad=0.6, h_pad=1.2)
+    # no legend (figures-ch4-tweaks): the caption explains filled and hollow points
+    style.tight(fig, w_pad=0.6, h_pad=1.2)
+    fig.canvas.draw()
+    for ax, t, x, y in boxes:  # the MAE/R2 boxes stay clear of the data: gap to the nearest point centre
+        bb = t.get_bbox_patch().get_window_extent()
+        px = ax.transData.transform(np.column_stack([x, y]))
+        dx = np.maximum(0, np.maximum(bb.x0 - px[:, 0], px[:, 0] - bb.x1))
+        dy = np.maximum(0, np.maximum(bb.y0 - px[:, 1], px[:, 1] - bb.y1))
+        gap = np.hypot(dx, dy).min() * 72 / fig.dpi
+        print(f"box {ax.get_title() or '':>14s}: nearest point {gap:.1f} pt")
+        assert gap > 3, gap
     style.save(fig, out, "regression_intensities_levels")
 
 

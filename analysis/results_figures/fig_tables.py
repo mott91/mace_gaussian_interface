@@ -16,6 +16,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import pandas as pd
+from matplotlib.patches import Patch, Rectangle
 
 ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location("thesis_style", ROOT / "mace_gaussian" / "analysis" / "thesis_style.py")
@@ -76,11 +77,37 @@ def molecules(out: Path, level: str = "vpt2") -> None:
     style.save(fig, out, f"molecules_{level}")
 
 
+DIPOLE_GREY = "#9e9e9e"  # medium grey between INK_MUTED (Gaussian) and GRID (Python interface)
+
+
+class _MultiPatch:
+    """Legend key made of the four energy-model colours side by side."""
+
+    def __init__(self, label: str):
+        self._label = label
+
+    def get_label(self) -> str:
+        return self._label
+
+
+class _MultiHandler:
+    def legend_artist(self, legend, orig, fontsize, box):
+        x0, y0, w, h = box.xdescent, box.ydescent, box.width, box.height
+        n = len(ELAB)
+        for i, m in enumerate(ELAB):
+            box.add_artist(Rectangle((x0 + i * w / n, y0), w / n, h, color=style.model_color(m), lw=0,
+                                     transform=box.get_transform()))  # fmt: skip
+        return box
+
+
 def time_split(out: Path) -> None:
     df = pd.read_csv(ROOT / "analysis" / "ch5_timing" / "timing_runs.csv")
     labels = ["3-4", "5-6", "8-12", "14-15", "17-24"]
     df["size"] = pd.cut(df.atoms, [0, 4, 6, 12, 15, 30], labels=labels)
-    parts = [("energy_s", "energy model", style.SERIES[0]), ("dipole_s", "dipole model", style.SERIES[2]),
+    # energy model in the colour of the panel's own model (None below); dipole model, Gaussian and the Python
+    # interface in three greys (figures-ch4-tweaks: the old blue and green repeated the OMOL-0 and OFF23 titles).
+    # CIELAB L*: 45.4 (#6b6b6b), 65.0 (#9e9e9e), 86.6 (#d8d8d8)
+    parts = [("energy_s", "energy model (panel colour)", None), ("dipole_s", "dipole model", DIPOLE_GREY),
              ("gaussian_own_s", "Gaussian", style.INK_MUTED), ("python_s", "Python interface", style.GRID)]
     t = df.groupby(["energy_model", "size"], observed=True)[[p for p, *_ in parts]].sum()
     t = t.div(t.sum(axis=1), axis=0) * 100
@@ -88,9 +115,9 @@ def time_split(out: Path) -> None:
     fig, axes = plt.subplots(1, 4, figsize=(style.figwidth(), 2.5), sharey=True)
     for ax, model in zip(axes, ELAB):
         bottom = pd.Series(0.0, index=labels)
-        for col, lab, color in parts:
+        for col, _, color in parts:
             v = t.loc[model, col].reindex(labels).fillna(0)
-            ax.bar(labels, v, bottom=bottom, color=color, width=0.75, label=lab if model == "mace_anicc" else None)
+            ax.bar(labels, v, bottom=bottom, color=color or style.model_color(model), width=0.75)
             bottom += v
         style.clean_axes(ax, grid=False)
         ax.set_title(style.tex(ELAB[model]), color=style.model_color(model), fontsize=style.BASE_FS)
@@ -98,8 +125,10 @@ def time_split(out: Path) -> None:
         ax.tick_params(axis="x", labelrotation=60)
     axes[0].set_ylabel(r"share of wall time / \%")
     fig.supxlabel("number of atoms", fontsize=style.BASE_FS)
-    fig.legend(loc="lower center", ncol=4, frameon=False, bbox_to_anchor=(0.5, 1.0), handlelength=1.0, columnspacing=1.2,
-               borderpad=0)  # fmt: skip
+    # legend key of the energy model: the four panel colours side by side in one patch
+    handles = [Patch(color=c, label=lab) if c else _MultiPatch(lab) for _, lab, c in parts]
+    fig.legend(handles=handles, handler_map={_MultiPatch: _MultiHandler()}, loc="lower center", ncol=4, frameon=False,
+               bbox_to_anchor=(0.5, 1.0), handlelength=1.6, columnspacing=1.2, borderpad=0)  # fmt: skip
     style.tight(fig, pad=0.4, w_pad=0.6)
     style.save(fig, out, "time_split")
 

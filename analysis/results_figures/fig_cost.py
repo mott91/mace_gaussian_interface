@@ -3,8 +3,8 @@
   cost_scaling    carboxylic acid series: (a) wall time against the number of atoms N, log-log, power-law
                   fits, 6-31G(d,p) basis functions on the upper axis; (b) speedup over B3LYP
   cost_accuracy   mean wall time per molecule against MAE, each panel with the time taken over the same
-                  molecules as its errors: (a) coupled-cluster set, (b) experiment set, (c) common set
-                  of the four energy models against B3LYP (VPT2)
+                  molecules as its errors: (a) coupled-cluster set, (b) experiment set (the panel against
+                  B3LYP on the common set was removed in figures-ch4-tweaks)
 
 Times: B3LYP = total_elapsed_s of the baseline results.json (both Gaussian links, optimisation and
 VPT2); MACE = mean wall_s of the three dipole-model runs (analysis/ch5_timing/timing_runs.csv, which is
@@ -133,32 +133,22 @@ def cost_scaling(t: pd.DataFrame, out: Path) -> None:
 def cost_accuracy(t: pd.DataFrame, out: Path) -> None:
     exp_bands = pd.read_csv(STATS / "experiment_bands.csv")
     exp_set = sorted(set(exp_bands[~exp_bands.assignment.astype(str).str.startswith("excluded")].molecule) - set(SYMTOP))
-    vpt2 = pd.read_csv(ROOT / "analysis" / "followup3" / "out" / "freq_vpt2_per_molecule.csv", index_col=0)
-    common = sorted(m for m in vpt2.index if vpt2.loc[m, ["ANI-cc", "OMOL", "OFF", "POLAR"]].notna().all())
     exp = pd.read_csv(STATS / "experiment_headline.csv", index_col=0)
     cc = pd.read_csv(STATS / "vci_vpt2.csv", index_col=0)
-    com = pd.read_csv(STATS / "freq_vpt2_common.csv", index_col=0)
     assert exp.loc["ANI-cc", "molecules"] == len(exp_set) == 5 and exp.loc["ANI-cc", "n"] == 46
-    assert cc.loc["ANI-cc", "n"] == 30 and len(common) == 18 and com.columns[0] == "n", common
-    assert f"({len(common)} molecules)" in com.index.name
+    assert cc.loc["ANI-cc", "n"] == 30
     panels = [
         ("(a) against coupled cluster", CC_SET, lambda k: cc.loc[KEY[k], "MAE"], [0.5, 1, 2]),
         ("(b) against experiment", exp_set, lambda k: exp.loc["B3LYP_vpt2" if k == "b3lyp" else KEY[k], "MAE"],
          [0.5, 1, 2, 3]),
-        ("(c) against B3LYP", common, lambda k: 0.0 if k == "b3lyp" else com.loc[KEY[k], "MAE"], [3, 10, 30]),
     ]  # fmt: skip
-    fig, axes = plt.subplots(1, 3, figsize=(style.figwidth(), 2.35), sharey=True)
+    fig, axes = plt.subplots(1, 2, figsize=(style.figwidth(), 2.35), sharey=True)
     for ax, (title, mols, mae, ticks) in zip(axes, panels):
         tm = t.loc[mols, ["b3lyp", *E]].mean()
         print(f"{title}: {len(mols)} molecules {mols}")
         for k in ["b3lyp", *E]:
             y = mae(k)
             print(f"   {k:11s} mean wall time {tm[k]:7.2f} min  MAE {y:5.1f}")
-            if k == "b3lyp" and title.startswith("(c)"):
-                ax.axvline(tm[k], color=style.INK, lw=1.0, ls="--", zorder=1)
-                ax.text(tm[k], 0.97, "B3LYP ", transform=ax.get_xaxis_transform(), ha="right", va="top",
-                        fontsize=style.ANNOT_FS, color=style.INK)  # fmt: skip
-                continue
             ax.plot([tm[k]], [y], "o", ms=5, mec="none", color=color(k), zorder=3)
         lo, hi = tm.min(), tm.max()
         ax.set_xscale("log"), ax.set_xlim(lo / 1.5, hi * 1.5)

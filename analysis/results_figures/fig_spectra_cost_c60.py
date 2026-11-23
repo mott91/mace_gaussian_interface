@@ -81,9 +81,10 @@ def c60(out: Path) -> None:
         ax.axvline(x, color=style.INK_MUTED, lw=0.7, ls=":")
     c = style.model_color("mace_omol")
     ax.plot(grid, yh, color=style.INK_MUTED, lw=1.2), ax.plot(grid, yv + off, color=c, lw=1.2)
-    ax.text(1690, 0.35, "harmonic", ha="right", fontsize=style.ANNOT_FS, color=style.INK_MUTED)
-    ax.text(1690, off + 0.35, "VPT2", ha="right", fontsize=style.ANNOT_FS, color=c)
-    ax.set_xlim(400, 1700), ax.set_yticks([0, off]), ax.set_yticklabels(["0", ""])
+    # high to low wavenumber like every other spectrum (figures-ch4-tweaks); labels at the left end
+    ax.text(1690, 0.35, "harmonic", ha="left", fontsize=style.ANNOT_FS, color=style.INK_MUTED)
+    ax.text(1690, off + 0.35, "VPT2", ha="left", fontsize=style.ANNOT_FS, color=c)
+    ax.set_xlim(1700, 400), ax.set_yticks([0, off]), ax.set_yticklabels(["0", ""])
     ax.set_xlabel(r"wavenumber $\tilde{\nu}$ / cm$^{-1}$"), ax.set_ylabel("relative absorbance")
     style.tight(fig)
     style.save(fig, out, "c60_spectrum")
