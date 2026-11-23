@@ -2,7 +2,7 @@
 
   cost_scaling    carboxylic acid series: (a) wall time against the number of atoms N, log-log, power-law
                   fits, 6-31G(d,p) basis functions on the upper axis; (b) speedup over B3LYP
-  cost_accuracy   mean wall time per molecule against MAE, each panel with the time taken over the same
+  cost_accuracy   mean wall time per molecule (linear axis from 0) against MAE, each panel with the time taken over the same
                   molecules as its errors: (a) coupled-cluster set, (b) experiment set (the panel against
                   B3LYP on the common set was removed in figures-ch4-tweaks)
 
@@ -39,6 +39,7 @@ KEY = {"b3lyp": "B3LYP", "mace_anicc": "ANI-cc", "mace_omol": "OMOL", "mace_off"
 ACIDS = ["formic_acid_trans", "acetic_acid", "propionic_acid", "butyric_acid", "valeric_acid", "caproic_acid"]
 CC_SET = ["methanol", "formic_acid_trans", "carbon_dioxide", "carbonic_acid"]  # vci_vpt2 (30 bands)
 SYMTOP = ["ammonia", "phosphine"]
+ACC_XMAX, ACC_MS = 3.6, 5  # cost_accuracy: time axis 0-3.6 min (largest time 3.44, B3LYP in (b)); marker pt
 ACC_HEIGHT = 3.25  # in, cost_accuracy: the smallest height at which the squares fill the width (191 pt each)  # out of the pooled VPT2 and experiment statistics
 
 
@@ -139,25 +140,25 @@ def cost_accuracy(t: pd.DataFrame, out: Path) -> None:
     assert exp.loc["ANI-cc", "molecules"] == len(exp_set) == 5 and exp.loc["ANI-cc", "n"] == 46
     assert cc.loc["ANI-cc", "n"] == 30
     panels = [
-        ("(a) against coupled cluster", CC_SET, lambda k: cc.loc[KEY[k], "MAE"], [0.5, 1, 2]),
-        ("(b) against experiment", exp_set, lambda k: exp.loc["B3LYP_vpt2" if k == "b3lyp" else KEY[k], "MAE"],
-         [0.5, 1, 2, 3]),
+        ("(a) against coupled cluster", CC_SET, lambda k: cc.loc[KEY[k], "MAE"]),
+        ("(b) against experiment", exp_set, lambda k: exp.loc["B3LYP_vpt2" if k == "b3lyp" else KEY[k], "MAE"]),
     ]  # fmt: skip
     # square axes boxes (figures-ch4-last-fixes); the height is the smallest at which the two squares fill the
     # width, so the only extra whitespace is the gap between the panels
     fig, axes = plt.subplots(1, 2, figsize=(style.figwidth(), ACC_HEIGHT), sharey=True)
-    for ax, (title, mols, mae, ticks) in zip(axes, panels):
+    pts = []  # (panel, key, x, y) for the overlap check
+    for ax, (title, mols, mae) in zip(axes, panels):
         tm = t.loc[mols, ["b3lyp", *E]].mean()
         print(f"{title}: {len(mols)} molecules {mols}")
         for k in ["b3lyp", *E]:
             y = mae(k)
             print(f"   {k:11s} mean wall time {tm[k]:7.2f} min  MAE {y:5.1f}")
-            ax.plot([tm[k]], [y], "o", ms=5, mec="none", color=color(k), zorder=3)
-        lo, hi = tm.min(), tm.max()
-        ax.set_xscale("log"), ax.set_xlim(lo / 1.5, hi * 1.5)
-        assert ticks[0] > lo / 1.5 and ticks[-1] < hi * 1.5, (title, lo, hi)
-        ax.set_xticks(ticks, [f"{v:g}" for v in ticks])
-        ax.xaxis.set_minor_locator(plt.NullLocator())
+            ax.plot([tm[k]], [y], "o", ms=ACC_MS, mec="none", color=color(k), zorder=3)
+            pts.append((ax, k, tm[k], y))
+        # linear time axis from 0, the same in both panels (cost-accuracy-axis); the log axis made the step
+        # from 2 to 3 min look shorter than the one from 1 to 2
+        assert tm.max() < ACC_XMAX, (title, tm.max())
+        ax.set_xlim(0, ACC_XMAX), ax.set_xticks([0, 1, 2, 3])
         style.clean_axes(ax)
         ax.set_box_aspect(1)
         ax.set_title(title, fontsize=style.BASE_FS, loc="left")
@@ -171,6 +172,13 @@ def cost_accuracy(t: pd.DataFrame, out: Path) -> None:
     style.save(fig, out, "cost_accuracy")
     w, h = (axes[0].get_window_extent().width, axes[0].get_window_extent().height)
     print(f"cost_accuracy axes box {w * 72 / fig.dpi:.1f} x {h * 72 / fig.dpi:.1f} pt")
+    # no two points overlap: centre distance in pt (final width) larger than the marker diameter ACC_MS
+    for ax in axes:
+        p = [(k, ax.transData.transform((x, y)) * 72 / fig.dpi) for a, k, x, y in pts if a is ax]
+        d = sorted((float(np.hypot(*(u - v))), k1, k2) for i, (k1, u) in enumerate(p) for k2, v in p[i + 1:])
+        print(f"{ax.get_title(loc='left')}: closest points {d[0][1]} / {d[0][2]}, centres {d[0][0]:.1f} pt apart "
+              f"(gap {d[0][0] - ACC_MS:.1f} pt)")  # fmt: skip
+        assert d[0][0] > ACC_MS, d[0]
 
 
 if __name__ == "__main__":
