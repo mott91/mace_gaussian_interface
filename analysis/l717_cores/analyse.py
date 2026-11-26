@@ -21,11 +21,19 @@ def seconds(d, h, m, s):
 
 
 def fundamentals(text):
-    """All 'Fundamental Bands' tables, each as a tuple of stripped rows."""
+    """The 'Fundamental Bands' tables with E(harm)/E(anharm) columns, as tuples of rows.
+
+    The transition-moment tables (x, y, z components) are left out: the checkpoint re-run
+    works in a rotated frame, so the components change while the strengths do not.
+    """
     lines = text.splitlines()
     tables = []
     for i, line in enumerate(lines):
-        if line.strip().endswith("Fundamental Bands") and lines[i + 1].strip().startswith("---"):
+        if (
+            line.strip().endswith("Fundamental Bands")
+            and lines[i + 1].strip().startswith("---")
+            and "E(harm)" in lines[i + 2]
+        ):
             rows = []
             for row in lines[i + 3 :]:
                 if not re.match(r"^\s+\d+\(\d+\)", row):
